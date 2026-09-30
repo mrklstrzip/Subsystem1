@@ -1,0 +1,105 @@
+@model Subsystem1.Areas.Student.ViewModels.StudentProfileViewModel
+@functions {
+    string Show(string value) { return string.IsNullOrWhiteSpace(value) ? "—" : value; }
+}
+@{
+    ViewBag.Title = "Profile";
+}
+
+<link href="~/Content/css/student-profile.css" rel="stylesheet" />
+
+<h2 class="prof-title">Profile</h2>
+
+<section class="prof-card">
+    <header class="prof-card-head">
+        <span class="prof-card-icon"><i class="fa fa-id-card"></i></span>
+        <h3>Profile Information</h3>
+    </header>
+
+    <dl class="prof-info">
+        <div class="prof-item">
+            <span class="prof-item-icon"><i class="fa fa-user"></i></span>
+            <div><dt>Name</dt><dd>@Show(Model.FullName)</dd></div>
+        </div>
+        <div class="prof-item">
+            <span class="prof-item-icon"><i class="fa fa-hashtag"></i></span>
+            <div><dt>ID</dt><dd>@Show(Model.StudentId)</dd></div>
+        </div>
+        <div class="prof-item">
+            <span class="prof-item-icon"><i class="fa fa-user-graduate"></i></span>
+            <div><dt>Role</dt><dd>@Show(Model.Role)</dd></div>
+        </div>
+        <div class="prof-item">
+            <span class="prof-item-icon"><i class="fa fa-envelope"></i></span>
+            <div><dt>Email</dt><dd>@Show(Model.Email)</dd></div>
+        </div>
+    </dl>
+</section>
+
+<section class="prof-card">
+    <header class="prof-card-head">
+        <span class="prof-card-icon"><i class="fa fa-key"></i></span>
+        <h3>Change Password</h3>
+    </header>
+
+    <form id="changePasswordForm" class="prof-form" novalidate>
+        <div class="prof-field">
+            <label for="currentPassword">Current Password</label>
+            <div class="prof-input">
+                <i class="fa fa-lock prof-input-lock"></i>
+                <input type="password" id="currentPassword" name="CurrentPassword" autocomplete="current-password" />
+                <button type="button" class="prof-eye" data-target="currentPassword" aria-label="Show password"><i class="fa fa-eye"></i></button>
+            </div>
+        </div>
+
+        <div class="prof-field">
+            <label for="newPassword">New Password</label>
+            <div class="prof-input">
+                <i class="fa fa-lock prof-input-lock"></i>
+                <input type="password" id="newPassword" name="NewPassword" autocomplete="new-password" />
+                <button type="button" class="prof-eye" data-target="newPassword" aria-label="Show password"><i class="fa fa-eye"></i></button>
+            </div>
+        </div>
+
+        <div class="prof-field">
+            <label for="confirmPassword">Confirm New Password</label>
+            <div class="prof-input">
+                <i class="fa fa-lock prof-input-lock"></i>
+                <input type="password" id="confirmPassword" name="ConfirmPassword" autocomplete="new-password" />
+                <button type="button" class="prof-eye" data-target="confirmPassword" aria-label="Show password"><i class="fa fa-eye"></i></button>
+            </div>
+        </div>
+
+        <p class="prof-hint">Use at least 8 characters.</p>
+        <p class="prof-error" id="passwordError" role="alert"></p>
+
+        <button type="submit" class="prof-btn">Confirm</button>
+    </form>
+</section>
+
+<script>
+    document.querySelectorAll('.prof-eye').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var input = document.getElementById(btn.dataset.target);
+            var show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.querySelector('i').className = show ? 'fa fa-eye-slash' : 'fa fa-eye';
+            btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        });
+    });
+
+    document.getElementById('changePasswordForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var current = document.getElementById('currentPassword').value;
+        var next = document.getElementById('newPassword').value;
+        var confirm = document.getElementById('confirmPassword').value;
+        var error = document.getElementById('passwordError');
+
+        if (!current || !next || !confirm) { error.textContent = 'Please fill in all fields.'; return; }
+        if (next.length < 8) { error.textContent = 'New password must be at least 8 characters.'; return; }
+        if (next !== confirm) { error.textContent = 'New passwords do not match.'; return; }
+
+        error.textContent = '';
+        // TODO: send the change to the server once accounts exist.
+    });
+</script>
