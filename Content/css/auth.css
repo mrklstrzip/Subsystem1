@@ -1,0 +1,169 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-header {
+    background-color: #FAFAFA;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.header-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.login-header h1 {
+    font-size: 20px;
+    color: #333;
+}
+
+.login-container {
+    display: flex;
+    flex: 1;
+    width: 100%;
+}
+
+    .login-container.reverse {
+        flex-direction: row-reverse;
+    }
+
+.login-left {
+    width: 60%;
+    overflow: hidden;
+}
+
+.side-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Colored panel */
+.login-right {
+    width: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+}
+
+.login-right-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 300px;
+}
+
+.panel-logo {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+}
+
+.panel-title {
+    color: #fff;
+    font-size: 22px;
+    margin-bottom: 25px;
+}
+
+/* Color variants */
+.login-accent {
+    background-color: #AC5065;
+}
+
+.adminlogin-accent {
+    background-color: #724389;
+}
+
+.login-card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 30px 25px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.login-icon {
+    font-size: 40px;
+    color: #AC5065;
+    margin-bottom: 15px;
+}
+
+.adminlogin-accent .login-icon {
+    color: #724389;
+}
+
+.login-card label {
+    display: block;
+    text-align: left;
+    font-size: 13px;
+    font-weight: bold;
+    color: #AC5065;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.adminlogin-accent .login-card label {
+    color: #724389;
+}
+
+.login-input {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #e9e9ee;
+    margin-bottom: 5px;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 20px;
+    background-color: #AC5065;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+    .login-btn:hover {
+        background-color: #944256;
+    }
+
+.adminlogin-accent .login-btn {
+    background-color: #724389;
+}
+
+    .adminlogin-accent .login-btn:hover {
+        background-color: #5c3570;
+    }
+
+.forgot-password {
+    display: block;
+    margin-top: 18px;
+    font-size: 13px;
+    color: #fff;
+    text-decoration: underline;
+    font-weight: 600;
+}

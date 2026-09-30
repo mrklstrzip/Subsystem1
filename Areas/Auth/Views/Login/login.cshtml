@@ -1,0 +1,52 @@
+﻿@{
+    Layout = null;
+    ViewBag.Title = "Login";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - Quezon City University</title>
+    <link href="~/Content/css/auth.css" rel="stylesheet" />
+    <link href="~/Content/fontawesome/css/all.min.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="login-header">
+        <img src="~/Content/images/qcu.jpeg" alt="QCU Logo" class="header-logo" />
+        <h1>Quezon City University</h1>
+    </header>
+
+    <div class="login-container">
+        <div class="login-left">
+            <img src="~/Content/images/login.png" alt="QCU Campus" class="side-image" />
+        </div>
+
+        <div class="login-right login-accent">
+            <div class="login-right-inner">
+                <img src="~/Content/images/qcu.jpeg" alt="QCU Logo" class="panel-logo" />
+                <h2 class="panel-title">Quezon City University</h2>
+
+                <div class="login-card">
+                    <div class="login-icon"><i class="fa fa-user"></i></div>
+
+                    <form id="loginForm">
+                        <label for="Email">Email</label>
+                        <input type="text" id="Email" name="Email" class="login-input" />
+
+                        <label for="Password">Password</label>
+                        <input type="password" id="Password" name="Password" class="login-input" />
+
+                        <button type="submit" class="login-btn">Login</button>
+                    </form>
+                </div>
+
+                <a href="#" class="forgot-password">Forgot Password</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/Scripts/dummy-users.js"></script>
+    <script src="~/Scripts/admin-shortcut.js"></script>
+    <script src="~/Scripts/login-check.js"></script>
+</body>
+</html>

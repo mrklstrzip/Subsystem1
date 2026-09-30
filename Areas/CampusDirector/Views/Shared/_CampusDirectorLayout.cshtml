@@ -1,0 +1,59 @@
+﻿@{
+    Layout = null;
+    string currentController = ViewContext.RouteData.Values["controller"].ToString();
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Campus Director - @ViewBag.Title</title>
+    <link href="~/Content/css/layout.css" rel="stylesheet" />
+    <link href="~/Content/fontawesome/css/all.min.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="layout-header">
+        <img src="~/Content/images/qcu.jpeg" alt="QCU Logo" class="layout-header-logo" />
+        <div class="layout-header-text">
+            <h1>Expertise-Based Defense Scheduling</h1>
+            <span>Quezon City University</span>
+        </div>
+    </header>
+
+    <div class="layout-wrapper role-campusdirector">
+        <aside class="layout-sidebar">
+            <div class="layout-profile">
+                <img id="profilePhoto" src="" alt="Profile" class="layout-avatar" />
+                <h3 id="profileName"></h3>
+                <span id="profileRole"></span>
+            </div>
+
+            <nav class="layout-nav">
+                <a href="@Url.Action("dashboard", "Dashboard")" class="@(currentController == "Dashboard" ? "active" : "")">
+                    <i class="fa fa-th-large"></i> Dashboard
+                </a>
+                <a href="#">
+                    <i class="fa fa-calendar-alt"></i> Room Schedule
+                </a>
+                <a href="#">
+                    <i class="fa fa-door-open"></i> Room Management
+                </a>
+                <a href="#">
+                    <i class="fa fa-calendar-check"></i> Event Management
+                </a>
+                <a href="#">
+                    <i class="fa fa-user-circle"></i> Profile
+                </a>
+            </nav>
+
+            <a href="#" id="logoutBtn" class="logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
+        </aside>
+
+        <main class="layout-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/Scripts/layout-profile.js"></script>
+</body>
+</html>

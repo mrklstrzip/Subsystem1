@@ -1,0 +1,270 @@
+﻿/* WAG PONG GALAWIN */
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #E1E5F0;
+}
+
+.layout-header {
+    display: flex;
+    align-items: center;
+    background-color: #fafafa;
+    padding: 12px 25px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.layout-header-logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.layout-header-text h1 {
+    font-size: 20px;
+    color: #333;
+    font-weight: 600;
+}
+
+.layout-header-text span {
+    font-size: 15px;
+    color: #888;
+    margin-left: 95px;
+}
+
+.layout-wrapper {
+    display: flex;
+    min-height: calc(100vh - 66px);
+}
+
+.layout-sidebar {
+    width: 220px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 1px 0 4px rgba(0,0,0,0.05);
+}
+
+.layout-profile {
+    color: #fff;
+    text-align: left;
+    padding: 20px 20px;
+}
+
+.layout-avatar {
+    width: 100%;
+    max-width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 18px;
+    display: block;
+}
+
+.layout-profile h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.layout-profile span {
+    font-size: 13px;
+    color: #e0d5e6;
+}
+
+/*for student only*/
+.layout-course {
+    display: block;
+    font-size: 10px;
+    color: #f0d9df;
+}
+
+.layout-section {
+    display: block;
+    font-size: 10px;
+    color: #f0d9df;
+    margin-bottom: 5px;
+}
+
+.layout-divider {
+    border-top: 1px solid rgba(255,255,255,0.3);
+    margin-bottom: 8px;
+    margin-top: 8px;
+}
+
+.layout-number {
+    display: block;
+    font-size: 13px;
+    color: #f0d9df;
+}
+
+.layout-nav {
+    flex: 1;
+    padding: 15px 12px;
+}
+
+    .layout-nav a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        margin-bottom: 6px;
+        border-radius: 10px;
+        color: #555;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+        .layout-nav a i {
+            width: 18px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .layout-nav a.active {
+            font-weight: 600;
+        }
+
+.logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 20px;
+    color: #555;
+    text-decoration: none;
+    font-size: 14px;
+    border-top: 1px solid #eee;
+}
+
+    .logout:hover {
+        color: #AC5065;
+    }
+
+.layout-content {
+    flex: 1;
+    padding: 30px;
+}
+
+
+
+
+/* Admin */
+.role-admin .layout-profile {
+    background-color: #724389;
+}
+
+.role-admin .layout-nav a i {
+    color: #724389;
+}
+
+.role-admin .layout-nav a:hover,
+.role-admin .layout-nav a.active {
+    background-color: #D5C7DC;
+    color: #724389;
+}
+
+    .role-admin .layout-nav a.active i,
+    .role-admin .layout-nav a:hover i {
+        color: #724389;
+    }
+
+/* CampusDirector */
+.role-campusdirector .layout-profile {
+    background-color: #2E5C8A;
+}
+
+    .role-campusdirector .layout-profile span {
+        color: #cfe0f0;
+    }
+
+.role-campusdirector .layout-nav a i {
+    color: #2E5C8A;
+}
+
+.role-campusdirector .layout-nav a:hover,
+.role-campusdirector .layout-nav a.active {
+    background-color: #C1CFDC;
+    color: #2E5C8A;
+}
+
+    .role-campusdirector .layout-nav a.active i,
+    .role-campusdirector .layout-nav a:hover i {
+        color: #2E5C8A;
+    }
+
+/* CapstoneCoordinator */
+.role-capstonecoordinator .layout-profile {
+    background-color: #2E5C8A;
+}
+
+    .role-capstonecoordinator .layout-profile span {
+        color: #cfe0f0;
+    }
+
+.role-capstonecoordinator .layout-nav a i {
+    color: #2E5C8A;
+}
+
+.role-capstonecoordinator .layout-nav a:hover,
+.role-capstonecoordinator .layout-nav a.active {
+    background-color: #C1CFDC;
+    color: #2E5C8A;
+}
+
+    .role-capstonecoordinator .layout-nav a.active i,
+    .role-capstonecoordinator .layout-nav a:hover i {
+        color: #2E5C8A;
+    }
+
+/* Professor */
+.role-professor .layout-profile {
+    background-color: #AC5065;
+}
+
+    .role-professor .layout-profile span {
+        color: #cfe0f0;
+    }
+
+.role-professor .layout-nav a i {
+    color: #AC5065;
+}
+
+.role-professor .layout-nav a:hover,
+.role-professor .layout-nav a.active {
+    background-color: #E7CBD1;
+    color: #AC5065;
+}
+
+    .role-professor .layout-nav a.active i,
+    .role-professor .layout-nav a:hover i {
+        color: #AC5065;
+    }
+
+/* Student */
+.role-student .layout-profile {
+    background-color: #AC5065;
+}
+
+.role-student .layout-nav a i {
+    color: #AC5065;
+}
+
+.role-student .layout-nav a:hover,
+.role-student .layout-nav a.active {
+    background-color: #E7CBD1;
+    color: #AC5065;
+}
+
+    .role-student .layout-nav a.active i,
+    .role-student .layout-nav a:hover i {
+        color: #AC5065;
+    }

@@ -1,0 +1,103 @@
+﻿@{
+    ViewBag.Title = "Profile";
+}
+
+<style>
+    <style >
+    .page-title {
+        padding-bottom: 30px;
+        font-weight: 600;
+    }
+
+    .tables {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 30px;
+        row-gap: 15px;
+        margin-bottom: 50px;
+    }
+
+    .information-box {
+        background-color: #ffffff;
+        border-radius: 10px;
+        border: solid 1px #DFDBDB;
+        padding: 15px 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        height: 300px;
+        margin-bottom: 20px;
+    }
+
+    .table-title {
+        color: #9092AD;
+        margin: 0 0 15px 0;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+
+    td {
+        padding: 4px 0;
+        font-size: 13px;
+    }
+
+    .bold {
+        font-weight: 600;
+    }
+
+    .activity-table {
+        text-align: left;
+    }
+
+    .actdate-col {
+        width: 120px;
+    }
+
+    .actdate {
+        color: #333333;
+    }
+
+    .role-col {
+        text-align: left;
+    }
+
+    .num-col {
+        text-align: center;
+        width: 120px;
+    }
+
+    .label,
+    .info,{
+        text-align: left;
+    }
+</style>
+
+<h1 class="page-title">Profile</h1>
+<div class="information-box">
+    <h4 class="information-title box-title">Profile Information</h4>
+    <table class="information-table">
+        <tbody>
+            <tr>
+                <td class="infoname label bold">NAME</td>
+                <td class="name info bold">Juan Dela Cruz</td>
+            </tr>
+            <tr>
+                <td class="infoid label bold">ID</td>
+                <td class="id info bold">12-3456</td>
+            </tr>
+            <tr>
+                <td class="inforole label bold">ROLE</td>
+                <td class="role info bold">Admin</td>
+
+            </tr>
+            <tr>
+                <td class="infoemail label bold">EMAIL</td>
+                <td class="email info bold">admin@qcu.edu.ph</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
