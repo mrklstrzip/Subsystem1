@@ -1,4 +1,102 @@
-﻿@{
+@using System.Linq
+@model Subsystem1.Areas.Student.ViewModels.StudentDashboardViewModel
+@{
     ViewBag.Title = "Dashboard";
+    bool hasSubmission = !string.IsNullOrEmpty(Model.ManuscriptStatus);
+    bool hasDefense = Model.DefenseDate.HasValue;
+    bool hasPanel = Model.Panel.Any();
 }
-<h1>Dashboard</h1>
+
+<link href="~/Content/css/student-dashboard.css" rel="stylesheet" />
+
+<h2 class="dash-title">Dashboard</h2>
+
+<section class="dash-stats">
+    <article class="dash-stat">
+        <svg class="dash-stat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z M15 2v5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M10 18v-4 M13 18v-6 M16 18v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+        <div class="dash-stat-text">
+            @if (hasSubmission)
+            {
+                <div class="dash-stat-title">@Model.ManuscriptStatus</div>
+                <div class="dash-stat-line">Stage @Model.Stage of @Model.TotalStages</div>
+                <div class="dash-stat-note">@(Model.StatusDate.HasValue ? Model.StatusDate.Value.ToString("MM/dd/yyyy") : "")</div>
+            }
+            else
+            {
+                <div class="dash-stat-title">No Submission Yet</div>
+                <div class="dash-stat-line">Upload your manuscript to begin review</div>
+                <div class="dash-stat-note">&nbsp;</div>
+            }
+        </div>
+    </article>
+
+    <article class="dash-stat">
+        <svg class="dash-stat-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M3 10h18 M8 3v4 M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /><circle cx="16.5" cy="16.5" r="3" fill="none" stroke="currentColor" stroke-width="1.8" /></svg>
+        <div class="dash-stat-text">
+            @if (hasDefense)
+            {
+                <div class="dash-stat-title">@Model.DefenseDate.Value.ToString("MMM d, yyyy")</div>
+                <div class="dash-stat-line">@(string.IsNullOrEmpty(Model.DefenseVenue) ? "No Venue Scheduled" : Model.DefenseVenue)</div>
+                <div class="dash-stat-note">@((Model.DefenseDate.Value.Date - DateTime.Today).Days) remaining days</div>
+            }
+            else
+            {
+                <div class="dash-stat-title">No Defense Scheduled</div>
+                <div class="dash-stat-line">No Venue Scheduled</div>
+                <div class="dash-stat-note">&nbsp;</div>
+            }
+        </div>
+    </article>
+</section>
+
+<section class="dash-panel @(hasPanel ? "dash-panel-list" : "")" aria-label="Assigned panel">
+    @if (hasPanel)
+    {
+        foreach (var p in Model.Panel)
+        {
+            <div class="dash-member">
+                <div class="dash-member-photo">
+                    @if (!string.IsNullOrEmpty(p.PhotoUrl))
+                    {
+                        <img src="@p.PhotoUrl" alt="" />
+                    }
+                    else
+                    {
+                        <i class="fa fa-user"></i>
+                    }
+                </div>
+                <div>
+                    <div class="dash-member-name">@p.Name</div>
+                    <div class="dash-member-role">@p.Role</div>
+                    <div class="dash-member-dept">@p.Department</div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p>No panelists assigned yet.</p>
+    }
+</section>
+
+<section class="dash-activity">
+    <h3>Recent Activity</h3>
+    <div class="dash-activity-head"><span>Activity</span><span>Date</span></div>
+    @if (Model.Activity.Any())
+    {
+        foreach (var a in Model.Activity)
+        {
+            <div class="dash-activity-row">
+                <span>@a.Description</span>
+                <span class="dash-activity-date">@a.Date.ToString("MMM d, yyyy")</span>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="dash-empty">
+            <strong>No activity yet</strong>
+            Updates on your manuscript and panel show up here.
+        </div>
+    }
+</section>
