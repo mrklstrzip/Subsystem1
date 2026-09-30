@@ -6,7 +6,9 @@ namespace Subsystem1.Areas.Student.Controllers
     {
         public ActionResult dashboard()
         {
-            return View();
+             var model = new StudentDashboardViewModel();
+             
+             return View(model);
         }
     }
 }
