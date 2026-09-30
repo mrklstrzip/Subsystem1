@@ -6,7 +6,7 @@ namespace Subsystem1.Areas.Auth.Controllers
     {
         public ActionResult login()
         {
-            return View(lalala);
+            return View();
         }
     }
 }
