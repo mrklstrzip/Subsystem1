@@ -14,8 +14,8 @@ namespace Subsystem1.Areas.Student.Controllers
         {
             var model = new StudentProfileViewModel();
 
-            model.FullName = "Test Student";
-            model.StudentId = "00-0000";
+            model.FullName = "Castro Clove";
+            model.StudentId = "24-3456";
             model.Email = "student@qcu.edu.ph";
 
             return View(model);
