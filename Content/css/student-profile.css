@@ -200,14 +200,4 @@
         outline: 2px solid #944256;
         outline-offset: 2px;
     }
-
-/* Small screens */
-@media (max-width: 700px) {
-    .prof-info {
-        grid-template-columns: 1fr;
-    }
-
-    .prof-card {
-        padding: 20px 18px 22px;
-    }
-}
+
