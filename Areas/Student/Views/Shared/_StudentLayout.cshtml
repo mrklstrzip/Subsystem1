@@ -41,9 +41,9 @@
                 <a href="#">
                     <i class="fa fa-chart-simple"></i> Status
                 </a>
-                <a href="#">
-                    <i class="fa fa-user-circle"></i> Profile
-                </a>
+                <a href="@Url.Action("profile", "Profile")" class="@(currentController == "Profile" ? "active" : "")">
+        <i class="fa fa-user-circle"></i> Profile
+    </a>
             </nav>
 
             <a href="#" id="logoutBtn" class="logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
