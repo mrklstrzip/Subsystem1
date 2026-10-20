@@ -25,7 +25,6 @@ namespace Subsystem1.Areas.Student.ViewModels
     {
         public string Name { get; set; }
         public string Role { get; set; }
-        public string Department { get; set; }
         public string PhotoUrl { get; set; }
     }
 
