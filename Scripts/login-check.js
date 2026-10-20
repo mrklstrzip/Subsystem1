@@ -1,32 +1,37 @@
-﻿document.getElementById('loginForm').addEventListener('submit', function (e) {
+﻿// where each role lands after signing in
+const ROLE_HOME = {
+    "Dean": '/Dean/Dashboard/dashboard',
+    "Campus Director": '/CampusDirector/Dashboard/dashboard',
+    "Capstone Coordinator": '/CapstoneCoordinator/Dashboard/dashboard',
+    "Professor": '/Professor/Dashboard/dashboard',
+    "Panelist": '/Professor/Dashboard/dashboard',            // same as Professor
+    "Adviser": '/Adviser/Dashboard/dashboard',
+    "Student": '/Student/Dashboard/dashboard',
+    "Project Manager": '/Student/Dashboard/dashboard'        // same as Student
+};
+
+document.getElementById('loginForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
     const email = document.getElementById('Email').value.trim();
     const password = document.getElementById('Password').value;
 
-    const match = loginUsers.find(u => u.email === email && u.password === password);
+    let overrides = {};
+    try { overrides = JSON.parse(localStorage.getItem('passwordOverrides') || '{}'); } catch (err) { overrides = {}; }
+
+    const match = loginUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && (overrides[u.email] || u.password) === password);
 
     if (!match) {
         alert("Invalid email or password.");
         return;
     }
 
-    localStorage.setItem('loggedInUser', JSON.stringify(match));
-
-    switch (match.role) {
-        case "Campus Director":
-            window.location.href = '/CampusDirector/Dashboard/dashboard';
-            break;
-        case "Capstone Coordinator":
-            window.location.href = '/CapstoneCoordinator/Dashboard/dashboard';
-            break;
-        case "Professor":
-            window.location.href = '/Professor/Dashboard/dashboard';
-            break;
-        case "Student":
-            window.location.href = '/Student/Dashboard/dashboard';
-            break;
-        default:
-            alert("Unknown role.");
+    const home = ROLE_HOME[match.role];
+    if (!home) {
+        alert("Unknown role.");
+        return;
     }
+
+    localStorage.setItem('loggedInUser', JSON.stringify(match));
+    window.location.href = home;
 });

@@ -1,0 +1,206 @@
+﻿/* --- Admin --- */
+.role-admin .page-title {
+    color: #2C2C2C;
+}
+
+.role-admin .card-title {
+    color: #2C2C2C;
+}
+
+.role-admin .password-form .input-wrapper input:focus {
+    border-color: #2C2C2C;
+}
+
+.role-admin .confirm-btn {
+    background-color: #2C2C2C;
+}
+
+    .role-admin .confirm-btn:hover {
+        background-color: #737373;
+    }
+
+/* --- Student --- */
+.role-student .card-title {
+    color: #AC5065;
+}
+
+.role-student .page-title {
+    color: #AC5065;
+}
+
+.role-student .password-form .input-wrapper input:focus {
+    border-color: #AC5065;
+}
+
+.role-student .confirm-btn {
+    background-color: #AC5065;
+}
+
+    .role-student .confirm-btn:hover {
+        background-color: #8c3e50;
+    }
+
+/* --- Capstone Coordinator --- */
+.role-capstonecoordinator .page-title {
+    color: #2E5C8A;
+}
+
+.role-capstonecoordinator .card-title {
+    color: #2E5C8A;
+}
+
+.role-capstonecoordinator .password-form .input-wrapper input:focus {
+    border-color: #2E5C8A;
+}
+
+.role-capstonecoordinator .confirm-btn {
+    background-color: #2E5C8A;
+}
+
+    .role-capstonecoordinator .confirm-btn:hover {
+        background-color: #23476c;
+    }
+
+/* --- Campus Director --- */
+.role-campusdirector .page-title {
+    color: #2E5C8A;
+}
+
+.role-campusdirector .card-title {
+    color: #2E5C8A;
+}
+
+.role-campusdirector .password-form .input-wrapper input:focus {
+    border-color: #2E5C8A;
+}
+
+.role-campusdirector .confirm-btn {
+    background-color: #2E5C8A;
+}
+
+    .role-campusdirector .confirm-btn:hover {
+        background-color: #23476c;
+    }
+
+/* --- Professor --- */
+.role-professor .page-title {
+    color: #724389;
+}
+
+.role-professor .card-title {
+    color: #724389;
+}
+
+.role-professor .password-form .input-wrapper input:focus {
+    border-color: #724389;
+}
+
+.role-professor .confirm-btn {
+    background-color: #724389;
+}
+
+    .role-professor .confirm-btn:hover {
+        background-color: #5a346d;
+    }
+.page-title {
+    padding-bottom: 24px;
+    font-weight: 550;
+    font-family: 'Newsreader', serif;
+}
+
+.profile-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 24px 30px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+}
+
+.information-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .information-table td {
+        padding: 10px 0;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+.label {
+    color: #1a202c;
+    font-weight: 700;
+    width: 120px;
+    letter-spacing: 0.5px;
+}
+
+.info {
+    color: #1a202c;
+    font-weight: 700;
+}
+
+.password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 280px;
+}
+
+    .password-form .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .password-form .form-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #1a202c;
+            letter-spacing: 0.5px;
+        }
+
+    .password-form .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+        .password-form .input-wrapper input {
+            width: 100%;
+            height: 32px;
+            padding: 0 32px 0 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease;
+        }
+
+    .password-form .toggle-password {
+        position: absolute;
+        right: 10px;
+        color: #a0aec0;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .password-form .confirm-btn {
+        margin-top: 8px;
+        width: fit-content;
+        padding: 8px 24px;
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }

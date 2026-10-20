@@ -1,4 +1,60 @@
 ﻿@{
     ViewBag.Title = "Faculty Profile";
 }
-<h1>Faculty Profile</h1>
+
+<link href="@Url.Content("~/Content/css/facultyprofile.css")?v=1.0" rel="stylesheet" type="text/css" />
+
+
+<h1 class="page-title">Faculty Profile</h1>
+
+<div class="function">
+    <div class="search-container">
+        <div class="search">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search faculty name or expertise tags">
+        </div>
+    </div>
+</div>
+
+<div class="faculty-profile">
+    <table class="faculty-profile-table" id="facultyTable">
+        <thead>
+            <tr>
+                <th class="column-title name-col">NAME</th>
+                <th class="column-title tags-col">EXPERTISE TAG</th>
+                <th class="column-title action-col">ACTION</th>
+            </tr>
+        </thead>
+        <tbody id="faculty-tbody"></tbody>
+    </table>
+</div>
+
+<!-- Edit Faculty Profile Modal -->
+<div id="editFacultyModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3 class="modal-title">EDIT FACULTY EXPERTISE</h3>
+        <form onsubmit="return false;">
+            <!-- Readonly Name Input -->
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" id="facultyName" class="readonly-field" readonly>
+            </div>
+
+            <!-- Editable Selected Tags Area -->
+            <div class="form-group" style="margin-top: 10px;">
+                <label>Expertise Tag</label>
+                <div class="selected-tags-box" id="selectedTagsBox"></div>
+            </div>
+
+            <!-- Available Tags Grid -->
+            <div class="tags-grid-box" id="systemTagsGrid"></div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-confirm" onclick="AD.saveExpertise()">Confirm</button>
+                <button type="button" class="btn-cancel" onclick="AD.closeModals()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=1.0"></script>

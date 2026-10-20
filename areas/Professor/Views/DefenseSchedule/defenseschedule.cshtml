@@ -1,0 +1,82 @@
+@{
+    ViewBag.Title = "Defense Schedule";
+    var rows = new[] {
+        new { Date = "09-21-2026", Status = "Upcoming" },
+        new { Date = "09-21-2026", Status = "Upcoming" },
+        new { Date = "09-02-2026", Status = "Completed" },
+        new { Date = "09-21-2026", Status = "Upcoming" },
+        new { Date = "09-07-2026", Status = "Completed" },
+        new { Date = "09-09-2026", Status = "Completed" },
+        new { Date = "09-21-2026", Status = "Upcoming" },
+        new { Date = "09-21-2026", Status = "Upcoming" }
+    };
+}
+    <h1 class="prof-title">Defense Schedule</h1>
+
+    <!-- Filter Dropdown -->
+    <div class="prof-toolbar">
+        <div>
+            <label for="statusFilter">Filter by Status:</label>
+            <select id="statusFilter">
+                <option value="all" selected>All</option>
+                <option value="completed">Completed</option>
+                <option value="upcoming">Upcoming</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="prof-card">
+        <table class="prof-table">
+            <thead>
+                <tr>
+                    <th>Manuscript Title</th>
+                    <th>Section</th>
+                    <th>Program</th>
+                    <th>Date</th>
+                    <th>Building/Room</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in rows)
+                {
+                    <tr data-status="@r.Status.ToLower()">
+                        <td>Manuscript Title</td>
+                        <td>SBIT4A</td>
+                        <td>BSIT</td>
+                        <td>@r.Date</td>
+                        <td>IK 603</td>
+                        <td class="@(r.Status == "Completed" ? "prof-status-completed" : "prof-status-upcoming")">@r.Status</td>
+                    </tr>
+                }
+                <tr id="emptyRow" style="display:none;">
+                    <td colspan="6" style="text-align:center; color:#777; padding:18px;">No schedules found matching the selected filter.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        (function () {
+            var filter = document.getElementById('statusFilter');
+            var rows = document.querySelectorAll('tbody tr[data-status]');
+            var emptyRow = document.getElementById('emptyRow');
+
+            filter.addEventListener('change', function () {
+                var selected = filter.value;
+                var matchCount = 0;
+
+                rows.forEach(function (row) {
+                    var status = row.getAttribute('data-status');
+                    if (selected === 'all' || status === selected) {
+                        row.style.display = '';
+                        matchCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                emptyRow.style.display = matchCount === 0 ? '' : 'none';
+            });
+        })();
+    </script>

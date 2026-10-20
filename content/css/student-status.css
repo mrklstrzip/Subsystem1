@@ -1,0 +1,354 @@
+﻿/* Student > Status page */
+
+h1 {
+    color: #AC5065;
+    font-weight: 550;
+    margin-bottom: 18px;
+    font-family: 'Newsreader', serif;
+}
+
+.st-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.st-message {
+    background: #E6F4EA;
+    border: 1px solid #BFE0C8;
+    color: #1F6B3A;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+
+/* ---------- Colors ---------- */
+:root {
+    --st-dark: #1E7A3E; /* finished */
+    --st-light: #8ED6A9; /* processing */
+    --st-light-border: #5CBB82;
+    --st-off-fill: #FFFFFF; /* not yet */
+    --st-off-border: #C9CDCA;
+    --st-line-off: #E1E4E2;
+}
+
+/* ---------- Progress tracker ---------- */
+.st-tracker {
+    background: #fff;
+    border-radius: 36px;
+    box-shadow: 0 2px 8px rgba(40, 40, 80, .12);
+    padding: 20px 36px;
+    width: min(100%, 560px);
+    margin: 56px auto 28px;
+}
+
+.st-steps {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.st-step {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+    .st-step:first-child {
+        flex: none;
+    }
+
+/* bar between circles */
+.st-link {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--st-line-off);
+    transition: background .25s ease;
+}
+
+.st-link-on {
+    background: var(--st-dark);
+}
+
+.st-link-proc {
+    background: var(--st-light);
+}
+
+.st-nodewrap {
+    position: relative;
+    flex: none;
+}
+
+.st-node {
+    display: block;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    box-sizing: border-box;
+    border: 3px solid var(--st-off-border);
+    background: var(--st-off-fill);
+    cursor: pointer;
+    transition: background .25s ease, border-color .25s ease, transform .15s ease;
+}
+
+    .st-node:hover:not(.st-node-locked) {
+        transform: scale(1.1);
+    }
+
+    .st-node:focus-visible {
+        outline: 2px solid var(--st-dark);
+        outline-offset: 3px;
+    }
+
+/* NOT YET - grey, not clickable */
+.st-node-locked {
+    cursor: not-allowed;
+    background: #F1F2F1;
+}
+
+/* FINISHED - dark green */
+.st-node.st-done {
+    background: var(--st-dark);
+    border-color: var(--st-dark);
+}
+
+/* PROCESSING - light green */
+.st-node.st-processing {
+    background: var(--st-light);
+    border-color: var(--st-light-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .st-node,
+    .st-link {
+        transition: none;
+    }
+}
+
+/* ---------- Legend ---------- */
+.st-legend {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    list-style: none;
+    margin: -12px 0 24px;
+    padding: 0;
+    font-size: 12px;
+    color: #555;
+}
+
+    .st-legend li {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+.st-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+}
+
+.st-dot-done {
+    background: var(--st-dark);
+    border-color: var(--st-dark);
+}
+
+.st-dot-processing {
+    background: var(--st-light);
+    border-color: var(--st-light-border);
+}
+
+.st-dot-off {
+    background: #F1F2F1;
+    border-color: var(--st-off-border);
+}
+
+/* ---------- "Is your defense completed?" bubble ---------- */
+.st-confirm {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 16px);
+    right: -14px;
+    width: 160px;
+    background: #fff;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 8px 10px 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
+    z-index: 2;
+}
+
+    .st-confirm::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        right: 26px;
+        border: 7px solid transparent;
+        border-top-color: #333;
+    }
+
+    .st-confirm p {
+        margin: 0 0 8px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #111;
+        text-align: left;
+    }
+
+.st-confirm-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.st-btn {
+    flex: 1;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+    .st-btn:focus-visible {
+        outline: 2px solid var(--st-dark);
+        outline-offset: 2px;
+    }
+
+.st-btn-yes {
+    background: var(--st-dark);
+    border: 1px solid var(--st-dark);
+    color: #fff;
+}
+
+.st-btn-no {
+    background: #fff;
+    border: 1px solid #999;
+    color: #333;
+}
+
+/* Pop-up behaviour */
+.st-node-action.st-open ~ .st-confirm {
+    display: block;
+}
+
+/* ---------- Cards ---------- */
+.st-card {
+    background: #fff;
+    border: 1px solid #D0D4E6;
+    border-radius: 10px;
+    padding: 18px 24px;
+    margin-bottom: 20px;
+}
+
+.st-head {
+    font-size: 11px;
+    font-weight: 600;
+    color: #8A88A8;
+    margin-bottom: 8px;
+}
+
+.st-cell {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: #222;
+}
+
+.st-cell-strong {
+    font-weight: 700;
+}
+
+.st-muted {
+    color: #888;
+    font-weight: 400;
+}
+
+.st-grid {
+    display: grid;
+    grid-template-columns: 2.2fr 2.2fr .6fr .9fr;
+    gap: 20px;
+    min-height: 130px;
+    align-content: start;
+}
+
+.st-col-date,
+.st-col-room {
+    text-align: center;
+}
+
+/* ---------- Activity log ---------- */
+.st-log {
+    min-height: 140px;
+}
+
+.st-log-row {
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    gap: 16px;
+    align-items: baseline;
+    font-size: 12px;
+    padding: 5px 0;
+    color: #222;
+}
+
+.st-log-head {
+    font-size: 11px;
+    font-weight: 600;
+    color: #8A88A8;
+    margin-bottom: 8px;
+    padding: 0;
+}
+
+    .st-log-head span:nth-child(2),
+    .st-log-text {
+        text-align: center;
+    }
+
+    .st-log-head span:last-child,
+    .st-log-date {
+        text-align: right;
+        font-weight: 700;
+    }
+
+.st-empty {
+    padding: 24px 0;
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 720px) {
+    .st-tracker {
+        padding: 16px 20px;
+    }
+
+    .st-grid {
+        grid-template-columns: 1fr 1fr;
+        min-height: 0;
+    }
+
+    .st-col-title,
+    .st-col-panel {
+        grid-column: 1 / -1;
+    }
+
+    .st-col-room,
+    .st-col-date {
+        text-align: left;
+    }
+
+    .st-log-row {
+        grid-template-columns: 70px 1fr 90px;
+    }
+}

@@ -1,0 +1,70 @@
+﻿@{
+    ViewBag.Title = "Room Availability";
+    ViewBag.ActiveMenu = "RoomSchedule";
+}
+
+<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.1" rel="stylesheet" type="text/css" />
+
+<style>
+    .page-title {
+        font-weight: 550;
+        color: #2E5C8A;
+        margin-bottom: 24px;
+        font-family: 'Newsreader', serif;
+        font-size: 2rem;
+    }
+</style>
+<h1 class="page-title">Room Availability</h1>
+
+<div class="table-card" style="margin-bottom: 16px;">
+    <div style="display: flex; gap: 14px; align-items: flex-end;">
+        <div class="form-group" style="margin: 0; flex: 1;">
+            <label>Date</label>
+            <input type="date" class="form-control" id="sc-date" />
+        </div>
+        <div class="form-group" style="margin: 0; flex: 1;">
+            <label>Room Status</label>
+            <select class="form-control" id="sc-status"><option value="all">All rooms</option><option value="open">Open</option><option value="reserved">Reserved</option><option value="occupied">Occupied</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option><option value="unavailable">Unavailable</option></select>
+        </div>
+    </div>
+</div>
+
+<div class="table-card" style="overflow-x: auto;">
+    <!-- Legend -->
+    <div class="sched-legend">
+        <span class="legend-item"><span class="status-indicator-box box-open"></span> Open</span>
+        <span class="legend-item"><span class="status-indicator-box box-occupied"></span> Occupied</span>
+        <span class="legend-item"><span class="status-indicator-box box-reserved"></span> Reserved</span>
+        <span class="legend-item"><span class="status-indicator-box box-completed"></span> Completed</span>
+        <span class="legend-item"><span class="status-indicator-box box-cancelled"></span> Cancelled</span>
+        <span class="legend-item"><span class="status-indicator-box box-unavailable"></span> Unavailable</span>
+    </div>
+
+    <table class="sched-table">
+        <thead>
+            <tr id="sc-head"></tr>
+        </thead>
+        <tbody id="sc-body"></tbody>
+    </table>
+</div>
+
+<!-- View Schedule Pop up (view only) -->
+<div class="modal-overlay" id="modal-edit-sched">
+    <div class="edit-sched-box">
+        <div class="edit-sched-header">
+            <h3>Schedule details</h3>
+        </div>
+        <div class="edit-sched-body">
+            <div class="sched-info-card" style="margin-bottom: 24px;">
+                <div class="sched-info-left" id="es-details"></div>
+                <div>
+                    <span class="sched-badge-occupied" id="es-badge">Open</span>
+                </div>
+            </div>
+
+            <div class="edit-sched-actions">
+                <button type="button" class="btn-sched-cancel" onclick="closeModal('modal-edit-sched')">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

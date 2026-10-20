@@ -8,45 +8,61 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Student - @ViewBag.Title</title>
-    <link href="~/Content/css/layout.css" rel="stylesheet" />
-    <link href="~/Content/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/css/layout.css")?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="student-theme">
     <header class="layout-header">
-        <img src="~/Content/images/qcu.jpeg" alt="QCU Logo" class="layout-header-logo" />
+        <div class="logo-bg">
+            <img src="~/Content/images/qcu.jpeg" alt="QCU Logo" class="layout-header-logo" />
+            <img src="~/Content/images/ccs-logo.png" alt="CCS Logo" class="layout-header-logo" />
+        </div>
+
         <div class="layout-header-text">
-            <h1>Expertise-Based Defense Scheduling</h1>
-            <span>Quezon City University</span>
+            <h1>Quezon City University</h1>
+            <span>College of Computer Studies</span>
+        </div>
+
+        <div class="header-stripes">
+            <span class="stripe stripe-1"></span>
+            <span class="stripe stripe-2"></span>
+            <span class="stripe stripe-3"></span>
         </div>
     </header>
 
-    <div class="layout-wrapper role-student">
-        <aside class="layout-sidebar">
-            <div class="layout-profile">
-                <img id="profilePhoto" src="" alt="Profile" class="layout-avatar" />
-                <h3 id="profileName"></h3>
-                <span id="profileCourse" class="layout-course"></span>
-                <span id="profileSection" class="layout-section"></span>
-                <div class="layout-divider"></div>
-                <span id="profileNumber" class="layout-number"></span>
+    <div class="layout-wrapper sidebar-rail" id="layoutWrapper">
+        <aside class="layout-sidebar" id="sidebar">
+
+            <div class="sb-top">
+                <span class="sb-menu-label">MAIN MENU</span>
+                <button type="button" id="sidebarToggle" class="sb-toggle" aria-label="Toggle sidebar" aria-expanded="false">
+                    <i class="fa fa-bars"></i>
+                </button>
             </div>
 
             <nav class="layout-nav">
-                <a href="@Url.Action("dashboard", "Dashboard")" class="@(currentController == "Dashboard" ? "active" : "")">
-                    <i class="fa fa-th-large"></i> Dashboard
+                <a href="@Url.Action("dashboard", "Dashboard")" class="@(currentController == "Dashboard" ? "active" : "")" title="Dashboard">
+                    <i class="fa fa-th-large"></i><span class="nav-label">Dashboard</span>
                 </a>
-                <a href="#">
-                    <i class="fa fa-file-arrow-up"></i> Submission
-                </a>
-                <a href="#">
-                    <i class="fa fa-chart-simple"></i> Status
-                </a>
-                <a href="#">
-                    <i class="fa fa-user-circle"></i> Profile
+                <a href="@Url.Action("submission", "Submission")" class="@(currentController == "Submission" ? "active" : "")" title="Submission">
+                    <i class="fa fa-file-arrow-up"></i><span class="nav-label">Submission</span>
                 </a>
             </nav>
 
-            <a href="#" id="logoutBtn" class="logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
+            <div class="sb-footer">
+                <a href="@Url.Action("profile", "Profile")" class="sb-user" title="Profile">
+                    <img id="profilePhoto" src="" alt="Profile" class="sb-avatar" />
+                    <span class="sb-user-text">
+                        <span id="profileName" class="sb-name"></span>
+                        <span id="profileRole" class="sb-role"></span>
+                    </span>
+                </a>
+                <a href="#" id="logoutBtn" class="sb-logout" title="Logout"><i class="fa fa-sign-out-alt"></i></a>
+            </div>
         </aside>
 
         <main class="layout-content">
@@ -54,6 +70,7 @@
         </main>
     </div>
 
+    <script src="~/Scripts/sidebar.js"></script>
     <script src="~/Scripts/layout-profile.js"></script>
 </body>
 </html>

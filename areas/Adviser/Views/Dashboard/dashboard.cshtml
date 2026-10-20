@@ -1,0 +1,91 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+}
+
+<style>
+    .prof-stats {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 32px !important;
+    }
+
+        .prof-stats .prof-stat {
+            width: auto !important;
+            min-height: 150px;
+            padding: 26px 32px;
+        }
+
+            .prof-stats .prof-stat span {
+                display: block !important;
+                color: #777 !important;
+                font-size: 18px;
+                font-weight: 400 !important;
+            }
+
+            .prof-stats .prof-stat strong {
+                display: block !important;
+                color: #000 !important;
+                font-size: 32px;
+                font-weight: 400 !important;
+                margin-top: 18px;
+            }
+
+    .prof-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        margin-bottom: 20px;
+    }
+
+        .prof-header .prof-title {
+            margin: 0 !important;
+        }
+
+        .prof-header .prof-btn-lg {
+            display: inline-block !important;
+            padding: 14px 32px !important;
+            font-size: 16px !important;
+            font-weight: 600;
+            border-radius: 8px;
+            background: #724389;
+            color: #fff;
+            text-decoration: none;
+        }
+</style>
+
+
+    <div class="prof-header">
+        <h1 class="prof-title">Dashboard</h1>
+    </div>
+
+    <div class="prof-stats">
+        <div class="prof-card prof-stat"><span>Panel Assignments</span><strong>6</strong></div>
+        <div class="prof-card prof-stat"><span>Accepted Panels</span><strong>6</strong></div>
+        <div class="prof-card prof-stat"><span>Completed Panel Assignments</span><strong>7</strong></div>
+    </div>
+
+    <p class="prof-subtitle">Pending Panel Assignments</p>
+
+    <div class="prof-card">
+        <table class="prof-table">
+            <thead>
+                <tr>
+                    <th>Manuscript Title</th>
+                    <th>Section</th>
+                    <th>Program</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in new[] { "BSIT", "BSCS", "BSIS", "BSIT", "BSIT" })
+                {
+                    <tr>
+                        <td>Manuscript Title</td>
+                        <td>SBIT4A</td>
+                        <td>@p</td>
+                        <td><a href="@Url.Action("Index", "PanelAssignment")" class="prof-btn">View</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>

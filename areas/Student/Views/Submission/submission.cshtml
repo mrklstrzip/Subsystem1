@@ -1,0 +1,176 @@
+﻿@model Subsystem1.Areas.Student.ViewModels.StudentSubmissionViewModel
+@using System.Linq
+@{
+    ViewBag.Title = "Submission";
+    bool reopenModal = !ViewData.ModelState.IsValid;
+}
+
+<link href="@Url.Content("~/Content/css/student-submission.css")?v=1.0" rel="stylesheet" type="text/css" />
+
+<div class="sub-header">
+    <h1 class="sub-title">Submissions</h1>
+    <button type="button" class="sub-btn sub-btn--primary sub-btn--rect" id="openModalBtn">+ Add Manuscript</button>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="sub-alert">@TempData["SuccessMessage"]</div>
+}
+
+<!-- Updated Filter Dropdown with class="sub-filter-select" -->
+<div class="sub-filters">
+    <label for="statusFilter">Status:</label>
+    <select id="statusFilter" class="sub-filter-select" name="statusFilter">
+        <option value="all" selected>All</option>
+        <option value="completed">Completed</option>
+        <option value="processing">Processing</option>
+        <option value="submitted">Submitted</option>
+    </select>
+</div>
+
+<div class="sub-card">
+    <table class="sub-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th class="sub-center">Date &amp; Time</th>
+                <th class="sub-center">Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Submissions.Any())
+            {
+                foreach (var item in Model.Submissions)
+                {
+                    string head = item.Title;
+                    string rest = "";
+                    int colon = item.Title.IndexOf(':');
+                    if (colon > 0)
+                    {
+                        head = item.Title.Substring(0, colon + 1);
+                        rest = item.Title.Substring(colon + 1);
+                    }
+
+                    <tr data-status="@item.Status.ToLower()">
+                        <td class="sub-title-cell"><strong>@head</strong>@rest</td>
+                        <td class="sub-date">@item.DateAndSubmissionTime.ToString("MMM d, h:mm tt")</td>
+                        <td class="sub-center"><span class="sub-badge sub-badge--@item.Status.ToLower()">@item.Status</span></td>
+                        <td class="sub-right"><a href="#" class="sub-link">View Manuscript</a></td>
+                    </tr>
+                }
+            }
+            <tr id="emptyRow" style="@(Model.Submissions.Any() ? "display:none" : "")">
+                <td colspan="4" class="sub-empty">No submissions found.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Manuscript Popup -->
+<div class="sub-overlay" id="addModal" style="display:none">
+    <div class="sub-modal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
+        <div class="sub-modal-head">
+            <h3 id="addModalTitle">Add Manuscript</h3>
+            <button type="button" class="sub-close" id="closeModalBtn" aria-label="Close">&times;</button>
+        </div>
+
+        @using (Html.BeginForm("AddManuscript", "Submission", new { area = "Student" }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "sub-error" })
+
+            <div class="sub-form-grid">
+                <div>
+                    <div class="sub-field">
+                        <label>Title</label>
+                        @Html.TextBoxFor(m => m.Title)
+                        @Html.ValidationMessageFor(m => m.Title, "", new { @class = "sub-error" })
+                    </div>
+                    <div class="sub-field">
+                        <label>Overview / Abstract</label>
+                        @Html.TextAreaFor(m => m.OverviewAbstract, new { rows = 7 })
+                        @Html.ValidationMessageFor(m => m.OverviewAbstract, "", new { @class = "sub-error" })
+                    </div>
+                </div>
+
+                <div>
+                    <div class="sub-field">
+                        <label>Keywords</label>
+                        @Html.TextBoxFor(m => m.Keywords)
+                    </div>
+                    <div class="sub-field">
+                        <label>Authors</label>
+                        @Html.TextBoxFor(m => m.Authors)
+                        @Html.ValidationMessageFor(m => m.Authors, "", new { @class = "sub-error" })
+                    </div>
+                    <div class="sub-field">
+                        <label>Date Submitted</label>
+                        @Html.TextBoxFor(m => m.DateSubmitted, "{0:MM-dd-yyyy}", new { @class = "readonly-field", @readonly = "readonly" })
+                    </div>
+                    <div class="sub-field">
+                        <label>Program</label>
+                        @Html.TextBoxFor(m => m.Program)
+                        @Html.ValidationMessageFor(m => m.Program, "", new { @class = "sub-error" })
+                    </div>
+                    <div class="sub-field">
+                        <label>Professor / Adviser</label>
+                        @Html.TextBoxFor(m => m.Professor)
+                        @Html.ValidationMessageFor(m => m.Professor, "", new { @class = "sub-error" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="sub-upload">
+                <div class="sub-upload-name" id="fileName"><i class="fa fa-file-arrow-up"></i> No file selected</div>
+                <input type="file" name="ManuscriptFile" id="fileInput" accept=".pdf,.doc,.docx" />
+                <label for="fileInput" class="sub-btn sub-btn--primary sub-btn--small">Browse</label>
+                @Html.ValidationMessageFor(m => m.ManuscriptFile, "", new { @class = "sub-error" })
+            </div>
+
+            <div class="sub-modal-foot">
+                <button type="submit" class="sub-btn sub-btn--primary sub-btn--wide">Submit Manuscript</button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    (function () {
+        var modal = document.getElementById('addModal');
+        function openModal()  { modal.style.display = 'flex'; }
+        function closeModal() { modal.style.display = 'none'; }
+
+        document.getElementById('openModalBtn').addEventListener('click', openModal);
+        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+        // Show the chosen file name
+        document.getElementById('fileInput').addEventListener('change', function () {
+            document.getElementById('fileName').textContent =
+                this.files.length ? this.files[0].name : 'No file selected';
+        });
+
+        // Dropdown status filter logic
+        var statusFilter = document.getElementById('statusFilter');
+        var rows = document.querySelectorAll('tbody tr[data-status]');
+        var emptyRow = document.getElementById('emptyRow');
+
+        statusFilter.addEventListener('change', function () {
+            var selectedFilter = statusFilter.value;
+            var shown = 0;
+
+            rows.forEach(function (r) {
+                var show = selectedFilter === 'all' || r.getAttribute('data-status') === selectedFilter;
+                r.style.display = show ? '' : 'none';
+                if (show) shown++;
+            });
+
+            emptyRow.style.display = shown ? 'none' : '';
+        });
+
+        // Reopen the modal if the server found validation errors
+        @if (reopenModal) { <text>openModal();</text> }
+    })();
+</script>

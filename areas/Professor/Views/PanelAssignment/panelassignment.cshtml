@@ -1,0 +1,29 @@
+@{
+    ViewBag.Title = "Panel Assignments";
+}
+
+    <h1 class="prof-title">Panel Assignments</h1>
+
+    @for (int i = 0; i < 3; i++)
+    {
+        <p class="prof-subtitle">Defense Details</p>
+        <div class="prof-card prof-defense">
+            <a href="@Url.Action("Index", "Manuscript")" class="prof-btn prof-btn-view">View Manuscript</a>
+            <dl>
+                <dt>Manuscript Title:</dt>
+                <dd></dd>
+                <dt>Section:</dt>
+                <dd></dd>
+                <dt>Group No.:</dt>
+                <dd></dd>
+                <dt>Date:</dt>
+                <dd></dd>
+                <dt>Building/ Room:</dt>
+                <dd></dd>
+            </dl>
+            <div class="prof-actions">
+                <button type="button" class="prof-btn prof-btn-accept">Accept</button>
+                <button type="button" class="prof-btn prof-btn-decline">Decline</button>
+            </div>
+        </div>
+    }

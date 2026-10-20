@@ -1,0 +1,382 @@
+﻿:root {
+    --prof-purple: #724389;
+    --prof-purple-light: #dccbe6;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ===== Fonts ===== */
+body, .layout-content, .layout-sidebar, input, select, button, textarea {
+    font-family: 'Inter', sans-serif;
+}
+
+/* ===== Header ===== */
+.professor-header {
+    display: flex !important;
+    align-items: stretch !important;
+    position: relative;
+    overflow: hidden;
+    height: 62px;
+    padding: 0 !important;
+    background: #cdd6e6 !important;
+}
+
+    .professor-header .ph-logos {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #2b3b55;
+        padding: 0 44px 0 16px;
+        clip-path: polygon(0 0, 100% 0, calc(100% - 30px) 100%, 0 100%);
+    }
+
+        .professor-header .ph-logos img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0;
+        }
+
+    .professor-header .ph-text {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-left: 8px;
+    }
+
+        .professor-header .ph-text h1 {
+            font-family: 'Newsreader', serif;
+            font-weight: 600;
+            font-size: 22px;
+            color: #000;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .professor-header .ph-text span {
+            font-family: 'Newsreader', serif;
+            font-weight: 600;
+            font-size: 13px;
+            color: #000;
+        }
+
+    .professor-header .ph-stripes {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        width: 110px;
+        background: linear-gradient(115deg, transparent 0 30%, #a9b0c2 30% 48%, #724389 48% 66%, #8d96ab 66% 84%, transparent 84%);
+    }
+
+/* ===== Shared page styles ===== */
+
+.prof-title {
+    color: #724389;
+    margin: 0 0 20px;
+    font-family: 'Newsreader', serif;
+    font-weight: 550;
+}
+
+.prof-subtitle {
+    color: #777;
+    font-size: 14px;
+    margin: 18px 0 8px;
+}
+
+.prof-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.25);
+    padding: 18px 22px;
+}
+
+/* Dashboard header + button */
+.prof-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 20px;
+}
+
+    .prof-header .prof-title {
+        margin: 0 !important;
+    }
+
+.prof-btn {
+    display: inline-block;
+    border: 0;
+    border-radius: 6px;
+    padding: 6px 16px;
+    background: #724389;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+    .prof-btn:hover {
+        opacity: .9;
+        color: #fff;
+    }
+
+.prof-header .prof-btn-lg {
+    display: inline-block !important;
+    padding: 14px 32px !important;
+    font-size: 16px !important;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.prof-btn-accept {
+    background: #43a35f;
+    font-weight: 700;
+    padding: 9px 30px;
+}
+
+.prof-btn-decline {
+    background: #cc2a4f;
+    font-weight: 700;
+    padding: 9px 30px;
+}
+
+/* Dashboard stat cards */
+.prof-stats {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 32px !important;
+}
+
+    .prof-stats .prof-stat {
+        width: auto !important;
+        min-height: 150px;
+        padding: 26px 32px;
+    }
+
+        .prof-stats .prof-stat span {
+            display: block !important;
+            color: #777 !important;
+            font-size: 18px;
+            font-weight: 400 !important;
+        }
+
+        .prof-stats .prof-stat strong {
+            display: block !important;
+            color: #000 !important;
+            font-size: 32px;
+            font-weight: 400 !important;
+            margin-top: 18px;
+        }
+
+@media (max-width: 900px) {
+    .prof-stats {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Tables */
+.prof-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .prof-table th {
+        color: #888;
+        font-weight: 400;
+        text-align: left;
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .prof-table td {
+        padding: 9px 10px;
+        font-size: 14px;
+    }
+
+.prof-status-upcoming {
+    color: #724389;
+}
+
+.prof-status-completed {
+    color: #3b5bdb;
+}
+
+/* Panel assignment */
+.prof-defense {
+    position: relative;
+    margin-bottom: 26px;
+    padding: 26px 34px;
+}
+
+    .prof-defense .prof-btn-view {
+        position: absolute;
+        top: 14px;
+        right: 22px;
+    }
+
+    .prof-defense dl {
+        margin: 10px 0 24px;
+        font-size: 18px;
+        line-height: 1.5;
+    }
+
+    .prof-defense dt {
+        display: inline;
+        font-weight: 400;
+    }
+
+    .prof-defense dd {
+        display: inline;
+        margin: 0;
+    }
+
+        .prof-defense dd::after {
+            content: "";
+            display: block;
+        }
+
+.prof-actions {
+    text-align: center;
+}
+
+    .prof-actions .prof-btn {
+        margin: 0 24px;
+    }
+
+/* Manuscript / Advising grid */
+.prof-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 36px 32px;
+}
+
+.prof-doc {
+    border: 1px solid #888;
+    background: #fff;
+    text-decoration: none;
+    color: #222;
+    display: block;
+}
+
+.prof-doc-cover {
+    height: 210px;
+    text-align: center;
+    padding-top: 34px;
+    font-size: 12px;
+}
+
+    .prof-doc-cover small {
+        display: block;
+        font-size: 7px;
+        line-height: 1.15;
+        margin-top: 34px;
+    }
+
+.prof-doc-name {
+    border-top: 1px solid #888;
+    padding: 5px 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* PDF viewer */
+.prof-pdf {
+    display: block;
+    width: 100%;
+    height: calc(100vh - 150px);
+    margin-top: 16px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+/* Advising filter */
+.prof-toolbar {
+    display: flex;
+    align-items: flex-end;
+    gap: 30px;
+    margin-bottom: 26px;
+}
+
+    .prof-toolbar label {
+        display: block;
+        color: #777;
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+
+    .prof-toolbar select {
+        min-width: 200px;
+        padding: 6px 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #fff;
+    }
+
+/* Profile */
+.prof-card h3 {
+    color: #724389;
+    font-size: 16px;
+    margin: 0 0 12px;
+}
+
+.prof-info {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    row-gap: 12px;
+    font-size: 13px;
+    margin: 0;
+}
+
+    .prof-info dt {
+        font-weight: 700;
+    }
+
+    .prof-info dd {
+        margin: 0;
+    }
+
+.prof-form label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin: 10px 0 3px;
+}
+
+.prof-pass {
+    position: relative;
+    width: 280px;
+}
+
+    .prof-pass input {
+        width: 100%;
+        padding: 5px 30px 5px 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .prof-pass i {
+        position: absolute;
+        right: 9px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+.prof-form .prof-btn {
+    margin-top: 12px;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.prof-stack > .prof-card {
+    margin-bottom: 24px;
+}

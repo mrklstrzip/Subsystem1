@@ -1,4 +1,175 @@
 ﻿@{
     ViewBag.Title = "User Management";
 }
-<h1>User Management</h1>
+
+<link href="@Url.Content("~/Content/css/usermanagement.css")?v=1.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/delete.css")?v=1.0" rel="stylesheet" type="text/css" />
+
+<h1 class="page-title">User Management</h1>
+
+<div class="function">
+    <div class="search-container">
+        <div class="search">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search users">
+        </div>
+        <button class="add-btn" id="openModalBtn"><i class="fa fa-plus"></i></button>
+    </div>
+</div>
+
+<div class="filters">
+    <div class="filter-group">
+        <label for="roleFilter">Role:</label>
+        <select id="roleFilter" name="role">
+            <option value="all" selected>All</option>
+            <option value="admin">Admin</option>
+            <option value="campus-director">Campus Director</option>
+            <option value="capstone-coordinator">Capstone Coordinator</option>
+            <option value="professor">Professor</option>
+            <option value="student">Student</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="statusFilter">Status:</label>
+        <select id="statusFilter" name="status">
+            <option value="all" selected>All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+    </div>
+</div>
+
+<div class="user-management">
+    <table class="user-management-table" id="usersTable">
+        <thead>
+            <tr>
+                <th class="column-title name-col">NAME</th>
+                <th class="column-title email-col">EMAIL</th>
+                <th class="column-title role-col">ROLE</th>
+                <th class="column-title status-col">STATUS</th>
+                <th class="column-title action-col">ACTION</th>
+            </tr>
+        </thead>
+        <tbody id="users-tbody"></tbody>
+    </table>
+</div>
+
+<!-- Dynamic User Modal (Used for both Create and Edit) -->
+<div class="modal-overlay" id="userModal">
+    <div class="modal-card">
+        <div class="modal-title" id="modalHeaderTitle">CREATE USER ACCOUNT</div>
+
+        <div class="name-grid">
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" id="lastNameInput" placeholder="Dela Cruz">
+            </div>
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" id="firstNameInput" placeholder="Juan">
+            </div>
+            <div class="form-group">
+                <label>Middle Name</label>
+                <input type="text" id="middleNameInput" placeholder="Santos">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="emailInput" placeholder="user@qcu.edu.ph">
+        </div>
+
+        <!-- ID Input Field -->
+        <div class="form-group">
+            <label>ID Number</label>
+            <input type="text" id="modalIdInput" placeholder="12-3456">
+        </div>
+
+        <div class="form-group">
+            <label>Role</label>
+            <select id="modalRoleSelect">
+                <option value="student" selected>Student</option>
+                <option value="professor">Professor / Panelist</option>
+                <option value="campus-director">Campus Director</option>
+                <option value="capstone-coordinator">Capstone Coordinator</option>
+            </select>
+        </div>
+
+        <!-- Student Dynamic Field -->
+        <div class="role-field" id="fieldProgram" style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="form-group">
+                <label>Program</label>
+                <select id="programSelect">
+                    <option value="" disabled selected>Select Program</option>
+                    <option value="BSIT">BS Information Technology</option>
+                    <option value="BSIS">BS Information System</option>
+                    <option value="BSCS">BS Computer Science</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Section</label>
+                <input type="text" id="sectionInput" placeholder="e.g. SBIT-4A">
+            </div>
+            <div class="form-group">
+                <label>Professor</label>
+                <select id="professorInput">
+                    <option value="" selected disabled>Select Professor</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Professor Dynamic Fields -->
+        <div class="role-field" id="fieldProfessor" style="display: none; flex-direction: column; gap: 12px;">
+            <div id="expertiseSection" style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="form-group">
+                    <label>Expertise Tag</label>
+                    <div class="selected-tags-box" id="selectedTagsBox"></div>
+                </div>
+
+                <div class="tags-grid-box" id="systemTagsGrid"></div>
+            </div>
+        </div>
+
+        <!-- Status Radio Group (Visible only during Edit Mode) -->
+        <div class="form-group" id="statusGroup" style="display: none;">
+            <label>Status</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" name="modalStatusRadio" id="statusActive" value="active" checked> Active
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="modalStatusRadio" id="statusInactive" value="inactive"> Inactive
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group" id="passwordGroup">
+            <label>Temporary Password</label>
+            <input type="password" id="passwordInput">
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-confirm" id="confirmBtn">Confirm</button>
+            <button class="btn-cancel" id="cancelBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Pop up -->
+<div class="modal-overlay" id="delUserModal">
+    <div class="cd-delete-card">
+        <div class="cd-delete-icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3 class="cd-delete-title">Are you sure?</h3>
+        <p class="cd-delete-text">
+            Do you really want to delete this <strong>USER</strong>?<br />
+            This process cannot be undone
+        </p>
+        <div class="cd-delete-actions">
+            <button type="button" class="btn-cd-delete-confirm" onclick="AD.confirmDelUser()">Delete</button>
+            <button type="button" class="btn-cd-delete-cancel" onclick="AD.closeModals()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=1.0"></script>

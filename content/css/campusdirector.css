@@ -1,0 +1,985 @@
+﻿:root {
+    --primary-color: #2E5C8A;
+    --primary-hover: #24496e;
+    --primary-light: #e6eef5;
+    --primary-active: #d0e0ee;
+    --bg-main: #f0f2f5;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --text-dark: #2c3e50;
+    --text-muted: #64748b;
+    --danger: #b3261e;
+    --danger-hover: #941e17;
+    --success: #28a745;
+    --sidebar-width: 250px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+
+.page-title {
+    font-weight: 550;
+    color: #2E5C8A;
+    margin-bottom: 24px;
+    font-family: 'Newsreader', serif;
+}
+
+/* Cards & Components */
+.card-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+    .stat-card .label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--text-muted);
+    }
+
+    .stat-card .value {
+        font-size: 1.9rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 6px 0;
+    }
+
+    .stat-card .desc {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+.table-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+}
+
+    table th {
+        text-align: left;
+        padding: 12px 14px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #64748b;
+        background: #fafbfc;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-active {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge-disabled {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: #ffffff;
+    border: none;
+    padding: 9px 18px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+    .btn-primary:hover {
+        background: var(--primary-hover);
+    }
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #475569;
+    border: none;
+    padding: 9px 18px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-filter-group {
+    display: flex;
+    gap: 6px;
+}
+
+.filter-btn {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #64748b;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+    .filter-btn.active {
+        background: var(--primary-color);
+        color: #fff;
+        border-color: var(--primary-color);
+    }
+
+/* Profile Card */
+.profile-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    max-width: 800px;
+}
+
+.profile-avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.profile-avatar-large {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-light);
+}
+
+.profile-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 14px;
+}
+
+    .form-group label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+    }
+
+    .form-control[readonly] {
+        background: #f8fafc;
+        color: #64748b;
+    }
+
+/* Profile page (same layout as Professor profile) */
+.cdp-page {
+    padding: 24px 30px;
+}
+
+    .cdp-page,
+    .cdp-page *:not(i) {
+        font-family: 'Inter', sans-serif;
+    }
+
+.cdp-title {
+    color: var(--primary-color);
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 20px;
+}
+
+.cdp-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.25);
+    padding: 18px 22px;
+    margin-bottom: 24px;
+}
+
+    .cdp-card h3 {
+        color: var(--primary-color);
+        font-size: 16px;
+        margin: 0 0 12px;
+    }
+
+.cdp-info {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    row-gap: 12px;
+    font-size: 13px;
+    margin: 0;
+}
+
+    .cdp-info dt {
+        font-weight: 700;
+    }
+
+    .cdp-info dd {
+        margin: 0;
+    }
+
+.cdp-form label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin: 10px 0 3px;
+}
+
+.cdp-pass {
+    position: relative;
+    width: 280px;
+}
+
+    .cdp-pass input {
+        width: 100%;
+        padding: 5px 30px 5px 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .cdp-pass i {
+        position: absolute;
+        right: 9px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+.cdp-btn {
+    display: inline-block;
+    border: 0;
+    border-radius: 6px;
+    padding: 6px 16px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 12px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+    .cdp-btn:hover {
+        opacity: .9;
+        color: #fff;
+    }
+
+/* Clickable schedule blocks on the room availability grid */
+.sched-block {
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+
+    .sched-block:hover {
+        filter: brightness(1.15);
+    }
+
+/* Modals Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+/* Card Popup (Add / Edit) */
+.cd-popup-card {
+    background: #ffffff;
+    width: 440px;
+    border-radius: 16px;
+    padding: 28px 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    animation: cdFadeIn 0.18s ease-out;
+}
+
+@keyframes cdFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cd-popup-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a2c42;
+    margin-bottom: 20px;
+}
+
+.cd-field-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #5c6c7f;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+}
+
+.cd-input {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid #d4dce5;
+    border-radius: 9px;
+    font-size: 0.9rem;
+    color: #1e293b;
+    outline: none;
+    background: #ffffff;
+    transition: border-color 0.15s ease;
+}
+
+    .cd-input::placeholder {
+        color: #9aa7b5;
+    }
+
+    .cd-input:focus {
+        border-color: #2E5C8A;
+    }
+
+.cd-select-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.cd-select {
+    width: 100%;
+    height: 42px;
+    padding: 0 36px 0 14px;
+    border: 1px solid #d4dce5;
+    border-radius: 9px;
+    font-size: 0.9rem;
+    color: #334155;
+    background: #ffffff;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    cursor: pointer;
+}
+
+    .cd-select:focus {
+        border-color: #2E5C8A;
+    }
+
+.cd-select-wrap .fa-chevron-down {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.78rem;
+    color: #5c6c7f;
+    pointer-events: none;
+}
+
+.cd-icon-input-wrap {
+    position: relative;
+    width: 100%;
+}
+
+    .cd-icon-input-wrap input {
+        width: 100%;
+        height: 42px;
+        padding: 0 38px 0 14px;
+        border: 1px solid #d4dce5;
+        border-radius: 9px;
+        font-size: 0.9rem;
+        color: #334155;
+        background: #ffffff;
+        outline: none;
+    }
+
+        .cd-icon-input-wrap input:focus {
+            border-color: #2E5C8A;
+        }
+
+    .cd-icon-input-wrap i {
+        position: absolute;
+        right: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.95rem;
+        color: #5c6c7f;
+        pointer-events: none;
+    }
+
+.cd-time-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.cd-radio-row {
+    display: flex;
+    gap: 24px;
+    margin-top: 8px;
+    margin-bottom: 22px;
+}
+
+.cd-radio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #1e293b;
+    cursor: pointer;
+    user-select: none;
+}
+
+    .cd-radio-item input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #cbd5e1;
+        border-radius: 50%;
+        margin: 0;
+        cursor: pointer;
+        position: relative;
+        outline: none;
+    }
+
+        .cd-radio-item input[type="radio"]:checked {
+            border-color: #2E5C8A;
+        }
+
+            .cd-radio-item input[type="radio"]:checked::after {
+                content: '';
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: #2E5C8A;
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+.cd-button-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-cd-fill {
+    background: #2E5C8A;
+    color: #ffffff;
+    border: none;
+    border-radius: 9px;
+    padding: 10px 22px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+    .btn-cd-fill:hover {
+        background: #24496e;
+    }
+
+.btn-cd-outline {
+    background: #ffffff;
+    color: #2E5C8A;
+    border: 1.5px solid #2E5C8A;
+    border-radius: 9px;
+    padding: 10px 22px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+    .btn-cd-outline:hover {
+        background: #f0f5fa;
+    }
+
+/* Schedule Details Pop up (view only) */
+.edit-sched-box {
+    background: #ffffff;
+    width: 540px;
+    max-width: 92%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    animation: cdFadeIn 0.2s ease-out;
+}
+
+.edit-sched-header {
+    padding: 24px 28px 18px 28px;
+    border-bottom: 1px solid #edf2f7;
+}
+
+    .edit-sched-header h3 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+.edit-sched-body {
+    padding: 24px 28px;
+}
+
+.sched-info-card {
+    background: #f1f5f9;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.sched-info-left {
+    flex: 1;
+    min-width: 0;
+}
+
+    .sched-info-left h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .sched-info-left .sched-date {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 3px;
+    }
+
+    .sched-info-left .sched-sub {
+        font-size: 0.82rem;
+        color: #64748b;
+        line-height: 1.4;
+    }
+
+.sched-badge-occupied {
+    background: #2E5C8A;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 20px;
+}
+
+.sched-info-card .sched-badge-occupied {
+    margin-left: 12px;
+    white-space: nowrap;
+}
+
+/* label / value rows inside the pop up */
+.sched-detail-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.86rem;
+}
+
+    .sched-detail-row:last-child {
+        border-bottom: none;
+    }
+
+.sched-detail-label {
+    font-weight: 700;
+    color: #64748b;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding-top: 2px;
+}
+
+.sched-detail-value {
+    color: #0f172a;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.sched-section-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.sched-time-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.sched-field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.sched-select-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.sched-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 10px 36px 10px 14px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+}
+
+.sched-select-wrap i {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+    font-size: 0.85rem;
+}
+
+.sched-status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 18px;
+    margin-bottom: 30px;
+}
+
+.status-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #1e293b;
+    user-select: none;
+}
+
+    .status-radio-label input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #cbd5e1;
+        border-radius: 50%;
+        outline: none;
+        margin: 0;
+        cursor: pointer;
+        position: relative;
+    }
+
+        .status-radio-label input[type="radio"]:checked {
+            border-color: #2E5C8A;
+        }
+
+            .status-radio-label input[type="radio"]:checked::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 10px;
+                height: 10px;
+                background: #2E5C8A;
+                border-radius: 50%;
+            }
+
+.status-indicator-box {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
+.box-open {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+}
+
+.box-occupied {
+    background: #bfdbfe;
+}
+
+.box-reserved {
+    background: #2E5C8A;
+}
+
+.box-completed {
+    background: #3aa76d;
+}
+
+.box-cancelled {
+    background: #d9534f;
+}
+
+.box-unavailable {
+    background: #7b8798;
+}
+
+/* Room availability legend */
+.sched-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 20px;
+    margin-bottom: 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sched-legend .status-indicator-box {
+    width: 14px;
+    height: 14px;
+}
+
+/* Room availability grid: equal hour columns that fit the card */
+.sched-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 960px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+    .sched-table th,
+    .sched-table td {
+        padding: 10px 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sched-table th {
+        font-size: 0.68rem;
+    }
+
+    .sched-table .sched-room-col {
+        width: 96px;
+    }
+
+    .sched-table td.sched-block {
+        padding: 10px 6px;
+        font-size: 0.74rem;
+    }
+
+.sched-cell {
+    border-left: 1px solid #eef2f7;
+}
+
+.edit-sched-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-sched-save {
+    background: #2E5C8A;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .btn-sched-save:hover {
+        background: #24496e;
+    }
+
+.btn-sched-cancel {
+    background: #ffffff;
+    color: #2E5C8A;
+    border: 1.5px solid #2E5C8A;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .btn-sched-cancel:hover {
+        background: #f0f5fa;
+    }
+
+/* Delete Confirmation Card */
+.cd-delete-card {
+    background: #f8fafc;
+    width: 440px;
+    border-radius: 16px;
+    border: 1.5px solid #94a3b8;
+    padding: 28px 26px 24px 26px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    animation: cdFadeIn 0.18s ease-out;
+}
+
+.cd-delete-icon-wrap {
+    margin-bottom: 12px;
+}
+
+    .cd-delete-icon-wrap i {
+        color: #a61c1c;
+        font-size: 2.2rem;
+    }
+
+.cd-delete-title {
+    font-size: 1.28rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.cd-delete-text {
+    font-size: 0.85rem;
+    color: #0f172a;
+    line-height: 1.45;
+    margin-bottom: 22px;
+}
+
+    .cd-delete-text strong {
+        font-weight: 700;
+    }
+
+.cd-delete-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.btn-cd-delete-confirm {
+    background: var(--danger);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 30px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+    .btn-cd-delete-confirm:hover {
+        background: var(--danger-hover);
+    }
+
+.btn-cd-delete-cancel {
+    background: #ffffff;
+    color: #1e3a5f;
+    border: 1.5px solid #1e3a5f;
+    border-radius: 10px;
+    padding: 10px 28px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+    .btn-cd-delete-cancel:hover {
+        background: #f1f5f9;
+    }
+
+/* Event date picker: hide the browser's own calendar icon and make the whole field clickable */
+.cd-icon-input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}

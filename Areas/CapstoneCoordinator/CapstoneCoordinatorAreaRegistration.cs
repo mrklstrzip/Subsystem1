@@ -2,7 +2,7 @@
 
 namespace Subsystem1.Areas.CapstoneCoordinator
 {
-    public class CapstoneCoordinatorAreaRegistration : AreaRegistration
+    public class DeanAreaRegistration : AreaRegistration
     {
         public override string AreaName => "CapstoneCoordinator";
 

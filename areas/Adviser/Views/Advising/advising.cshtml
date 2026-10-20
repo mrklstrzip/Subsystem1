@@ -1,0 +1,29 @@
+@{
+    ViewBag.Title = "Advisory Class";
+}
+    <h1 class="prof-title">Advisory Class</h1>
+
+    <div class="prof-toolbar">
+        <div>
+            <label for="section">Section</label>
+            <select id="section">
+                <option value="">All</option>
+                <option>BSCS-4A</option>
+                <option>BSCS-4B</option>
+                <option>BSCS-4C</option>
+                <option>BSIS-4A</option>
+                <option>BSIS-4B</option>
+                <option>BSIT-4A</option>
+                <option>BSIT-4B</option>
+                <option>BSIT-4C</option>
+                <option>BSIT-4D</option>
+                <option>BSIT-4E</option>
+                <option>BSIT-4F</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="prof-grid">
+        @for (int i = 0; i < 8; i++)
+        {@Html.Partial("_ManuscriptCard")}
+    </div>

@@ -1,0 +1,88 @@
+﻿/* Delete confirmation pop up (same look as the Campus Director pages).
+   Used with the existing .modal-overlay from usermanagement.css / expertisetag.css */
+.cd-delete-card {
+    background: #f8fafc;
+    width: 440px;
+    max-width: 90%;
+    border-radius: 16px;
+    border: 1.5px solid #94a3b8;
+    padding: 28px 26px 24px 26px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    animation: cdFadeIn 0.18s ease-out;
+}
+
+@keyframes cdFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cd-delete-icon-wrap {
+    margin-bottom: 12px;
+}
+
+    .cd-delete-icon-wrap i {
+        color: #a61c1c;
+        font-size: 2.2rem;
+    }
+
+.cd-delete-title {
+    font-size: 1.28rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.cd-delete-text {
+    font-size: 0.85rem;
+    color: #0f172a;
+    line-height: 1.45;
+    margin-bottom: 22px;
+}
+
+    .cd-delete-text strong {
+        font-weight: 700;
+    }
+
+.cd-delete-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.btn-cd-delete-confirm {
+    background: #b3261e;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 30px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+    .btn-cd-delete-confirm:hover {
+        background: #941e17;
+    }
+
+.btn-cd-delete-cancel {
+    background: #ffffff;
+    color: #1e3a5f;
+    border: 1.5px solid #1e3a5f;
+    border-radius: 10px;
+    padding: 10px 28px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+    .btn-cd-delete-cancel:hover {
+        background: #f1f5f9;
+    }

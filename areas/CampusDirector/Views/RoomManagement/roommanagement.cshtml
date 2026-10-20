@@ -1,0 +1,88 @@
+﻿@{
+    ViewBag.Title = "Room Management";
+    ViewBag.ActiveMenu = "RoomManagement";
+}
+
+<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.1" rel="stylesheet" type="text/css" />
+
+<style>
+    .page-title {
+        font-weight: 550;
+        color: #2E5C8A;
+        margin-bottom: 24px;
+        font-family: 'Newsreader', serif;
+        font-size: 2rem;
+    }
+</style>
+
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+    <h2 class="page-title" style="margin: 0;">Room Management</h2>
+    <button class="btn-primary" onclick="CD.openAddRoom()"><i class="fa fa-plus"></i> Add Room</button>
+</div>
+
+<div style="margin-bottom: 16px;">
+    <input type="text" class="form-control" id="rm-search" placeholder="Search rooms..." style="max-width: 320px;" />
+</div>
+
+<!-- Rooms Table -->
+<div class="table-card">
+    <h4 style="margin-bottom: 12px;">Rooms <span id="rooms-count" style="font-size:0.75rem; color:#64748b;">(0 rooms)</span></h4>
+    <table>
+        <thead><tr><th>Room</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="rooms-tbody"></tbody>
+    </table>
+</div>
+
+<!-- Add Room Pop up -->
+<div class="modal-overlay" id="modal-add-room">
+    <div class="cd-popup-card">
+        <h3 class="cd-popup-title">Add New Room</h3>
+        <div style="margin-bottom: 16px;">
+            <label class="cd-field-label">ROOM NUMBER</label>
+            <input type="text" class="cd-input" id="add-room-name" placeholder="e.g. IK503" />
+        </div>
+        <div class="cd-button-row">
+            <button type="button" class="btn-cd-fill" onclick="CD.saveAddRoom()">Add Room</button>
+            <button type="button" class="btn-cd-outline" onclick="closeModal('modal-add-room')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Room Pop up -->
+<div class="modal-overlay" id="modal-edit-room">
+    <div class="cd-popup-card">
+        <h3 class="cd-popup-title">Edit Room</h3>
+        <div style="margin-bottom: 14px;">
+            <label class="cd-field-label">ROOM NAME</label>
+            <input type="text" class="cd-input" id="edit-room-name" value="IK504" />
+        </div>
+        <div>
+            <label class="cd-field-label">STATUS</label>
+            <div class="cd-radio-row">
+                <label class="cd-radio-item"><input type="radio" name="edit-rm-status" value="Active" checked /> Active</label>
+                <label class="cd-radio-item"><input type="radio" name="edit-rm-status" value="Unavailable" /> Unavailable</label>
+            </div>
+        </div>
+        <div class="cd-button-row">
+            <button type="button" class="btn-cd-fill" onclick="CD.saveEditRoom()">Save Changes</button>
+            <button type="button" class="btn-cd-outline" onclick="closeModal('modal-edit-room')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Room Pop up -->
+<div class="modal-overlay" id="modal-del-room">
+    <div class="cd-delete-card">
+        <div class="cd-delete-icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3 class="cd-delete-title">Are you sure?</h3>
+        <p class="cd-delete-text">
+            Do you really want to delete this <strong>ROOM</strong>?<br />
+            This process cannot be undone
+        </p>
+        <div class="cd-delete-actions">
+            <button type="button" class="btn-cd-delete-confirm" onclick="CD.confirmDelRoom()">Delete</button>
+            <button type="button" class="btn-cd-delete-cancel" onclick="closeModal('modal-del-room')">Cancel</button>
+        </div>
+    </div>
+</div>

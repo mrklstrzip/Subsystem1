@@ -2,7 +2,7 @@
 
 namespace Subsystem1.Areas.Professor
 {
-    public class ProfessorAreaRegistration : AreaRegistration
+    public class AdviserAreaRegistration : AreaRegistration
     {
         public override string AreaName => "Professor";
 

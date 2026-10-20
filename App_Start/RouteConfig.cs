@@ -9,11 +9,15 @@ namespace Subsystem1
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
-            routes.MapRoute(
+            var route = routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+                defaults: new { controller = "Login", action = "login", id = UrlParameter.Optional },
+                namespaces: new[] { "Subsystem1.Areas.Auth.Controllers" }
             );
+
+            route.DataTokens["UseNamespaceFallback"] = false;
+            route.DataTokens["area"] = "Auth";
         }
     }
 }

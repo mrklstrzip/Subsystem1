@@ -101,8 +101,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\css\campusdirector.css" />
+    <Content Include="Content\css\capstonecoor.css" />
+    <Content Include="Content\css\dashboard.css" />
+    <Content Include="Content\css\delete.css" />
+    <Content Include="Content\css\expertisetag.css" />
+    <Content Include="Content\css\facultyprofile.css" />
+    <Content Include="Content\css\professor.css" />
+    <Content Include="Content\css\profile.css" />
     <Content Include="Content\css\layout.css" />
     <Content Include="Content\css\auth.css" />
+    <Content Include="Content\css\student-dashboard.css" />
+    <Content Include="Content\css\student-status.css" />
+    <Content Include="Content\css\student-submission.css" />
+    <Content Include="Content\css\usermanagement.css" />
     <Content Include="Content\fontawesome\css\all.css" />
     <Content Include="Content\fontawesome\css\all.min.css" />
     <Content Include="Content\fontawesome\css\brands.css" />
@@ -127,16 +139,22 @@
     <Content Include="Content\images\adminlogin.png" />
     <Content Include="Content\images\campus-avatar.jpg" />
     <Content Include="Content\images\capstone-avatar.jpg" />
+    <Content Include="Content\images\ccs-logo.png" />
     <Content Include="Content\images\login.png" />
     <Content Include="Content\images\professor-avatar.jpg" />
     <Content Include="Content\images\qcu.jpeg" />
     <Content Include="Content\images\student-avatar.png" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\admin-app.js" />
     <Content Include="Scripts\admin-shortcut.js" />
     <Content Include="Scripts\adminlogin-check.js" />
+    <Content Include="Scripts\campusdirector-app.js" />
+    <Content Include="Scripts\campusdirector-modal.js" />
     <Content Include="Scripts\dummy-users.js" />
     <Content Include="Scripts\layout-profile.js" />
     <Content Include="Scripts\login-check.js" />
+    <Content Include="Scripts\profile.js" />
+    <Content Include="Scripts\sidebar.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -149,17 +167,40 @@
     <Compile Include="Areas\Admin\Controllers\FacultyProfileController.cs" />
     <Compile Include="Areas\Admin\Controllers\ProfileController.cs" />
     <Compile Include="Areas\Admin\Controllers\UserManagementController.cs" />
+    <Compile Include="Areas\Adviser\Controllers\AdvisingController.cs" />
+    <Compile Include="Areas\Adviser\Controllers\DashboardController.cs" />
+    <Compile Include="Areas\Adviser\Controllers\DefenseScheduleController.cs" />
+    <Compile Include="Areas\Adviser\Controllers\ProfileController.cs" />
+    <Compile Include="Areas\Adviser\AdviserAreaRegistration.cs" />
     <Compile Include="Areas\Auth\AuthAreaRegistration.cs" />
     <Compile Include="Areas\Auth\Controllers\AdminLoginController.cs" />
     <Compile Include="Areas\Auth\Controllers\LoginController.cs" />
+    <Compile Include="Areas\Auth\Controllers\RequestController.cs" />
     <Compile Include="Areas\CampusDirector\CampusDirectorAreaRegistration.cs" />
     <Compile Include="Areas\CampusDirector\Controllers\DashboardController.cs" />
+    <Compile Include="Areas\CampusDirector\Controllers\ProfileController.cs" />
+    <Compile Include="Areas\CampusDirector\Controllers\RoomManagementController.cs" />
+    <Compile Include="Areas\CampusDirector\Controllers\RoomScheduleController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\CapstoneCoordinatorAreaRegistration.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\DashboardController.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Controllers\ProfileController.cs" />
+    <Compile Include="Areas\Dean\DeanAreaRegistration.cs" />
+    <Compile Include="Areas\Dean\Controllers\DashboardController.cs" />
+    <Compile Include="Areas\Dean\Controllers\ProfileController.cs" />
     <Compile Include="Areas\Professor\Controllers\DashboardController.cs" />
+    <Compile Include="Areas\Professor\Controllers\DefenseScheduleController.cs" />
+    <Compile Include="Areas\Professor\Controllers\ManuscriptController.cs" />
+    <Compile Include="Areas\Professor\Controllers\PanelAssignmentController.cs" />
+    <Compile Include="Areas\Professor\Controllers\ProfileController.cs" />
     <Compile Include="Areas\Professor\ProfessorAreaRegistration.cs" />
     <Compile Include="Areas\Student\Controllers\DashboardController.cs" />
+    <Compile Include="Areas\Student\Controllers\ProfileController.cs" />
+    <Compile Include="Areas\Student\Controllers\StatusController.cs" />
+    <Compile Include="Areas\Student\Controllers\SubmissionController.cs" />
     <Compile Include="Areas\Student\StudentAreaRegistration.cs" />
+    <Compile Include="Areas\Student\ViewModels\StudentDashboardViewModel.cs" />
+    <Compile Include="Areas\Student\ViewModels\StudentStatusViewModel.cs" />
+    <Compile Include="Areas\Student\ViewModels\StudentSubmissionViewModel.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -197,6 +238,32 @@
     <Content Include="Areas\Student\Views\_ViewStart.cshtml" />
     <Content Include="Areas\Student\Views\web.config" />
     <Content Include="Areas\Student\Views\Dashboard\dashboard.cshtml" />
+    <Content Include="Areas\Student\Views\Profile\profile.cshtml" />
+    <Content Include="Areas\Professor\Views\Profile\profile.cshtml" />
+    <Content Include="Areas\CapstoneCoordinator\Views\Profile\profile.cshtml" />
+    <Content Include="Areas\CampusDirector\Views\Profile\profile.cshtml" />
+    <Content Include="Areas\Professor\Views\DefenseSchedule\defenseschedule.cshtml" />
+    <Content Include="Areas\Professor\Views\Manuscript\manuscript.cshtml" />
+    <Content Include="Areas\Professor\Views\PanelAssignment\panelassignment.cshtml" />
+    <Content Include="Areas\Professor\Views\Shared\_ManuscriptCard.cshtml" />
+    <Content Include="Areas\Student\Views\Submission\submission.cshtml" />
+    <Content Include="Areas\Student\Views\Status\status.cshtml" />
+    <Content Include="Areas\CampusDirector\Views\RoomManagement\roommanagement.cshtml" />
+    <Content Include="Areas\CampusDirector\Views\RoomSchedule\roomschedule.cshtml" />
+    <Content Include="Areas\Auth\Views\Request\request.cshtml" />
+    <Content Include="Areas\Adviser\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\Adviser\Views\Advising\advising.cshtml" />
+    <Content Include="Areas\Adviser\Views\Dashboard\dashboard.cshtml" />
+    <Content Include="Areas\Adviser\Views\DefenseSchedule\defenseschedule.cshtml" />
+    <Content Include="Areas\Adviser\Views\Profile\profile.cshtml" />
+    <Content Include="Areas\Adviser\Views\Shared\_ManuscriptCard.cshtml" />
+    <Content Include="Areas\Adviser\Views\Shared\_AdviserLayout.cshtml" />
+    <Content Include="Areas\Adviser\Views\web.config" />
+    <Content Include="Areas\Dean\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\Dean\Views\Dashboard\dashboard.cshtml" />
+    <Content Include="Areas\Dean\Views\Profile\profile.cshtml" />
+    <Content Include="Areas\Dean\Views\Shared\_DeanLayout.cshtml" />
+    <Content Include="Areas\Dean\Views\web.config" />
     <None Include="packages.config" />
     <Content Include="Views\web.config" />
     <Content Include="Views\Shared\Error.cshtml" />
@@ -210,33 +277,25 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\ViewModels\" />
+    <Folder Include="Areas\Adviser\Models\" />
+    <Folder Include="Areas\Adviser\ViewModels\" />
     <Folder Include="Areas\Auth\Models\" />
     <Folder Include="Areas\Auth\ViewModels\" />
     <Folder Include="Areas\CampusDirector\Models\" />
     <Folder Include="Areas\CampusDirector\ViewModels\" />
-    <Folder Include="Areas\CampusDirector\Views\EventManagement\" />
-    <Folder Include="Areas\CampusDirector\Views\Profile\" />
-    <Folder Include="Areas\CampusDirector\Views\RoomManagement\" />
-    <Folder Include="Areas\CampusDirector\Views\RoomSchedule\" />
     <Folder Include="Areas\CapstoneCoordinator\Models\" />
     <Folder Include="Areas\CapstoneCoordinator\ViewModels\" />
     <Folder Include="Areas\CapstoneCoordinator\Views\ConflictResult\" />
     <Folder Include="Areas\CapstoneCoordinator\Views\DefenseSchedule\" />
-    <Folder Include="Areas\CapstoneCoordinator\Views\ManuscriptManagement\" />
-    <Folder Include="Areas\CapstoneCoordinator\Views\PanelManagement\" />
-    <Folder Include="Areas\CapstoneCoordinator\Views\Profile\" />
+    <Folder Include="Areas\CapstoneCoordinator\Views\ScheduleManagement\" />
+    <Folder Include="Areas\Dean\Models\" />
+    <Folder Include="Areas\Dean\ViewModels\" />
+    <Folder Include="Areas\Dean\Views\DefenseSchedule\" />
+    <Folder Include="Areas\Dean\Views\ScheduleApproval\" />
     <Folder Include="Areas\Professor\Models\" />
     <Folder Include="Areas\Professor\ViewModels\" />
-    <Folder Include="Areas\Professor\Views\Advising\" />
-    <Folder Include="Areas\Professor\Views\DefenseSchedule\" />
-    <Folder Include="Areas\Professor\Views\Manuscript\" />
-    <Folder Include="Areas\Professor\Views\PanelAssignment\" />
-    <Folder Include="Areas\Professor\Views\Profile\" />
     <Folder Include="Areas\Student\Models\" />
-    <Folder Include="Areas\Student\ViewModels\" />
-    <Folder Include="Areas\Student\Views\Profile\" />
-    <Folder Include="Areas\Student\Views\Status\" />
-    <Folder Include="Areas\Student\Views\Submission\" />
+    <Folder Include="Content\css\Admin\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

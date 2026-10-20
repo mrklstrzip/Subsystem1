@@ -1,0 +1,67 @@
+﻿@{
+    ViewBag.Title = "Profile";
+}
+
+<link href="@Url.Content("~/Content/css/profile.css")?v=1.0" rel="stylesheet" type="text/css" />
+
+<div class="role-capstonecoordinator">
+    <h1 class="page-title">Profile</h1>
+
+    <div class="profile-card">
+        <h4 class="card-title">Profile Information</h4>
+        <table class="information-table">
+            <tbody id="profileTableBody">
+                <tr>
+                    <td class="label">NAME</td>
+                    <td class="info" id="infoName"></td>
+                </tr>
+                <tr>
+                    <td class="label">ID</td>
+                    <td class="info" id="infoNumber"></td>
+                </tr>
+                <tr>
+                    <td class="label">ROLE</td>
+                    <td class="info" id="infoRole"></td>
+                </tr>
+                <tr>
+                    <td class="label">EMAIL</td>
+                    <td class="info" id="infoEmail"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="profile-card">
+        <h4 class="card-title">Change Password</h4>
+        <form class="password-form" id="changePasswordForm" onsubmit="return false;">
+            <div class="form-group">
+                <label for="current-password">CURRENT PASSWORD</label>
+                <div class="input-wrapper">
+                    <input type="password" id="current-password" required>
+                    <i class="fa fa-eye toggle-password"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="new-password">NEW PASSWORD</label>
+                <div class="input-wrapper">
+                    <input type="password" id="new-password" required>
+                    <i class="fa fa-eye toggle-password"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm-password">CONFIRM NEW PASSWORD</label>
+                <div class="input-wrapper">
+                    <input type="password" id="confirm-password" required>
+                    <i class="fa fa-eye toggle-password"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="confirm-btn">Confirm</button>
+        </form>
+    </div>
+</div>
+
+<script src="~/Scripts/dummy-users.js"></script>
+<script src="~/Scripts/profile.js"></script>

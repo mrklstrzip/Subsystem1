@@ -1,4 +1,115 @@
 ﻿@{
     ViewBag.Title = "Expertise Tag Management";
 }
-<h1>Expertise Tag Management</h1>
+
+<link href="@Url.Content("~/Content/css/expertisetag.css")?v=1.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/delete.css")?v=1.0" rel="stylesheet" type="text/css" />
+
+
+<h1 class="page-title">Expertise Tag Management</h1>
+
+<div class="function">
+    <div class="search-container">
+        <div class="search">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search expertise tags">
+        </div>
+        <button class="add-btn" onclick="AD.openAddTag()"><i class="fa fa-plus"></i></button>
+    </div>
+</div>
+
+<div class="filters">
+    <div class="filter-group">
+        <label for="statusFilter">Status:</label>
+        <select id="statusFilter" name="status">
+            <option value="all" selected>All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+    </div>
+</div>
+
+<div class="expertise-tag-management">
+    <table class="expertise-tag-management-table" id="tagsTable">
+        <thead>
+            <tr>
+                <th class="column-title expertise-col">EXPERTISE TAG</th>
+                <th class="column-title desc-col">DESCRIPTION</th>
+                <th class="column-title status-col">STATUS</th>
+                <th class="column-title action-col">ACTION</th>
+            </tr>
+        </thead>
+        <tbody id="tags-tbody"></tbody>
+    </table>
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3 class="modal-title">ADD EXPERTISE TAG</h3>
+        <form onsubmit="AD.saveNewTag(); return false;">
+            <div class="form-group">
+                <label>Expertise Tag Name</label>
+                <input type="text" id="addTagName" required>
+            </div>
+            <div class="form-group" style="margin-top: 12px;">
+                <label>Description</label>
+                <textarea id="addTagDesc" required></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn-confirm">Confirm</button>
+                <button type="button" class="btn-cancel" onclick="AD.closeModals()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3 class="modal-title">EDIT EXPERTISE TAG</h3>
+        <form onsubmit="AD.saveEditedTag(); return false;">
+            <div class="form-group">
+                <label>Expertise Tag Name</label>
+                <input type="text" id="editTagName" required>
+            </div>
+            <div class="form-group" style="margin-top: 12px;">
+                <label>Description</label>
+                <textarea id="editTagDesc" required></textarea>
+            </div>
+            <div class="form-group" style="margin-top: 12px;">
+                <label>Expertise Tag Status</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="editStatus" id="statusActive" value="active"> Active
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="editStatus" id="statusInactive" value="inactive"> Inactive
+                    </label>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn-confirm">Confirm</button>
+                <button type="button" class="btn-cancel" onclick="AD.closeModals()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Expertise Tag Pop up -->
+<div class="modal-overlay" id="delTagModal">
+    <div class="cd-delete-card">
+        <div class="cd-delete-icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3 class="cd-delete-title">Are you sure?</h3>
+        <p class="cd-delete-text">
+            Do you really want to delete this <strong>EXPERTISE TAG</strong>?<br />
+            This process cannot be undone
+        </p>
+        <div class="cd-delete-actions">
+            <button type="button" class="btn-cd-delete-confirm" onclick="AD.confirmDelTag()">Delete</button>
+            <button type="button" class="btn-cd-delete-cancel" onclick="AD.closeModals()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=1.0"></script>

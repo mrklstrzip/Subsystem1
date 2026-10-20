@@ -1,0 +1,192 @@
+﻿@{
+    Layout = null;
+    ViewBag.Title = "Request Account";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Quezon City University</title>
+    <link href="@Url.Content("~/Content/css/auth.css")?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600&display=swap" rel="stylesheet">
+</head>
+<body class="login-body request-theme">
+
+    <header class="login-header">
+
+        <div class="logo-bg">
+            <img src="@Url.Content("~/Content/images/qcu.jpeg")" alt="QCU Logo" class="header-logo" />
+            <img src="@Url.Content("~/Content/images/ccs-logo.png")" alt="CCS Logo" class="header-logo" />
+        </div>
+
+        <div class="header-text">
+            <h1>Quezon City University</h1>
+            <span>College of Computer Studies</span>
+        </div>
+
+        <div class="header-stripes">
+            <span class="stripe stripe-1"></span>
+            <span class="stripe stripe-2"></span>
+            <span class="stripe stripe-3"></span>
+        </div>
+
+    </header>
+
+
+    <main class="main-container">
+
+        <svg class="bg-wave" viewBox="0 0 1440 900" preserveAspectRatio="none">
+            <path d="M-100,0 C350,250 350,650 750,450 C1150,250 1200,850 1600,1000 L1600,0 Z" />
+        </svg>
+
+
+        <div class="watermark-container">
+            <div class="watermark-rings">
+                <img src="@Url.Content("~/Content/images/ccs-logo.png")" alt="CCS Watermark" class="ccs-watermark" />
+            </div>
+        </div>
+
+
+        <div class="login-card">
+
+            <img src="@Url.Content("~/Content/images/qcu.jpeg")" alt="QCU Logo" class="card-logo" />
+
+            <h2 class="card-title">Request Account</h2>
+
+
+            <form action="" method="post" class="login-form">
+
+                <div class="name-row">
+
+                    <fieldset class="input-fieldset">
+                        <legend>Last Name</legend>
+
+                        <div class="input-field-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" name="LastName" placeholder="" required />
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="input-fieldset">
+                        <legend>First Name</legend>
+                        <div class="input-field-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" name="FirstName" placeholder="" required />
+                        </div>
+                    </fieldset>
+
+
+                    <fieldset class="input-fieldset">
+                        <legend>Middle Name</legend>
+
+                        <div class="input-field-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" name="MiddleName" placeholder="" />
+                        </div>
+                    </fieldset>
+
+
+                    <fieldset class="input-fieldset suffix-fieldset">
+                        <legend>Suffix</legend>
+
+                        <div class="input-field-wrapper">
+                            <i class="fas fa-id-badge input-icon"></i>
+                            <select name="Suffix">
+                                <option value="" selected disabled>-</option>
+                                <option value="Jr.">Jr.</option>
+                                <option value="Sr.">Sr.</option>
+                                <option value="II">II</option>
+                                <option value="III">III</option>
+                                <option value="IV">IV</option>
+                                <option value="V">V</option>
+                            </select>
+                        </div>
+                    </fieldset>
+
+                </div>
+
+
+                <fieldset class="input-fieldset">
+                    <legend>Email</legend>
+
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" name="Email" placeholder="" required />
+                    </div>
+                </fieldset>
+
+
+                <fieldset class="input-fieldset">
+                    <legend>ID Number</legend>
+
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-id-card input-icon"></i>
+                        <input type="text" name="IDNumber" placeholder="" required />
+                    </div>
+                </fieldset>
+
+
+                <fieldset class="input-fieldset">
+                    <legend>Program</legend>
+
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-graduation-cap input-icon"></i>
+                        <select name="Program" required>
+                            <option value="" selected disabled>Select Program</option>
+                            <option value="BSIT">Bachelor of Science in Information Technology</option>
+                            <option value="BSCS">Bachelor of Science in Computer Science</option>
+                            <option value="BSIS">Bachelor of Science in Information Systems</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+
+                <fieldset class="input-fieldset">
+                    <legend>Section</legend>
+
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-users input-icon"></i>
+                        <input type="text" name="Section" placeholder="" required />
+                    </div>
+                </fieldset>
+
+
+                <fieldset class="input-fieldset">
+                    <legend>Adviser</legend>
+
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-user-tie input-icon"></i>
+                        <select name="Adviser" required>
+                            <option value="" selected disabled>Select Adviser</option>
+                            <option value="Adviser 1">Adviser 1</option>
+                            <option value="Adviser 2">Adviser 2</option>
+                            <option value="Adviser 3">Adviser 3</option>
+                            <option value="Adviser 4">Adviser 4</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+
+                <button type="submit" class="btn-login">
+                    Submit
+                </button>
+
+                <p>
+                    Already have an Account?
+                    <a href="@Url.Action("login", "Login", new { area = "Auth" })">Login</a>
+                </p>
+
+            </form>
+
+        </div>
+
+    </main>
+
+
+    <script src="~/Scripts/dummy-users.js"></script>
+    <script src="~/Scripts/admin-shortcut.js"></script>
+    <script src="~/Scripts/login-check.js"></script>
+</body>
+</html>

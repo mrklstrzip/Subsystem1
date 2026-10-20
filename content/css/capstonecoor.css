@@ -1,0 +1,360 @@
+:root {
+    --navy: #263a56;
+    --header-bg: #cdd5e5;
+    --page-bg: #dfe4f0;
+    --blue: #2b5b8a;
+    --title: #2b5483;
+    --nav-active: #bfcade;
+    --label: #7a8394;
+    --badge: #8ea3bd;
+    --ink: #111827;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
+}
+
+.cc-body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--page-bg);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ---------- Header ---------- */
+.cc-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 92px;
+    background: var(--header-bg);
+    overflow: hidden;
+}
+
+.cc-header-logos {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 280px;
+    height: 100%;
+    padding-left: 38px;
+    background: var(--navy);
+    clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
+}
+
+    .cc-header-logos img {
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+    }
+
+.cc-header-title {
+    margin-left: 24px;
+    font-family: 'Libre Baskerville', Georgia, serif;
+}
+
+.cc-univ {
+    font-size: 28px;
+    line-height: 1.2;
+}
+
+.cc-college {
+    font-size: 17px;
+    letter-spacing: .02em;
+}
+
+.cc-header-stripes {
+    position: absolute;
+    right: 24px;
+    top: 0;
+    bottom: 0;
+    width: 120px;
+    background: linear-gradient(115deg, transparent 0 20%, #8a8fb0 20% 40%, #b04a62 40% 60%, #6b3f93 60% 80%, transparent 80%);
+    opacity: .9;
+}
+
+/* ---------- Shell ---------- */
+.cc-shell {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.cc-sidebar {
+    width: 276px;
+    flex-shrink: 0;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 14px;
+}
+
+.cc-profile-card {
+    background: var(--blue);
+    border-radius: 10px;
+    padding: 16px 16px 12px;
+    text-align: center;
+    color: #fff;
+}
+
+    .cc-profile-card img {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        background: #fff;
+        border-radius: 8px;
+        border: 2px solid #111;
+    }
+
+.cc-profile-name {
+    margin-top: 8px;
+    font-weight: 700;
+    font-size: 17px;
+}
+
+.cc-profile-role {
+    font-size: 10px;
+    opacity: .9;
+}
+
+.cc-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 16px;
+}
+
+    .cc-nav a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 6px;
+        color: var(--title);
+        text-decoration: none;
+        font-size: 16px;
+    }
+
+        .cc-nav a:hover {
+            background: #eef1f8;
+        }
+
+        .cc-nav a.active {
+            background: var(--nav-active);
+        }
+
+        .cc-nav a:focus-visible, .cc-logout-btn:focus-visible {
+            outline: 2px solid var(--blue);
+            outline-offset: 2px;
+        }
+        .cc-logout-btn {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border: 0; border-radius: 6px;
+    background: transparent;
+    color: var(--title);
+    font: inherit;
+    cursor: pointer;
+}
+.cc-logout-btn:hover { background: #eef1f8; }
+
+.cc-logout {
+    margin-top: auto;
+    border-top: 1px solid var(--navy);
+    padding-top: 18px;
+}
+
+    .cc-logout a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--title);
+        text-decoration: none;
+        padding: 8px 12px;
+    }
+
+/* ---------- Main ---------- */
+.cc-main {
+    flex: 1;
+    padding: 26px 52px 40px;
+    min-width: 0;
+}
+
+.cc-page-title {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-weight: 400;
+    font-size: 36px;
+    color: var(--title);
+    margin: 0 0 34px;
+}
+
+.cc-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .18);
+}
+
+.cc-label {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    color: var(--label);
+}
+
+/* Stat cards: 3 columns, 2 rows */
+.cc-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 36px;
+}
+
+.cc-stat {
+    padding: 16px 16px 12px;
+    min-height: 104px;
+}
+
+.cc-value {
+    margin-top: 6px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* Panels: 2 columns */
+.cc-panels {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 16px 30px;
+    margin-top: 28px;
+}
+
+.cc-panel {
+    padding: 16px;
+    min-height: 158px;
+}
+
+/* Tables */
+.cc-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+    .cc-table th {
+        text-align: left;
+        padding: 4px 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--label);
+    }
+
+    .cc-table td {
+        padding: 8px 6px;
+        font-weight: 600;
+    }
+
+.cc-strong {
+    font-weight: 700;
+}
+
+.cc-empty {
+    color: var(--label);
+    font-weight: 400 !important;
+    font-size: 13px;
+}
+
+/* Conflict list */
+.cc-conflicts {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+}
+
+    .cc-conflicts li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0;
+        font-size: 13px;
+        font-weight: 600;
+        border-bottom: 3px solid #9aa7bd;
+    }
+
+        .cc-conflicts li + li {
+            margin-top: 3px;
+        }
+
+        .cc-conflicts li.cc-empty {
+            border: 0;
+        }
+
+/* Status badges */
+.cc-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--badge);
+    border: 1px solid #5f7391;
+}
+
+.cc-badge-resolved {
+    background: #8ea3bd;
+    color: #1f2d44;
+}
+
+.cc-badge-in-progress {
+    background: #3f5877;
+}
+
+.cc-badge-outline {
+    background: #d7dde8;
+    color: #4a5568;
+    border-color: #7c8aa0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+    .cc-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cc-panels {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .cc-shell {
+        flex-direction: column;
+    }
+
+    .cc-sidebar {
+        width: 100%;
+    }
+
+    .cc-main {
+        padding: 20px;
+    }
+
+    .cc-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .cc-header-title .cc-univ {
+        font-size: 20px;
+    }
+}

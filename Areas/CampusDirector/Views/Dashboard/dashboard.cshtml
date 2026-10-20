@@ -1,4 +1,50 @@
 ﻿@{
     ViewBag.Title = "Dashboard";
+    ViewBag.ActiveMenu = "Dashboard";
 }
-<h1>Dashboard</h1>
+
+<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.1" rel="stylesheet" type="text/css" />
+
+<style>
+    .page-title {
+        font-weight: 550;
+        color: #2E5C8A;
+        margin-bottom: 24px;
+        font-family: 'Newsreader', serif;
+        font-size: 2rem;
+    }
+</style>
+
+<h2 class="page-title">Dashboard</h2>
+<div class="card-row">
+    <div class="stat-card">
+        <div class="label">Total Rooms</div>
+        <div class="value" id="dash-total-rooms">28</div>
+        <div class="desc">Across all buildings</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Active Rooms</div>
+        <div class="value" id="dash-active-rooms">10</div>
+        <div class="desc">Currently available for use</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Disabled Rooms</div>
+        <div class="value" id="dash-disabled-rooms">2</div>
+        <div class="desc">Under maintenance or closed</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Scheduled Events</div>
+        <div class="value" id="dash-events">2</div>
+        <div class="desc">Upcoming this week</div>
+    </div>
+</div>
+
+<div class="table-card">
+    <h4 style="margin-bottom: 12px; color:#1e293b;">Recent Activity</h4>
+    <table>
+        <thead>
+            <tr><th>Timestamp</th><th>Schedule Activity</th></tr>
+        </thead>
+        <tbody id="dash-activity"></tbody>
+    </table>
+</div>

@@ -1,4 +1,33 @@
 ﻿/* WAG PONG GALAWIN */
+.admin-theme {
+    --primary: #2C3F56;
+    --background: #2C3F56;
+    --sidebar: linear-gradient(178deg,rgba(44, 63, 86, 1) 31%, rgba(83, 103, 127, 1) 100%);
+}
+
+.user-theme {
+    --primary: #1B293B;
+    --background: #1B293B;
+    --sidebar: linear-gradient(178deg,rgba(27, 41, 59, 1) 31%, rgba(70, 91, 115, 1) 100%);
+}
+
+.student-theme[data-program="BS Computer Science"] {
+    --primary: #4A091D;
+    --background: #4A091D;
+    --sidebar: linear-gradient( 178deg, rgba(74, 7, 27, 1) 31%, rgba(109, 23, 48, 1) 100% );
+}
+
+.student-theme[data-program="BS Information System"] {
+    --primary: #2C124D;
+    --background: #2C124D;
+    --sidebar: linear-gradient( 178deg, rgba(44, 18, 77, 1) 31%, rgba(89, 59, 125, 1) 100% );
+}
+
+.student-theme[data-program="BS Information Technology"] {
+    --primary: #3F3F44;
+    --background: #3F3F44;
+    --sidebar: linear-gradient( 178deg, rgba(63, 63, 68, 1) 31%, rgba(153, 153, 153, 1) 100% );
+}
 
 
 * {
@@ -8,78 +37,159 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: #E1E5F0;
 }
 
 .layout-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
     display: flex;
     align-items: center;
-    background-color: #fafafa;
-    padding: 12px 25px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    background-color: var(--primary);
+    height: 64px;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Newsreader', serif;
+    z-index: 200;
+}
+
+.logo-bg {
+    background-color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    padding: 0 24px 0 20px;
+    height: 100%;
+    width: 290px;
+    clip-path: polygon(0 0, 100% 0, 75% 100%, 0 100%);
+    padding-right: 45px;
+    z-index: 2;
 }
 
 .layout-header-logo {
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    margin-right: 12px;
+    margin-right: 10px;
+    object-fit: cover;
 }
 
-.layout-header-text h1 {
-    font-size: 20px;
-    color: #333;
-    font-weight: 600;
+    .layout-header-logo:last-child {
+        margin-right: 0;
+    }
+
+.layout-header-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 15px;
+    z-index: 2;
+    color: #FFFFFF;
 }
 
-.layout-header-text span {
-    font-size: 15px;
-    color: #888;
-    margin-left: 95px;
+    .layout-header-text h1 {
+        font-family: 'Newsreader', serif;
+        font-size: 22px;
+        font-weight: 500;
+        margin: 0;
+        line-height: 1.1;
+    }
+
+    .layout-header-text span {
+        font-family: 'Newsreader', serif;
+        font-size: 14px;
+        margin: 2px 0 0 0;
+        font-weight: 400;
+    }
+
+.header-stripes {
+    position: absolute;
+    right: 10px;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    gap: 0;
+    z-index: 1;
+}
+
+.stripe {
+    width: 14px;
+    height: 100%;
+    transform: skewX(-38deg);
+}
+
+.stripe-1 {
+    background-color: #8587A0;
+}
+
+.stripe-2 {
+    background-color: #AC5065;
+}
+
+.stripe-3 {
+    background-color: #724389;
 }
 
 .layout-wrapper {
     display: flex;
-    min-height: calc(100vh - 66px);
+    min-height: calc(100vh - 64px);
+    margin-top: 64px;
+    position: relative;
 }
 
 .layout-sidebar {
     width: 220px;
-    background-color: #ffffff;
+    background: var(--background);
+    background: var(--sidebar);
     display: flex;
     flex-direction: column;
+    padding: 12px;
     box-shadow: 1px 0 4px rgba(0,0,0,0.05);
+    position: fixed;
+    top: 64px;
+    left: 0;
+    height: calc(100vh - 64px);
+    box-sizing: border-box;
+    z-index: 100;
 }
 
 .layout-profile {
     color: #fff;
     text-align: left;
-    padding: 20px 20px;
+    padding: 16px;
+    border-radius: 16px;
+}
+
+.avatar-container {
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 12px;
 }
 
 .layout-avatar {
     width: 100%;
-    max-width: 150px;
     height: 150px;
     object-fit: cover;
-    border-radius: 6px;
-    margin-bottom: 18px;
+    border-radius: 12px;
     display: block;
 }
 
 .layout-profile h3 {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin: 0 0 2px 0;
 }
 
 .layout-profile span {
-    font-size: 13px;
+    font-size: 12px;
     color: #e0d5e6;
+    display: block;
 }
 
-/*for student only*/
+/* For student only */
 .layout-course {
     display: block;
     font-size: 10px;
@@ -105,9 +215,12 @@ body {
     color: #f0d9df;
 }
 
+/* Navigation */
 .layout-nav {
     flex: 1;
-    padding: 15px 12px;
+    padding: 15px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
     .layout-nav a {
@@ -117,7 +230,7 @@ body {
         padding: 12px 15px;
         margin-bottom: 6px;
         border-radius: 10px;
-        color: #555;
+        color: #FFFFFF;
         text-decoration: none;
         font-size: 14px;
         font-weight: 500;
@@ -143,6 +256,8 @@ body {
     text-decoration: none;
     font-size: 14px;
     border-top: 1px solid #eee;
+    margin-top: auto; /* Forces it to stick to the bottom */
+    flex-shrink: 0; /* Prevents it from shrinking */
 }
 
     .logout:hover {
@@ -151,120 +266,205 @@ body {
 
 .layout-content {
     flex: 1;
-    padding: 30px;
+    min-width: 0;
+    margin-left: 220px;
+    padding: 45px 50px;
 }
 
 
-
-
-/* Admin */
-.role-admin .layout-profile {
-    background-color: #724389;
+.layout-nav a:hover,
+.layout-nav a.active {
+    background-color: #FFFFFF;
+    color: var(--primary);
 }
 
-.role-admin .layout-nav a i {
-    color: #724389;
-}
-
-.role-admin .layout-nav a:hover,
-.role-admin .layout-nav a.active {
-    background-color: #D5C7DC;
-    color: #724389;
-}
-
-    .role-admin .layout-nav a.active i,
-    .role-admin .layout-nav a:hover i {
-        color: #724389;
+    .layout-nav a.active i,
+    .layout-nav a:hover i {
+        color: var(--primary);
     }
 
-/* CampusDirector */
-.role-campusdirector .layout-profile {
-    background-color: #2E5C8A;
+
+/* ==========================================================================
+   Collapsible sidebar ("rail"): thin by default, wide on hover or when pinned open
+   with the hamburger. Works for any role: add the class "sidebar-rail" to the
+   .layout-wrapper of a layout to use it. Layouts without that class keep the
+   original sidebar above.
+   ========================================================================== */
+
+.layout-wrapper.sidebar-rail {
+    --sb-thin: 68px;
+    --sb-wide: 240px;
 }
 
-    .role-campusdirector .layout-profile span {
-        color: #cfe0f0;
+    /* ---------- the bar itself ---------- */
+    .layout-wrapper.sidebar-rail .layout-sidebar {
+        width: var(--sb-thin);
+        padding: 12px 10px;
+        overflow: hidden;
+        transition: width 0.22s ease, box-shadow 0.22s ease;
     }
 
-.role-campusdirector .layout-nav a i {
-    color: #2E5C8A;
-}
-
-.role-campusdirector .layout-nav a:hover,
-.role-campusdirector .layout-nav a.active {
-    background-color: #C1CFDC;
-    color: #2E5C8A;
-}
-
-    .role-campusdirector .layout-nav a.active i,
-    .role-campusdirector .layout-nav a:hover i {
-        color: #2E5C8A;
+    /* wide: hovered (unless we just collapsed it with the hamburger) or pinned open */
+    .layout-wrapper.sidebar-rail:not(.sidebar-force-thin) .layout-sidebar:hover,
+    .layout-wrapper.sidebar-rail.sidebar-open .layout-sidebar {
+        width: var(--sb-wide);
     }
 
-/* CapstoneCoordinator */
-.role-capstonecoordinator .layout-profile {
-    background-color: #2E5C8A;
-}
-
-    .role-capstonecoordinator .layout-profile span {
-        color: #cfe0f0;
+    /* hover-only (not pinned) floats over the page */
+    .layout-wrapper.sidebar-rail:not(.sidebar-open):not(.sidebar-force-thin) .layout-sidebar:hover {
+        box-shadow: 6px 0 18px rgba(0, 0, 0, 0.25);
     }
 
-.role-capstonecoordinator .layout-nav a i {
-    color: #2E5C8A;
-}
-
-.role-capstonecoordinator .layout-nav a:hover,
-.role-capstonecoordinator .layout-nav a.active {
-    background-color: #C1CFDC;
-    color: #2E5C8A;
-}
-
-    .role-capstonecoordinator .layout-nav a.active i,
-    .role-capstonecoordinator .layout-nav a:hover i {
-        color: #2E5C8A;
+    /* page content: leaves room for the thin bar, and for the wide bar only when pinned open */
+    .layout-wrapper.sidebar-rail .layout-content {
+        margin-left: var(--sb-thin);
+        transition: margin-left 0.22s ease;
     }
 
-/* Professor */
-.role-professor .layout-profile {
-    background-color: #AC5065;
-}
-
-    .role-professor .layout-profile span {
-        color: #cfe0f0;
+    .layout-wrapper.sidebar-rail.sidebar-open .layout-content {
+        margin-left: var(--sb-wide);
     }
 
-.role-professor .layout-nav a i {
-    color: #AC5065;
-}
-
-.role-professor .layout-nav a:hover,
-.role-professor .layout-nav a.active {
-    background-color: #E7CBD1;
-    color: #AC5065;
-}
-
-    .role-professor .layout-nav a.active i,
-    .role-professor .layout-nav a:hover i {
-        color: #AC5065;
+    /* no animation while the saved state is applied on page load */
+    .layout-wrapper.sidebar-rail.no-anim,
+    .layout-wrapper.sidebar-rail.no-anim * {
+        transition: none !important;
     }
 
-/* Student */
-.role-student .layout-profile {
-    background-color: #AC5065;
-}
-
-.role-student .layout-nav a i {
-    color: #AC5065;
-}
-
-.role-student .layout-nav a:hover,
-.role-student .layout-nav a.active {
-    background-color: #E7CBD1;
-    color: #AC5065;
-}
-
-    .role-student .layout-nav a.active i,
-    .role-student .layout-nav a:hover i {
-        color: #AC5065;
+    /* ---------- labels: hidden when thin, shown when wide ---------- */
+    .layout-wrapper.sidebar-rail .sb-menu-label,
+    .layout-wrapper.sidebar-rail .nav-label,
+    .layout-wrapper.sidebar-rail .sb-user-text,
+    .layout-wrapper.sidebar-rail .sb-logout {
+        max-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        transition: max-width 0.22s ease, opacity 0.15s ease;
     }
+
+    .layout-wrapper.sidebar-rail:not(.sidebar-force-thin) .layout-sidebar:hover .sb-menu-label,
+    .layout-wrapper.sidebar-rail:not(.sidebar-force-thin) .layout-sidebar:hover .nav-label,
+    .layout-wrapper.sidebar-rail:not(.sidebar-force-thin) .layout-sidebar:hover .sb-user-text,
+    .layout-wrapper.sidebar-rail:not(.sidebar-force-thin) .layout-sidebar:hover .sb-logout,
+    .layout-wrapper.sidebar-rail.sidebar-open .sb-menu-label,
+    .layout-wrapper.sidebar-rail.sidebar-open .nav-label,
+    .layout-wrapper.sidebar-rail.sidebar-open .sb-user-text,
+    .layout-wrapper.sidebar-rail.sidebar-open .sb-logout {
+        max-width: 170px;
+        opacity: 1;
+        transition-delay: 0s, 0.08s;
+    }
+
+    /* ---------- top: MAIN MENU + hamburger ---------- */
+    .layout-wrapper.sidebar-rail .sb-top {
+        display: flex;
+        align-items: center;
+        height: 44px;
+        margin-bottom: 6px;
+        flex-shrink: 0;
+    }
+
+    .layout-wrapper.sidebar-rail .sb-menu-label {
+        flex: 1 1 auto;
+        padding-left: 5px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    .layout-wrapper.sidebar-rail .sb-toggle {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        margin: 0 auto;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: #FFFFFF;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.15s ease;
+    }
+
+        .layout-wrapper.sidebar-rail .sb-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+    /* ---------- navigation ---------- */
+    .layout-wrapper.sidebar-rail .layout-nav {
+        padding: 8px 0;
+    }
+
+        .layout-wrapper.sidebar-rail .layout-nav a {
+            gap: 12px;
+            padding: 12px 15px;
+            white-space: nowrap;
+        }
+
+            .layout-wrapper.sidebar-rail .layout-nav a i {
+                flex-shrink: 0;
+            }
+
+    /* ---------- bottom: user + logout ---------- */
+    .layout-wrapper.sidebar-rail .sb-footer {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: auto;
+        padding: 12px 0 4px 7px;
+        flex-shrink: 0;
+    }
+
+    .layout-wrapper.sidebar-rail .sb-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1 1 auto;
+        min-width: 0;
+        text-decoration: none;
+        color: #FFFFFF;
+    }
+
+    .layout-wrapper.sidebar-rail .sb-avatar {
+        flex-shrink: 0;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .layout-wrapper.sidebar-rail .sb-user-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .layout-wrapper.sidebar-rail .sb-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #FFFFFF;
+    }
+
+    .layout-wrapper.sidebar-rail .sb-role {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .layout-wrapper.sidebar-rail .sb-logout {
+        flex-shrink: 0;
+        padding: 8px 10px;
+        color: #FFFFFF;
+        font-size: 16px;
+        text-decoration: none;
+        border-radius: 8px;
+    }
+
+        .layout-wrapper.sidebar-rail .sb-logout:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+        }

@@ -1,0 +1,79 @@
+﻿@{
+    Layout = null;
+    string currentController = ViewContext.RouteData.Values["controller"].ToString();
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - @ViewBag.Title</title>
+    <link href="@Url.Content("~/Content/css/layout.css")?v=1.1" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+</head>
+<body class="user-theme">
+    <header class="layout-header">
+        <div class="logo-bg">
+            <img src="~/Content/images/qcu.jpeg" alt="QCU Logo" class="layout-header-logo" />
+            <img src="~/Content/images/ccs-logo.png" alt="CCS Logo" class="layout-header-logo" />
+        </div>
+
+        <div class="layout-header-text">
+            <h1>Quezon City University</h1>
+            <span>College of Computer Studies</span>
+        </div>
+
+        <div class="header-stripes">
+            <span class="stripe stripe-1"></span>
+            <span class="stripe stripe-2"></span>
+            <span class="stripe stripe-3"></span>
+        </div>
+    </header>
+
+    <div class="layout-wrapper sidebar-rail" id="layoutWrapper">
+        <aside class="layout-sidebar" id="sidebar">
+
+            <div class="sb-top">
+                <span class="sb-menu-label">MAIN MENU</span>
+                <button type="button" id="sidebarToggle" class="sb-toggle" aria-label="Toggle sidebar" aria-expanded="false">
+                    <i class="fa fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="layout-nav">
+                <a href="@Url.Action("dashboard", "Dashboard")" class="@(currentController == "Dashboard" ? "active" : "")" title="Dashboard">
+                    <i class="fa fa-th-large"></i><span class="nav-label">Dashboard</span>
+                </a>
+                <a href="#" title="Schedule Approval">
+                    <i class="fa fa-file-lines"></i></i><span class="nav-label">Schedule Approval</span>
+                </a>
+                <a href="#" title="Defense Schedule">
+                    <i class="fa fa-calendar"></i></i><span class="nav-label">Defense Schedule</span>
+                </a>
+            </nav>
+
+            <div class="sb-footer">
+                <a href="@Url.Action("profile", "Profile")" class="sb-user" title="Profile">
+                    <img id="profilePhoto" src="" alt="Profile" class="sb-avatar" />
+                    <span class="sb-user-text">
+                        <span id="profileName" class="sb-name"></span>
+                        <span id="profileRole" class="sb-role"></span>
+                    </span>
+                </a>
+                <a href="#" id="logoutBtn" class="sb-logout" title="Logout"><i class="fa fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <main class="layout-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/Scripts/sidebar.js"></script>
+    <script src="~/Scripts/layout-profile.js"></script>
+</body>
+</html>
