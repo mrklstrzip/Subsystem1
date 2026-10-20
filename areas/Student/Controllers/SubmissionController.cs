@@ -1,59 +1,80 @@
-﻿using Subsystem1.Areas.Student.ViewModels;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
+using System.Linq;
 using System.Web.Mvc;
+using Subsystem1.Areas.Student.Models;
+using Subsystem1.Areas.Student.ViewModels;
 
 namespace Subsystem1.Areas.Student.Controllers
 {
     public class SubmissionController : Controller
     {
+        private readonly SubmissionStore _store = SubmissionStore.Instance;
+
         // GET: Student/Submission/submission
-        public ActionResult submission()
+        // Preview the three design states with ?demo=empty | inprogress | complete
+        public ActionResult submission(string demo)
         {
+            if (demo != null) _store.LoadDemo(demo);
             var model = new StudentSubmissionViewModel();
-            Populate(model);
+            BuildPage(model);
             return View(model);
         }
 
+        // "Add Capstone Title" pop-up
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AddManuscript(StudentSubmissionViewModel model)
+        public ActionResult AddTitle(StudentTitleInput input)
         {
-            if (model.ManuscriptFile != null && model.ManuscriptFile.ContentLength > 0)
+            if (!ModelState.IsValid)
             {
-                var ext = Path.GetExtension(model.ManuscriptFile.FileName).ToLowerInvariant();
-                if (ext != ".pdf" && ext != ".doc" && ext != ".docx")
-                    ModelState.AddModelError("ManuscriptFile", "Only PDF or Word files are allowed.");
-            }
-
-            if (ModelState.IsValid)
-            {
-                var folder = Server.MapPath("~/App_Data/Manuscripts");
-                Directory.CreateDirectory(folder);
-                var savedName = Guid.NewGuid() + Path.GetExtension(model.ManuscriptFile.FileName);
-                model.ManuscriptFile.SaveAs(Path.Combine(folder, savedName));
-
-                // TODO: Save title, authors, professor, program, date submitted, savedName, etc. to database
-
-                TempData["SuccessMessage"] = "Manuscript submitted successfully.";
+                TempData["SubmissionError"] = "Please fill in all required fields.";
                 return RedirectToAction("submission");
             }
-
-            Populate(model);
-            return View("submission", model);
+            _store.Add(input);
+            TempData["SuccessMessage"] = "Capstone title submitted.";
+            return RedirectToAction("submission");
         }
 
-        private void Populate(StudentSubmissionViewModel model)
+        // "View Capstone Title" pop-up (loaded with fetch)
+        public ActionResult Details(int id)
         {
-            model.DateSubmitted = DateTime.Today;
+            var item = _store.Titles.FirstOrDefault(t => t.Id == id);
+            if (item == null) return HttpNotFound();
+            return PartialView("_TitleDetails", item);
+        }
 
-            model.Submissions = new List<ManuscriptItemDto>
+        // DEMO: click a circle. The next pending one moves forward, a completed one goes back.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult StepClick(int index)
+        {
+            var steps = _store.BuildSteps();
+            if (index >= 0 && index < steps.Count)
             {
-                new ManuscriptItemDto { Id = 1, Title = "SmartQueue: An RFID-Based Queuing and Notification System for University Clinics", DateAndSubmissionTime = new DateTime(2026, 9, 10, 14, 30, 0), Status = "Submitted" },
-                new ManuscriptItemDto { Id = 2, Title = "Lorem ipsum: lorem ipsum dolor sit amet consectetur adipiscing elit aute voluptas et", DateAndSubmissionTime = new DateTime(2026, 9, 11, 16, 0, 0), Status = "Processing" },
-                new ManuscriptItemDto { Id = 3, Title = "Lorem ipsum: lorem ipsum dolor sit amet consectetur adipiscing elit aute voluptas et", DateAndSubmissionTime = new DateTime(2026, 9, 12, 13, 10, 0), Status = "Completed" }
-            };
+                if (steps[index].Done) _store.RevertTo(index);
+                else if (index == steps.FindIndex(x => !x.Done)) _store.AdvanceNext();
+            }
+            return RedirectToAction("submission");
+        }
+
+        // "Is your defense completed?" -> Yes
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CompleteDefense()
+        {
+            _store.SetDefenseComplete();
+            return RedirectToAction("submission");
+        }
+
+        private void BuildPage(StudentSubmissionViewModel model)
+        {
+
+            model.Steps = _store.BuildSteps();
+            model.Submissions = _store.Titles.ToList();
+            model.Log = _store.Log.OrderByDescending(l => l.Timestamp).ToList();
+            model.Programs = SubmissionStore.Programs.ToList();
+            model.Advisors = SubmissionStore.Advisors.ToList();
         }
     }
 }
