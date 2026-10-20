@@ -1,4 +1,16 @@
 ﻿/*para sa admin to*/
+:root {
+    --total: #2C2C2C;
+    --projectmanager: #8B9200;
+    --panelist: #724389;
+    --adviser: #D065D6;
+    --campusdirector: #2E5C8A;
+    --capstonecoordinator: #ED640F;
+    --dean: #5C4033;
+    --create: #008000;
+    --edit: #436cf2;
+    --delete: #A32224;
+}
 
 .page-title {
     padding-bottom: 30px;
@@ -6,39 +18,69 @@
     font-family: 'Newsreader', serif;
 }
 
+
+
 .admin-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     column-gap: 30px;
     row-gap: 15px;
     margin-bottom: 50px;
+    color: #FFFFFF
 }
 
 .card {
     background-color: #ffffff;
     border-radius: 10px;
-    border: solid 1px;
-    border-color: #DFDBDB;
     padding: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    height: 120px;
+    box-shadow: 0 5px 15px #9092AD;
+    height: 150px;
 }
 
+
+.card-total {
+    background-color: var(--total)
+}
+
+.card-projectmanager {
+    background-color: var(--projectmanager)
+}
+
+.card-adviser {
+    background-color: var(--adviser)
+}
+
+.card-panelist {
+    background-color: var(--panelist)
+}
+
+.card-campusdirector {
+    background-color: var(--campusdirector)
+}
+
+.card-capstonecoordinator {
+    background-color: var(--capstonecoordinator)
+}
+
+.card-dean {
+    background-color: var(--dean)
+}
+
+
 .card-title {
-    color: #9092AD;
     padding: 10px;
 }
 
 .number {
-    font-size: 30px;
+    font-size: 45px;
     font-weight: 600;
     padding: 0 10px;
 }
 
 .card-description {
-    color: #9092AD;
     font-size: 12px;
     padding: 10px;
+    letter-spacing: .75px;
 }
 
 

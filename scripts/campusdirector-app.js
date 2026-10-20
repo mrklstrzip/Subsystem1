@@ -9,15 +9,15 @@
 (function () {
     'use strict';
 
-    var KEY = 'cdDemoData_v6';   // bumped: completed / cancelled schedules
+    var KEY = 'cdDemoData_v7';   // bumped: three buildings / 18 rooms
     var HOUR_FIRST = 7;    // first column on the room schedule grid (7:00 AM)
     var HOUR_END = 21;     // grid ends at 9:00 PM (last column is 8:00 – 9:00 PM)
 
     // Room schedule colors: Open = white, Reserved = dark blue, Occupied = light blue,
     // Completed = green, Cancelled = red, Unavailable = gray
-    var STATUS_COLORS = { open: '#ffffff', reserved: '#2E5C8A', occupied: '#bfdbfe', completed: '#3aa76d', cancelled: '#d9534f', unavailable: '#7b8798' };
-    var STATUS_TEXT = { open: '#1e293b', reserved: '#ffffff', occupied: '#1e3a5f', completed: '#ffffff', cancelled: '#ffffff', unavailable: '#ffffff' };
-    var STATUS_LABELS = { open: 'Open', reserved: 'Reserved', occupied: 'Occupied', completed: 'Completed', cancelled: 'Cancelled', unavailable: 'Unavailable' };
+    var STATUS_COLORS = { open: '#ffffff', reserved: '#1F4E7F', occupied: '#2E6FAD', completed: '#3aa74d', cancelled: '#b3262b', unavailable: '#777777' };
+    var STATUS_TEXT = { open: '#1e293b', reserved: '#ffffff', occupied: '#ffffff', completed: '#ffffff', cancelled: '#ffffff', unavailable: '#ffffff' };
+    var STATUS_LABELS = { open: 'Open', reserved: 'Reserved', occupied: 'Occupied', completed: 'Completed', cancelled: 'Canceled', unavailable: 'Unavailable' };
     var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -95,7 +95,9 @@
         return {
             nextId: 100,
             buildings: [
-                { id: 'b3', name: 'Bautista Bldg.', code: 'IK', status: 'Active' }
+                { id: 'b1', name: 'New Academic Building', code: 'IL', status: 'Active' },
+                { id: 'b2', name: 'KORPHIL Building', code: 'IE', status: 'Unavailable' },
+                { id: 'b3', name: 'Bautista Building', code: 'IK', status: 'Active' }
             ],
             rooms: [
                 { id: 'r1', buildingId: 'b3', name: 'IK506', status: 'Unavailable' },
@@ -104,7 +106,18 @@
                 { id: 'r4', buildingId: 'b3', name: 'IK502', status: 'Active' },
                 { id: 'r5', buildingId: 'b3', name: 'IK503', status: 'Active' },
                 { id: 'r6', buildingId: 'b3', name: 'IK504', status: 'Active' },
-                { id: 'r7', buildingId: 'b3', name: 'Auditorium', status: 'Active' }
+                { id: 'r7', buildingId: 'b3', name: 'Auditorium', status: 'Active' },
+                { id: 'r8', buildingId: 'b1', name: 'IL101', status: 'Active' },
+                { id: 'r9', buildingId: 'b1', name: 'IL102', status: 'Active' },
+                { id: 'r10', buildingId: 'b1', name: 'IL103', status: 'Active' },
+                { id: 'r11', buildingId: 'b1', name: 'IL104', status: 'Active' },
+                { id: 'r12', buildingId: 'b1', name: 'IL201', status: 'Active' },
+                { id: 'r13', buildingId: 'b1', name: 'IL202', status: 'Active' },
+                { id: 'r14', buildingId: 'b1', name: 'IL506', status: 'Unavailable' },
+                { id: 'r15', buildingId: 'b1', name: 'IL606', status: 'Active' },
+                { id: 'r16', buildingId: 'b2', name: 'IE101', status: 'Unavailable' },
+                { id: 'r17', buildingId: 'b2', name: 'IE102', status: 'Unavailable' },
+                { id: 'r18', buildingId: 'b2', name: 'IE103', status: 'Unavailable' }
             ],
             // start / end are minutes since midnight (540 = 9:00 AM)
             events: [
@@ -278,18 +291,51 @@
     function renderDashboard() {
         if (!$('dash-total-rooms')) return;
 
+        var total = state.rooms.length;
         var active = state.rooms.filter(function (r) { return r.status === 'Active'; }).length;
-        var today = todayISO();
-        var upcoming = state.events.filter(function (e) { return e.date >= today; }).length;
+        var disabled = total - active;
 
-        $('dash-total-rooms').textContent = state.rooms.length;
+        $('dash-total-rooms').textContent = total;
         $('dash-active-rooms').textContent = active;
-        $('dash-disabled-rooms').textContent = state.rooms.length - active;
-        $('dash-events').textContent = upcoming;
+        $('dash-disabled-rooms').textContent = disabled;
 
+        // Welcome banner: use the logged-in user's last name
+        try {
+            var user = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+            if (user && user.lastName && $('dash-welcome-name')) $('dash-welcome-name').textContent = user.lastName;
+        } catch (e) { /* keep default */ }
+
+        // Room per building (bars are relative to the biggest building)
+        var counts = state.buildings.map(function (b) { return { b: b, n: roomsOf(b.id).length }; });
+        var max = Math.max.apply(null, counts.map(function (c) { return c.n; }).concat([1]));
+        $('dash-buildings').innerHTML = counts.map(function (c) {
+            var pct = Math.round(c.n / (max * 1.25) * 100);
+            return '<div class="dsh-bar-row">' +
+                '<div class="dsh-bar-head"><span>' + esc(c.b.name) + ' | ' + esc(c.b.code) + '</span>' +
+                '<b>' + c.n + (c.n === 1 ? ' room' : ' rooms') + '</b></div>' +
+                '<div class="dsh-track"><div class="dsh-fill" style="width:' + pct + '%"></div></div></div>';
+        }).join('') || '<div class="dsh-empty">No buildings yet</div>';
+
+        // Room status donut (Active vs Disabled)
+        var R = 72, SW = 44, C = 2 * Math.PI * R;
+        var svg = '<g transform="rotate(-90 100 100)" fill="none" stroke-width="' + SW + '">';
+        if (!total) {
+            svg += '<circle cx="100" cy="100" r="' + R + '" stroke="#e2e8f0"><title>No rooms yet</title></circle>';
+        } else {
+            var aLen = C * active / total;
+            svg += '<circle cx="100" cy="100" r="' + R + '" stroke="#6b97d6"><title>Disabled Rooms: ' + disabled +
+                ' (' + Math.round(disabled / total * 100) + '%)</title></circle>';
+            if (active > 0) {
+                svg += '<circle cx="100" cy="100" r="' + R + '" stroke="#246a86" stroke-dasharray="' + aLen.toFixed(2) + ' ' + C.toFixed(2) +
+                    '"><title>Active Rooms: ' + active + ' (' + Math.round(active / total * 100) + '%)</title></circle>';
+            }
+        }
+        $('dash-donut').innerHTML = svg + '</g>';
+
+        // Recent activity
         $('dash-activity').innerHTML = state.activity.slice(0, 6).map(function (a) {
             return '<tr><td>' + esc(a.ts) + '</td><td>' + esc(a.text) + '</td></tr>';
-        }).join('') || '<tr><td colspan="2" style="text-align:center; color:#64748b;">No recent activity</td></tr>';
+        }).join('') || '<tr><td colspan="2" class="dsh-empty">No recent activity</td></tr>';
     }
 
     /* ------------------------------------------------------------------ *
@@ -358,11 +404,13 @@
 
         var date = currentDate();
         var sFilter = $('sc-status').value;
+        var bFilter = $('sc-building') ? $('sc-building').value : 'all';
         var totalCols = HOUR_END - HOUR_FIRST;
         var rows = [];
         rendered = {};
 
         state.rooms.forEach(function (r) {
+            if (bFilter !== 'all' && r.buildingId !== bFilter) return;
             var unavailable = r.status !== 'Active';
             var cells = [], present = {};
 
@@ -441,10 +489,17 @@
 
         // column headers: 7 AM ... 8 PM (the last column covers 8 - 9 PM), built from the grid range
         var head = '<th class="sched-room-col">Room</th>';
-        for (var h = HOUR_FIRST; h < HOUR_END; h++) head += '<th>' + ((h % 12) || 12) + ' ' + (h >= 12 ? 'PM' : 'AM') + '</th>';
+        for (var h = HOUR_FIRST; h < HOUR_END; h++) head += '<th>' + ((h % 12) || 12) + ':00</th>';
         $('sc-head').innerHTML = head;
 
         $('sc-date').value = todayISO();
+
+        var bSel = $('sc-building');
+        if (bSel) {
+            bSel.innerHTML = '<option value="all">All buildings</option>' +
+                optionsHtml(state.buildings, null, function (b) { return b.name; });
+            bSel.addEventListener('change', renderSchedule);
+        }
 
         $('sc-date').addEventListener('change', renderSchedule);
         $('sc-status').addEventListener('change', renderSchedule);
@@ -456,57 +511,119 @@
     }
 
     /* ------------------------------------------------------------------ *
-     *  Room Management
+     *  Room Management (rooms + buildings)
      * ------------------------------------------------------------------ */
-    var editRoomId = null, delRoomId = null;
+    var editRoomId = null, delRoomId = null, editBldId = null, delBldId = null;
+
+    function statusPill(status) {
+        var cls = status === 'Active' ? 'rmx-active' : (status === 'Under Maintenance' ? 'rmx-maint' : 'rmx-unavail');
+        return '<span class="rmx-pill ' + cls + '">' + esc(status) + '</span>';
+    }
+
+    function shortBldg(name) { return String(name || '').replace(/Building/i, 'Bldg.'); }
+
+    function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+
+    function setErr(id, msg) { var e = $(id); if (e) e.textContent = msg || ''; }
+
+    function actionIcons(kind, id) {
+        return '<button type="button" class="rmx-icon rmx-edit" title="Edit" onclick="CD.openEdit' + kind + '(\'' + id + '\')"><i class="fa-regular fa-pen-to-square"></i></button>' +
+            '<button type="button" class="rmx-icon rmx-trash" title="Delete" onclick="CD.openDel' + kind + '(\'' + id + '\')"><i class="fa-regular fa-trash-can"></i></button>';
+    }
+
+    function fillBuildingSelect(sel, selectedId, includeAll) {
+        if (!sel) return;
+        sel.innerHTML = (includeAll ? '<option value="all">All buildings</option>' : '') +
+            optionsHtml(state.buildings, selectedId, function (b) { return b.name; });
+        if (includeAll) sel.value = (selectedId && bldgById(selectedId)) ? selectedId : 'all';
+    }
 
     function renderRooms() {
         var rbody = $('rooms-tbody');
         if (!rbody) return;
 
+        var filterSel = $('rm-building');
+        fillBuildingSelect(filterSel, filterSel.value, true);
+        var bf = filterSel.value;
         var q = norm(($('rm-search') || {}).value);
 
+        // ---- rooms ----
         var rooms = state.rooms.filter(function (r) {
-            return !q || norm(r.name + ' ' + r.status).indexOf(q) > -1;
+            var b = bldgById(r.buildingId) || { name: '', code: '' };
+            if (bf !== 'all' && r.buildingId !== bf) return false;
+            return !q || norm(r.name + ' ' + b.name + ' ' + b.code + ' ' + r.status).indexOf(q) > -1;
         });
 
         rbody.innerHTML = rooms.map(function (r) {
-            return '<tr>' +
+            var b = bldgById(r.buildingId) || { name: '\u2014' };
+            return '<tr><td class="rmx-b">' + esc(shortBldg(b.name)) + '</td>' +
                 '<td>' + esc(r.name) + '</td>' +
-                '<td>' + badgeFor(r.status) + '</td>' +
-                '<td>' +
-                '<i class="fa fa-edit" style="color:var(--primary-color); cursor:pointer;" onclick="CD.openEditRoom(\'' + r.id + '\')"></i>' +
-                '<i class="fa fa-trash" style="color:var(--danger); cursor:pointer; margin-left:8px;" onclick="CD.openDelRoom(\'' + r.id + '\')"></i>' +
-                '</td></tr>';
-        }).join('') || '<tr><td colspan="3" style="text-align:center; color:#64748b;">No rooms found</td></tr>';
+                '<td class="rmx-c">' + statusPill(r.status) + '</td>' +
+                '<td class="rmx-act">' + actionIcons('Room', r.id) + '</td></tr>';
+        }).join('') || '<tr><td colspan="4" class="rmx-empty">No rooms found</td></tr>';
 
-        $('rooms-count').textContent = '(' + state.rooms.length + ' rooms)';
+        $('rooms-count').textContent = state.rooms.length + ' rooms across ' + plural(state.buildings.length, 'building');
+        $('rooms-foot').textContent = 'Showing ' + rooms.length + ' of ' + state.rooms.length + ' rooms';
+
+        // ---- buildings ----
+        var blds = state.buildings.filter(function (b) {
+            if (bf !== 'all' && b.id !== bf) return false;
+            return !q || norm(b.name + ' ' + b.code + ' ' + b.status).indexOf(q) > -1;
+        });
+
+        $('buildings-tbody').innerHTML = blds.map(function (b) {
+            return '<tr><td class="rmx-b">' + esc(shortBldg(b.name)) + '</td>' +
+                '<td>' + esc(b.code) + '</td>' +
+                '<td class="rmx-c">' + statusPill(b.status) + '</td>' +
+                '<td class="rmx-act">' + actionIcons('Building', b.id) + '</td></tr>';
+        }).join('') || '<tr><td colspan="4" class="rmx-empty">No buildings found</td></tr>';
+
+        $('buildings-count').textContent = plural(state.buildings.length, 'building') + ' registered';
+        $('buildings-foot').textContent = 'Showing ' + blds.length + ' of ' + state.buildings.length + ' buildings';
     }
 
     function initRooms() {
         if (!$('rooms-tbody')) return;
 
-        var search = $('rm-search');
-        if (search) search.addEventListener('input', renderRooms);
+        $('rm-search').addEventListener('input', renderRooms);
+        $('rm-building').addEventListener('change', renderRooms);
+        $('add-room-building').addEventListener('change', syncAddRoomPrefix);
         renderRooms();
     }
 
+    /* ---------- Rooms ---------- */
+    function syncAddRoomPrefix() {
+        var b = bldgById($('add-room-building').value);
+        $('add-room-prefix').textContent = b ? b.code : '';
+    }
+
     function openAddRoom() {
+        var bf = $('rm-building').value;
+        fillBuildingSelect($('add-room-building'), bf !== 'all' ? bf : (state.buildings[0] || {}).id, false);
+        syncAddRoomPrefix();
         $('add-room-name').value = '';
+        setErr('add-room-error', state.buildings.length ? '' : 'Add a building first.');
         openModal('modal-add-room');
     }
 
     function saveAddRoom() {
-        // there is only one building (Bautista), so new rooms always go to it
-        var bid = state.buildings.length ? state.buildings[0].id : null;
-        var name = $('add-room-name').value.trim();
-        if (!bid) { alert('No building is set up yet.'); return; }
-        if (!name) { alert('Please enter a room number.'); return; }
-        var dup = roomsOf(bid).some(function (r) { return norm(r.name) === norm(name); });
-        if (dup) { alert('That room already exists in this building.'); return; }
+        var b = bldgById($('add-room-building').value);
+        if (!b) { setErr('add-room-error', 'Add a building first.'); return; }
 
-        state.rooms.push({ id: uid('r'), buildingId: bid, name: name, status: 'Active' });
-        logActivity('Room ' + name + ' added to ' + bldgById(bid).name);
+        var typed = $('add-room-name').value.trim().replace(/\s+/g, '');
+        if (!typed) { setErr('add-room-error', 'Please enter a room number.'); return; }
+
+        // "506" -> "IK506"; "IK506" stays as is; a full name like "Auditorium" stays as is
+        var name = typed;
+        if (/^\d/.test(typed)) name = b.code + typed;
+        else if (norm(typed).indexOf(norm(b.code)) === 0) name = b.code + typed.slice(b.code.length);
+
+        if (roomsOf(b.id).some(function (r) { return norm(r.name) === norm(name); })) {
+            setErr('add-room-error', name + ' already exists in this building.'); return;
+        }
+
+        state.rooms.push({ id: uid('r'), buildingId: b.id, name: name, status: 'Active' });
+        logActivity('Room ' + name + ' added to ' + b.name);
         save();
         closeModal('modal-add-room');
         renderRooms();
@@ -516,20 +633,27 @@
         var r = roomById(id);
         if (!r) return;
         editRoomId = id;
+        fillBuildingSelect($('edit-room-building'), r.buildingId, false);
         $('edit-room-name').value = r.name;
         setRadio('edit-rm-status', r.status);
+        setErr('edit-room-error', '');
         openModal('modal-edit-room');
     }
 
     function saveEditRoom() {
         var r = roomById(editRoomId);
         if (!r) { closeModal('modal-edit-room'); return; }
+
+        var bid = $('edit-room-building').value;
         var name = $('edit-room-name').value.trim();
-        if (!name) { alert('Please enter a room name.'); return; }
-        var dup = roomsOf(r.buildingId).some(function (o) { return o.id !== r.id && norm(o.name) === norm(name); });
-        if (dup) { alert('That room already exists.'); return; }
+        if (!bldgById(bid)) { setErr('edit-room-error', 'Please choose a building.'); return; }
+        if (!name) { setErr('edit-room-error', 'Please enter a room number.'); return; }
+        if (roomsOf(bid).some(function (o) { return o.id !== r.id && norm(o.name) === norm(name); })) {
+            setErr('edit-room-error', name + ' already exists in that building.'); return;
+        }
 
         var oldStatus = r.status;
+        r.buildingId = bid;
         r.name = name;
         r.status = getRadio('edit-rm-status') || r.status;
 
@@ -541,7 +665,13 @@
         renderRooms();
     }
 
-    function openDelRoom(id) { delRoomId = id; openModal('modal-del-room'); }
+    function openDelRoom(id) {
+        var r = roomById(id);
+        if (!r) return;
+        delRoomId = id;
+        $('del-room-name').textContent = r.name;
+        openModal('modal-del-room');
+    }
 
     function confirmDelRoom() {
         var r = roomById(delRoomId);
@@ -554,6 +684,97 @@
         }
         delRoomId = null;
         closeModal('modal-del-room');
+        renderRooms();
+    }
+
+    /* ---------- Buildings ---------- */
+    function bldgClash(name, code, ignoreId) {
+        var out = null;
+        state.buildings.forEach(function (b) {
+            if (b.id === ignoreId) return;
+            if (norm(b.name) === norm(name)) out = 'A building named "' + b.name + '" already exists.';
+            else if (norm(b.code) === norm(code)) out = 'The code ' + b.code + ' is already used by ' + b.name + '.';
+        });
+        return out;
+    }
+
+    function openAddBuilding() {
+        $('add-bld-name').value = '';
+        $('add-bld-code').value = '';
+        setErr('add-bld-error', '');
+        openModal('modal-add-building');
+    }
+
+    function saveAddBuilding() {
+        var name = $('add-bld-name').value.trim();
+        var code = $('add-bld-code').value.trim().toUpperCase();
+        if (!name || !code) { setErr('add-bld-error', 'Please enter the building name and code.'); return; }
+        var clash = bldgClash(name, code, null);
+        if (clash) { setErr('add-bld-error', clash); return; }
+
+        state.buildings.push({ id: uid('b'), name: name, code: code, status: 'Active' });
+        logActivity('Building ' + name + ' added');
+        save();
+        closeModal('modal-add-building');
+        renderRooms();
+    }
+
+    function openEditBuilding(id) {
+        var b = bldgById(id);
+        if (!b) return;
+        editBldId = id;
+        $('edit-bld-name').value = b.name;
+        $('edit-bld-code').value = b.code;
+        setRadio('edit-bld-status', b.status);
+        setErr('edit-bld-error', '');
+        openModal('modal-edit-building');
+    }
+
+    function saveEditBuilding() {
+        var b = bldgById(editBldId);
+        if (!b) { closeModal('modal-edit-building'); return; }
+        var name = $('edit-bld-name').value.trim();
+        var code = $('edit-bld-code').value.trim().toUpperCase();
+        if (!name || !code) { setErr('edit-bld-error', 'Please enter the building name and code.'); return; }
+        var clash = bldgClash(name, code, b.id);
+        if (clash) { setErr('edit-bld-error', clash); return; }
+
+        var oldStatus = b.status;
+        b.name = name;
+        b.code = code;
+        b.status = getRadio('edit-bld-status') || b.status;
+
+        logActivity(b.status !== oldStatus
+            ? 'Building ' + b.name + ' status changed to ' + b.status
+            : 'Building ' + b.name + ' details updated');
+        save();
+        closeModal('modal-edit-building');
+        renderRooms();
+    }
+
+    function openDelBuilding(id) {
+        var b = bldgById(id);
+        if (!b) return;
+        delBldId = id;
+        var n = roomsOf(id).length;
+        $('del-bld-name').textContent = b.name;
+        $('del-bld-extra').textContent = n ? 'Its ' + plural(n, 'room') + ' (and their schedules) will also be deleted.' : '';
+        openModal('modal-del-building');
+    }
+
+    function confirmDelBuilding() {
+        var b = bldgById(delBldId);
+        if (b) {
+            var ids = roomsOf(b.id).map(function (r) { return r.id; });
+            state.rooms = state.rooms.filter(function (r) { return ids.indexOf(r.id) === -1; });
+            state.events = state.events.filter(function (e) { return ids.indexOf(e.roomId) === -1; });
+            state.schedules = state.schedules.filter(function (s) { return ids.indexOf(s.roomId) === -1; });
+            state.buildings = state.buildings.filter(function (x) { return x.id !== b.id; });
+            logActivity('Building ' + b.name + ' deleted');
+            save();
+        }
+        delBldId = null;
+        closeModal('modal-del-building');
         renderRooms();
     }
 
@@ -736,6 +957,11 @@
         openAddRoom: openAddRoom, saveAddRoom: saveAddRoom,
         openEditRoom: openEditRoom, saveEditRoom: saveEditRoom,
         openDelRoom: openDelRoom, confirmDelRoom: confirmDelRoom,
+        syncAddRoomPrefix: syncAddRoomPrefix,
+        // buildings
+        openAddBuilding: openAddBuilding, saveAddBuilding: saveAddBuilding,
+        openEditBuilding: openEditBuilding, saveEditBuilding: saveEditBuilding,
+        openDelBuilding: openDelBuilding, confirmDelBuilding: confirmDelBuilding,
         // events
         openAddEvent: openAddEvent, saveAddEvent: saveAddEvent,
         openEditEvent: openEditEvent, saveEditEvent: saveEditEvent,
@@ -746,9 +972,51 @@
     };
 
     /* ------------------------------------------------------------------ *
+     *  Logout confirmation
+     *  The sidebar's logout button is left as is. A capture-phase listener
+     *  catches the click first and asks for confirmation before the shared
+     *  layout-profile.js logout runs.
+     * ------------------------------------------------------------------ */
+    function initLogoutConfirm() {
+        var name = '';
+        try {
+            var u = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+            if (u) name = (u.firstName || '') + ' ' + (u.lastName || '');
+        } catch (e) { /* ignore */ }
+
+        var overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.id = 'modal-logout';
+        overlay.innerHTML =
+            '<div class="lo-card" role="dialog" aria-modal="true" aria-labelledby="lo-title">' +
+            '<div class="lo-icon"><i class="fa-solid fa-right-to-bracket"></i></div>' +
+            '<h3 id="lo-title" class="lo-title">Log out of your account?</h3>' +
+            '<p class="lo-sub">Signed in as: ' + esc(name.trim()) + '</p>' +
+            '<div class="lo-actions">' +
+            '<button type="button" class="lo-btn lo-fill" id="lo-confirm">Log out</button>' +
+            '<button type="button" class="lo-btn lo-outline" onclick="closeModal(\'modal-logout\')">Cancel</button>' +
+            '</div></div>';
+        document.body.appendChild(overlay);
+
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest ? e.target.closest('#logoutBtn') : null;
+            if (!btn) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            openModal('modal-logout');
+        }, true);
+
+        $('lo-confirm').addEventListener('click', function () {
+            try { localStorage.removeItem('loggedInUser'); } catch (e) { /* ignore */ }
+            window.location.href = '/Auth/Login/login';
+        });
+    }
+
+    /* ------------------------------------------------------------------ *
      *  Boot
      * ------------------------------------------------------------------ */
     load();
+    initLogoutConfirm();
     renderDashboard();
     initSchedule();
     initRooms();

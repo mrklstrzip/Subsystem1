@@ -1,6 +1,8 @@
-﻿using System;
-using System.Web.Mvc;
+﻿using Subsystem1.Areas.Student.Models;
 using Subsystem1.Areas.Student.ViewModels;
+using System;
+using System.Linq;
+using System.Web.Mvc;
 
 namespace Subsystem1.Areas.Student.Controllers
 {
@@ -8,23 +10,44 @@ namespace Subsystem1.Areas.Student.Controllers
     {
         public ActionResult dashboard()
         {
-            var model = new StudentDashboardViewModel();
+            // The Dashboard reads the same data as the Submission page, so the two always match.
+            var store = SubmissionStore.Instance;
+            var steps = store.BuildSteps();
+            int last = steps.FindLastIndex(x => x.Done);      // -1 = nothing submitted yet
 
-            model.ManuscriptStatus = "Under Review";
-            model.Stage = 2;
-            model.TotalStages = 5;
-            model.StatusDate = DateTime.Today;
+            var model = new StudentDashboardViewModel
+            {
+                UserRole = "Project Manager",
+                TotalStages = steps.Count,
+                DefenseDate = store.DefenseDate,
+                DefenseVenue = store.Room == null ? null : "Room " + store.Room
+            };
 
-            model.DefenseDate = DateTime.Today.AddDays(12);
-            model.DefenseVenue = "Room 101";
+            if (last >= 0)
+            {
+                model.ManuscriptStatus = steps[last].Label;   // e.g. "Defense Scheduled"
+                model.Stage = last + 1;                       // e.g. Stage 5 of 6
+                model.StatusDate = store.LastChanged;
+            }
 
-            // Added 3 test panelists without department
-            model.Panel.Add(new PanelistItem { Name = "Test Panelist 1", Role = "Panel Chair" });
-            model.Panel.Add(new PanelistItem { Name = "Test Panelist 2", Role = "Panel Member" });
-            model.Panel.Add(new PanelistItem { Name = "Test Panelist 3", Role = "Panel Member" });
+            if (store.PanelistCount > 0)
+            {
+                foreach (var p in store.Panelists)
+                {
+                    model.Panel.Add(new PanelistItem
+                    {
+                        Name = p.Name,
+                        Role = p.Role,
+                        Department = p.Department,
+                        PhotoUrl = p.PhotoUrl == null ? null : Url.Content(p.PhotoUrl)
+                    });
+                }
+            }
 
-            model.Activity.Add(new ActivityItem { Description = "Manuscript changed from \"Draft Submitted\" to \"Under Review\"", Date = DateTime.Today });
-            model.Activity.Add(new ActivityItem { Description = "Manuscript uploaded for review", Date = DateTime.Today.AddDays(-3) });
+            foreach (var l in store.Log.OrderByDescending(x => x.Timestamp).Take(5))
+            {
+                model.Activity.Add(new ActivityItem { Description = l.Text, Date = l.Timestamp });
+            }
 
             return View(model);
         }

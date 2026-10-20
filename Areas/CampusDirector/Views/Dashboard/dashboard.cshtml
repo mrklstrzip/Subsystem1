@@ -3,48 +3,314 @@
     ViewBag.ActiveMenu = "Dashboard";
 }
 
-<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.1" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.2" rel="stylesheet" type="text/css" />
 
 <style>
-    .page-title {
-        font-weight: 550;
-        color: #2E5C8A;
-        margin-bottom: 24px;
-        font-family: 'Newsreader', serif;
-        font-size: 2rem;
+    /* ===== Dashboard (content only) ===== */
+    .dsh-banner {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+        padding: 20px 30px 22px;
+        color: #fff;
+        background: linear-gradient(100deg, #2C3F56 0%, #3a4e6a 55%, #53677F 100%);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, .25);
+        margin-bottom: 18px;
+    }
+
+        .dsh-banner .dsh-crumb {
+            font-size: 10px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dsh-banner h2 {
+            font-family: 'Newsreader', serif;
+            font-weight: 600;
+            font-size: 3.2rem;
+            line-height: 1.1;
+            color: #fff;
+            margin: 0 0 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dsh-banner .dsh-welcome {
+            font-size: 13px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dsh-banner .dsh-deco {
+            position: absolute;
+            right: -26px;
+            bottom: -44px;
+            font-size: 200px;
+            color: rgba(27, 41, 59, .5);
+            line-height: 1;
+        }
+
+    .dsh-grid {
+        display: grid;
+        gap: 18px;
+        margin-bottom: 18px;
+    }
+
+    .dsh-row-1 {
+        grid-template-columns: 1fr 1fr 1fr 2.15fr;
+    }
+
+    .dsh-row-2 {
+        grid-template-columns: 2fr 3fr;
+    }
+
+    .dsh-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, .25);
+        padding: 18px 20px;
+        min-width: 0;
+    }
+
+    /* stat cards */
+    .dsh-stat {
+        position: relative;
+        min-height: 122px;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .dsh-stat .dsh-label {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+            color: #8a8aa8;
+        }
+
+        .dsh-stat .dsh-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #000;
+            margin: 10px 0 4px;
+            line-height: 1;
+        }
+
+        .dsh-stat .dsh-desc {
+            font-size: 9px;
+            color: #9aa0b4;
+            max-width: 90px;
+            line-height: 1.3;
+        }
+
+        .dsh-stat .dsh-icon {
+            position: absolute;
+            right: 16px;
+            bottom: 14px;
+            font-size: 34px;
+            color: #9a9ab8;
+        }
+
+    .dsh-card-title {
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+        color: #2C3F56;
+        margin: 0 0 10px;
+    }
+
+    /* room per building */
+    .dsh-bars {
+        max-height: 112px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .dsh-bar-row {
+        margin-bottom: 9px;
+    }
+
+    .dsh-bar-head {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #1B293B;
+        margin-bottom: 2px;
+    }
+
+        .dsh-bar-head b {
+            font-weight: 700;
+        }
+
+    .dsh-track {
+        height: 12px;
+        border-radius: 8px;
+        background: #d9d9d9;
+        overflow: hidden;
+    }
+
+    .dsh-fill {
+        height: 100%;
+        border-radius: 8px;
+        background: #2C3F56;
+        transition: width .4s ease;
+    }
+
+    /* donut */
+    .dsh-donut-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding-top: 6px;
+    }
+
+    .dsh-donut {
+        width: 190px;
+        height: 190px;
+    }
+
+    .dsh-legend {
+        display: flex;
+        gap: 22px;
+        font-size: 10px;
+        color: #1B293B;
+    }
+
+        .dsh-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dsh-legend i {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+    /* activity */
+    .dsh-activity {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    table.dsh-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1rem;
+    }
+
+        table.dsh-table th {
+            text-align: left;
+            font-size: .95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #8a8aa8;
+            background: transparent;
+            border: 0;
+            padding: 6px 10px 8px 0;
+            position: sticky;
+            top: 0;
+            background: #fff;
+        }
+
+        table.dsh-table td {
+            border: 0;
+            padding: 6px 10px 6px 0;
+            font-size: .88rem;
+            font-weight: 700;
+            color: #000;
+        }
+
+            table.dsh-table td:first-child {
+                font-weight: 500;
+                width: 190px;
+                white-space: nowrap;
+            }
+
+    .dsh-empty {
+        color: #8a8aa8;
+        font-size: 12px;
+        padding: 14px 0;
+    }
+
+    @@media (max-width: 1200px) {
+        .dsh-row-1 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+            .dsh-row-1 .dsh-card:last-child {
+                grid-column: 1 / -1;
+            }
+
+        .dsh-row-2 {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
-<h2 class="page-title">Dashboard</h2>
-<div class="card-row">
-    <div class="stat-card">
-        <div class="label">Total Rooms</div>
-        <div class="value" id="dash-total-rooms">28</div>
-        <div class="desc">Across all buildings</div>
+<section class="dsh-banner">
+    <div class="dsh-crumb">Campus Director | Dashboard</div>
+    <h2>Dashboard</h2>
+    <div class="dsh-welcome">Welcome back, <span id="dash-welcome-name">Director</span>!</div>
+    <i class="fa fa-table-cells-large dsh-deco" aria-hidden="true"></i>
+</section>
+
+<div class="dsh-grid dsh-row-1">
+    <div class="dsh-card dsh-stat">
+        <div class="dsh-label">Total Rooms</div>
+        <div class="dsh-value" id="dash-total-rooms">0</div>
+        <div class="dsh-desc">Across all buildings</div>
+        <i class="fa fa-door-closed dsh-icon" aria-hidden="true"></i>
     </div>
-    <div class="stat-card">
-        <div class="label">Active Rooms</div>
-        <div class="value" id="dash-active-rooms">10</div>
-        <div class="desc">Currently available for use</div>
+
+    <div class="dsh-card dsh-stat">
+        <div class="dsh-label">Active Rooms</div>
+        <div class="dsh-value" id="dash-active-rooms">0</div>
+        <div class="dsh-desc">Currently available for use</div>
+        <i class="fa-regular fa-circle-check dsh-icon" aria-hidden="true"></i>
     </div>
-    <div class="stat-card">
-        <div class="label">Disabled Rooms</div>
-        <div class="value" id="dash-disabled-rooms">2</div>
-        <div class="desc">Under maintenance or closed</div>
+
+    <div class="dsh-card dsh-stat">
+        <div class="dsh-label">Disabled Rooms</div>
+        <div class="dsh-value" id="dash-disabled-rooms">0</div>
+        <div class="dsh-desc">Under maintenance or closed</div>
+        <i class="fa fa-building-circle-xmark dsh-icon" aria-hidden="true"></i>
     </div>
-    <div class="stat-card">
-        <div class="label">Scheduled Events</div>
-        <div class="value" id="dash-events">2</div>
-        <div class="desc">Upcoming this week</div>
+
+    <div class="dsh-card">
+        <h3 class="dsh-card-title">Room per Building</h3>
+        <div class="dsh-bars" id="dash-buildings"></div>
     </div>
 </div>
 
-<div class="table-card">
-    <h4 style="margin-bottom: 12px; color:#1e293b;">Recent Activity</h4>
-    <table>
-        <thead>
-            <tr><th>Timestamp</th><th>Schedule Activity</th></tr>
-        </thead>
-        <tbody id="dash-activity"></tbody>
-    </table>
+<div class="dsh-grid dsh-row-2">
+    <div class="dsh-card">
+        <h3 class="dsh-card-title">Room Status</h3>
+        <div class="dsh-donut-wrap">
+            <svg class="dsh-donut" id="dash-donut" viewBox="0 0 200 200" role="img" aria-label="Room status chart"></svg>
+            <div class="dsh-legend">
+                <span><i style="background:#246a86"></i>Active Rooms</span>
+                <span><i style="background:#6b97d6"></i>Disabled Rooms</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="dsh-card">
+        <h3 class="dsh-card-title">Recent Activity</h3>
+        <div class="dsh-activity">
+            <table class="dsh-table">
+                <thead>
+                    <tr><th>Timestamp</th><th>Schedule Activity</th></tr>
+                </thead>
+                <tbody id="dash-activity"></tbody>
+            </table>
+        </div>
+    </div>
 </div>

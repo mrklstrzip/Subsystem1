@@ -1,176 +1,192 @@
-﻿@model Subsystem1.Areas.Student.ViewModels.StudentSubmissionViewModel
-@using System.Linq
+﻿@using System.Linq
+@using Subsystem1.Areas.Student.ViewModels
+@model StudentSubmissionViewModel
 @{
     ViewBag.Title = "Submission";
-    bool reopenModal = !ViewData.ModelState.IsValid;
+    var error = TempData["SubmissionError"] as string;
+    var success = TempData["SuccessMessage"] as string;
 }
 
-<link href="@Url.Content("~/Content/css/student-submission.css")?v=1.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/student-pm.css")?v=1.0" rel="stylesheet" type="text/css" />
 
-<div class="sub-header">
-    <h1 class="sub-title">Submissions</h1>
-    <button type="button" class="sub-btn sub-btn--primary sub-btn--rect" id="openModalBtn">+ Add Manuscript</button>
-</div>
+<div class="pm">
+    <section class="pm-banner pm-banner--row">
+        <div>
+            <small>Project Manager | Submission</small>
+            <h1>Submission</h1>
+            <p>Upload your manuscript and follow your defense scheduling</p>
+        </div>
+        @if (Model.AllComplete)
+        {
+            <a class="pm-pill" href="#">Go to Post Defense</a>
+        }
+        else if (!Model.HasTitle)
+        {
+            <button type="button" class="pm-pill" data-open="pmAddDialog">+ Add Capstone Title</button>
+        }
+    </section>
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="sub-alert">@TempData["SuccessMessage"]</div>
-}
+    @if (error != null)
+    {<div class="pm-alert">@error</div>}
+    @if (success != null)
+    {<div class="pm-alert pm-alert--ok">@success</div>}
 
-<!-- Updated Filter Dropdown with class="sub-filter-select" -->
-<div class="sub-filters">
-    <label for="statusFilter">Status:</label>
-    <select id="statusFilter" class="sub-filter-select" name="statusFilter">
-        <option value="all" selected>All</option>
-        <option value="completed">Completed</option>
-        <option value="processing">Processing</option>
-        <option value="submitted">Submitted</option>
-    </select>
-</div>
-
-<div class="sub-card">
-    <table class="sub-table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th class="sub-center">Date &amp; Time</th>
-                <th class="sub-center">Status</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Submissions.Any())
+    <section class="pm-card pm-stepper-card">
+        <ol class="pm-stepper">
+            @for (var i = 0; i < Model.Steps.Count; i++)
             {
-                foreach (var item in Model.Submissions)
-                {
-                    string head = item.Title;
-                    string rest = "";
-                    int colon = item.Title.IndexOf(':');
-                    if (colon > 0)
+                var s = Model.Steps[i];
+                bool isNext = i == Model.NextStepIndex;
+                <li class="pm-step @(s.Done ? "done" : "pending") @(isNext ? "next" : "")">
+
+                    @* DEMO: click the pulsing circle to go forward, click a completed circle to go back *@
+                    @if (isNext && i == 0)
                     {
-                        head = item.Title.Substring(0, colon + 1);
-                        rest = item.Title.Substring(colon + 1);
+                        <button type="button" class="pm-dot pm-dot--click" data-open="pmAddDialog" title="Add your capstone title"></button>
+                    }
+                    else if (isNext && i == 5)
+                    {
+                        <button type="button" class="pm-dot pm-dot--click" data-show="pmBubble" title="Mark your defense as completed"></button>
+                    }
+                    else if (isNext || s.Done)
+                    {
+                        <div class="pm-dot-form">
+                            @using (Html.BeginForm("StepClick", "Submission", new { area = "Student" }, FormMethod.Post, new { @class = "pm-dot-form" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="index" value="@i" />
+                                <button type="submit" class="pm-dot pm-dot--click" title="@(s.Done ? "Click to undo this step" : "Demo: complete this step")">
+                                    @if (s.Done)
+                                    {<i class="fa fa-check"></i>}
+                            </button>
+                        }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="pm-dot"></span>
                     }
 
-                    <tr data-status="@item.Status.ToLower()">
-                        <td class="sub-title-cell"><strong>@head</strong>@rest</td>
-                        <td class="sub-date">@item.DateAndSubmissionTime.ToString("MMM d, h:mm tt")</td>
-                        <td class="sub-center"><span class="sub-badge sub-badge--@item.Status.ToLower()">@item.Status</span></td>
-                        <td class="sub-right"><a href="#" class="sub-link">View Manuscript</a></td>
-                    </tr>
-                }
+                    <strong>@s.Label</strong>
+                    <small>@s.Detail</small>
+
+                    @if (i == 5 && Model.AskDefenseComplete)
+                    {
+                        <div class="pm-bubble" id="pmBubble">
+                            <p>Is your defense completed?</p>
+                            @using (Html.BeginForm("CompleteDefense", "Submission", new { area = "Student" }, FormMethod.Post, new { @class = "pm-bubble-actions" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button class="yes" type="submit">Yes</button>
+                                <button class="no" type="button" data-dismiss="pmBubble">No</button>
+                            }
+                        </div>
+                    }
+                </li>
             }
-            <tr id="emptyRow" style="@(Model.Submissions.Any() ? "display:none" : "")">
-                <td colspan="4" class="sub-empty">No submissions found.</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+        </ol>
+    </section>
 
-<!-- Add Manuscript Popup -->
-<div class="sub-overlay" id="addModal" style="display:none">
-    <div class="sub-modal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
-        <div class="sub-modal-head">
-            <h3 id="addModalTitle">Add Manuscript</h3>
-            <button type="button" class="sub-close" id="closeModalBtn" aria-label="Close">&times;</button>
-        </div>
+    @if (!Model.HasTitle)
+    {
+        <section class="pm-card pm-empty">
+            <i class="fa fa-copy"></i>
+            <p>No Submitted Title Yet</p>
+        </section>
+    }
+    else
+    {
+        <section class="pm-card pm-titles">
+            <div><span>Title</span><span>Date &amp; Time</span><span>Status</span><span></span></div>
+            @foreach (var t in Model.Submissions)
+            {
+                <div>
+                    <span><b>@t.TitleBold</b>@t.TitleRest</span>
+                    <span class="pm-muted">@StudentFormat.Stamp(t.DateAndSubmissionTime)</span>
+                    <span><span class="pm-badge pm-badge--@t.Status.ToLower()">@t.Status</span></span>
+                    <span><a class="pm-link" href="#" data-view-title="@t.Id">View Capstone Title</a></span>
+                </div>
+            }
+        </section>
+    }
 
-        @using (Html.BeginForm("AddManuscript", "Submission", new { area = "Student" }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+    <section class="pm-card">
+        <h3 class="pm-title">Activity Log</h3>
+        @if (Model.Log.Count == 0)
         {
-            @Html.AntiForgeryToken()
-            @Html.ValidationSummary(true, "", new { @class = "sub-error" })
-
-            <div class="sub-form-grid">
-                <div>
-                    <div class="sub-field">
-                        <label>Title</label>
-                        @Html.TextBoxFor(m => m.Title)
-                        @Html.ValidationMessageFor(m => m.Title, "", new { @class = "sub-error" })
-                    </div>
-                    <div class="sub-field">
-                        <label>Overview / Abstract</label>
-                        @Html.TextAreaFor(m => m.OverviewAbstract, new { rows = 7 })
-                        @Html.ValidationMessageFor(m => m.OverviewAbstract, "", new { @class = "sub-error" })
-                    </div>
-                </div>
-
-                <div>
-                    <div class="sub-field">
-                        <label>Keywords</label>
-                        @Html.TextBoxFor(m => m.Keywords)
-                    </div>
-                    <div class="sub-field">
-                        <label>Authors</label>
-                        @Html.TextBoxFor(m => m.Authors)
-                        @Html.ValidationMessageFor(m => m.Authors, "", new { @class = "sub-error" })
-                    </div>
-                    <div class="sub-field">
-                        <label>Date Submitted</label>
-                        @Html.TextBoxFor(m => m.DateSubmitted, "{0:MM-dd-yyyy}", new { @class = "readonly-field", @readonly = "readonly" })
-                    </div>
-                    <div class="sub-field">
-                        <label>Program</label>
-                        @Html.TextBoxFor(m => m.Program)
-                        @Html.ValidationMessageFor(m => m.Program, "", new { @class = "sub-error" })
-                    </div>
-                    <div class="sub-field">
-                        <label>Professor / Adviser</label>
-                        @Html.TextBoxFor(m => m.Professor)
-                        @Html.ValidationMessageFor(m => m.Professor, "", new { @class = "sub-error" })
-                    </div>
-                </div>
-            </div>
-
-            <div class="sub-upload">
-                <div class="sub-upload-name" id="fileName"><i class="fa fa-file-arrow-up"></i> No file selected</div>
-                <input type="file" name="ManuscriptFile" id="fileInput" accept=".pdf,.doc,.docx" />
-                <label for="fileInput" class="sub-btn sub-btn--primary sub-btn--small">Browse</label>
-                @Html.ValidationMessageFor(m => m.ManuscriptFile, "", new { @class = "sub-error" })
-            </div>
-
-            <div class="sub-modal-foot">
-                <button type="submit" class="sub-btn sub-btn--primary sub-btn--wide">Submit Manuscript</button>
+            <div class="pm-empty pm-empty--inline">
+                <i class="fa fa-box-open"></i>
+                <p>No Activity Yet</p>
             </div>
         }
-    </div>
+        else
+        {
+            <table class="pm-table">
+                <thead><tr><th>Time</th><th class="pm-center">Activity</th><th class="pm-right">Date</th></tr></thead>
+                <tbody>
+                    @foreach (var l in Model.Log)
+                    {
+                        <tr>
+                            <td class="pm-muted">@l.Timestamp.ToString("h:mm tt")</td>
+                            <td class="pm-center">@StudentFormat.Bold(l.Text)</td>
+                            <td class="pm-right pm-muted">@StudentFormat.Short(l.Timestamp)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="pm-view-all"><a class="pm-link" href="#"></a></div>
+        }
+    </section>
+
+    <!-- Add Capstone Title -->
+    <dialog id="pmAddDialog" class="pm-dialog pm-dialog--lg">
+        @using (Html.BeginForm("AddTitle", "Submission", new { area = "Student" }, FormMethod.Post, new { @class = "pm-modal-card" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ProjectManager" id="pmProjectManager" />
+            <header class="pm-modal-head">
+                <h2>Add Capstone Title</h2>
+                <button type="button" class="pm-x" data-close aria-label="Close"><i class="fa fa-xmark"></i></button>
+            </header>
+            <div class="pm-form-grid">
+                <div class="pm-col">
+                    <label>Title<textarea name="Title" rows="2" placeholder="Capstone title..." required></textarea></label>
+                    <label class="grow">Overview / Abstract<textarea name="Abstract" rows="7" placeholder="Brief summary of your study..." required></textarea></label>
+                </div>
+                <div class="pm-col">
+                    <label>Keywords<input name="Keywords" placeholder="Add Keywords seperated by comma (ex. Python, Java)" /></label>
+                    <label>Authors<input name="Authors" placeholder="Full names..." required /></label>
+                    <label>Date Published<input name="DatePublished" type="date" /></label>
+                    <label>
+                        Program
+                        <select name="Program" required>
+                            <option value="" disabled selected>Select a Program</option>
+                            @foreach (var p in Model.Programs)
+                            {
+                                <option>@p</option>
+}
+                        </select>
+                    </label>
+                    <label>
+                        Professor / Advisor
+                        <select name="Advisor" required>
+                            <option value="" disabled selected>Select Advisor</option>
+                            @foreach (var a in Model.Advisors)
+                            {
+                                <option>@a</option>
+}
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <footer class="pm-modal-foot"><button class="pm-primary" type="submit">Submit Title</button></footer>
+        }
+    </dialog>
+
+    <!-- View Capstone Title (filled by JS) -->
+    <dialog id="pmViewDialog" class="pm-dialog" data-details-url="@Url.Action("Details", "Submission", new { area = "Student" })">
+        <div id="pmViewBody"></div>
+    </dialog>
 </div>
 
-<script>
-    (function () {
-        var modal = document.getElementById('addModal');
-        function openModal()  { modal.style.display = 'flex'; }
-        function closeModal() { modal.style.display = 'none'; }
-
-        document.getElementById('openModalBtn').addEventListener('click', openModal);
-        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
-        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
-
-        // Show the chosen file name
-        document.getElementById('fileInput').addEventListener('change', function () {
-            document.getElementById('fileName').textContent =
-                this.files.length ? this.files[0].name : 'No file selected';
-        });
-
-        // Dropdown status filter logic
-        var statusFilter = document.getElementById('statusFilter');
-        var rows = document.querySelectorAll('tbody tr[data-status]');
-        var emptyRow = document.getElementById('emptyRow');
-
-        statusFilter.addEventListener('change', function () {
-            var selectedFilter = statusFilter.value;
-            var shown = 0;
-
-            rows.forEach(function (r) {
-                var show = selectedFilter === 'all' || r.getAttribute('data-status') === selectedFilter;
-                r.style.display = show ? '' : 'none';
-                if (show) shown++;
-            });
-
-            emptyRow.style.display = shown ? 'none' : '';
-        });
-
-        // Reopen the modal if the server found validation errors
-        @if (reopenModal) { <text>openModal();</text> }
-    })();
-</script>
+<script src="@Url.Content("~/Scripts/student-submission.js")?v=1.0"></script>

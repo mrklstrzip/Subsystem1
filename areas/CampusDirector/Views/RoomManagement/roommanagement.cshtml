@@ -3,86 +3,176 @@
     ViewBag.ActiveMenu = "RoomManagement";
 }
 
-<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.1" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.2" rel="stylesheet" type="text/css" />
 
-<style>
-    .page-title {
-        font-weight: 550;
-        color: #2E5C8A;
-        margin-bottom: 24px;
-        font-family: 'Newsreader', serif;
-        font-size: 2rem;
-    }
-</style>
+<section class="cdb-banner">
+    <div class="cdb-crumb">Campus Director | Room Management</div>
+    <h2>Room Management</h2>
+    <p>Manage campus rooms and buildings, monitor their status, and keep facility records up to date</p>
+    <i class="fa fa-building cdb-deco" aria-hidden="true"></i>
+</section>
 
-
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-    <h2 class="page-title" style="margin: 0;">Room Management</h2>
-    <button class="btn-primary" onclick="CD.openAddRoom()"><i class="fa fa-plus"></i> Add Room</button>
+<div class="rmx-toolbar">
+    <div class="rmx-search">
+        <i class="fa fa-magnifying-glass"></i>
+        <input type="text" id="rm-search" placeholder="Search rooms or buildings..." autocomplete="off" />
+    </div>
+    <button type="button" class="rmx-top-btn rmx-top-fill" onclick="CD.openAddRoom()">+ Add Room</button>
+    <button type="button" class="rmx-top-btn rmx-top-white" onclick="CD.openAddBuilding()">+ Add Building</button>
 </div>
 
-<div style="margin-bottom: 16px;">
-    <input type="text" class="form-control" id="rm-search" placeholder="Search rooms..." style="max-width: 320px;" />
+<div class="cdf-field rmx-filter">
+    <select id="rm-building"><option value="all">All buildings</option></select>
 </div>
 
-<!-- Rooms Table -->
-<div class="table-card">
-    <h4 style="margin-bottom: 12px;">Rooms <span id="rooms-count" style="font-size:0.75rem; color:#64748b;">(0 rooms)</span></h4>
-    <table>
-        <thead><tr><th>Room</th><th>Status</th><th>Action</th></tr></thead>
-        <tbody id="rooms-tbody"></tbody>
-    </table>
+<div class="rmx-panels">
+    <!-- Rooms -->
+    <div class="rmx-panel">
+        <div class="rmx-head">
+            <h3>Rooms</h3>
+            <small id="rooms-count"></small>
+        </div>
+        <div class="rmx-scroll">
+            <table class="rmx-table">
+                <thead><tr><th>Building</th><th>Room</th><th class="rmx-c">Status</th><th>Action</th></tr></thead>
+                <tbody id="rooms-tbody"></tbody>
+            </table>
+        </div>
+        <div class="rmx-foot" id="rooms-foot"></div>
+    </div>
+
+    <!-- Buildings -->
+    <div class="rmx-panel">
+        <div class="rmx-head">
+            <h3>Buildings</h3>
+            <small id="buildings-count"></small>
+        </div>
+        <div class="rmx-scroll">
+            <table class="rmx-table">
+                <thead><tr><th>Building</th><th>Code</th><th class="rmx-c">Status</th><th>Action</th></tr></thead>
+                <tbody id="buildings-tbody"></tbody>
+            </table>
+        </div>
+        <div class="rmx-foot" id="buildings-foot"></div>
+    </div>
+</div>
+
+<!-- Add Building Pop up -->
+<div class="modal-overlay" id="modal-add-building">
+    <div class="rmx-card">
+        <h3 class="rmx-title">Add New Building</h3>
+        <div class="rmx-field">
+            <label for="add-bld-name">Building Name</label>
+            <input type="text" id="add-bld-name" placeholder="e.g. New Academic Building" autocomplete="off" />
+        </div>
+        <div class="rmx-field">
+            <label for="add-bld-code">Building Code</label>
+            <input type="text" id="add-bld-code" placeholder="eg. IK" maxlength="10" autocomplete="off" />
+        </div>
+        <div class="rmx-error" id="add-bld-error"></div>
+        <div class="rmx-actions">
+            <button type="button" class="rmx-btn rmx-outline" onclick="closeModal('modal-add-building')">Cancel</button>
+            <button type="button" class="rmx-btn rmx-fill" onclick="CD.saveAddBuilding()">Add Building</button>
+        </div>
+    </div>
 </div>
 
 <!-- Add Room Pop up -->
 <div class="modal-overlay" id="modal-add-room">
-    <div class="cd-popup-card">
-        <h3 class="cd-popup-title">Add New Room</h3>
-        <div style="margin-bottom: 16px;">
-            <label class="cd-field-label">ROOM NUMBER</label>
-            <input type="text" class="cd-input" id="add-room-name" placeholder="e.g. IK503" />
+    <div class="rmx-card">
+        <h3 class="rmx-title">Add New Room</h3>
+        <div class="rmx-field">
+            <label for="add-room-building">Building</label>
+            <select id="add-room-building"></select>
         </div>
-        <div class="cd-button-row">
-            <button type="button" class="btn-cd-fill" onclick="CD.saveAddRoom()">Add Room</button>
-            <button type="button" class="btn-cd-outline" onclick="closeModal('modal-add-room')">Cancel</button>
+        <div class="rmx-field">
+            <label for="add-room-name">Room Number</label>
+            <div class="rmx-prefixed">
+                <span id="add-room-prefix"></span>
+                <input type="text" id="add-room-name" placeholder="506" autocomplete="off" />
+            </div>
+        </div>
+        <div class="rmx-error" id="add-room-error"></div>
+        <div class="rmx-actions">
+            <button type="button" class="rmx-btn rmx-outline" onclick="closeModal('modal-add-room')">Cancel</button>
+            <button type="button" class="rmx-btn rmx-fill" onclick="CD.saveAddRoom()">Add Room</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Building Pop up -->
+<div class="modal-overlay" id="modal-edit-building">
+    <div class="rmx-card">
+        <h3 class="rmx-title">Edit Building</h3>
+        <div class="rmx-field">
+            <label for="edit-bld-name">Building Name</label>
+            <input type="text" id="edit-bld-name" autocomplete="off" />
+        </div>
+        <div class="rmx-field">
+            <label for="edit-bld-code">Building Code</label>
+            <input type="text" id="edit-bld-code" maxlength="10" autocomplete="off" />
+        </div>
+        <div class="rmx-status-label">Status</div>
+        <div class="rmx-radios">
+            <label class="cd-radio-item"><input type="radio" name="edit-bld-status" value="Active" checked /> Active</label>
+            <label class="cd-radio-item"><input type="radio" name="edit-bld-status" value="Unavailable" /> Unavailable</label>
+        </div>
+        <div class="rmx-error" id="edit-bld-error"></div>
+        <div class="rmx-actions">
+            <button type="button" class="rmx-btn rmx-outline" onclick="closeModal('modal-edit-building')">Cancel</button>
+            <button type="button" class="rmx-btn rmx-fill" onclick="CD.saveEditBuilding()">Save Changes</button>
         </div>
     </div>
 </div>
 
 <!-- Edit Room Pop up -->
 <div class="modal-overlay" id="modal-edit-room">
-    <div class="cd-popup-card">
-        <h3 class="cd-popup-title">Edit Room</h3>
-        <div style="margin-bottom: 14px;">
-            <label class="cd-field-label">ROOM NAME</label>
-            <input type="text" class="cd-input" id="edit-room-name" value="IK504" />
+    <div class="rmx-card">
+        <h3 class="rmx-title">Edit Room</h3>
+        <div class="rmx-field">
+            <label for="edit-room-building">Building Name</label>
+            <select id="edit-room-building"></select>
         </div>
-        <div>
-            <label class="cd-field-label">STATUS</label>
-            <div class="cd-radio-row">
-                <label class="cd-radio-item"><input type="radio" name="edit-rm-status" value="Active" checked /> Active</label>
-                <label class="cd-radio-item"><input type="radio" name="edit-rm-status" value="Unavailable" /> Unavailable</label>
-            </div>
+        <div class="rmx-field">
+            <label for="edit-room-name">Room Number</label>
+            <input type="text" id="edit-room-name" autocomplete="off" />
         </div>
-        <div class="cd-button-row">
-            <button type="button" class="btn-cd-fill" onclick="CD.saveEditRoom()">Save Changes</button>
-            <button type="button" class="btn-cd-outline" onclick="closeModal('modal-edit-room')">Cancel</button>
+        <div class="rmx-status-label">Status</div>
+        <div class="rmx-radios">
+            <label class="cd-radio-item"><input type="radio" name="edit-rm-status" value="Active" checked /> Active</label>
+            <label class="cd-radio-item"><input type="radio" name="edit-rm-status" value="Unavailable" /> Unavailable</label>
+        </div>
+        <div class="rmx-error" id="edit-room-error"></div>
+        <div class="rmx-actions">
+            <button type="button" class="rmx-btn rmx-outline" onclick="closeModal('modal-edit-room')">Cancel</button>
+            <button type="button" class="rmx-btn rmx-fill" onclick="CD.saveEditRoom()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Building Pop up -->
+<div class="modal-overlay" id="modal-del-building">
+    <div class="rmx-del">
+        <i class="fa-solid fa-triangle-exclamation rmx-warn"></i>
+        <h3>Are you sure?</h3>
+        <p>Do you really want to delete <strong id="del-bld-name"></strong> from the list?<br />This process cannot be undone</p>
+        <p class="rmx-del-extra" id="del-bld-extra"></p>
+        <div class="rmx-del-actions">
+            <button type="button" class="rmx-btn rmx-danger" onclick="CD.confirmDelBuilding()">Delete</button>
+            <button type="button" class="rmx-btn rmx-outline" onclick="closeModal('modal-del-building')">Cancel</button>
         </div>
     </div>
 </div>
 
 <!-- Delete Room Pop up -->
 <div class="modal-overlay" id="modal-del-room">
-    <div class="cd-delete-card">
-        <div class="cd-delete-icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <h3 class="cd-delete-title">Are you sure?</h3>
-        <p class="cd-delete-text">
-            Do you really want to delete this <strong>ROOM</strong>?<br />
-            This process cannot be undone
-        </p>
-        <div class="cd-delete-actions">
-            <button type="button" class="btn-cd-delete-confirm" onclick="CD.confirmDelRoom()">Delete</button>
-            <button type="button" class="btn-cd-delete-cancel" onclick="closeModal('modal-del-room')">Cancel</button>
+    <div class="rmx-del">
+        <i class="fa-solid fa-triangle-exclamation rmx-warn"></i>
+        <h3>Are you sure?</h3>
+        <p>Do you really want to delete <strong id="del-room-name"></strong> from the list?<br />This process cannot be undone</p>
+        <div class="rmx-del-actions">
+            <button type="button" class="rmx-btn rmx-danger" onclick="CD.confirmDelRoom()">Delete</button>
+            <button type="button" class="rmx-btn rmx-outline" onclick="closeModal('modal-del-room')">Cancel</button>
         </div>
     </div>
 </div>

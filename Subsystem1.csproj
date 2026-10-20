@@ -111,9 +111,7 @@
     <Content Include="Content\css\profile.css" />
     <Content Include="Content\css\layout.css" />
     <Content Include="Content\css\auth.css" />
-    <Content Include="Content\css\student-dashboard.css" />
-    <Content Include="Content\css\student-status.css" />
-    <Content Include="Content\css\student-submission.css" />
+    <Content Include="Content\css\student-pm.css" />
     <Content Include="Content\css\usermanagement.css" />
     <Content Include="Content\fontawesome\css\all.css" />
     <Content Include="Content\fontawesome\css\all.min.css" />
@@ -155,6 +153,7 @@
     <Content Include="Scripts\login-check.js" />
     <Content Include="Scripts\profile.js" />
     <Content Include="Scripts\sidebar.js" />
+    <Content Include="Scripts\student-submission.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -195,11 +194,11 @@
     <Compile Include="Areas\Professor\ProfessorAreaRegistration.cs" />
     <Compile Include="Areas\Student\Controllers\DashboardController.cs" />
     <Compile Include="Areas\Student\Controllers\ProfileController.cs" />
-    <Compile Include="Areas\Student\Controllers\StatusController.cs" />
     <Compile Include="Areas\Student\Controllers\SubmissionController.cs" />
+    <Compile Include="Areas\Student\Models\SubmissionStore.cs" />
     <Compile Include="Areas\Student\StudentAreaRegistration.cs" />
     <Compile Include="Areas\Student\ViewModels\StudentDashboardViewModel.cs" />
-    <Compile Include="Areas\Student\ViewModels\StudentStatusViewModel.cs" />
+    <Compile Include="Areas\Student\ViewModels\StudentFormat.cs" />
     <Compile Include="Areas\Student\ViewModels\StudentSubmissionViewModel.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -247,7 +246,6 @@
     <Content Include="Areas\Professor\Views\PanelAssignment\panelassignment.cshtml" />
     <Content Include="Areas\Professor\Views\Shared\_ManuscriptCard.cshtml" />
     <Content Include="Areas\Student\Views\Submission\submission.cshtml" />
-    <Content Include="Areas\Student\Views\Status\status.cshtml" />
     <Content Include="Areas\CampusDirector\Views\RoomManagement\roommanagement.cshtml" />
     <Content Include="Areas\CampusDirector\Views\RoomSchedule\roomschedule.cshtml" />
     <Content Include="Areas\Auth\Views\Request\request.cshtml" />
@@ -264,6 +262,7 @@
     <Content Include="Areas\Dean\Views\Profile\profile.cshtml" />
     <Content Include="Areas\Dean\Views\Shared\_DeanLayout.cshtml" />
     <Content Include="Areas\Dean\Views\web.config" />
+    <Content Include="Areas\Student\Views\Submission\_TitleDetails.cshtml" />
     <None Include="packages.config" />
     <Content Include="Views\web.config" />
     <Content Include="Views\Shared\Error.cshtml" />
@@ -294,7 +293,6 @@
     <Folder Include="Areas\Dean\Views\ScheduleApproval\" />
     <Folder Include="Areas\Professor\Models\" />
     <Folder Include="Areas\Professor\ViewModels\" />
-    <Folder Include="Areas\Student\Models\" />
     <Folder Include="Content\css\Admin\" />
   </ItemGroup>
   <PropertyGroup>

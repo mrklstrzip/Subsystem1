@@ -983,3 +983,810 @@ table {
     height: 100%;
     cursor: pointer;
 }
+
+
+/* ==========================================================================
+   Campus Director – page redesign (Room Schedule, Room Management, Profile)
+   Content area only. Header and sidebar styles live in layout.css.
+   ========================================================================== */
+
+/* ---------- Page banner (shared) ---------- */
+.cdb-banner {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    padding: 20px 30px 22px;
+    color: #fff;
+    background: linear-gradient(100deg, #2C3F56 0%, #3a4e6a 55%, #53677F 100%);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, .25);
+    margin-bottom: 20px;
+}
+
+    .cdb-banner .cdb-crumb {
+        font-size: 10px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cdb-banner h2 {
+        font-family: 'Newsreader', serif;
+        font-weight: 600;
+        font-size: 3.2rem;
+        line-height: 1.1;
+        color: #fff;
+        margin: 0 0 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cdb-banner p {
+        font-size: 13px;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+        max-width: 80%;
+    }
+
+    .cdb-banner .cdb-deco {
+        position: absolute;
+        right: -14px;
+        bottom: -34px;
+        font-size: 190px;
+        color: rgba(27, 41, 59, .5);
+        line-height: 1;
+    }
+
+/* ---------- Filter fields (selects / date) ---------- */
+.cdf-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 22px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.cdf-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    color: #59607a;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.cdf-field select,
+.cdf-field input[type=date] {
+    height: 44px;
+    min-width: 210px;
+    padding: 0 14px;
+    border: 1px solid #dfe3ee;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    color: #1B293B;
+    outline: none;
+}
+
+.cdf-field select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 38px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231B293B' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+
+    .cdf-field select:focus,
+    .cdf-field input[type=date]:focus {
+        border-color: #2C3F56;
+    }
+
+/* ---------- Room schedule grid ---------- */
+.cds-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+    padding: 16px 14px 24px;
+    overflow-x: auto;
+    min-height: 340px;
+}
+
+    .cds-card .sched-legend {
+        gap: 12px 22px;
+        margin: 0 0 14px 4px;
+        font-weight: 500;
+    }
+
+    .cds-card .status-indicator-box {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+    }
+
+    .cds-card .box-open {
+        background: #fff;
+        border: 1px solid #8b93a5;
+    }
+
+    .cds-card .box-occupied {
+        background: #2E6FAD;
+    }
+
+    .cds-card .box-reserved {
+        background: #1F4E7F;
+    }
+
+    .cds-card .box-unavailable {
+        background: #777777;
+    }
+
+    .cds-card .box-completed {
+        background: #3aa74d;
+    }
+
+    .cds-card .box-cancelled {
+        background: #b3262b;
+    }
+
+    .cds-card .sched-table {
+        border: 0;
+        min-width: 900px;
+    }
+
+        .cds-card .sched-table th {
+            background: #eef0f6;
+            color: #1B293B;
+            font-size: .72rem;
+            font-weight: 600;
+            text-transform: none;
+            padding: 11px 2px;
+            border-bottom: 0;
+        }
+
+            .cds-card .sched-table th.sched-room-col {
+                text-align: left;
+                padding-left: 16px;
+            }
+
+        .cds-card .sched-table td {
+            padding: 0;
+            height: 34px;
+            border-bottom: 1px solid #e8ebf2;
+            color: #000;
+        }
+
+            .cds-card .sched-table td:first-child {
+                text-align: left;
+                padding-left: 18px;
+                font-weight: 700;
+                font-size: .82rem;
+                background: #fff;
+            }
+
+            .cds-card .sched-table td.sched-cell {
+                border-left: 1px solid #e8ebf2;
+                background: #f7f8fc;
+            }
+
+            .cds-card .sched-table td.sched-block {
+                text-align: left;
+                padding: 0 12px;
+                font-size: .72rem;
+            }
+
+/* ---------- Room management ---------- */
+.rmx-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.rmx-search {
+    position: relative;
+    flex: 1;
+}
+
+    .rmx-search i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+    }
+
+    .rmx-search input {
+        width: 100%;
+        height: 46px;
+        padding: 0 16px 0 44px;
+        border: 1px solid #e3e6ee;
+        border-radius: 8px;
+        background: #fff;
+        font-size: 14px;
+        outline: none;
+    }
+
+        .rmx-search input:focus {
+            border-color: #2C3F56;
+        }
+
+.rmx-top-btn {
+    height: 46px;
+    padding: 0 26px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.rmx-top-fill {
+    background: #2E5C8A;
+    color: #fff;
+    border: 1px solid #2E5C8A;
+}
+
+.rmx-top-white {
+    background: #fff;
+    color: #1B293B;
+    border: 1px solid #e3e6ee;
+}
+
+.rmx-top-fill:hover {
+    background: #24496e;
+}
+
+.rmx-top-white:hover {
+    background: #f4f6fa;
+}
+
+.rmx-filter {
+    margin-bottom: 18px;
+}
+
+.rmx-panels {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 34px;
+    align-items: start;
+}
+
+.rmx-panel {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+}
+
+.rmx-head {
+    background: #2E5C8A;
+    color: #fff;
+    padding: 16px 22px 14px;
+}
+
+    .rmx-head h3 {
+        font-family: 'Newsreader', serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .rmx-head small {
+        font-size: 12px;
+        opacity: .9;
+    }
+
+.rmx-scroll {
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+table.rmx-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+}
+
+    table.rmx-table th {
+        background: #f1f2f7;
+        color: #59607a;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+        padding: 12px 14px;
+        border-bottom: 0;
+        position: sticky;
+        top: 0;
+    }
+
+    table.rmx-table td {
+        padding: 11px 14px;
+        border-bottom: 1px solid #eef0f5;
+        color: #1B293B;
+        vertical-align: middle;
+    }
+
+        table.rmx-table td.rmx-b {
+            font-weight: 700;
+            color: #000;
+            white-space: nowrap;
+        }
+
+        table.rmx-table td.rmx-act, table.rmx-table th:last-child {
+            white-space: nowrap;
+        }
+
+    table.rmx-table .rmx-c {
+        text-align: center;
+    }
+
+    table.rmx-table td.rmx-empty {
+        text-align: center;
+        color: #8a8aa8;
+        padding: 28px 0;
+    }
+
+.rmx-foot {
+    text-align: center;
+    color: #6b7280;
+    font-size: .8rem;
+    padding: 14px 0;
+}
+
+.rmx-pill {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 12px;
+    font-size: .68rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.rmx-active {
+    background: #dcf3e4;
+    color: #2a8a4a;
+}
+
+.rmx-maint {
+    background: #dbe5f4;
+    color: #2E5C8A;
+}
+
+.rmx-unavail {
+    background: #dde3ee;
+    color: #44516a;
+}
+
+.rmx-icon {
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 3px 5px;
+}
+
+.rmx-edit {
+    color: #1e88e5;
+}
+
+.rmx-trash {
+    color: #e53935;
+}
+
+.rmx-icon:hover {
+    opacity: .7;
+}
+
+/* ---------- Add / Edit pop ups ---------- */
+.modal-overlay {
+    padding: 16px;
+}
+
+.rmx-card {
+    background: #f5f5f7;
+    border: 1px solid #b9c6d6;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 100%;
+    padding: 24px 28px 22px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+    animation: cdFadeIn .18s ease-out;
+}
+
+.rmx-title {
+    font-size: .95rem;
+    font-weight: 800;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    color: #2C3F56;
+    margin-bottom: 22px;
+}
+
+.rmx-field {
+    position: relative;
+    margin-bottom: 18px;
+}
+
+    .rmx-field > label {
+        position: absolute;
+        top: -8px;
+        left: 12px;
+        padding: 0 5px;
+        background: #f5f5f7;
+        font-size: .68rem;
+        font-weight: 600;
+        color: #6b7280;
+        z-index: 1;
+    }
+
+    .rmx-field input,
+    .rmx-field select,
+    .rmx-prefixed {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #c9ced8;
+        border-radius: 7px;
+        padding: 0 14px;
+        background: #f5f5f7;
+        font-size: .88rem;
+        color: #1B293B;
+        outline: none;
+    }
+
+    .rmx-field select {
+        appearance: none;
+        -webkit-appearance: none;
+        cursor: pointer;
+        padding-right: 36px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b7280' stroke-width='1.6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+    }
+
+        .rmx-field input:focus,
+        .rmx-field select:focus,
+        .rmx-prefixed:focus-within {
+            border-color: #2C3F56;
+        }
+
+    .rmx-field input::placeholder {
+        color: #a3a9b5;
+    }
+
+.rmx-prefixed {
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+}
+
+    .rmx-prefixed span {
+        color: #1B293B;
+        font-size: .88rem;
+    }
+
+    .rmx-prefixed input {
+        border: 0;
+        height: 100%;
+        padding: 0;
+        flex: 1;
+        min-width: 0;
+    }
+
+.rmx-status-label {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: #59607a;
+    margin: 2px 0 0;
+}
+
+.rmx-radios {
+    display: flex;
+    gap: 24px;
+    margin: 8px 0 6px;
+}
+
+    .rmx-radios .cd-radio-item {
+        font-size: .8rem;
+    }
+
+.rmx-error {
+    color: #b3261e;
+    font-size: .75rem;
+    min-height: 16px;
+    margin: 2px 0 0;
+}
+
+.rmx-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.rmx-btn {
+    border-radius: 20px;
+    padding: 8px 22px;
+    font-size: .85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid #2C3F56;
+    transition: opacity .15s;
+}
+
+    .rmx-btn:hover {
+        opacity: .88;
+    }
+
+.rmx-fill {
+    background: #2C3F56;
+    color: #fff;
+}
+
+.rmx-outline {
+    background: #fff;
+    color: #2C3F56;
+}
+
+.rmx-danger {
+    background: #b3262b;
+    border-color: #b3262b;
+    color: #fff;
+}
+
+/* ---------- Delete pop ups ---------- */
+.rmx-del {
+    background: #f3f6fb;
+    border: 1px solid #5b87b4;
+    border-radius: 8px;
+    width: 380px;
+    max-width: 100%;
+    padding: 26px 24px 22px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+    animation: cdFadeIn .18s ease-out;
+}
+
+    .rmx-del h3 {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #000;
+        margin: 8px 0 8px;
+    }
+
+    .rmx-del p {
+        font-size: .72rem;
+        color: #111;
+        line-height: 1.55;
+        font-weight: 600;
+    }
+
+    .rmx-del .rmx-del-extra {
+        color: #b3262b;
+        margin-top: 6px;
+    }
+
+        .rmx-del .rmx-del-extra:empty {
+            display: none;
+        }
+
+.rmx-warn {
+    font-size: 30px;
+    color: #b3262b;
+}
+
+.rmx-del-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+/* ---------- Profile ---------- */
+.cdp2-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    align-items: stretch;
+}
+
+.cdp2-card {
+    background: #fff;
+    border: 1.5px solid #2C3F56;
+    border-radius: 18px;
+    padding: 22px 26px 24px;
+}
+
+.cdp2-title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #2C3F56;
+    margin-bottom: 14px;
+}
+
+.cdp2-who {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 14px;
+}
+
+.cdp2-avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top;
+    background: #e6e9f1;
+}
+
+.cdp2-name {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #2a1215;
+}
+
+.cdp2-role {
+    font-size: .95rem;
+    color: #2a1215;
+}
+
+table.cdp2-info {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+}
+
+    table.cdp2-info td {
+        padding: 15px 4px;
+        border-top: 1px solid #2C3F56;
+        border-bottom: 0;
+        color: #1B293B;
+    }
+
+    table.cdp2-info tr:last-child td {
+        border-bottom: 1px solid #2C3F56;
+    }
+
+    table.cdp2-info td.label {
+        width: 90px;
+        font-weight: 600;
+        color: #2C3F56;
+    }
+
+    table.cdp2-info td.info {
+        font-weight: 700;
+        color: #000;
+    }
+
+.cdp2-form label {
+    display: block;
+    font-size: .95rem;
+    font-weight: 700;
+    color: #2C3F56;
+    margin: 14px 0 6px;
+}
+
+    .cdp2-form label:first-child {
+        margin-top: 0;
+    }
+
+.cdp2-form input {
+    width: 100%;
+    height: 44px;
+    padding: 0 18px;
+    border: 1.5px solid #2C3F56;
+    border-radius: 22px;
+    background: #f8f8fc;
+    font-size: .95rem;
+    outline: none;
+}
+
+    .cdp2-form input:focus {
+        box-shadow: 0 0 0 3px rgba(44, 63, 86, .18);
+    }
+
+.cdp2-submit {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 22px;
+}
+
+.cdp2-btn {
+    height: 44px;
+    padding: 0 44px;
+    border: 0;
+    border-radius: 22px;
+    background: #2C3F56;
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+    .cdp2-btn:hover {
+        background: #1B293B;
+    }
+
+/* ---------- Logout confirmation (all Campus Director pages) ---------- */
+.lo-card {
+    background: #fff;
+    border-radius: 14px;
+    width: 380px;
+    max-width: 100%;
+    padding: 34px 28px 28px;
+    text-align: center;
+    box-shadow: 0 12px 34px rgba(0, 0, 0, .25);
+    animation: cdFadeIn .18s ease-out;
+}
+
+.lo-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    margin: 0 auto 18px;
+    background: #8b9bb0;
+    color: #1B293B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.lo-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1B293B;
+    margin-bottom: 8px;
+}
+
+.lo-sub {
+    font-size: .78rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.lo-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.lo-btn {
+    height: 44px;
+    padding: 0 28px;
+    border-radius: 22px;
+    font-size: .95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid #2C3F56;
+}
+
+.lo-fill {
+    background: #2C3F56;
+    color: #fff;
+}
+
+.lo-outline {
+    background: #fff;
+    color: #1B293B;
+}
+
+@media (max-width: 1100px) {
+    .rmx-panels, .cdp2-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rmx-toolbar {
+        flex-wrap: wrap;
+    }
+}

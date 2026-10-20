@@ -1,101 +1,143 @@
 ﻿@using System.Linq
-@model Subsystem1.Areas.Student.ViewModels.StudentDashboardViewModel
+@using Subsystem1.Areas.Student.ViewModels
+@model StudentDashboardViewModel
 @{
     ViewBag.Title = "Dashboard";
     bool hasSubmission = !string.IsNullOrEmpty(Model.ManuscriptStatus);
     bool hasDefense = Model.DefenseDate.HasValue;
-    bool hasPanel = Model.Panel.Any();
+    int daysLeft = hasDefense ? (Model.DefenseDate.Value.Date - DateTime.Today).Days : 0;
 }
 
-<link href="@Url.Content("~/Content/css/student-dashboard.css")?v=1.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/student-pm.css")?v=1.0" rel="stylesheet" type="text/css" />
 
-<h1 class="dash-title">Dashboard</h1>
+<div class="pm">
+    <section class="pm-banner">
+        <div>
+            <small>@Model.UserRole | Dashboard</small>
+            <h1>Dashboard</h1>
+            <p>Welcome back, <span id="pmFirstName">Student</span>!</p>
+        </div>
+        <svg class="pm-banner-art" viewBox="0 0 120 120" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="10">
+                <rect x="10" y="10" width="40" height="40" />
+                <rect x="70" y="10" width="40" height="40" />
+                <rect x="10" y="70" width="40" height="40" />
+                <path d="M70 70h14v14H70zM96 96h14v14H96z" />
+            </g>
+        </svg>
+    </section>
 
-<section class="dash-stats">
-    <article class="dash-stat">
-        <svg class="dash-stat-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z M15 2v5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /><path d="M10 18v-4 M13 18v-6 M16 18v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
-        <div class="dash-stat-text">
+    <section class="pm-grid2">
+        <div class="pm-status-card">
             @if (hasSubmission)
             {
-                <div class="dash-stat-title">@Model.ManuscriptStatus</div>
-                <div class="dash-stat-line">Stage @Model.Stage of @Model.TotalStages</div>
-                <div class="dash-stat-note">@(Model.StatusDate.HasValue ? Model.StatusDate.Value.ToString("MM/dd/yyyy") : "")</div>
+                <div class="pm-status-head">
+                    <h2>@Model.ManuscriptStatus</h2>
+                    <span>@(Model.StatusDate.HasValue ? Model.StatusDate.Value.ToString("MM/dd/yyyy") : "")</span>
+                </div>
+                <div class="pm-stage">
+                    <span>Stage @Model.Stage of @Model.TotalStages</span>
+                    <div class="pm-stage-bar">
+                        @for (var i = 1; i <= (Model.TotalStages ?? 0); i++)
+                        {
+                            <i class="@(i <= (Model.Stage ?? 0) ? "on" : "")"></i>
+                        }
+                    </div>
+                </div>
             }
             else
             {
-                <div class="dash-stat-title">No Submission Yet</div>
-                <div class="dash-stat-line">Upload your manuscript to begin review</div>
-                <div class="dash-stat-note">&nbsp;</div>
+                <div class="pm-status-head"><h2>No Submission Yet</h2></div>
+                <div class="pm-stage"><span>Upload your manuscript to begin review</span></div>
             }
+            <i class="fa fa-file-lines pm-status-icon"></i>
         </div>
-    </article>
 
-    <article class="dash-stat">
-        <svg class="dash-stat-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M3 10h18 M8 3v4 M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /><circle cx="16.5" cy="16.5" r="3" fill="none" stroke="currentColor" stroke-width="1.8" /></svg>
-        <div class="dash-stat-text">
+        <div class="pm-card pm-defense">
+            <div class="pm-defense-head">
+                <strong>Defense</strong>
+                @if (hasDefense && daysLeft >= 0)
+                {
+                    <span class="pm-remaining"><b>@daysLeft</b> days remaining</span>
+                }
+            </div>
             @if (hasDefense)
             {
-                <div class="dash-stat-title">@Model.DefenseDate.Value.ToString("MMM d, yyyy")</div>
-                <div class="dash-stat-line">@(string.IsNullOrEmpty(Model.DefenseVenue) ? "No Venue Scheduled" : Model.DefenseVenue)</div>
-                <div class="dash-stat-note">@((Model.DefenseDate.Value.Date - DateTime.Today).Days) remaining days</div>
+                <div class="pm-defense-date">@Model.DefenseDate.Value.ToString("MMM. d, yyyy")</div>
+                <div class="pm-defense-room">@(string.IsNullOrEmpty(Model.DefenseVenue) ? "No Venue Scheduled" : Model.DefenseVenue)</div>
             }
             else
             {
-                <div class="dash-stat-title">No Defense Scheduled</div>
-                <div class="dash-stat-line">No Venue Scheduled</div>
-                <div class="dash-stat-note">&nbsp;</div>
+                <div class="pm-defense-date">No Defense Scheduled</div>
+                <div class="pm-defense-room">No Venue Scheduled</div>
             }
+            <i class="fa fa-calendar pm-defense-icon"></i>
         </div>
-    </article>
-</section>
+    </section>
 
-<section class="dash-panel @(hasPanel ? "dash-panel-list" : "")" aria-label="Assigned panel">
-    @if (hasPanel)
-    {
-        foreach (var p in Model.Panel)
+    <section class="pm-card">
+        <h3 class="pm-label">Panelist</h3>
+        @if (Model.Panel.Any())
         {
-            <div class="dash-member">
-                <div class="dash-member-photo">
-                    @if (!string.IsNullOrEmpty(p.PhotoUrl))
-                    {
-                        <img src="@p.PhotoUrl" alt="" />
-                    }
-                    else
-                    {
-                        <i class="fa fa-user"></i>
-                    }
-                </div>
-                <div>
-                    <div class="dash-member-name">@p.Name</div>
-                    <div class="dash-member-role">@p.Role</div>
-                </div>
+            <div class="pm-panel-row">
+                @foreach (var p in Model.Panel)
+                {
+                    <div class="pm-panelist">
+                        @if (!string.IsNullOrEmpty(p.PhotoUrl))
+                        {
+                            <img class="pm-avatar" src="@p.PhotoUrl" alt="@p.Name" />
+                        }
+                        else
+                        {
+                            <div class="pm-avatar">@p.Initials</div>
+                        }
+                        <div class="pm-panelist-info">
+                            <strong>@p.Name</strong>
+                            <span>@p.Role</span>
+                            @if (!string.IsNullOrEmpty(p.Department))
+                            {<span>@p.Department</span>}
+                        </div>
+                    </div>
+                }
             </div>
         }
-    }
-    else
-    {
-        <p>No panelists assigned yet.</p>
-    }
-</section>
-
-<section class="dash-activity">
-    <h3>Recent Activity</h3>
-    <div class="dash-activity-head"><span>Activity</span><span>Date</span></div>
-    @if (Model.Activity.Any())
-    {
-        foreach (var a in Model.Activity)
+        else
         {
-            <div class="dash-activity-row">
-                <span>@a.Description</span>
-                <span class="dash-activity-date">@a.Date.ToString("MMM d, yyyy")</span>
+            <p class="pm-muted-text">No panelists assigned yet.</p>
+        }
+    </section>
+
+    <section class="pm-card">
+        <h3 class="pm-title">Recent Activity</h3>
+        @if (Model.Activity.Any())
+        {
+            <table class="pm-table">
+                <thead><tr><th>Activity</th><th class="pm-right">Date</th></tr></thead>
+                <tbody>
+                    @foreach (var a in Model.Activity)
+                    {
+                        <tr>
+                            <td>@StudentFormat.Bold(a.Description)</td>
+                            <td class="pm-right pm-muted">@StudentFormat.TimeAgo(a.Date)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="pm-empty pm-empty--inline">
+                <p>No activity yet</p>
+                <small>Updates on your manuscript and panel show up here.</small>
             </div>
         }
-    }
-    else
-    {
-        <div class="dash-empty">
-            <strong>No activity yet</strong>
-            Updates on your manuscript and panel show up here.
-        </div>
-    }
-</section>
+    </section>
+</div>
+
+<script>// greet the logged-in user (same localStorage user the sidebar uses)
+    (function () {
+        try {
+            var u = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+            if (u && u.firstName) document.getElementById('pmFirstName').textContent = u.firstName;
+        } catch (e) { }
+    })();</script>

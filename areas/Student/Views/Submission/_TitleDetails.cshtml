@@ -1,0 +1,34 @@
+@using Subsystem1.Areas.Student.ViewModels
+@model ManuscriptItemDto
+<div class="pm-modal-card pm-view">
+    <header class="pm-modal-head">
+        <div>
+            <h2>View Capstone Title</h2>
+            <p class="pm-sub">College of Computer Studies · QCU · Thesis Document Management</p>
+        </div>
+        <button type="button" class="pm-x" data-close aria-label="Close"><i class="fa fa-xmark"></i></button>
+    </header>
+
+    <div class="pm-info-box">
+        <div><span class="k">Project Title</span><p><b>@Model.TitleBold</b>@Model.TitleRest</p></div>
+        <div><span class="k">Date Submitted</span><p><b>@Model.DateAndSubmissionTime.ToString("MMM d, yyyy")</b></p></div>
+        <div><span class="k">Current Status</span><p><span class="pm-badge pm-badge--@Model.Status.ToLower()">@Model.Status</span></p></div>
+        <div><span class="k">Project Manager</span><p><b>@Model.ProjectManager</b></p></div>
+        <div><span class="k">Program</span><p><b>@Model.Program</b></p></div>
+        <div><span class="k">Adviser</span><p><b>@Model.Adviser</b></p></div>
+    </div>
+
+    <div class="pm-two-col">
+        <div class="pm-soft">
+            <h4>Abstract</h4>
+            <p class="pm-abstract">@Model.Abstract</p>
+            <small class="pm-muted-s">Submitted @Model.DateAndSubmissionTime.ToString("MMM d, yyyy")</small>
+        </div>
+        <div class="pm-soft">
+            <h4>Keywords</h4>
+            <ul>@foreach (var k in Model.Keywords) { <li>@k</li> }</ul>
+        </div>
+    </div>
+
+    <footer class="pm-modal-foot"><button type="button" class="pm-outline" data-close>Close</button></footer>
+</div>
