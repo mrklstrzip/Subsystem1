@@ -1,11 +1,9 @@
-﻿/* Student dashboard style. TOUCH ME NOT */
+﻿/* Student dashboard style. TOUCH ME NOT
 
 /* Page title */
-.layout-content h1.dash-title {
+.layout-content h2.dash-title {
     color: #AC5065;
-    font-weight: 550;
-    font-family: 'Newsreader', serif;
-    margin-bottom: 22px;
+    font-weight: 700;
 }
 
 /* Status cards */
@@ -70,6 +68,7 @@
         color: #888;
     }
 
+
 /* Panel strip with members */
 .dash-panel-list {
     display: flex;
@@ -100,13 +99,6 @@
     flex: none;
 }
 
-    .dash-member-photo img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 4px;
-    }
-
 .dash-member-name {
     font-size: 20px;
     font-weight: 700;
@@ -116,6 +108,11 @@
 .dash-member-role {
     font-size: 15.5px;
     color: #333;
+}
+
+.dash-member-dept {
+    font-size: 15px;
+    color: #888;
 }
 
 .dash-slots {
@@ -168,6 +165,13 @@
         color: #333;
         margin-bottom: 4px;
     }
+
+.dash-member-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
 
 .dash-activity-row {
     display: flex;
