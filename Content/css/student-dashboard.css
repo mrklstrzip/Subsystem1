@@ -1,0 +1,196 @@
+﻿/* Student dashboard style. TOUCH ME NOT
+
+/* Page title */
+.layout-content h2.dash-title {
+    color: #AC5065;
+    font-weight: 700;
+}
+
+/* Status cards */
+.dash-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.dash-stat {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background-color: #AC5065;
+    color: #fff;
+    border-radius: 8px;
+    padding: 20px 24px;
+}
+
+.dash-stat-icon {
+    width: 42px;
+    height: 42px;
+    flex: none;
+}
+
+.dash-stat-text {
+    flex: 1;
+    text-align: right;
+}
+
+.dash-stat-title {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.dash-stat-line {
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+.dash-stat-note {
+    font-size: 11px;
+    margin-top: 8px;
+    color: #F0D9DF;
+}
+
+/* Panel strip */
+.dash-panel {
+    background-color: #fff;
+    border: 1px solid #D0D4E6;
+    border-radius: 10px;
+    padding: 20px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    justify-content: center;
+}
+
+    .dash-panel p {
+        font-size: 13px;
+        color: #888;
+    }
+
+
+/* Panel strip with members */
+.dash-panel-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 18px 28px;
+    padding: 30px;
+    text-align: left;
+}
+
+.dash-member {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dash-member-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 4px;
+    background-color: #E7CBD1;
+    color: #AC5065;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    font-weight: 700;
+    flex: none;
+}
+
+.dash-member-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #AC5065;
+}
+
+.dash-member-role {
+    font-size: 15.5px;
+    color: #333;
+}
+
+.dash-member-dept {
+    font-size: 15px;
+    color: #888;
+}
+
+.dash-slots {
+    display: flex;
+    gap: 8px;
+    flex: none;
+}
+
+    .dash-slots span {
+        width: 40px;
+        height: 46px;
+        border-radius: 4px;
+        border: 1.5px dashed #C9C6E0;
+    }
+
+/* Recent activity */
+.dash-activity {
+    background-color: #fff;
+    border: 1px solid #B9B3E0;
+    border-radius: 10px;
+    padding: 18px 20px 12px;
+}
+
+    .dash-activity h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #AC5065;
+        margin-bottom: 14px;
+    }
+
+.dash-activity-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #888;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #E7E5F2;
+}
+
+.dash-empty {
+    padding: 28px 0 22px;
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+}
+
+    .dash-empty strong {
+        display: block;
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+.dash-member-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.dash-activity-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ECEAF5;
+    font-size: 15px;
+    color: #333;
+}
+
+    .dash-activity-row:last-child {
+        border-bottom: 0;
+    }
+
+.dash-activity-date {
+    font-style: italic;
+    font-size: 15px;
+    color: #888;
+    white-space: nowrap;
+}
