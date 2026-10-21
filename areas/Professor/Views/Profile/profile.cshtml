@@ -2,65 +2,59 @@
     ViewBag.Title = "Profile";
 }
 
+<div class="pf-page">
 
-    <div class="role-professor">
-        <h1 class="page-title">Profile</h1>
-
-        <div class="profile-card">
-            <h4 class="card-title">Profile Information</h4>
-            <table class="information-table">
-                <tbody id="profileTableBody">
-                    <tr>
-                        <td class="label">NAME</td>
-                        <td class="info" id="infoName"></td>
-                    </tr>
-                    <tr>
-                        <td class="label">ID</td>
-                        <td class="info" id="infoNumber"></td>
-                    </tr>
-                    <tr>
-                        <td class="label">ROLE</td>
-                        <td class="info" id="infoRole"></td>
-                    </tr>
-                    <tr>
-                        <td class="label">EMAIL</td>
-                        <td class="info" id="infoEmail"></td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="pf-banner">
+        <div>
+            <h1>Profile</h1>
         </div>
-
-        <div class="profile-card">
-            <h4 class="card-title">Change Password</h4>
-            <form class="password-form" id="changePasswordForm" onsubmit="return false;">
-                <div class="form-group">
-                    <label for="current-password">CURRENT PASSWORD</label>
-                    <div class="input-wrapper">
-                        <input type="password" id="current-password" required>
-                        <i class="fa fa-eye toggle-password"></i>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="new-password">NEW PASSWORD</label>
-                    <div class="input-wrapper">
-                        <input type="password" id="new-password" required>
-                        <i class="fa fa-eye toggle-password"></i>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="confirm-password">CONFIRM NEW PASSWORD</label>
-                    <div class="input-wrapper">
-                        <input type="password" id="confirm-password" required>
-                        <i class="fa fa-eye toggle-password"></i>
-                    </div>
-                </div>
-
-                <button type="submit" class="confirm-btn">Confirm</button>
-            </form>
-        </div>
+        <svg class="pf-banner-deco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <path d="M21 12a9 9 0 1 0-4 7.5" />
+            <circle cx="13" cy="9.5" r="3" fill="currentColor" stroke="none" />
+            <path d="M7.5 18.5a5.5 5.5 0 0 1 11 0z" fill="currentColor" stroke="none" />
+        </svg>
     </div>
 
-    <script src="~/Scripts/dummy-users.js"></script>
-    <script src="~/Scripts/profile.js"></script>
+    <div class="pf-profile-grid">
+
+        <!-- Profile Information -->
+        <div class="pf-pcard">
+            <h3>Profile Information</h3>
+
+            <div class="pf-pinfo-head">
+                <!-- Replace this svg with: <img class="pf-avatar" src="YOUR-PHOTO-PATH" alt="Profile photo" /> -->
+                <img class="pf-avatar" src="@Url.Content("~/Content/images/professor-avatar.jpg")" alt="Profile photo" />
+                <div>
+                    <div class="pf-pname">Resume Dizon</div>
+                    <div class="pf-prole">Panelist</div>
+                </div>
+            </div>
+
+            <div class="pf-prow"><span>Name</span><span>Resume Dizon</span></div>
+            <div class="pf-prow"><span>ID</span><span>2X-XXXX</span></div>
+            <div class="pf-prow"><span>Role</span><span>Panelist</span></div>
+            <div class="pf-prow"><span>Email</span><span>adviser@qcu.edu.ph</span></div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="pf-pcard">
+            <h3>Change Password</h3>
+
+            <div class="pf-field">
+                <label for="curPass">Current password</label>
+                <input type="password" id="curPass" />
+
+                <label for="newPass">New password</label>
+                <input type="password" id="newPass" />
+
+                <label for="confPass">Confirm password</label>
+                <input type="password" id="confPass" />
+            </div>
+
+            <div class="pf-pfoot">
+                <button type="button" class="pf-confirm">Confirm</button>
+            </div>
+        </div>
+
+    </div>
+</div>

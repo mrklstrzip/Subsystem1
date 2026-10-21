@@ -1,0 +1,910 @@
+﻿/* =========================================================
+   Dean.css - Dean area styles (bell, notifications, dashboard)
+   ========================================================= */
+
+/* ---------- Bell (header) ---------- */
+
+.notif-bell {
+    position: absolute;
+    right: 150px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: 0;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.notif-dot {
+    position: absolute;
+    top: -2px;
+    right: -3px;
+    right: -3px;
+    width: 9px;
+    height: 9px;
+    background: #e5484d;
+    border-radius: 50%;
+    border: 2px solid #2c3e5c;
+}
+
+    .notif-dot.hidden {
+        display: none;
+    }
+
+/* ---------- Notification panel ---------- */
+.notif-panel {
+    position: fixed;
+    top: 70px;
+    right: 70px;
+    width: 250px;
+    max-width: calc(100vw - 20px);
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .28);
+    z-index: 1000;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+    .notif-panel[hidden] {
+        display: none;
+    }
+
+.notif-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 14px 6px;
+}
+
+.notif-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .notif-title h3 {
+        margin: 0;
+        font-size: 18px;
+        color: #2c3e5c;
+    }
+
+.notif-badge {
+    background: #8b9ab0;
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.notif-close {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 16px;
+    color: #4a5568;
+}
+
+.notif-tabs {
+    display: flex;
+    gap: 16px;
+    padding: 0 14px;
+    border-bottom: 1px solid #e3e6ec;
+    font-size: 11px;
+}
+
+.notif-tab {
+    background: none;
+    border: 0;
+    padding: 6px 0;
+    cursor: pointer;
+    color: #7a869a;
+    border-bottom: 2px solid transparent;
+}
+
+    .notif-tab.active {
+        color: #2c3e5c;
+        font-weight: 600;
+        border-bottom-color: #2c3e5c;
+    }
+
+.notif-body {
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+.notif-group-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #7a869a;
+    padding: 10px 14px 4px;
+    letter-spacing: .05em;
+}
+
+.notif-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 14px;
+    border-top: 1px solid #eef0f4;
+}
+
+    .notif-item.unread {
+        background: #e8eef7;
+    }
+
+.notif-icon {
+    flex: 0 0 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: #8b9ab0;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+}
+
+.notif-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notif-item-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2c3e5c;
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.unread-dot {
+    width: 6px;
+    height: 6px;
+    background: #2c3e5c;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex: 0 0 6px;
+}
+
+.notif-content p {
+    margin: 3px 0 8px;
+    font-size: 10px;
+    color: #7a869a;
+}
+
+.notif-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .notif-actions button {
+        font-size: 10px;
+        padding: 2px 9px;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+.btn-cancel {
+    background: #dde3ee;
+    color: #2c3e5c;
+    border: 1px solid #2c3e5c;
+}
+
+.btn-approve {
+    background: #2c3e5c;
+    color: #fff;
+    border: 1px solid #2c3e5c;
+}
+
+.notif-time {
+    margin-left: auto;
+    font-size: 10px;
+    color: #7a869a;
+}
+
+/* ---------- Dashboard hero ---------- */
+.dash-hero {
+    background: linear-gradient(135deg, #2c3e5c, #3f5578);
+    color: #fff;
+    border-radius: 10px;
+    padding: 22px 28px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+}
+
+    .dash-hero h1 {
+        font-family: 'Newsreader', serif;
+        font-size: 44px;
+        margin: 4px 0 8px;
+    }
+
+    .dash-hero p {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+.dash-crumb {
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.dash-hero-icon {
+    font-size: 80px;
+    opacity: .15;
+}
+
+/* ---------- Dashboard layout ---------- */
+.dash-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 20px;
+}
+
+.dash-main,
+.dash-side {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ---------- Cards ---------- */
+.dash-card {
+    background: #fff;
+    border: 1px solid #b9c2d4;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .12);
+}
+
+.dash-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+    .dash-card-head h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 500;
+        color: #1a1a1a;
+    }
+
+        .dash-card-head h2.muted-h {
+            font-size: 11px;
+            font-weight: 700;
+            color: #7a7f9a;
+            letter-spacing: .03em;
+        }
+
+.view-all {
+    font-size: 11px;
+    color: #7a4fa0;
+    text-decoration: none;
+}
+
+/* ---------- Tables ---------- */
+.dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+    .dash-table th {
+        font-size: 10px;
+        font-weight: 500;
+        color: #6b7280;
+        text-align: center;
+        padding: 6px 4px;
+    }
+
+    .dash-table td {
+        text-align: center;
+        padding: 8px 4px;
+        border-top: 1px solid #e3e6ec;
+    }
+
+    .dash-table .left {
+        text-align: left;
+    }
+
+.ms-title {
+    font-weight: 600;
+    font-size: 11px;
+}
+
+/* ---------- Section tags ---------- */
+.tag {
+    display: inline-block;
+    font-size: 7px;
+    padding: 1px 7px;
+    border-radius: 8px;
+    margin-top: 3px;
+}
+
+.tag-gray {
+    background: #d0d0d0;
+    color: #333;
+}
+
+.tag-red {
+    background: #f5b5b5;
+    color: #7a1f1f;
+}
+
+.tag-purple {
+    background: #d9c5f2;
+    color: #4b2a7a;
+}
+
+/* ---------- View button ---------- */
+.btn-view {
+    display: inline-block;
+    border: 1px solid #7a4fa0;
+    color: #7a4fa0;
+    border-radius: 4px;
+    padding: 2px 16px;
+    font-size: 10px;
+    text-decoration: none;
+}
+
+    .btn-view:hover {
+        background: #7a4fa0;
+        color: #fff;
+    }
+
+/* ---------- Total Defenses card ---------- */
+.stat-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #7a7f9a;
+}
+
+.stat-number {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.stat-sub {
+    font-size: 7px;
+    color: #9aa0b0;
+}
+
+.stat-icon {
+    font-size: 36px;
+    color: #8b8fb5;
+}
+
+/* ---------- Recent Activities ---------- */
+.activity-table td {
+    height: 38px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1000px) {
+    .dash-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+    
+/* =========================================================
+   Schedule Approval page + pop-up
+   ========================================================= */
+
+.sa-banner {
+    position: relative;
+    overflow: hidden;
+    background: #2c3e5a;
+    color: #fff;
+    border-radius: 14px;
+    padding: 14px 28px 18px;
+    margin-bottom: 28px;
+}
+
+    .sa-banner small {
+        font-family: 'Inter', sans-serif;
+        font-size: 9px;
+        font-weight: 600;
+    }
+
+    .sa-banner h1 {
+        font-family: 'Newsreader', serif;
+        font-size: 44px;
+        font-weight: 700;
+        margin: 4px 0 0;
+    }
+
+.sa-banner-icon {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 70px;
+    opacity: .12;
+}
+
+/* Toolbar */
+.sa-toolbar {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.sa-search {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1.5px solid #2c3e5a;
+    border-radius: 10px;
+    padding: 0 14px;
+    height: 40px;
+}
+
+    .sa-search i {
+        color: #9aa3b2;
+    }
+
+    .sa-search input {
+        border: 0;
+        outline: 0;
+        flex: 1;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        background: transparent;
+    }
+
+.sa-filter {
+    position: relative;
+    background: #fff;
+    border: 1.5px solid #2c3e5a;
+    border-radius: 10px;
+    height: 40px;
+    padding: 0 10px;
+    min-width: 105px;
+}
+
+    .sa-filter label {
+        position: absolute;
+        top: -8px;
+        left: 10px;
+        background: #fff;
+        padding: 0 4px;
+        font-family: 'Inter', sans-serif;
+        font-size: 9px;
+        font-weight: 600;
+        color: #2c3e5a;
+    }
+
+    .sa-filter select {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #2c3e5a;
+        cursor: pointer;
+    }
+
+/* Table */
+.sa-card {
+    background: #fff;
+    border: 1px solid #2c3e5a;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.12);
+    overflow: hidden;
+}
+
+.sa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+}
+
+    .sa-table th {
+        text-align: center;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: .06em;
+        color: #3b4558;
+        padding: 24px 12px;
+    }
+
+        .sa-table th:first-child, .sa-table td:first-child {
+            text-align: left;
+            padding-left: 32px;
+        }
+
+    .sa-table td {
+        text-align: center;
+        font-size: 12px;
+        color: #1e2635;
+        padding: 16px 12px;
+        border-top: 1px solid #2c3e5a;
+    }
+
+.sa-title strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.sa-chip {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.chip-bsit {
+    background: #d5d5d9;
+    color: #3b4558;
+}
+
+.chip-bscs {
+    background: #f7c9c9;
+    color: #b23a3a;
+}
+
+.chip-bsis {
+    background: #e2d4f5;
+    color: #6b3fa8;
+}
+
+.sa-status {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 4px;
+    border: 1px solid;
+}
+
+.st-toapprove {
+    background: #a9b4d9;
+    color: #2c3e5a;
+    border-color: #8a97c4;
+}
+
+.st-approved {
+    background: #c9ccd4;
+    color: #2f3646;
+    border-color: #a9adb8;
+}
+
+.sa-btn-view {
+    background: #fff;
+    color: #5b3a8c;
+    border: 1.5px solid #5b3a8c;
+    border-radius: 6px;
+    padding: 8px 28px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background .15s;
+}
+
+    .sa-btn-view:hover {
+        background: #f3edfa;
+    }
+
+.sa-empty {
+    padding: 30px;
+    text-align: center;
+    color: #7b8496;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+}
+
+/* Modal */
+.sa-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+    .sa-overlay.open {
+        display: flex;
+    }
+
+.sa-modal {
+    background: #fff;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 1150px;
+    max-height: 94vh;
+    overflow-y: auto;
+    padding: 36px 38px 28px;
+    font-family: 'Inter', sans-serif;
+    color: #2b2f3a;
+    animation: saPop .18s ease-out;
+}
+
+@keyframes saPop {
+    from {
+        transform: scale(.96);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.sa-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 22px;
+}
+
+    .sa-modal-head h2 {
+        font-family: 'Newsreader', serif;
+        font-size: 32px;
+        font-weight: 700;
+        color: #2c5a8c;
+        margin: 0;
+    }
+
+    .sa-modal-head p {
+        margin: 4px 0 0;
+        font-size: 14px;
+        color: #6c7488;
+    }
+
+.sa-x {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 0;
+    background: #efedf6;
+    color: #4b2e83;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+    .sa-x:hover {
+        background: #e3e0f0;
+    }
+
+.sa-info {
+    background: #eff1f8;
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 22px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 24px;
+}
+
+    .sa-info label {
+        display: block;
+        font-size: 11px;
+        letter-spacing: .04em;
+        color: #6c7488;
+        margin-bottom: 6px;
+    }
+
+    .sa-info strong {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .sa-info .sa-status {
+        font-size: 12px;
+        padding: 3px 10px;
+    }
+
+.sa-info-sep {
+    grid-column: 1 / -1;
+    height: 1px;
+    background: #d5d9e6;
+    margin: -4px 0;
+}
+
+.sa-body {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+.sa-panel {
+    border: 1px solid #dcdfe8;
+    border-radius: 14px;
+    padding: 22px 24px;
+    min-height: 300px;
+}
+
+    .sa-panel h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 12px;
+    }
+
+        .sa-panel h3.sa-mt {
+            margin-top: 26px;
+        }
+
+    .sa-panel p {
+        font-size: 14px;
+        line-height: 1.45;
+        margin: 0 0 20px;
+    }
+
+.sa-muted {
+    color: #9aa0b0;
+    font-size: 12px;
+}
+
+.sa-panel-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.sa-panel-row-head {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.sa-match {
+    width: 98px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 0;
+    border-radius: 10px;
+    border: 1px solid;
+}
+
+.match-high {
+    background: #c9f5c9;
+    color: #2f7d2f;
+    border-color: #4fc24f;
+}
+
+.match-medium {
+    background: #f4f7a8;
+    color: #8a8f1a;
+    border-color: #c9d02a;
+}
+
+.match-low {
+    background: #e1e1e1;
+    color: #555;
+    border-color: #888;
+}
+
+.sa-sched {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 20px;
+    margin: 0;
+    font-size: 13px;
+}
+
+    .sa-sched dt {
+        color: #6c7488;
+    }
+
+    .sa-sched dd {
+        margin: 0;
+        text-align: right;
+        color: #4b5266;
+    }
+
+.sa-modal-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+}
+
+.sa-btn-close, .sa-btn-approve {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    padding: 14px 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity .15s;
+}
+
+.sa-btn-close {
+    background: #fff;
+    border: 1px solid #cfd3e0;
+    color: #2b2f3a;
+}
+
+.sa-btn-approve {
+    background: #4a5f80;
+    border: 1px solid #2c3e5a;
+    color: #fff;
+}
+
+    .sa-btn-approve:hover {
+        opacity: .9;
+    }
+
+    .sa-btn-approve:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+@media (max-width: 900px) {
+    .sa-body {
+        grid-template-columns: 1fr;
+    }
+
+    .sa-info {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* =========================================================
+   Defense Schedule page
+   ========================================================= */
+.sa-banner p {
+    margin: 6px 0 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.st-completed {
+    background: #c9f5c9;
+    color: #1d6b24;
+    border-color: #4caf50;
+}
+
+.st-ongoing {
+    background: #d6e2ff;
+    color: #2c4fa8;
+    border-color: #6b8ee0;
+}
+
+.st-upcoming {
+    background: #f3c9c9;
+    color: #7a1f1f;
+    border-color: #b34a4a;
+}
+
+.ds-panelists {
+    max-width: 160px;
+    margin: 0 auto;
+}

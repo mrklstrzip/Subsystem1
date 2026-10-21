@@ -1,4 +1,104 @@
-﻿@{
+﻿@model Subsystem1.Areas.Dean.Models.DashboardViewModel
+@{
     ViewBag.Title = "Dashboard";
 }
-<h1>Dashboard</h1>
+
+<section class="dash-hero">
+    <div>
+        <div class="dash-crumb">Dean / Dashboard</div>
+        <h1>Dashboard</h1>
+        <p>View room schedules and check room availability by building, date, and room status</p>
+    </div>
+    <i class="fa fa-calendar-check dash-hero-icon"></i>
+</section>
+
+<div class="dash-grid">
+    <div class="dash-main">
+
+        <div class="dash-card">
+            <div class="dash-card-head">
+                <h2>To Approve</h2>
+                <a href="@Url.Action("ScheduleApprovalView", "ScheduleApproval")" class="view-all">View All</a>
+            </div>
+            <table class="dash-table">
+                <thead>
+                    <tr><th class="left">MANUSCRIPT</th><th>AUTHOR</th><th>ADVISER</th><th>DATE</th><th>ACTION</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.ToApprove)
+                    {
+                        <tr data-id="@r.Id">
+                            <td class="left">
+                                <div class="ms-title">@r.Title</div>
+                                <span class="tag @r.TagClass">@r.Section</span>
+                            </td>
+                            <td>@r.Author</td>
+                            <td>@r.Adviser</td>
+                            <td>@r.Date</td>
+                            <td><a href="@Url.Action("ScheduleApprovalView", "ScheduleApproval")" class="btn-view" data-sa-open data-id="@r.Id">View</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dash-card">
+            <div class="dash-card-head">
+                <h2>Upcoming Defenses</h2>
+                <a href="@Url.Action("DefenseScheduleView", "DefenseSchedule")" class="view-all">View All</a>
+            </div>
+            <table class="dash-table">
+                <thead>
+                    <tr><th class="left">MANUSCRIPT</th><th>AUTHOR</th><th>ADVISER</th><th>ROOM</th><th>DATE</th><th>TIME</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.Upcoming)
+                    {
+                        <tr>
+                            <td class="left">
+                                <div class="ms-title">@r.Title</div>
+                                <span class="tag @r.TagClass">@r.Section</span>
+                            </td>
+                            <td>@r.Author</td>
+                            <td>@r.Adviser</td>
+                            <td><strong>@r.Room</strong></td>
+                            <td>@r.Date</td>
+                            <td>@r.Time</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <aside class="dash-side">
+        <div class="dash-card stat-card">
+            <div>
+                <div class="stat-label">TOTAL DEFENSES</div>
+                <div class="stat-number">@Model.TotalDefenses</div>
+                <div class="stat-sub">Across all buildings</div>
+            </div>
+            <i class="fa fa-door-open stat-icon"></i>
+        </div>
+
+        <div class="dash-card">
+            <div class="dash-card-head"><h2 class="muted-h">RECENT ACTIVITIES</h2></div>
+            <table class="dash-table activity-table">
+                <thead><tr><th class="left">TIME</th><th class="left">ACTIVITY</th></tr></thead>
+                <tbody>
+                    @foreach (var a in Model.RecentActivities)
+                    {
+                        <tr><td class="left">@a.Time</td><td class="left">@a.Text</td></tr>
+                    }
+                    @for (var i = Model.RecentActivities.Count; i < 4; i++)
+                    {
+                        <tr><td>&nbsp;</td><td></td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </aside>
+</div>
+
+@Html.Partial("_ScheduleApprovalModal")
+<script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.1"></script>

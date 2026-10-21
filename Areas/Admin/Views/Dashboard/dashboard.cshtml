@@ -1,64 +1,103 @@
 ﻿@{
     ViewBag.Title = "Dashboard";
 }
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-<link href="@Url.Content("~/Content/css/dashboard.css")?v=1.0" rel="stylesheet" type="text/css" />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="@Url.Content("~/Content/css/dashboard.css")?v=1.2" rel="stylesheet" type="text/css" />
 
-<h1 class="page-title">Dashboard</h1>
+<!-- Header Banner -->
+<div class="dashboard-header">
+    <div class="header-text">
+        <span class="breadcrumb-text">Admin | Dashboard</span>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="welcome-text">Welcome back, Dela Cruz!</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-th-large"></i>
+    </div>
+</div>
 
+<!-- Admin Stat Cards Grid -->
 <div class="admin-cards">
     <div class="card card-total">
-        <h4 class="card-title card-total">TOTAL USER</h4>
-        <p class="number" id="dash-total">0</p>
-        <span class="card-description">All registered accounts</span>
-        <i class="fa fa-users"></i>
+        <div class="card-info">
+            <h4 class="card-title">TOTAL USER</h4>
+            <p class="number" id="dash-total">0</p>
+            <span class="card-description">All registered accounts</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa fa-users"></i>
+        </div>
     </div>
 
     <div class="card card-projectmanager">
-        <h4 class="card-title">PROJECT MANAGER</h4>
-        <p class="number" id="dash-projectmanagers">0</p>
-        <span class="card-description">Registered project manager accounts</span>
-        <i class="fa fa-graduation-cap"></i>    
-    </div>
-
-    <div class="card card-adviser">
-        <h4 class="card-title">ADVISER</h4>
-        <p class="number" id="dash-advisers">0</p>
-        <span class="card-description">Registered adviser accounts</span>
-        <i class="fa fa-person-chalkboard"></i>
+        <div class="card-info">
+            <h4 class="card-title">PROJECT MANAGERS</h4>
+            <p class="number" id="dash-students">0</p>
+            <span class="card-description">Registered student accounts</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
     </div>
 
     <div class="card card-panelist">
-        <h4 class="card-title">PANELIST</h4>
-        <p class="number" id="dash-panelist">0</p>
-        <span class="card-description">Registered panelist accounts</span>
-        <i class="fa fa-clipboard"></i>
+        <div class="card-info">
+            <h4 class="card-title">PANELIST</h4>
+            <p class="number" id="dash-professors">0</p>
+            <span class="card-description">Registered professor/panelist account</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa fa-pen-nib"></i>
+        </div>
+    </div>
+
+    <div class="card card-adviser">
+        <div class="card-info">
+            <h4 class="card-title">ADVISER</h4>
+            <p class="number" id="dash-advisers">5</p>
+            <span class="card-description">Registered adviser account</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa-solid fa-chalkboard-user"></i>
+        </div>
     </div>
 
     <div class="card card-campusdirector">
-        <h4 class="card-title">CAMPUS DIRECTOR</h4>
-        <p class="number" id="dash-campusdirectors">0</p>
-        <span class="card-description">Registered campus director accounts</span>
-        <i class="fa fa-building"></i>
+        <div class="card-info">
+            <h4 class="card-title">CAMPUS DIRECTOR</h4>
+            <p class="number" id="dash-directors">0</p>
+            <span class="card-description">Registered campus director</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa fa-building"></i>
+        </div>
     </div>
 
     <div class="card card-capstonecoordinator">
-        <h4 class="card-title">CAPSTONE COORDINATOR</h4>
-        <p class="number" id="dash-capstonecoordinators">0</p>
-        <span class="card-description">Registered capstone coordinator accounts</span>
-        <i class="fa fa-folder-closed"></i>
+        <div class="card-info">
+            <h4 class="card-title">CAPSTONE COORDINATOR</h4>
+            <p class="number" id="dash-coordinators">0</p>
+            <span class="card-description">Registered capstone coordinator accounts</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa-solid fa-folder-open"></i>
+        </div>
     </div>
 
     <div class="card card-dean">
-        <h4 class="card-title">DEAN</h4>
-        <p class="number" id="dash-dean">0</p>
-        <span class="card-description">Registered dean accounts</span>
-        <i class="fa fa-user-tie"></i>
+        <div class="card-info">
+            <h4 class="card-title">DEAN</h4>
+            <p class="number" id="dash-dean">1</p>
+            <span class="card-description">Registered dean accounts</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa-solid fa-user-tie"></i>
+        </div>
     </div>
-
 </div>
 
 <div class="tables">
@@ -71,24 +110,36 @@
                     <th class="column-title">ACTIVITY</th>
                 </tr>
             </thead>
-            <tbody id="dash-activity"></tbody>
+            <tbody id="dash-activity">
+            </tbody>
         </table>
     </div>
 
+    <!-- Role Distribution Section -->
     <div class="distribution">
         <h4 class="table-title">ROLE DISTRIBUTION</h4>
-        <table class="distribution-table">
-            <thead>
-                <tr>
-                    <th class="column-title role-col">ROLE</th>
-                    <th class="column-title num-col">TOTAL</th>
-                    <th class="column-title num-col">ACTIVE</th>
-                    <th class="column-title num-col">INACTIVE</th>
-                </tr>
-            </thead>
-            <tbody id="dash-roles"></tbody>
-        </table>
+        <div class="distribution-content">
+            <!-- Donut Chart -->
+            <div class="donut-chart-container">
+                <div class="donut-chart"></div>
+            </div>
+
+            <!-- Distribution Table -->
+            <table class="distribution-table">
+                <thead>
+                    <tr>
+                        <th class="column-title role-col">ROLE</th>
+                        <th class="column-title num-col">TOTAL</th>
+                        <th class="column-title num-col">ACTIVE</th>
+                        <th class="column-title num-col">INACTIVE</th>
+                    </tr>
+                </thead>
+                <tbody id="dash-roles">
+                    <!-- Dynamically populated by admin-app.js -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=1.0"></script>
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=1.2"></script>

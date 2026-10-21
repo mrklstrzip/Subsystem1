@@ -1,91 +1,106 @@
 ﻿@{
-    ViewBag.Title = "Dashboard";
+    ViewData["Title"] = "Dashboard";
 }
 
-<style>
-    .prof-stats {
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 32px !important;
-    }
+<div class="av-page">
 
-        .prof-stats .prof-stat {
-            width: auto !important;
-            min-height: 150px;
-            padding: 26px 32px;
-        }
-
-            .prof-stats .prof-stat span {
-                display: block !important;
-                color: #777 !important;
-                font-size: 18px;
-                font-weight: 400 !important;
-            }
-
-            .prof-stats .prof-stat strong {
-                display: block !important;
-                color: #000 !important;
-                font-size: 32px;
-                font-weight: 400 !important;
-                margin-top: 18px;
-            }
-
-    .prof-header {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        margin-bottom: 20px;
-    }
-
-        .prof-header .prof-title {
-            margin: 0 !important;
-        }
-
-        .prof-header .prof-btn-lg {
-            display: inline-block !important;
-            padding: 14px 32px !important;
-            font-size: 16px !important;
-            font-weight: 600;
-            border-radius: 8px;
-            background: #724389;
-            color: #fff;
-            text-decoration: none;
-        }
-</style>
-
-
-    <div class="prof-header">
-        <h1 class="prof-title">Dashboard</h1>
+    <!-- Banner -->
+    <div class="av-banner">
+        <div>
+            <div class="av-eyebrow">Tuesday, October 13</div>
+            <h1>Welcome back, Dizon</h1>
+            <p>5 Panel Assignments are waiting for your decision.</p>
+        </div>
+        <svg class="av-banner-deco" viewBox="0 0 96 96" fill="currentColor" aria-hidden="true">
+            <rect x="4" y="4" width="38" height="52" rx="4" />
+            <rect x="50" y="4" width="42" height="20" rx="4" />
+            <rect x="50" y="32" width="42" height="40" rx="4" />
+            <rect x="4" y="64" width="38" height="28" rx="4" />
+        </svg>
     </div>
 
-    <div class="prof-stats">
-        <div class="prof-card prof-stat"><span>Panel Assignments</span><strong>6</strong></div>
-        <div class="prof-card prof-stat"><span>Accepted Panels</span><strong>6</strong></div>
-        <div class="prof-card prof-stat"><span>Completed Panel Assignments</span><strong>7</strong></div>
+    <!-- Stats -->
+    <div class="av-stats">
+        <div class="av-stat">
+            <div class="av-stat-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="3.2" /><circle cx="5" cy="10" r="2.4" /><circle cx="19" cy="10" r="2.4" /><path d="M12 13c-3.3 0-6 1.8-6 4v2h12v-2c0-2.2-2.7-4-6-4zM5 13.5c-2.2 0-4 1.3-4 3v1.5h3.5v-1.6c0-1.1.5-2 1.4-2.8-.3-.1-.6-.1-.9-.1zm14 0c-.3 0-.6 0-.9.1.9.8 1.4 1.7 1.4 2.8V18H23v-1.5c0-1.7-1.8-3-4-3z" /></svg>
+            </div>
+            <div><div class="av-stat-num">1</div><div class="av-stat-label">Advisee Groups</div></div>
+        </div>
+        <div class="av-stat">
+            <div class="av-stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="14" height="17" rx="2" /><path d="M8 2h6v4H8z" /><circle cx="17" cy="17" r="5" fill="#d6e6fb" /><path d="M17 14.5V17l1.8 1" /></svg>
+            </div>
+            <div><div class="av-stat-num">2</div><div class="av-stat-label">In Progress</div></div>
+        </div>
+        <div class="av-stat">
+            <div class="av-stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 12.5l3 3 5-6" /></svg>
+            </div>
+            <div><div class="av-stat-num">3</div><div class="av-stat-label">Ready for Defense</div></div>
+        </div>
+        <div class="av-stat">
+            <div class="av-stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /><circle cx="16" cy="16" r="3.5" fill="#d6e6fb" /><path d="M16 14.5V16l1 .7" /></svg>
+            </div>
+            <div><div class="av-stat-num">4</div><div class="av-stat-label">Upcoming Defenses</div></div>
+        </div>
     </div>
 
-    <p class="prof-subtitle">Pending Panel Assignments</p>
+    <!-- Main grid -->
+    <div class="av-dash-grid">
 
-    <div class="prof-card">
-        <table class="prof-table">
-            <thead>
-                <tr>
-                    <th>Manuscript Title</th>
-                    <th>Section</th>
-                    <th>Program</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var p in new[] { "BSIT", "BSCS", "BSIS", "BSIT", "BSIT" })
-                {
+        <div class="av-panel">
+            <div class="av-panel-head">
+                <h3>Advisory Classes</h3>
+                <a href="#">View Advisory</a>
+            </div>
+            <table class="av-table">
+                <thead>
                     <tr>
-                        <td>Manuscript Title</td>
-                        <td>SBIT4A</td>
-                        <td>@p</td>
-                        <td><a href="@Url.Action("Index", "PanelAssignment")" class="prof-btn">View</a></td>
+                        <th>Manuscript</th>
+                        <th class="c">Program</th>
+                        <th class="c">Date</th>
+                        <th class="c">Action</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Manuscript Title<small>Group 3 &nbsp; SBIT-4E</small></td>
+                        <td class="c"><span class="av-badge av-badge-bsit">BSIT</span></td>
+                        <td class="c">Oct 10</td>
+                        <td class="c"><a class="av-btn av-btn-outline" href="#">View</a></td>
+                    </tr>
+                    <tr>
+                        <td>Manuscript Title<small>Group 1 &nbsp; SBCS-4A</small></td>
+                        <td class="c"><span class="av-badge av-badge-bscs">BSCS</span></td>
+                        <td class="c">Oct 10</td>
+                        <td class="c"><a class="av-btn av-btn-outline" href="#">View</a></td>
+                    </tr>
+                    <tr>
+                        <td>Manuscript Title<small>Group 2 &nbsp; SBIS-4B</small></td>
+                        <td class="c"><span class="av-badge av-badge-bsis">BSIS</span></td>
+                        <td class="c">Oct 10</td>
+                        <td class="c"><a class="av-btn av-btn-outline" href="#">View</a></td>
+                    </tr>
+                    <tr>
+                        <td>Manuscript Title<small>Group 4 &nbsp; SBIT-4C</small></td>
+                        <td class="c"><span class="av-badge av-badge-bsit">BSIT</span></td>
+                        <td class="c">Oct 10</td>
+                        <td class="c"><a class="av-btn av-btn-outline" href="#">View</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="av-next">
+            <div class="av-eyebrow">Next Defense</div>
+            <h4>Date: October 14</h4>
+            <h4>Time: 10:30</h4>
+            <p style="margin-top:8px">Section: SBIT4E</p>
+            <p>Building/Room: IK603</p>
+            <a class="av-btn" href="#">View Schedule</a>
+        </div>
+
     </div>
+</div>

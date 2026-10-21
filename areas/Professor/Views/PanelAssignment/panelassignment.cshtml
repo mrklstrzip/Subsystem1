@@ -2,28 +2,211 @@
     ViewBag.Title = "Panel Assignments";
 }
 
-    <h1 class="prof-title">Panel Assignments</h1>
+<div class="pf-page">
 
-    @for (int i = 0; i < 3; i++)
-    {
-        <p class="prof-subtitle">Defense Details</p>
-        <div class="prof-card prof-defense">
-            <a href="@Url.Action("Index", "Manuscript")" class="prof-btn prof-btn-view">View Manuscript</a>
-            <dl>
-                <dt>Manuscript Title:</dt>
-                <dd></dd>
-                <dt>Section:</dt>
-                <dd></dd>
-                <dt>Group No.:</dt>
-                <dd></dd>
-                <dt>Date:</dt>
-                <dd></dd>
-                <dt>Building/ Room:</dt>
-                <dd></dd>
-            </dl>
-            <div class="prof-actions">
-                <button type="button" class="prof-btn prof-btn-accept">Accept</button>
-                <button type="button" class="prof-btn prof-btn-decline">Decline</button>
+    <input type="radio" name="paTab" id="paPending" class="pf-radio pf-r1" checked />
+    <input type="radio" name="paTab" id="paAccepted" class="pf-radio pf-r2" />
+    <input type="radio" name="paTab" id="paCompleted" class="pf-radio pf-r3" />
+
+    <div class="pf-banner">
+        <div>
+            <h1>Panel Assignments</h1>
+            <p>Review each defense request then accept or decline</p>
+        </div>
+        <svg class="pf-banner-deco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4" /><path d="M1 21c0-4 3.5-7 8-7" /><circle cx="18" cy="17" r="5" /><path d="M18 14v3l2 1" /></svg>
+    </div>
+
+    <!-- Tabs -->
+    <div class="pf-tabs">
+        <label for="paPending" class="pf-tab pf-t1">Pending <span class="pf-count">2</span></label>
+        <label for="paAccepted" class="pf-tab pf-t2">Accepted <span class="pf-count">2</span></label>
+        <label for="paCompleted" class="pf-tab pf-t3">Completed <span class="pf-count">2</span></label>
+    </div>
+
+    <div class="pf-assign-list pf-content">
+
+        <!-- ===== PENDING ===== -->
+        <div class="pf-assign pf-tabpane pf-p1">
+            <div class="pf-assign-top">
+                <div class="pf-datebox"><span>OCT</span><b>10</b></div>
+                <div class="pf-assign-body">
+                    <span class="pf-tag pf-tag-bsit">BSIT</span>
+                    <h4>Manuscript Title</h4>
+                    <div class="pf-meta">
+                        <div><small>Section</small><strong>SBIT-4E</strong></div>
+                        <div><small>Group No.</small><strong>5</strong></div>
+                        <div><small>Date</small><strong>October 30, 2026</strong></div>
+                        <div><small>Time</small><strong>10:30</strong></div>
+                    </div>
+                </div>
+                <a href="#" class="pf-btn pf-btn-outline">View Manuscript</a>
+            </div>
+            <div class="pf-assign-foot">
+                <span class="pf-status ok">No Schedule Conflict</span>
+                <div class="pf-actions">
+                    <a href="#declineModal" class="pf-btn pf-btn-danger">Decline</a>
+                    <button type="button" class="pf-btn pf-btn-success">Accept</button>
+                </div>
             </div>
         </div>
-    }
+
+        <div class="pf-assign pf-tabpane pf-p1">
+            <div class="pf-assign-top">
+                <div class="pf-datebox"><span>OCT</span><b>8</b></div>
+                <div class="pf-assign-body">
+                    <span class="pf-tag pf-tag-bsit">BSIT</span>
+                    <h4>Manuscript Title</h4>
+                    <div class="pf-meta">
+                        <div><small>Section</small><strong>SBIT-4E</strong></div>
+                        <div><small>Group No.</small><strong>5</strong></div>
+                        <div><small>Date</small><strong>October 30, 2026</strong></div>
+                        <div><small>Time</small><strong>10:30</strong></div>
+                    </div>
+                </div>
+                <a href="#" class="pf-btn pf-btn-outline">View Manuscript</a>
+            </div>
+            <div class="pf-assign-foot">
+                <span class="pf-status bad">Overlaps with another defense</span>
+                <div class="pf-actions">
+                    <a href="#declineModal" class="pf-btn pf-btn-danger">Decline</a>
+                    <button type="button" class="pf-btn pf-btn-success">Accept</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ACCEPTED ===== -->
+        <div class="pf-assign pf-tabpane pf-p2">
+            <div class="pf-assign-top">
+                <div class="pf-datebox green"><span>OCT</span><b>30</b></div>
+                <div class="pf-assign-body">
+                    <span class="pf-tag pf-tag-bsit">BSIT</span>
+                    <h4>Manuscript Title</h4>
+                    <div class="pf-meta">
+                        <div><small>Section</small><strong>SBIT-4E</strong></div>
+                        <div><small>Group No.</small><strong>5</strong></div>
+                        <div><small>Date</small><strong>October 30, 2026</strong></div>
+                        <div><small>Time</small><strong>10:30</strong></div>
+                    </div>
+                </div>
+                <a href="#" class="pf-btn pf-btn-outline">View Manuscript</a>
+            </div>
+            <div class="pf-assign-foot">
+                <span class="pf-status muted">Accepted on Oct 2</span>
+                <div class="pf-actions">
+                    <a href="#withdrawModal" class="pf-btn pf-btn-danger">Withdraw</a>
+                    <button type="button" class="pf-btn pf-btn-primary">Add to Calendar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="pf-assign pf-tabpane pf-p2">
+            <div class="pf-assign-top">
+                <div class="pf-datebox green"><span>OCT</span><b>29</b></div>
+                <div class="pf-assign-body">
+                    <span class="pf-tag pf-tag-bsis">BSIS</span>
+                    <h4>Manuscript Title</h4>
+                    <div class="pf-meta">
+                        <div><small>Section</small><strong>SBIT-4E</strong></div>
+                        <div><small>Group No.</small><strong>5</strong></div>
+                        <div><small>Date</small><strong>October 30, 2026</strong></div>
+                        <div><small>Time</small><strong>10:30</strong></div>
+                    </div>
+                </div>
+                <a href="#" class="pf-btn pf-btn-outline">View Manuscript</a>
+            </div>
+            <div class="pf-assign-foot">
+                <span class="pf-status muted">Accepted on Oct 1</span>
+                <div class="pf-actions">
+                    <a href="#withdrawModal" class="pf-btn pf-btn-danger">Withdraw</a>
+                    <button type="button" class="pf-btn pf-btn-primary">Add to Calendar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== COMPLETED ===== -->
+        <div class="pf-assign pf-tabpane pf-p3">
+            <div class="pf-assign-top">
+                <div class="pf-datebox gray"><span>OCT</span><b>3</b></div>
+                <div class="pf-assign-body">
+                    <span class="pf-tag pf-tag-bsit">BSIT</span>
+                    <h4>Manuscript Title</h4>
+                    <div class="pf-meta">
+                        <div><small>Section</small><strong>SBIT-4E</strong></div>
+                        <div><small>Group No.</small><strong>5</strong></div>
+                        <div><small>Date</small><strong>October 3, 2026</strong></div>
+                        <div><small>Time</small><strong>8:00 AM</strong></div>
+                    </div>
+                </div>
+                <a href="#" class="pf-btn pf-btn-outline">View Manuscript</a>
+            </div>
+            <div class="pf-assign-foot">
+                <span class="pf-status muted">Defense completed</span>
+            </div>
+        </div>
+
+        <div class="pf-assign pf-tabpane pf-p3">
+            <div class="pf-assign-top">
+                <div class="pf-datebox gray"><span>SEP</span><b>26</b></div>
+                <div class="pf-assign-body">
+                    <span class="pf-tag pf-tag-bscs">BSCS</span>
+                    <h4>Manuscript Title</h4>
+                    <div class="pf-meta">
+                        <div><small>Section</small><strong>SBCS-4A</strong></div>
+                        <div><small>Group No.</small><strong>2</strong></div>
+                        <div><small>Date</small><strong>September 26, 2026</strong></div>
+                        <div><small>Time</small><strong>1:00 PM</strong></div>
+                    </div>
+                </div>
+                <a href="#" class="pf-btn pf-btn-outline">View Manuscript</a>
+            </div>
+            <div class="pf-assign-foot">
+                <span class="pf-status muted">Defense completed</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== DECLINE POPUP ===== -->
+<div class="pf-modal-overlay" id="declineModal">
+    <div class="pf-modal">
+        <div class="pf-modal-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9" /><path d="M9 9l6 6M15 9l-6 6" /></svg></div>
+        <a href="#" class="pf-modal-close">&times;</a>
+        <h3 class="red">Decline this Panel Assignment?</h3>
+        <p>The group will be told you are not available as a panelist for this defense.</p>
+        <label for="declineReason">Reason for declining</label>
+        <select id="declineReason">
+            <option value="">Choose a reason</option>
+            <option>Schedule conflict</option>
+            <option>Not my area of expertise</option>
+            <option>On leave / unavailable</option>
+            <option>Too many panel assignments</option>
+            <option>Other</option>
+        </select>
+        <div class="pf-modal-foot">
+            <a href="#" class="pf-btn pf-btn-cancel-purple">Cancel</a>
+            <button type="button" class="pf-btn pf-btn-danger">Yes, Decline</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== WITHDRAW POPUP ===== -->
+<div class="pf-modal-overlay" id="withdrawModal">
+    <div class="pf-modal">
+        <div class="pf-modal-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 20h20L12 3z" /><path d="M12 10v4M12 17v.5" /></svg></div>
+        <h3 class="amber">Withdraw from this Panel?</h3>
+        <p>You accepted this defense on [date]. Withdrawing means the group needs a replacement panelist.</p>
+        <label for="withdrawReason">Reason for withdrawing</label>
+        <select id="withdrawReason">
+            <option value="">Choose a reason</option>
+            <option>Schedule conflict</option>
+            <option>Emergency / personal reason</option>
+            <option>On leave / unavailable</option>
+            <option>Other</option>
+        </select>
+        <div class="pf-modal-foot">
+            <a href="#" class="pf-btn pf-btn-outline">Cancel</a>
+            <button type="button" class="pf-btn pf-btn-danger">Withdraw</button>
+        </div>
+    </div>
+</div>

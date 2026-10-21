@@ -1,19 +1,75 @@
-﻿.page-title {
-    padding-bottom: 30px;
-    font-weight: 550;
+﻿body {
+    background-color: #EAECEF;
+    font-family: 'Inter', sans-serif;
+    color: #22252A;
+    margin: 0;
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
+}
+
+/* Header Banner Styling */
+.dashboard-header {
+    background: #2C3F56;
+    background: linear-gradient(92deg,rgba(44, 63, 86, 1) 31%, rgba(83, 103, 127, 1) 100%);
+    border-radius: 14px;
+    padding: 32px 40px;
+    color: #FFFFFF;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.breadcrumb-text {
+    font-size: 12px;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.page-title {
     font-family: 'Newsreader', serif;
+    font-size: 48px;
+    font-weight: 700;
+    margin: 6px 0 10px 0;
+    padding-bottom: 0;
+    letter-spacing: -0.5px;
+}
+
+.welcome-text {
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.header-bg-icon {
+    position: absolute;
+    right: 30px;
+    bottom: -20px;
+    font-size: 140px;
+    color: #374A60;
+    pointer-events: none;
+}
+
+/* Outer White Card Container for Controls */
+.controls-card {
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
 .search-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-bottom: 12px;
+    flex: 1;
 }
 
 .search {
     position: relative;
-    flex: 1;
     display: flex;
     align-items: center;
 }
@@ -21,35 +77,137 @@
     .search .fa-search {
         position: absolute;
         left: 16px;
-        color: #DFDBDB;
-        font-size: 16px;
+        color: #9092AD;
+        font-size: 15px;
         pointer-events: none;
     }
 
     .search input {
         width: 100%;
-        height: 44px;
+        height: 48px;
         padding: 0 16px 0 44px;
-        background-color: #ffffff;
+        background-color: #FFFFFF;
         border-radius: 12px;
-        border: solid 2px #DFDBDB;
-        font-size: 15px;
+        border: 1.5px solid #374A60;
+        font-size: 14px;
+        color: #2D3748;
         outline: none;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        box-sizing: border-box;
     }
 
         .search input::placeholder {
-            color: #DFDBDB;
+            color: #A0AEC0;
         }
 
+.filter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Custom Styled Dropdowns with Simulated Fieldset & Legend */
+.custom-select-box {
+    position: relative;
+    background: #FFFFFF;
+    border: 1.5px solid #374A60;
+    border-radius: 12px;
+    padding: 10px 14px 6px 14px;
+    width: 180px;
+    height: 48px;
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.filter-legend {
+    position: absolute;
+    top: -7px;
+    left: 12px;
+    background-color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 700;
+    color: #374A60;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.select-selected {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1A202C;
+    height: 100%;
+}
+
+    .select-selected i:first-child {
+        color: #374A60;
+        font-size: 15px;
+    }
+
+    .select-selected .chevron {
+        margin-left: auto;
+        font-size: 12px;
+        color: #374A60;
+    }
+
+.custom-select-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: -1.5px;
+    width: calc(100% + 3px);
+    background: #FFFFFF;
+    border: 1.5px solid #374A60;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+    overflow: hidden;
+}
+
+    .custom-select-dropdown.open {
+        display: block;
+    }
+
+.select-option {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2D3748;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s ease;
+}
+
+    .select-option:first-child {
+        background-color: #374A60;
+        color: #FFFFFF;
+    }
+
+        .select-option:first-child i {
+            color: #FFFFFF;
+        }
+
+    .select-option:hover:not(:first-child) {
+        background-color: #F4F6F8;
+    }
+
+    .select-option i {
+        width: 16px;
+        color: #536273;
+    }
+
+/* Add Button */
 .add-btn {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border: none;
     border-radius: 12px;
     background-color: #2C2C2C;
-    color: #ffffff;
-    font-size: 16px;
+    color: #FFFFFF;
+    font-size: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -59,48 +217,17 @@
 }
 
     .add-btn:hover {
-        background-color: #737373;
+        background-color: #4A4A4A;
     }
 
-.filters {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 12px;
-    flex-wrap: wrap;
-}
-
-    .filters label {
-        font-size: 14px;
-        font-weight: 600;
-        color: #4a5568;
-    }
-
-    .filters select {
-        height: 30px;
-        padding: 0 36px 0 14px;
-        font-size: 14px;
-        color: #2d3748;
-        background-color: #ffffff;
-        border: 1px solid transparent;
-        border-radius: 10px;
-        outline: none;
-        cursor: pointer;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-
-        .filters select:focus {
-            border-color: #724b8e;
-            box-shadow: 0 0 0 3px rgba(114, 75, 142, 0.15);
-        }
-
+/* Table Container */
 .user-management {
     background-color: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    border: none;
     padding: 24px 30px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    margin-bottom: 30px;
 }
 
 table {
@@ -111,11 +238,11 @@ table {
 .column-title {
     color: #2C2C2C;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 12px;
     letter-spacing: 0.5px;
     padding-bottom: 14px;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #EDEDED;
 }
 
 .name-col {
@@ -143,7 +270,7 @@ td {
     padding: 14px 0;
     font-size: 13px;
     color: #1a202c;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #F4F5F7;
     vertical-align: middle;
 }
 
@@ -155,61 +282,116 @@ tr:last-child td {
     font-weight: 600;
 }
 
-.status, .role {
+/* Role Badges with Icons */
+.role span {
     font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.4;
 }
 
-    .status span, .role span {
-        display: inline-block;
-        padding: 2px 14px;
-        border-radius: 20px;
-        font-weight: 600;
-        text-align: center;
-        line-height: 1.4;
+    .role span i {
+        font-size: 11px;
     }
 
+/* Individual Role Color Themes */
 .adm-rl {
-    border: 1px solid #2c2c2c;
-    background-color: #a6a6a6;
-    color: #2c2c2c;
+    border: 1px solid #1a1a1a;
+    background-color: #2C2C2C;
+    color: #ffffff;
 }
 
-.campdirect-rl {
-    border: 1px solid #9bb5d4;
-    background-color: #e8f0f8;
-    color: #2E5C8A;
-}
-
-.capscoor-rl {
-    border: 1px solid #f7b288;
-    background-color: #fdf1e8;
-    color: #ED640F;
-}
+    .adm-rl i {
+        color: #ffffff;
+    }
 
 .prof-rl {
-    border: 1px solid #b288c0;
-    background-color: #f3ebf6;
-    color: #724389;
+    border: 1px solid #9b72b0;
+    background-color: #724389;
+    color: #ffffff;
 }
+
+    .prof-rl i {
+        color: #ffffff;
+    }
+
+.campdirect-rl {
+    border: 1px solid #4a7ab5;
+    background-color: #3B6B9B;
+    color: #ffffff;
+}
+
+    .campdirect-rl i {
+        color: #ffffff;
+    }
 
 .stud-rl {
-    border: 1px solid #d9e052;
-    background-color: #fbfde5;
-    color: #8b9200;
+    border: 1px solid #9da51c;
+    background-color: #8b9200;
+    color: #ffffff;
 }
 
+    .stud-rl i {
+        color: #ffffff;
+    }
+
+.capscoor-rl {
+    border: 1px solid #e06014;
+    background-color: #ED640F;
+    color: #ffffff;
+}
+
+    .capscoor-rl i {
+        color: #ffffff;
+    }
+
+.dean-rl {
+    border: 1px solid #4a3328;
+    background-color: #5C4033;
+    color: #ffffff;
+}
+
+    .dean-rl i {
+        color: #ffffff;
+    }
+
+.adv-rl {
+    border: 1px solid #bd6ec9;
+    background-color: #ab47bc;
+    color: #ffffff;
+}
+
+    .adv-rl i {
+        color: #ffffff;
+    }
+
+/* Status Badges */
 .act {
     border: 1px solid #82cd82;
-    background-color: #eaf6ea;
-    color: #1b801b;
+    background-color: #00A63E;
+    color: #ffffff;
+    padding: 3px 16px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
 }
 
 .inact {
     border: 1px solid #f89e9e;
-    background-color: #fdeaea;
-    color: #d93838;
+    background-color: #A32224;
+    color: #ffffff;
+    padding: 3px 16px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
 }
 
+/* Table Action Icons */
 .action {
     text-align: center;
 }
@@ -233,7 +415,7 @@ tr:last-child td {
     color: #ef4444;
 }
 
-/* Modal Overlay */
+/* Modal Overlay & Styling */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -247,7 +429,6 @@ tr:last-child td {
     justify-content: center;
 }
 
-/* Modal Card Setup */
 .modal-card {
     background-color: #f6f8fc;
     width: 460px;
@@ -307,7 +488,6 @@ tr:last-child td {
         flex: 1;
     }
 
-/* Radio Group Styling */
 .radio-group {
     display: flex;
     align-items: center;
@@ -330,7 +510,6 @@ tr:last-child td {
         cursor: pointer;
     }
 
-/* Selected Tag Container */
 .selected-tags-box {
     background-color: #ffffff;
     border: 1px solid #cbd5e1;
@@ -362,11 +541,6 @@ tr:last-child td {
         background-color: #737373;
     }
 
-    .modal-tag i {
-        font-size: 10px;
-    }
-
-/* Available Tags Grid Box */
 .tags-grid-box {
     background-color: #ffffff;
     border: 1px solid #cbd5e1;

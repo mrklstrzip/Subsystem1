@@ -101,9 +101,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\css\adviser.css" />
     <Content Include="Content\css\campusdirector.css" />
     <Content Include="Content\css\capstonecoor.css" />
+    <Content Include="Content\css\capstonecoordinator\conflictresult.css" />
+    <Content Include="Content\css\capstonecoordinator\defenseschedule.css" />
+    <Content Include="Content\css\capstonecoordinator\schedulemanagement.css" />
+    <Content Include="Content\css\capstonecoordinator\dashboard.css" />
     <Content Include="Content\css\dashboard.css" />
+    <Content Include="Content\css\Dean.css" />
     <Content Include="Content\css\delete.css" />
     <Content Include="Content\css\expertisetag.css" />
     <Content Include="Content\css\facultyprofile.css" />
@@ -148,6 +154,10 @@
     <Content Include="Scripts\adminlogin-check.js" />
     <Content Include="Scripts\campusdirector-app.js" />
     <Content Include="Scripts\campusdirector-modal.js" />
+    <Content Include="Scripts\capstonecoordinator-app.js" />
+    <Content Include="Scripts\DeanDefenseSched.js" />
+    <Content Include="Scripts\DeanNotifs.js" />
+    <Content Include="Scripts\DeanSchedApproval.js" />
     <Content Include="Scripts\dummy-users.js" />
     <Content Include="Scripts\layout-profile.js" />
     <Content Include="Scripts\login-check.js" />
@@ -181,11 +191,21 @@
     <Compile Include="Areas\CampusDirector\Controllers\RoomManagementController.cs" />
     <Compile Include="Areas\CampusDirector\Controllers\RoomScheduleController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\CapstoneCoordinatorAreaRegistration.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Controllers\ConflictResultController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\DashboardController.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Controllers\DefenseScheduleController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\ProfileController.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Controllers\ScheduleManagementController.cs" />
+    <Compile Include="Areas\Dean\Controllers\DefenseScheduleController.cs" />
+    <Compile Include="Areas\Dean\Controllers\NotificationController.cs" />
+    <Compile Include="Areas\Dean\Controllers\ScheduleApprovalController.cs" />
     <Compile Include="Areas\Dean\DeanAreaRegistration.cs" />
     <Compile Include="Areas\Dean\Controllers\DashboardController.cs" />
     <Compile Include="Areas\Dean\Controllers\ProfileController.cs" />
+    <Compile Include="Areas\Dean\Models\DashboardModels.cs" />
+    <Compile Include="Areas\Dean\Models\DefenseScheduleModels.cs" />
+    <Compile Include="Areas\Dean\Models\NotificationModels.cs" />
+    <Compile Include="Areas\Dean\Models\ScheduleApprovalModels.cs" />
     <Compile Include="Areas\Professor\Controllers\DashboardController.cs" />
     <Compile Include="Areas\Professor\Controllers\DefenseScheduleController.cs" />
     <Compile Include="Areas\Professor\Controllers\ManuscriptController.cs" />
@@ -263,6 +283,12 @@
     <Content Include="Areas\Dean\Views\Shared\_DeanLayout.cshtml" />
     <Content Include="Areas\Dean\Views\web.config" />
     <Content Include="Areas\Student\Views\Submission\_TitleDetails.cshtml" />
+    <Content Include="Areas\Dean\Views\DefenseSchedule\DefenseScheduleView.cshtml" />
+    <Content Include="Areas\Dean\Views\ScheduleApproval\ScheduleApprovalView.cshtml" />
+    <Content Include="Areas\Dean\Views\Shared\_ScheduleApprovalModal.cshtml" />
+    <Content Include="Areas\CapstoneCoordinator\Views\DefenseSchedule\defenseschedule.cshtml" />
+    <Content Include="Areas\CapstoneCoordinator\Views\ConflictResult\conflictresult.cshtml" />
+    <None Include="Areas\CapstoneCoordinator\Views\ScheduleManagement\schedulemanagement.cshtml" />
     <None Include="packages.config" />
     <Content Include="Views\web.config" />
     <Content Include="Views\Shared\Error.cshtml" />
@@ -284,16 +310,9 @@
     <Folder Include="Areas\CampusDirector\ViewModels\" />
     <Folder Include="Areas\CapstoneCoordinator\Models\" />
     <Folder Include="Areas\CapstoneCoordinator\ViewModels\" />
-    <Folder Include="Areas\CapstoneCoordinator\Views\ConflictResult\" />
-    <Folder Include="Areas\CapstoneCoordinator\Views\DefenseSchedule\" />
-    <Folder Include="Areas\CapstoneCoordinator\Views\ScheduleManagement\" />
-    <Folder Include="Areas\Dean\Models\" />
     <Folder Include="Areas\Dean\ViewModels\" />
-    <Folder Include="Areas\Dean\Views\DefenseSchedule\" />
-    <Folder Include="Areas\Dean\Views\ScheduleApproval\" />
     <Folder Include="Areas\Professor\Models\" />
     <Folder Include="Areas\Professor\ViewModels\" />
-    <Folder Include="Content\css\Admin\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -1,11 +1,11 @@
 ﻿// DashboardController.cs
 using System.Web.Mvc;
 
-namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
+namespace Subsystem1.Areas.CampusDirector.Controllers
 {
     public class ProfileController : Controller
     {
-        public ActionResult Profile()
+        public ActionResult profile()
         {
             return View();
         }

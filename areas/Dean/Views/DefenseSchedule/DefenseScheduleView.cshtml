@@ -1,0 +1,96 @@
+﻿@model Subsystem1.Areas.Dean.Models.DefenseScheduleViewModel
+@{
+    ViewBag.Title = "DefenseScheduleView";
+}
+<link href="@Url.Content("~/Content/css/Dean.css")?v=1.0" rel="stylesheet" type="text/css" />
+
+<section class="sa-banner">
+    <small>Dean / Defense Schedule</small>
+    <h1>Defense Schedule</h1>
+    <p>View submitted defense schedules and check status</p>
+    <i class="fa fa-calendar-check sa-banner-icon"></i>
+</section>
+
+@using (Html.BeginForm("DefenseScheduleView", "DefenseSchedule", FormMethod.Get, new { id = "dsFilterForm", @class = "sa-toolbar" }))
+{
+    <div class="sa-search">
+        <i class="fa fa-magnifying-glass"></i>
+        <input type="text" name="search" value="@Model.Search" placeholder="Search" autocomplete="off" />
+    </div>
+
+    <div class="sa-filter">
+        <label>Program</label>
+        <select name="program">
+            <option value="All">All</option>
+            @foreach (var p in Model.Programs)
+            {
+                <option value="@p" @(Model.Program == p ? "selected" : "")>@p</option>
+            }
+        </select>
+    </div>
+
+    <div class="sa-filter">
+        <label>Status</label>
+        <select name="status">
+            <option value="All">All</option>
+            @foreach (var s in Model.Statuses)
+            {
+                <option value="@s" @(Model.Status == s ? "selected" : "")>@s</option>
+            }
+        </select>
+    </div>
+
+    <div class="sa-filter">
+        <label>Adviser</label>
+        <select name="adviser">
+            <option value="All">All</option>
+            @foreach (var a in Model.Advisers)
+            {
+                <option value="@a" @(Model.Adviser == a ? "selected" : "")>@a</option>
+            }
+        </select>
+    </div>
+}
+
+<div class="sa-card">
+    <table class="sa-table">
+        <thead>
+            <tr>
+                <th>MANUSCRIPT</th>
+                <th>AUTHOR</th>
+                <th>ADVISER</th>
+                <th>DATE</th>
+                <th>TIME</th>
+                <th>ROOM</th>
+                <th>PANELISTS</th>
+                <th>STATUS</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Items.Any())
+            {
+                <tr><td colspan="8" class="sa-empty">No defense schedules found.</td></tr>
+            }
+            @foreach (var i in Model.Items)
+            {
+                <tr>
+                    <td class="sa-title">
+                        <strong>@i.Manuscript</strong>
+                        <span class="sa-chip chip-@i.ProgramClass">@i.Section</span>
+                    </td>
+                    <td>@i.Author</td>
+                    <td>@i.Adviser</td>
+                    <td>@i.Date.ToString("MM-dd-yy")</td>
+                    <td>@i.TimeRange</td>
+                    <td>@i.Room</td>
+                    <td><div class="ds-panelists">@string.Join(", ", i.Panelists)</div></td>
+                    <td><span class="sa-status st-@i.StatusClass">@i.Status</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section scripts {
+    <script src="@Url.Content("~/Scripts/DeanDefenseSched.js")?v=1.0"></script>
+}

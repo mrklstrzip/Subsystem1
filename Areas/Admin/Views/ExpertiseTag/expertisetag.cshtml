@@ -2,38 +2,62 @@
     ViewBag.Title = "Expertise Tag Management";
 }
 
-<link href="@Url.Content("~/Content/css/expertisetag.css")?v=1.0" rel="stylesheet" type="text/css" />
-<link href="@Url.Content("~/Content/css/delete.css")?v=1.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/expertisetag.css")?v=3.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/delete.css")?v=3.0" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
+<!-- Header Banner -->
+<div class="dashboard-header">
+    <div class="header-text">
+        <span class="breadcrumb-text">Admin / Expertise Tag</span>
+        <h1 class="page-title">Expertise Tag Management</h1>
+        <p class="welcome-text">Create ang manage expertise tags used for faculty profiling and manuscript keyword matching</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-tags"></i>
+    </div>
+</div>
 
-<h1 class="page-title">Expertise Tag Management</h1>
-
-<div class="function">
+<!-- Controls Container Card -->
+<div class="controls-card">
     <div class="search-container">
         <div class="search">
             <i class="fa fa-search"></i>
             <input type="text" id="searchInput" placeholder="Search expertise tags">
         </div>
+    </div>
+
+    <div class="filter-wrapper">
+        <!-- Status Filter Box -->
+        <div class="custom-select-box" id="statusDropdownToggle">
+            <span class="filter-legend">Status</span>
+            <div class="select-selected">
+                <i class="fa-solid fa-sliders"></i>
+                <span id="selectedStatusText">All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="custom-select-dropdown" id="statusDropdownMenu">
+                <div class="select-option active" data-value="all"><i class="fa-solid fa-sliders"></i> All</div>
+                <div class="select-option" data-value="active"><i class="fa-solid fa-toggle-on"></i> Active</div>
+                <div class="select-option" data-value="inactive"><i class="fa-solid fa-toggle-off"></i> Inactive</div>
+            </div>
+            <select id="statusFilter" name="status" style="display:none;">
+                <option value="all" selected>All</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+
         <button class="add-btn" onclick="AD.openAddTag()"><i class="fa fa-plus"></i></button>
     </div>
 </div>
 
-<div class="filters">
-    <div class="filter-group">
-        <label for="statusFilter">Status:</label>
-        <select id="statusFilter" name="status">
-            <option value="all" selected>All</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-        </select>
-    </div>
-</div>
-
+<!-- Expertise Tag Table Section -->
 <div class="expertise-tag-management">
     <table class="expertise-tag-management-table" id="tagsTable">
         <thead>
             <tr>
-                <th class="column-title expertise-col">EXPERTISE TAG</th>
+                <th class="column-title name-col">NAME</th>
                 <th class="column-title desc-col">DESCRIPTION</th>
                 <th class="column-title status-col">STATUS</th>
                 <th class="column-title action-col">ACTION</th>
@@ -112,4 +136,4 @@
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=1.0"></script>
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=3.0"></script>

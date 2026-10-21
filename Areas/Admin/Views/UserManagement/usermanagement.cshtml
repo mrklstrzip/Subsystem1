@@ -2,44 +2,87 @@
     ViewBag.Title = "User Management";
 }
 
-<link href="@Url.Content("~/Content/css/usermanagement.css")?v=1.0" rel="stylesheet" type="text/css" />
-<link href="@Url.Content("~/Content/css/delete.css")?v=1.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/usermanagement.css")?v=4.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/delete.css")?v=4.0" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<h1 class="page-title">User Management</h1>
+<!-- Header Banner -->
+<div class="dashboard-header">
+    <div class="header-text">
+        <span class="breadcrumb-text">Admin / User Management</span>
+        <h1 class="page-title">User Management</h1>
+        <p class="welcome-text">Create and manage user accounts and account details</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa-solid fa-users"></i>
+    </div>
+</div>
 
-<div class="function">
+<!-- Controls Container Card (All-in-one White Box) -->
+<div class="controls-card">
     <div class="search-container">
         <div class="search">
             <i class="fa fa-search"></i>
             <input type="text" id="searchInput" placeholder="Search users">
         </div>
+    </div>
+
+    <div class="filter-wrapper">
+        <!-- Role Filter Box -->
+        <div class="custom-select-box" id="roleDropdownToggle">
+            <span class="filter-legend">Role</span>
+            <div class="select-selected">
+                <i class="fa-solid fa-users" id="selectedRoleIcon"></i>
+                <span id="selectedRoleText">All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="custom-select-dropdown" id="roleDropdownMenu">
+                <div class="select-option active" data-value="all"><i class="fa-solid fa-users"></i> All</div>
+                <div class="select-option" data-value="admin"><i class="fa-solid fa-user-gear"></i> Admin</div>
+                <div class="select-option" data-value="dean"><i class="fa-solid fa-user-tie"></i> Dean</div>
+                <div class="select-option" data-value="capstone-coordinator"><i class="fa-solid fa-folder-open"></i> Capstone Coordinator</div>
+                <div class="select-option" data-value="campus-director"><i class="fa-solid fa-building"></i> Campus Director</div>
+                <div class="select-option" data-value="adviser"><i class="fa-solid fa-chalkboard-user"></i> Adviser</div>
+                <div class="select-option" data-value="panelist"><i class="fa-solid fa-pen-nib"></i> Panelist</div>
+                <div class="select-option" data-value="project-manager"><i class="fa-solid fa-graduation-cap"></i> Student</div>
+            </div>
+            <select id="roleFilter" name="role" style="display:none;">
+                <option value="all" selected>All</option>
+                <option value="admin">Admin</option>
+                <option value="dean">Dean</option>
+                <option value="capstone-coordinator">Capstone Coordinator</option>
+                <option value="campus-director">Campus Director</option>
+                <option value="adviser">Adviser</option>
+                <option value="panelist">Panelist</option>
+                <option value="project-manager">Student</option>
+            </select>
+        </div>
+
+        <!-- Status Filter Box -->
+        <div class="custom-select-box" id="statusDropdownToggle">
+            <span class="filter-legend">Status</span>
+            <div class="select-selected">
+                <i class="fa-solid fa-sliders"></i>
+                <span id="selectedStatusText">All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="custom-select-dropdown" id="statusDropdownMenu">
+                <div class="select-option active" data-value="all"><i class="fa-solid fa-sliders"></i> All</div>
+                <div class="select-option" data-value="active"><i class="fa-solid fa-toggle-on"></i> Active</div>
+                <div class="select-option" data-value="inactive"><i class="fa-solid fa-toggle-off"></i> Inactive</div>
+            </div>
+            <select id="statusFilter" name="status" style="display:none;">
+                <option value="all" selected>All</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+
         <button class="add-btn" id="openModalBtn"><i class="fa fa-plus"></i></button>
     </div>
 </div>
 
-<div class="filters">
-    <div class="filter-group">
-        <label for="roleFilter">Role:</label>
-        <select id="roleFilter" name="role">
-            <option value="all" selected>All</option>
-            <option value="admin">Admin</option>
-            <option value="campus-director">Campus Director</option>
-            <option value="capstone-coordinator">Capstone Coordinator</option>
-            <option value="professor">Professor</option>
-            <option value="student">Student</option>
-        </select>
-    </div>
-
-    <div class="filter-group">
-        <label for="statusFilter">Status:</label>
-        <select id="statusFilter" name="status">
-            <option value="all" selected>All</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-        </select>
-    </div>
-</div>
-
+<!-- User Table Section -->
 <div class="user-management">
     <table class="user-management-table" id="usersTable">
         <thead>
@@ -55,7 +98,7 @@
     </table>
 </div>
 
-<!-- Dynamic User Modal (Used for both Create and Edit) -->
+<!-- Dynamic User Modal (Create / Edit) -->
 <div class="modal-overlay" id="userModal">
     <div class="modal-card">
         <div class="modal-title" id="modalHeaderTitle">CREATE USER ACCOUNT</div>
@@ -80,7 +123,6 @@
             <input type="email" id="emailInput" placeholder="user@qcu.edu.ph">
         </div>
 
-        <!-- ID Input Field -->
         <div class="form-group">
             <label>ID Number</label>
             <input type="text" id="modalIdInput" placeholder="12-3456">
@@ -89,14 +131,15 @@
         <div class="form-group">
             <label>Role</label>
             <select id="modalRoleSelect">
-                <option value="student" selected>Student</option>
-                <option value="professor">Professor / Panelist</option>
+                <option value="project-manager" selected>Student</option>
+                <option value="panelist">Panelist</option>
+                <option value="adviser">Adviser</option>
                 <option value="campus-director">Campus Director</option>
                 <option value="capstone-coordinator">Capstone Coordinator</option>
+                <option value="dean">Dean</option>
             </select>
         </div>
 
-        <!-- Student Dynamic Field -->
         <div class="role-field" id="fieldProgram" style="display: flex; flex-direction: column; gap: 12px;">
             <div class="form-group">
                 <label>Program</label>
@@ -112,26 +155,23 @@
                 <input type="text" id="sectionInput" placeholder="e.g. SBIT-4A">
             </div>
             <div class="form-group">
-                <label>Professor</label>
+                <label>Professor / Adviser</label>
                 <select id="professorInput">
-                    <option value="" selected disabled>Select Professor</option>
+                    <option value="" selected disabled>Select Adviser</option>
                 </select>
             </div>
         </div>
 
-        <!-- Professor Dynamic Fields -->
         <div class="role-field" id="fieldProfessor" style="display: none; flex-direction: column; gap: 12px;">
             <div id="expertiseSection" style="display: flex; flex-direction: column; gap: 12px;">
                 <div class="form-group">
                     <label>Expertise Tag</label>
                     <div class="selected-tags-box" id="selectedTagsBox"></div>
                 </div>
-
                 <div class="tags-grid-box" id="systemTagsGrid"></div>
             </div>
         </div>
 
-        <!-- Status Radio Group (Visible only during Edit Mode) -->
         <div class="form-group" id="statusGroup" style="display: none;">
             <label>Status</label>
             <div class="radio-group">
@@ -172,4 +212,4 @@
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=1.0"></script>
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=4.0"></script>

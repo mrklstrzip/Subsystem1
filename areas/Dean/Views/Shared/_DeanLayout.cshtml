@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin - @ViewBag.Title</title>
     <link href="@Url.Content("~/Content/css/layout.css")?v=1.1" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/css/Dean.css")?v=1.0" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,6 +33,11 @@
             <span class="stripe stripe-2"></span>
             <span class="stripe stripe-3"></span>
         </div>
+
+        <button type="button" id="notifBell" class="notif-bell" aria-label="Notifications" aria-expanded="false">
+            <i class="fa fa-bell"></i>
+            <span class="notif-dot" id="notifDot"></span>
+        </button>
     </header>
 
     <div class="layout-wrapper sidebar-rail" id="layoutWrapper">
@@ -48,11 +54,11 @@
                 <a href="@Url.Action("dashboard", "Dashboard")" class="@(currentController == "Dashboard" ? "active" : "")" title="Dashboard">
                     <i class="fa fa-th-large"></i><span class="nav-label">Dashboard</span>
                 </a>
-                <a href="#" title="Schedule Approval">
-                    <i class="fa fa-file-lines"></i></i><span class="nav-label">Schedule Approval</span>
+                <a href="@Url.Action("ScheduleApprovalView", "ScheduleApproval")" class="@(currentController == "ScheduleApproval" ? "active" : "")" title="Schedule Approval">
+                    <i class="fa fa-file-lines"></i><span class="nav-label">Schedule Approval</span>
                 </a>
-                <a href="#" title="Defense Schedule">
-                    <i class="fa fa-calendar"></i></i><span class="nav-label">Defense Schedule</span>
+                <a href="@Url.Action("DefenseScheduleView", "DefenseSchedule")" class="@(currentController == "DefenseSchedule" ? "active" : "")" title="Defense Schedule">
+                    <i class="fa fa-calendar"></i><span class="nav-label">Defense Schedule</span>
                 </a>
             </nav>
 
@@ -73,7 +79,56 @@
         </main>
     </div>
 
+    <!-- Notification panel (opened by the bell in the header) -->
+    <div class="notif-panel" id="notifPanel" hidden>
+        <div class="notif-head">
+            <div class="notif-title">
+                <h3>Notifications</h3>
+                <span class="notif-badge" id="notifBadge">3 new</span>
+            </div>
+            <button type="button" id="notifClose" class="notif-close" aria-label="Close"><i class="fa fa-xmark"></i></button>
+        </div>
+
+        <div class="notif-tabs">
+            <button type="button" class="notif-tab active" data-tab="all">All (<span id="countAll">7</span>)</button>
+            <button type="button" class="notif-tab" data-tab="unread">Unread (<span id="countUnread">3</span>)</button>
+        </div>
+
+        <div class="notif-body" id="notifBody">
+            <div class="notif-group-label">TODAY</div>
+
+            <div class="notif-item unread" data-id="1">
+                <div class="notif-icon"><i class="fa fa-graduation-cap"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Cho Miyeon submitted a defense schedule <span class="unread-dot"></span></div>
+                    <p>Defense schedule for BSIT-4A, with a title "Lips of an Angel"</p>
+                    <div class="notif-actions">
+                        <button type="button" class="btn-cancel" data-action="cancel">Cancel</button>
+                        <button type="button" class="btn-approve" data-action="approve">Approve</button>
+                        <span class="notif-time">5 min ago</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="notif-group-label">EARLIER</div>
+
+            <div class="notif-item" data-id="2">
+                <div class="notif-icon"><i class="fa fa-graduation-cap"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Cho Miyeon submitted a defense schedule</div>
+                    <p>Defense schedule for BSCS-4A, with a title "Lips of an Angel"</p>
+                    <div class="notif-actions">
+                        <button type="button" class="btn-approve" data-action="approve">Approve</button>
+                        <span class="notif-time">5 min ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/Scripts/sidebar.js"></script>
     <script src="~/Scripts/layout-profile.js"></script>
+    <script src="~/Scripts/DeanNotifs.js"></script>
+    @RenderSection("scripts", required: false)
 </body>
 </html>

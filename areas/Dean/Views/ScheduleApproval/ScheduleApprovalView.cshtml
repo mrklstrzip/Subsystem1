@@ -1,0 +1,93 @@
+﻿@model IEnumerable<Subsystem1.Areas.Dean.Models.ScheduleListItem>
+@{
+    ViewBag.Title = "ScheduleApproval";
+
+    var items = (IEnumerable<Subsystem1.Areas.Dean.Models.ScheduleListItem>)Model;
+    var programs = items.Select(x => x.Program).Distinct().ToList();
+    var advisers = items.Select(x => x.Adviser).Distinct().ToList();
+}
+
+<section class="sa-banner">
+    <small>Dean / Schedule Approval</small>
+    <h1>Schedule Approval</h1>
+    <i class="fa fa-calendar sa-banner-icon"></i>
+</section>
+
+<div class="sa-toolbar">
+    <div class="sa-search">
+        <i class="fa fa-magnifying-glass"></i>
+        <input type="text" id="saSearch" placeholder="Search" />
+    </div>
+
+    <div class="sa-filter">
+        <label>Program</label>
+        <select id="fProgram">
+            <option value="">All</option>
+            @foreach (var p in programs)
+            {
+                <option value="@p">@p</option>
+            }
+        </select>
+    </div>
+    <div class="sa-filter">
+        <label>Status</label>
+        <select id="fStatus">
+            <option value="">All</option>
+            <option value="To Approve">To Approve</option>
+            <option value="Approved">Approved</option>
+        </select>
+    </div>
+    <div class="sa-filter">
+        <label>Adviser</label>
+        <select id="fAdviser">
+            <option value="">All</option>
+            @foreach (var a in advisers)
+            {
+                <option value="@a">@a</option>
+            }
+        </select>
+    </div>
+</div>
+
+<div class="sa-card">
+    <table class="sa-table" id="saTable">
+        <thead>
+            <tr>
+                <th>MANUSCRIPT</th>
+                <th>AUTHOR</th>
+                <th>ADVISER</th>
+                <th>DATE</th>
+                <th>STATUS</th>
+                <th>ACTION</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in items)
+            {
+                <tr data-id="@m.Id"
+                    data-program="@m.Program"
+                    data-status="@m.Status"
+                    data-adviser="@m.Adviser"
+                    data-search="@((m.Title + " " + m.Author + " " + m.Adviser).ToLower())">
+                    <td class="sa-title">
+                        <strong>@m.Title</strong>
+                        <span class="sa-chip chip-@m.Program.ToLower()">@m.Section</span>
+                    </td>
+                    <td>@m.Author</td>
+                    <td>@m.Adviser</td>
+                    <td>@m.Date.ToString("MM-dd-yy")</td>
+                    <td>
+                        <span class="sa-status @(m.Status == "Approved" ? "st-approved" : "st-toapprove")">@m.Status</span>
+                    </td>
+                    <td>
+                    <td><button type="button" class="sa-btn-view" data-sa-open data-id="@m.Id">View</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="sa-empty" id="saEmpty" style="display:none;">No results found.</div>
+</div>
+
+
+@Html.Partial("_ScheduleApprovalModal")
+<script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.0"></script>

@@ -2,7 +2,7 @@
 
 namespace Subsystem1.Areas.CapstoneCoordinator
 {
-    public class DeanAreaRegistration : AreaRegistration
+    public class CapstoneCoordinatorAreaRegistration : AreaRegistration
     {
         public override string AreaName => "CapstoneCoordinator";
 
@@ -11,7 +11,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator
             context.MapRoute(
                 "CapstoneCoordinator_default",
                 "CapstoneCoordinator/{controller}/{action}/{id}",
-                new { action = "dashboard", id = UrlParameter.Optional }
+                new { action = "dashboard", id = UrlParameter.Optional },
+                namespaces: new[] { "Subsystem1.Areas.CapstoneCoordinator.Controllers" }
             );
         }
     }

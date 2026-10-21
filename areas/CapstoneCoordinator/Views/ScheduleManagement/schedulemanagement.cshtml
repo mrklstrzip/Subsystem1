@@ -1,0 +1,545 @@
+﻿@{
+    ViewBag.Title = "Schedule Management";
+}
+
+<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.3" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<!-- Header Banner -->
+<div class="dashboard-header">
+    <div class="header-text">
+        <span class="breadcrumb-text">Capstone Coordinator / Defense Management</span>
+        <h1 class="page-title">Schedule Management</h1>
+        <p class="welcome-text">Generate and edit schedule</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-calendar-days"></i>
+    </div>
+</div>
+
+<!-- Controls Container Card -->
+<div class="controls-card">
+    <div class="search-container">
+        <div class="search">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search">
+        </div>
+    </div>
+
+    <div class="filter-wrapper">
+        <!-- Program Filter Box -->
+        <div class="custom-select-box">
+            <span class="filter-legend">Program</span>
+            <div class="select-selected">
+                <i class="fa fa-graduation-cap"></i>
+                <span>All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+        </div>
+
+        <!-- Status Filter Box -->
+        <div class="custom-select-box">
+            <span class="filter-legend">Status</span>
+            <div class="select-selected">
+                <i class="fa-solid fa-sliders"></i>
+                <span>All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+        </div>
+
+        <!-- Adviser Filter Box -->
+        <div class="custom-select-box">
+            <span class="filter-legend">Adviser</span>
+            <div class="select-selected">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span>All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Management Table Section -->
+<div class="schedule-management-card">
+    <table class="schedule-table" id="scheduleTable">
+        <thead>
+            <tr>
+                <th class="column-title manuscript-col">MANUSCRIPT</th>
+                <th class="column-title author-col">AUTHOR</th>
+                <th class="column-title adviser-col">ADVISER</th>
+                <th class="column-title date-col">DATE</th>
+                <th class="column-title status-col">STATUS</th>
+                <th class="column-title action-col">ACTION</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <div class="manuscript-title-text">Lips of An Angel</div>
+                    <span class="program-badge bsit">BSIT-4A</span>
+                </td>
+                <td class="author-cell">Sarah G</td>
+                <td class="adviser-cell">Naruto Uzumaki</td>
+                <td class="date-cell">10-25-27</td>
+                <td>
+                    <span class="status-badge to-submit">To Submit</span>
+                </td>
+                <td class="action-cell">
+                    <button class="btn-view"
+                            data-status="to-submit"
+                            data-title="Lips of An Angel"
+                            data-date-submitted="Sep 22, 2026"
+                            data-problem=""
+                            data-student="Sarah G"
+                            data-program="BS Information Technology · 4A"
+                            data-adviser="Naruto Uzumaki">
+                        View
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="manuscript-title-text">Huwag na Huwag Mong Sasabihin</div>
+                    <span class="program-badge bscs">BSCS-4A</span>
+                </td>
+                <td class="author-cell">Lea Salonga</td>
+                <td class="adviser-cell">Sasuke Uchiha</td>
+                <td class="date-cell">10-25-27</td>
+                <td>
+                    <span class="status-badge in-conflict">In Conflict</span>
+                </td>
+                <td class="action-cell">
+                    <button class="btn-view"
+                            data-status="in-conflict"
+                            data-title="Huwag na Huwag Mong Sasabihin"
+                            data-date-submitted="Sep 22, 2026"
+                            data-problem="Room Unavailability"
+                            data-student="Lea Salonga"
+                            data-program="BS Computer Science · 4A"
+                            data-adviser="Sasuke Uchiha">
+                        View
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="manuscript-title-text">Pangarap Lang Kita</div>
+                    <span class="program-badge bsis">BSIS-4A</span>
+                </td>
+                <td class="author-cell">Apple D App</td>
+                <td class="adviser-cell">Bon Jovie</td>
+                <td class="date-cell">10-25-27</td>
+                <td>
+                    <span class="status-badge to-submit">To Submit</span>
+                </td>
+                <td class="action-cell">
+                    <button class="btn-view"
+                            data-status="to-submit"
+                            data-title="Pangarap Lang Kita"
+                            data-date-submitted="Sep 22, 2026"
+                            data-problem=""
+                            data-student="Apple D App"
+                            data-program="BS Information Systems · 4A"
+                            data-adviser="Bon Jovie">
+                        View
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="manuscript-title-text">The Greatest Love of All</div>
+                    <span class="program-badge bscs-dark">BSCS-4D</span>
+                </td>
+                <td class="author-cell">Bamboo</td>
+                <td class="adviser-cell">The Beatles</td>
+                <td class="date-cell">10-25-27</td>
+                <td>
+                    <span class="status-badge submitted">Submitted</span>
+                </td>
+                <td class="action-cell">
+                    <button class="btn-view"
+                            data-status="submitted"
+                            data-title="The Greatest Love of All"
+                            data-date-submitted="Sep 22, 2026"
+                            data-problem=""
+                            data-student="Bamboo"
+                            data-program="BS Computer Science · 4D"
+                            data-adviser="The Beatles">
+                        View
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ==========================================================
+     Generated Schedule Modal (one markup, 3 status variants)
+     to-submit  -> Close + Submit
+     in-conflict-> Close + Submit, problem shown
+     submitted  -> Close only
+     ========================================================== -->
+<div class="modal-overlay" id="scheduleModal" aria-hidden="true">
+    <div class="schedule-modal" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
+
+        <button type="button" class="modal-close-icon" id="modalCloseIcon" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <h2 class="modal-heading" id="modalHeading">Generated Schedule</h2>
+        <p class="modal-subheading">College of Computer Studies - QCU &nbsp;·&nbsp; Defense Schedule</p>
+
+        <!-- Summary card -->
+        <div class="modal-summary">
+            <div class="summary-row summary-row-4">
+                <div class="summary-item">
+                    <span class="summary-label">Project Title</span>
+                    <span class="summary-value" id="mTitle"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Date Submitted</span>
+                    <span class="summary-value" id="mDateSubmitted"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Problem</span>
+                    <span class="summary-value" id="mProblem"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Current Status</span>
+                    <span class="status-badge" id="mStatus"></span>
+                </div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row summary-row-3">
+                <div class="summary-item">
+                    <span class="summary-label">Student</span>
+                    <span class="summary-value" id="mStudent"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Program</span>
+                    <span class="summary-value" id="mProgram"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Adviser</span>
+                    <span class="summary-value" id="mAdviser"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body: Abstract + Panelists -->
+        <div class="modal-body-grid">
+            <div class="modal-panel abstract-panel">
+                <h3 class="panel-title">Abstract</h3>
+                <p class="panel-text" id="mAbstract"></p>
+
+                <h3 class="panel-title">Keywords</h3>
+                <p class="panel-text" id="mKeywords"></p>
+
+                <span class="panel-footnote" id="mSubmittedNote"></span>
+            </div>
+
+            <div class="modal-panel panelists-panel">
+                <div class="panel-header-row">
+                    <h3 class="panel-title no-margin">Assigned Panelists</h3>
+                    <div class="edit-actions">
+                        <button type="button" class="btn-edit-panelists" id="btnEditPanelists" title="Edit panelists and schedule">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button type="button" class="btn-edit-panelists btn-cancel-edit" id="btnCancelEdit" title="Cancel" hidden>
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <button type="button" class="btn-edit-panelists btn-save-edit" id="btnSaveEdit" title="Save changes" hidden>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panelist-head">
+                    <span>Panelists</span>
+                    <span>Expertise Match</span>
+                </div>
+                <div id="mPanelists"></div>
+
+                <h3 class="panel-title schedule-title">Proposed Defense Schedule</h3>
+                <dl class="defense-schedule">
+                    <div>
+                        <dt>TIME</dt>
+                        <dd>
+                            <span class="view-val" id="mTime"></span>
+                            <span class="edit-val">
+                                <input type="time" class="edit-input" id="eTimeStart" aria-label="Start time">
+                                <span class="time-sep">&ndash;</span>
+                                <input type="time" class="edit-input" id="eTimeEnd" aria-label="End time">
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>DATE</dt>
+                        <dd>
+                            <span class="view-val" id="mDate"></span>
+                            <span class="edit-val">
+                                <input type="date" class="edit-input" id="eDate" aria-label="Defense date">
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>ROOM</dt>
+                        <dd>
+                            <span class="view-val" id="mRoom"></span>
+                            <span class="edit-val">
+                                <input type="text" class="edit-input room-input" id="eRoom" maxlength="20" aria-label="Room">
+                            </span>
+                        </dd>
+                    </div>
+                </dl>
+                <p class="edit-error" id="mEditError" hidden></p>
+            </div>
+        </div>
+
+        <!-- Footer buttons -->
+        <div class="modal-footer">
+            <button type="button" class="btn-modal btn-modal-close" id="modalCloseBtn">Close</button>
+            <button type="button" class="btn-modal btn-modal-submit" id="modalSubmitBtn">Submit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var STATUS_LABELS = {
+            "to-submit": "To Submit",
+            "in-conflict": "In Conflict",
+            "submitted": "Submitted"
+        };
+        var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        // TODO: replace this sample data with real data from your controller/API.
+        // Each table row gets its own copy, so edits are kept per manuscript.
+        var sample = {
+            abstract: "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            keywords: "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis",
+            panelists: [
+                { name: "Itadori Yuuji", match: "high" },
+                { name: "Remy Butter", match: "medium" },
+                { name: "Jane Doe", match: "low" }
+            ],
+            time: { start: "08:00", end: "10:00" },
+            date: "2027-04-25",
+            room: "IK601A"
+        };
+
+        var overlay = document.getElementById("scheduleModal");
+        var submitBtn = document.getElementById("modalSubmitBtn");
+        var panel = document.querySelector(".panelists-panel");
+        var btnEdit = document.getElementById("btnEditPanelists");
+        var btnSave = document.getElementById("btnSaveEdit");
+        var btnCancel = document.getElementById("btnCancelEdit");
+
+        var store = new WeakMap();   // table row -> its schedule data
+        var currentRow = null;
+        var currentData = null;
+        var editing = false;
+        var currentStatus = "";
+
+        function $(id) { return document.getElementById(id); }
+        function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+        function fmtTime(t) {
+            if (!t) return "";
+            var p = t.split(":");
+            var h = parseInt(p[0], 10);
+            var ap = h >= 12 ? "PM" : "AM";
+            h = h % 12 || 12;
+            return h + ":" + p[1] + ap;
+        }
+
+        function fmtDate(iso) {
+            if (!iso) return "";
+            var p = iso.split("-");
+            return MONTHS[parseInt(p[1], 10) - 1] + " " + parseInt(p[2], 10) + ", " + p[0];
+        }
+
+        // ---------- Rendering ----------
+        function renderPanelists() {
+            var list = $("mPanelists");
+            list.innerHTML = "";
+            currentData.panelists.forEach(function (p) {
+                var row = document.createElement("div");
+                row.className = "panelist-row";
+
+                if (editing) {
+                    var input = document.createElement("input");
+                    input.type = "text";
+                    input.className = "edit-input panelist-input";
+                    input.maxLength = 60;
+                    input.value = p.name;
+                    input.setAttribute("aria-label", "Panelist name");
+                    row.appendChild(input);
+                } else {
+                    var name = document.createElement("span");
+                    name.className = "panelist-name";
+                    name.textContent = p.name;
+                    row.appendChild(name);
+                }
+
+                // Expertise match is read-only
+                var pill = document.createElement("span");
+                pill.className = "match-pill " + p.match;
+                pill.textContent = p.match.charAt(0).toUpperCase() + p.match.slice(1);
+                row.appendChild(pill);
+
+                list.appendChild(row);
+            });
+        }
+
+        function renderSchedule() {
+            $("mTime").textContent = fmtTime(currentData.time.start) + " - " + fmtTime(currentData.time.end);
+            $("mDate").textContent = fmtDate(currentData.date);
+            $("mRoom").textContent = currentData.room;
+
+            $("eTimeStart").value = currentData.time.start;
+            $("eTimeEnd").value = currentData.time.end;
+            $("eDate").value = currentData.date;
+            $("eRoom").value = currentData.room;
+        }
+
+        function showError(msg) {
+            var el = $("mEditError");
+            el.textContent = msg || "";
+            el.hidden = !msg;
+        }
+
+        // ---------- Edit mode ----------
+        function setEditing(on) {
+            editing = on;
+            panel.classList.toggle("editing", on);
+            btnEdit.hidden = on;
+            btnSave.hidden = !on;
+            btnCancel.hidden = !on;
+            submitBtn.disabled = on;   // finish editing before submitting
+            showError("");
+            renderPanelists();
+            renderSchedule();
+            if (on) {
+                var first = panel.querySelector(".panelist-input");
+                if (first) first.focus();
+            }
+        }
+
+        function saveEdit() {
+            var inputs = panel.querySelectorAll(".panelist-input");
+            var names = [];
+            for (var i = 0; i < inputs.length; i++) {
+                var n = inputs[i].value.trim();
+                if (!n) { showError("Panelist names can't be empty."); inputs[i].focus(); return; }
+                names.push(n);
+            }
+            var lower = names.map(function (n) { return n.toLowerCase(); });
+            if (lower.some(function (n, i) { return lower.indexOf(n) !== i; })) {
+                showError("A panelist can only be assigned once.");
+                return;
+            }
+
+            var start = $("eTimeStart").value;
+            var end = $("eTimeEnd").value;
+            var date = $("eDate").value;
+            var room = $("eRoom").value.trim();
+
+            if (!start || !end) { showError("Please set a start and end time."); return; }
+            if (end <= start) { showError("End time must be later than start time."); return; }
+            if (!date) { showError("Please choose a defense date."); return; }
+            if (!room) { showError("Please enter a room."); return; }
+
+            names.forEach(function (n, i) { currentData.panelists[i].name = n; });
+            currentData.time = { start: start, end: end };
+            currentData.date = date;
+            currentData.room = room;
+
+            // TODO: persist currentData to your server here (AJAX/POST)
+            setEditing(false);
+        }
+
+        // ---------- Open / close ----------
+        function openModal(btn) {
+            var d = btn.dataset;
+            currentStatus = d.status;
+            currentRow = btn.closest("tr");
+            if (!store.has(currentRow)) store.set(currentRow, clone(sample));
+            currentData = store.get(currentRow);
+
+            $("mTitle").textContent = d.title;
+            $("mDateSubmitted").textContent = d.dateSubmitted;
+            $("mProblem").textContent = d.problem && d.problem.length ? d.problem : "\u2014";
+            $("mStudent").textContent = d.student;
+            $("mProgram").textContent = d.program;
+            $("mAdviser").textContent = d.adviser;
+
+            var badge = $("mStatus");
+            badge.className = "status-badge " + currentStatus;
+            badge.textContent = STATUS_LABELS[currentStatus] || currentStatus;
+
+            $("mAbstract").textContent = currentData.abstract;
+            $("mKeywords").textContent = currentData.keywords;
+            $("mSubmittedNote").textContent = "Submitted " + d.dateSubmitted.replace(/^(\w+) (\d+), (\d+)$/, function (m, mon, day, yr) {
+                var full = { Jan: "January", Feb: "February", Mar: "March", Apr: "April", May: "May", Jun: "June", Jul: "July", Aug: "August", Sep: "September", Oct: "October", Nov: "November", Dec: "December" };
+                return (full[mon] || mon) + " " + day + ", " + yr;
+            });
+
+            // Status-based footer: "Submitted" has no Submit button
+            submitBtn.style.display = currentStatus === "submitted" ? "none" : "";
+
+            setEditing(false);   // always open in view mode
+
+            overlay.classList.add("open");
+            overlay.setAttribute("aria-hidden", "false");
+            document.body.classList.add("modal-open");
+        }
+
+        function closeModal() {
+            if (editing) setEditing(false);   // discard unsaved edits
+            overlay.classList.remove("open");
+            overlay.setAttribute("aria-hidden", "true");
+            document.body.classList.remove("modal-open");
+        }
+
+        // Open
+        document.querySelectorAll(".btn-view").forEach(function (btn) {
+            btn.addEventListener("click", function () { openModal(btn); });
+        });
+
+        // Close
+        $("modalCloseIcon").addEventListener("click", closeModal);
+        $("modalCloseBtn").addEventListener("click", closeModal);
+        overlay.addEventListener("click", function (e) { if (e.target === overlay && !editing) closeModal(); });
+        document.addEventListener("keydown", function (e) {
+            if (e.key !== "Escape" || !overlay.classList.contains("open")) return;
+            if (editing) setEditing(false); else closeModal();   // Esc cancels editing first
+        });
+
+        // Edit / save / cancel
+        btnEdit.addEventListener("click", function () { setEditing(true); });
+        btnCancel.addEventListener("click", function () { setEditing(false); });
+        btnSave.addEventListener("click", saveEdit);
+        panel.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && editing && e.target.tagName === "INPUT") {
+                e.preventDefault();
+                saveEdit();
+            }
+        });
+
+        // Submit -> mark row as Submitted (hook your AJAX/POST here)
+        submitBtn.addEventListener("click", function () {
+            if (editing) return;
+            if (currentRow) {
+                var rowBadge = currentRow.querySelector(".status-badge");
+                rowBadge.className = "status-badge submitted";
+                rowBadge.textContent = "Submitted";
+                currentRow.querySelector(".btn-view").dataset.status = "submitted";
+                currentRow.querySelector(".btn-view").dataset.problem = "";
+            }
+            closeModal();
+        });
+    })();
+</script>
+
+<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=1.0"></script>

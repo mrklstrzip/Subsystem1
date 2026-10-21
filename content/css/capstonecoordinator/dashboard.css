@@ -1,0 +1,253 @@
+﻿
+body {
+    background-color: #EAECEF;
+    font-family: 'Inter', sans-serif;
+    color: #22252A;
+    margin: 0;
+}
+
+.dashboard-header {
+    background: #1B293B;
+    background: linear-gradient(92deg, rgba(27, 41, 59, 1) 31%, rgba(74, 101, 135, 1) 100%);
+    border-radius: 14px;
+    padding: 32px 40px;
+    color: #FFFFFF;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.breadcrumb-text {
+    font-size: 12px;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.page-title {
+    font-family: 'Newsreader', serif;
+    font-size: 48px;
+    font-weight: 700;
+    margin: 6px 0 10px 0;
+    padding-bottom: 0;
+    letter-spacing: -0.5px;
+}
+
+.welcome-text {
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.header-bg-icon {
+    position: absolute;
+    right: 30px;
+    bottom: -20px;
+    font-size: 140px;
+    color: #1B293B;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   Dashboard Grid Layout
+   ========================================================================== */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.35fr 0.85fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.dashboard-left-column,
+.dashboard-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ==========================================================================
+   Dashboard Cards
+   ========================================================================== */
+.dashboard-card {
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.view-all-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: #3b82f6;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+    .view-all-link:hover {
+        opacity: 0.8;
+    }
+
+/* ==========================================================================
+   Tables
+   ========================================================================== */
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.column-title {
+    color: #9092AD;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    padding-bottom: 12px;
+    text-align: left;
+    border-bottom: 1px solid #EDEDED;
+    text-transform: uppercase;
+}
+
+.dashboard-table td {
+    padding: 14px 0;
+    font-size: 13px;
+    color: #1a202c;
+    border-bottom: 1px solid #F4F5F7;
+    vertical-align: middle;
+}
+
+.dashboard-table tr:last-child td {
+    border-bottom: none;
+}
+
+.manuscript-title-text {
+    font-weight: 600;
+    color: #1a202c;
+    margin-bottom: 4px;
+}
+
+/* Program Badges */
+.program-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 700;
+    border: 1px solid #cbd5e1;
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+    .program-badge.bsit {
+        background-color: #f1f5f9;
+        color: #334155;
+        border-color: #cbd5e1;
+    }
+
+    .program-badge.bscs {
+        background-color: #fdf2f2;
+        color: #991b1b;
+        border-color: #fecaca;
+    }
+
+    .program-badge.bsis {
+        background-color: #f5f3ff;
+        color: #5b21b6;
+        border-color: #ddd6fe;
+    }
+
+.date-cell, .time-cell {
+    color: #475569;
+    font-weight: 500;
+}
+
+.action-cell {
+    text-align: right;
+}
+
+.btn-view {
+    padding: 4px 16px;
+    background-color: #ffffff;
+    color: #374A60;
+    border: 1.5px solid #374A60;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .btn-view:hover {
+        background-color: #374A60;
+        color: #ffffff;
+    }
+
+/* ==========================================================================
+   Metrics Row
+   ========================================================================== */
+.metrics-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.metric-card {
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 22px 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #9092AD;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1a202c;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.metric-subtitle {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.metric-icon {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    font-size: 36px;
+    color: #cbd5e1;
+    opacity: 0.4;
+}
+
+/* Recent Activities Empty Rows */
+.recent-activities-card .empty-row td {
+    height: 38px;
+}

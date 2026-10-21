@@ -1,8 +1,57 @@
 @{
-    ViewBag.Title = "Manuscripts";
+    ViewBag.Title = "Manuscripts Details";
 }
-    <h1 class="prof-title">Manuscripts</h1>
-    <div class="prof-grid">
-        @for (int i = 0; i < 8; i++)
-        {@Html.Partial("_ManuscriptCard")}
+
+<div class="pf-page">
+
+    <div class="pf-banner">
+        <div>
+            <h1>Manuscripts Details</h1>
+            <p>View manuscript details from your groups</p>
+        </div>
+        <svg class="pf-banner-deco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="15" height="20" rx="3" />
+            <path d="M9 8h7M9 12h7" />
+            <path d="M2 6h3M2 10h3M2 14h3M2 18h3" />
+        </svg>
     </div>
+
+    <div class="pf-filters">
+        <div class="pf-filter">
+            <label for="msSearch">Search</label>
+            <input type="text" id="msSearch" placeholder="Search title or group" />
+        </div>
+        <div class="pf-filter">
+            <label for="msSection">Section</label>
+            <select id="msSection">
+                <option value="">Select Section</option>
+                <option>SBIT-4A</option>
+                <option>SBIT-4E</option>
+                <option>SBCS-4A</option>
+                <option>SBIS-4B</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="pf-ms-grid" id="msGrid">
+
+        <div class="pf-ms-card" data-title="Manuscript Title" data-group="Group 5" data-section="SBIT-4E">
+            <div class="pf-ms-thumb"><div class="pf-ms-doc"><i></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="pf-ms-info">
+                <b>Manuscript Title</b>
+                <small><span>Group 5</span><span>SBIT-4E</span></small>
+                <a href="#" class="pf-btn pf-btn-outline">View Manuscript Details</a>
+            </div>
+        </div>
+
+        <div class="pf-ms-card" data-title="Manuscript Title" data-group="Group 5" data-section="SBIS-4B">
+            <div class="pf-ms-thumb"><div class="pf-ms-doc"><i></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="pf-ms-info">
+                <b>Manuscript Title</b>
+                <small><span>Group 5</span><span>SBIS-4B</span></small>
+                <a href="#" class="pf-btn pf-btn-outline">View Manuscript Details</a>
+            </div>
+        </div>
+
+    </div>
+</div>

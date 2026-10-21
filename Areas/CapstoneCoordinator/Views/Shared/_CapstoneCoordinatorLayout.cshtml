@@ -48,17 +48,14 @@
                 <a href="@Url.Action("dashboard", "Dashboard")" class="@(currentController == "Dashboard" ? "active" : "")" title="Dashboard">
                     <i class="fa fa-th-large"></i><span class="nav-label">Dashboard</span>
                 </a>
-                <a href="#" title="Manuscript Management">
-                    <i class="fa fa-file-lines"></i></i><span class="nav-label">Manuscript Management</span>
+                <a href="@Url.Action("schedulemanagement", "ScheduleManagement")" class="@(currentController == "ScheduleManagement" ? "active" : "")" title="Schedule Management">
+                    <i class="fa fa-file-lines"></i></i><span class="nav-label">Schedule Management</span>
                 </a>
-                <a href="#" title="Panel Management">
-                    <i class="fa fa-calendar-plus"></i></i><span class="nav-label">Panel Management</span>
-                </a>
-                <a href="#" title="Conflict Result">
-                    <i class="fa fa-clipboard-check"></i></i><span class="nav-label">Conflict Result</span>
-                </a>
-                <a href="#" title="Defense Schedule">
+                <a href="@Url.Action("defenseschedule", "DefenseSchedule")" class="@(currentController == "DefenseSchedule" ? "active" : "")" title="Defense Schedule">
                     <i class="fa fa-calendar"></i></i><span class="nav-label">Defense Schedule</span>
+                </a>
+                <a href="@Url.Action("conflictresult", "ConflictResult")" class="@(currentController == "ConflictResult" ? "active" : "")" title="Conflict Result">
+                    <i class="fa fa-clipboard-check"></i></i><span class="nav-label">Conflict Result</span>
                 </a>
             </nav>
 

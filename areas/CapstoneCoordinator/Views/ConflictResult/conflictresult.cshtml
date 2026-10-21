@@ -1,0 +1,633 @@
+﻿@{
+    ViewBag.Title = "Conflict Result";
+}
+
+<link href="@Url.Content("~/Content/css/capstonecoordinator/conflictresult.css")?v=2.1" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<!-- Header Banner -->
+<div class="dashboard-header">
+    <div class="header-text">
+        <span class="breadcrumb-text">Capstone Coordinator / Conflict Result</span>
+        <h1 class="page-title">Conflict Result</h1>
+        <p class="welcome-text">View and resolve defense conflict</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-calendar-days"></i>
+    </div>
+</div>
+
+<!-- Controls Container Card -->
+<div class="controls-card">
+    <div class="search-container">
+        <div class="search">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search">
+        </div>
+    </div>
+
+    <div class="filter-wrapper">
+        <!-- Room Filter Box -->
+        <!-- Status Filter Box -->
+        <div class="custom-select-box">
+            <span class="filter-legend">Status</span>
+            <div class="select-selected">
+                <i class="fa-solid fa-sliders"></i>
+                <span>All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conflict Result Table Section (click a row to open its Conflict Report) -->
+<div class="schedule-management-card">
+    <table class="schedule-table" id="conflictTable">
+        <thead>
+            <tr>
+                <th class="column-title manuscript-col">MANUSCRIPT</th>
+                <th class="column-title room-col">ROOM</th>
+                <th class="column-title type-col">CONFLICT TYPE</th>
+                <th class="column-title desc-col">DESCRIPTION</th>
+                <th class="column-title date-col">DETECTED DATE</th>
+                <th class="column-title date-col">RESOLVED DATE</th>
+                <th class="column-title status-col">STATUS</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="clickable-row" tabindex="0"
+                data-status="resolved" data-steps-done="4"
+                data-type="Room Unavailability" data-description="Aircon Not Working"
+                data-student="Sarah G" data-adviser="Naruto Uzumaki"
+                data-program="BS Information Technology · 4A" data-date-submitted="Sep 22, 2026">
+                <td>
+                    <div class="manuscript-title-text">Lips of An Angel</div>
+                    <span class="program-badge bsit">BSIT-4A</span>
+                </td>
+                <td class="room-cell">IK505</td>
+                <td class="conflict-cell">Lorem Ipsum</td>
+                <td class="desc-cell">Naruto Uzumaki</td>
+                <td class="date-cell">10-25-2027</td>
+                <td class="date-cell">11-5-2027</td>
+                <td>
+                    <span class="status-badge resolved">Resolved</span>
+                </td>
+            </tr>
+            <tr class="clickable-row" tabindex="0"
+                data-status="in-progress" data-steps-done="3"
+                data-type="Room Unavailability" data-description="Aircon Not Working"
+                data-student="Lea Salonga" data-adviser="Sasuke Uchiha"
+                data-program="BS Computer Science · 4A" data-date-submitted="Sep 22, 2026">
+                <td>
+                    <div class="manuscript-title-text">Huwag na Huwag Mong Sasabihin</div>
+                    <span class="program-badge bscs">BSCS-4A</span>
+                </td>
+                <td class="room-cell">IK505</td>
+                <td class="conflict-cell">Lorem Ipsum</td>
+                <td class="desc-cell">Sasuke Uchiha</td>
+                <td class="date-cell">10-25-2027</td>
+                <td class="date-cell">-------</td>
+                <td>
+                    <span class="status-badge in-progress">In Progress</span>
+                </td>
+            </tr>
+            <tr class="clickable-row" tabindex="0"
+                data-status="resolved" data-steps-done="4"
+                data-type="Room Unavailability" data-description="Aircon Not Working"
+                data-student="Apple D App" data-adviser="Bon Jovie"
+                data-program="BS Information Systems · 4A" data-date-submitted="Sep 22, 2026">
+                <td>
+                    <div class="manuscript-title-text">Pangarap Lang Kita</div>
+                    <span class="program-badge bsis">BSIS-4A</span>
+                </td>
+                <td class="room-cell">IK505</td>
+                <td class="conflict-cell">Lorem Ipsum</td>
+                <td class="desc-cell">Bon Jovie</td>
+                <td class="date-cell">10-25-2027</td>
+                <td class="date-cell">11-5-2027</td>
+                <td>
+                    <span class="status-badge resolved">Resolved</span>
+                </td>
+            </tr>
+            <tr class="clickable-row" tabindex="0"
+                data-status="in-progress" data-steps-done="3"
+                data-type="Room Unavailability" data-description="Aircon Not Working"
+                data-student="Bamboo" data-adviser="The Beatles"
+                data-program="BS Computer Science · 4D" data-date-submitted="Sep 22, 2026">
+                <td>
+                    <div class="manuscript-title-text">The Greatest Love of All</div>
+                    <span class="program-badge bscs-dark">BSCS-4D</span>
+                </td>
+                <td class="room-cell">IK505</td>
+                <td class="conflict-cell">Lorem Ipsum</td>
+                <td class="desc-cell">The Beatles</td>
+                <td class="date-cell">10-25-2027</td>
+                <td class="date-cell">-------</td>
+                <td>
+                    <span class="status-badge in-progress">In Progress</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ==========================================================
+     MODAL 1: Conflict Report
+     in-progress -> Close + Resolve (last step greyed out)
+     resolved    -> Close only (all steps done)
+     ========================================================== -->
+<div class="modal-overlay" id="reportModal" aria-hidden="true">
+    <div class="schedule-modal report-modal" role="dialog" aria-modal="true" aria-labelledby="reportHeading">
+
+        <button type="button" class="modal-close-icon" id="reportCloseIcon" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <h2 class="modal-heading" id="reportHeading">Conflict Report</h2>
+        <p class="report-subheading" id="rSubheading"></p>
+
+        <div class="report-grid">
+            <aside class="report-side">
+                <div class="side-item">
+                    <span class="summary-label">Room</span>
+                    <span class="summary-value" id="rRoom"></span>
+                </div>
+                <div class="side-item">
+                    <span class="summary-label">Conflict Type</span>
+                    <span class="summary-value" id="rType"></span>
+                </div>
+                <div class="side-item">
+                    <span class="summary-label">Description</span>
+                    <span class="summary-value" id="rDescription"></span>
+                </div>
+                <div class="side-item">
+                    <span class="summary-label">Detected At</span>
+                    <span class="summary-value" id="rDetected"></span>
+                </div>
+                <div class="side-item">
+                    <span class="summary-label">Resolved At</span>
+                    <span class="summary-value" id="rResolved"></span>
+                </div>
+                <div class="side-item">
+                    <span class="summary-label">Current Status</span>
+                    <span class="report-status" id="rStatus"></span>
+                </div>
+            </aside>
+
+            <section class="report-steps" id="rSteps"></section>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-modal btn-modal-close" id="reportCloseBtn">Close</button>
+            <button type="button" class="btn-modal btn-modal-submit" id="reportResolveBtn">Resolve</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================
+     MODAL 2: Generated Schedule (In Conflict) - same popup as
+     Schedule Management. Opens when "Resolve" is clicked.
+     ========================================================== -->
+<div class="modal-overlay" id="scheduleModal" aria-hidden="true">
+    <div class="schedule-modal" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
+
+        <button type="button" class="modal-close-icon" id="modalCloseIcon" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <h2 class="modal-heading" id="modalHeading">Generated Schedule</h2>
+        <p class="modal-subheading">College of Computer Studies - QCU &nbsp;·&nbsp; Defense Schedule</p>
+
+        <!-- Summary card -->
+        <div class="modal-summary">
+            <div class="summary-row summary-row-4">
+                <div class="summary-item">
+                    <span class="summary-label">Project Title</span>
+                    <span class="summary-value" id="mTitle"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Date Submitted</span>
+                    <span class="summary-value" id="mDateSubmitted"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Problem</span>
+                    <span class="summary-value" id="mProblem"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Current Status</span>
+                    <span class="status-badge in-conflict" id="mStatus">In Conflict</span>
+                </div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row summary-row-3">
+                <div class="summary-item">
+                    <span class="summary-label">Student</span>
+                    <span class="summary-value" id="mStudent"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Program</span>
+                    <span class="summary-value" id="mProgram"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Adviser</span>
+                    <span class="summary-value" id="mAdviser"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body: Abstract + Panelists -->
+        <div class="modal-body-grid">
+            <div class="modal-panel abstract-panel">
+                <h3 class="panel-title">Abstract</h3>
+                <p class="panel-text" id="mAbstract"></p>
+
+                <h3 class="panel-title">Keywords</h3>
+                <p class="panel-text" id="mKeywords"></p>
+
+                <span class="panel-footnote" id="mSubmittedNote"></span>
+            </div>
+
+            <div class="modal-panel panelists-panel">
+                <div class="panel-header-row">
+                    <h3 class="panel-title no-margin">Assigned Panelists</h3>
+                    <div class="edit-actions">
+                        <button type="button" class="btn-edit-panelists" id="btnEditPanelists" title="Edit panelists and schedule">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button type="button" class="btn-edit-panelists btn-cancel-edit" id="btnCancelEdit" title="Cancel" hidden>
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <button type="button" class="btn-edit-panelists btn-save-edit" id="btnSaveEdit" title="Save changes" hidden>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panelist-head">
+                    <span>Panelists</span>
+                    <span>Expertise Match</span>
+                </div>
+                <div id="mPanelists"></div>
+
+                <h3 class="panel-title schedule-title">Proposed Defense Schedule</h3>
+                <dl class="defense-schedule">
+                    <div>
+                        <dt>TIME</dt>
+                        <dd>
+                            <span class="view-val" id="mTime"></span>
+                            <span class="edit-val">
+                                <input type="time" class="edit-input" id="eTimeStart" aria-label="Start time">
+                                <span class="time-sep">&ndash;</span>
+                                <input type="time" class="edit-input" id="eTimeEnd" aria-label="End time">
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>DATE</dt>
+                        <dd>
+                            <span class="view-val" id="mDate"></span>
+                            <span class="edit-val">
+                                <input type="date" class="edit-input" id="eDate" aria-label="Defense date">
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>ROOM</dt>
+                        <dd>
+                            <span class="view-val" id="mRoom"></span>
+                            <span class="edit-val">
+                                <input type="text" class="edit-input room-input" id="eRoom" maxlength="20" aria-label="Room">
+                            </span>
+                        </dd>
+                    </div>
+                </dl>
+                <p class="edit-error" id="mEditError" hidden></p>
+            </div>
+        </div>
+
+        <!-- Footer buttons -->
+        <div class="modal-footer">
+            <button type="button" class="btn-modal btn-modal-close" id="modalCloseBtn">Close</button>
+            <button type="button" class="btn-modal btn-modal-submit" id="modalSubmitBtn">Submit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        var SHORT_TO_FULL = { Jan: "January", Feb: "February", Mar: "March", Apr: "April", May: "May", Jun: "June", Jul: "July", Aug: "August", Sep: "September", Oct: "October", Nov: "November", Dec: "December" };
+
+        // TODO: replace sample data with real data from your controller/API
+        var reportSteps = [
+            { title: "Lorem ipsum", text: "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore." },
+            { title: "Lorem ipsum", text: "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore." },
+            { title: "Lorem ipsum", text: "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore." },
+            { title: "Lorem ipsum", text: "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." }
+        ];
+
+        var sample = {
+            abstract: "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            keywords: "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis",
+            panelists: [
+                { name: "Itadori Yuuji", match: "high" },
+                { name: "Remy Butter", match: "medium" },
+                { name: "Jane Doe", match: "low" }
+            ],
+            time: { start: "08:00", end: "10:00" },
+            date: "2027-04-25",
+            room: "IK601A"
+        };
+
+        function $(id) { return document.getElementById(id); }
+        function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+        function fmtTime(t) {
+            if (!t) return "";
+            var p = t.split(":");
+            var h = parseInt(p[0], 10);
+            var ap = h >= 12 ? "PM" : "AM";
+            h = h % 12 || 12;
+            return h + ":" + p[1] + ap;
+        }
+        function fmtDate(iso) {
+            if (!iso) return "";
+            var p = iso.split("-");
+            return MONTHS[parseInt(p[1], 10) - 1] + " " + parseInt(p[2], 10) + ", " + p[0];
+        }
+
+        var currentRow = null;
+        function dash(txt) { txt = (txt || "").trim(); return /^-+$/.test(txt) || !txt ? "\u2014" : txt; }
+
+        /* ==========================================================
+           MODAL 1: Conflict Report
+           ========================================================== */
+        var reportOverlay = $("reportModal");
+        var resolveBtn = $("reportResolveBtn");
+
+        function openReport(row) {
+            currentRow = row;
+            var d = row.dataset;
+            var cells = row.querySelectorAll(".date-cell");
+            var isResolved = d.status === "resolved";
+
+            $("rSubheading").textContent = row.querySelector(".manuscript-title-text").textContent + " - " + row.querySelector(".program-badge").textContent;
+            $("rRoom").textContent = row.querySelector(".room-cell").textContent;
+            $("rType").textContent = d.type;
+            $("rDescription").textContent = d.description;
+            $("rDetected").textContent = cells[0].textContent.trim();
+            $("rResolved").textContent = dash(cells[1].textContent);
+
+            var st = $("rStatus");
+            st.className = "report-status " + d.status;
+            st.textContent = isResolved ? "Resolved" : "In Progress";
+
+            // Steps: first N are done, the rest are greyed out
+            var done = parseInt(d.stepsDone, 10) || 0;
+            var wrap = $("rSteps");
+            wrap.innerHTML = "";
+            reportSteps.forEach(function (s, i) {
+                var row = document.createElement("div");
+                row.className = "step-row" + (i < done ? "" : " pending");
+
+                var head = document.createElement("div");
+                head.className = "step-head";
+                var dot = document.createElement("span");
+                dot.className = "step-dot";
+                var label = document.createElement("div");
+                label.className = "step-label";
+                label.textContent = "STEP " + (i + 1) + ":";
+                label.appendChild(document.createElement("br"));
+                label.appendChild(document.createTextNode(s.title));
+                head.appendChild(dot);
+                head.appendChild(label);
+
+                var text = document.createElement("p");
+                text.className = "step-text";
+                text.textContent = s.text;
+
+                row.appendChild(head);
+                row.appendChild(text);
+                wrap.appendChild(row);
+            });
+
+            // Resolved reports are read-only (Close only)
+            resolveBtn.style.display = isResolved ? "none" : "";
+
+            reportOverlay.classList.add("open");
+            reportOverlay.setAttribute("aria-hidden", "false");
+            document.body.classList.add("modal-open");
+        }
+
+        function closeReport(keepBodyLocked) {
+            reportOverlay.classList.remove("open");
+            reportOverlay.setAttribute("aria-hidden", "true");
+            if (!keepBodyLocked) document.body.classList.remove("modal-open");
+        }
+
+        document.querySelectorAll(".clickable-row").forEach(function (row) {
+            row.addEventListener("click", function () { openReport(row); });
+            row.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openReport(row); }
+            });
+        });
+
+        $("reportCloseIcon").addEventListener("click", function () { closeReport(); });
+        $("reportCloseBtn").addEventListener("click", function () { closeReport(); });
+        reportOverlay.addEventListener("click", function (e) { if (e.target === reportOverlay) closeReport(); });
+
+        // RESOLVE -> open the In Conflict "Generated Schedule" popup
+        resolveBtn.addEventListener("click", function () {
+            var row = currentRow;
+            closeReport(true);          // keep page scroll locked
+            openSchedule(row);
+        });
+
+        /* ==========================================================
+           MODAL 2: Generated Schedule (In Conflict)
+           ========================================================== */
+        var overlay = $("scheduleModal");
+        var submitBtn = $("modalSubmitBtn");
+        var panel = document.querySelector(".panelists-panel");
+        var btnEdit = $("btnEditPanelists");
+        var btnSave = $("btnSaveEdit");
+        var btnCancel = $("btnCancelEdit");
+
+        var store = new WeakMap();   // table row -> its schedule data
+        var currentData = null;
+        var editing = false;
+
+        function renderPanelists() {
+            var list = $("mPanelists");
+            list.innerHTML = "";
+            currentData.panelists.forEach(function (p) {
+                var row = document.createElement("div");
+                row.className = "panelist-row";
+
+                if (editing) {
+                    var input = document.createElement("input");
+                    input.type = "text";
+                    input.className = "edit-input panelist-input";
+                    input.maxLength = 60;
+                    input.value = p.name;
+                    input.setAttribute("aria-label", "Panelist name");
+                    row.appendChild(input);
+                } else {
+                    var name = document.createElement("span");
+                    name.className = "panelist-name";
+                    name.textContent = p.name;
+                    row.appendChild(name);
+                }
+
+                var pill = document.createElement("span");   // expertise match is read-only
+                pill.className = "match-pill " + p.match;
+                pill.textContent = p.match.charAt(0).toUpperCase() + p.match.slice(1);
+                row.appendChild(pill);
+
+                list.appendChild(row);
+            });
+        }
+
+        function renderSchedule() {
+            $("mTime").textContent = fmtTime(currentData.time.start) + " - " + fmtTime(currentData.time.end);
+            $("mDate").textContent = fmtDate(currentData.date);
+            $("mRoom").textContent = currentData.room;
+            $("eTimeStart").value = currentData.time.start;
+            $("eTimeEnd").value = currentData.time.end;
+            $("eDate").value = currentData.date;
+            $("eRoom").value = currentData.room;
+        }
+
+        function showError(msg) {
+            var el = $("mEditError");
+            el.textContent = msg || "";
+            el.hidden = !msg;
+        }
+
+        function setEditing(on) {
+            editing = on;
+            panel.classList.toggle("editing", on);
+            btnEdit.hidden = on;
+            btnSave.hidden = !on;
+            btnCancel.hidden = !on;
+            submitBtn.disabled = on;
+            showError("");
+            renderPanelists();
+            renderSchedule();
+            if (on) {
+                var first = panel.querySelector(".panelist-input");
+                if (first) first.focus();
+            }
+        }
+
+        function saveEdit() {
+            var inputs = panel.querySelectorAll(".panelist-input");
+            var names = [];
+            for (var i = 0; i < inputs.length; i++) {
+                var n = inputs[i].value.trim();
+                if (!n) { showError("Panelist names can't be empty."); inputs[i].focus(); return; }
+                names.push(n);
+            }
+            var lower = names.map(function (n) { return n.toLowerCase(); });
+            if (lower.some(function (n, i) { return lower.indexOf(n) !== i; })) {
+                showError("A panelist can only be assigned once.");
+                return;
+            }
+
+            var start = $("eTimeStart").value;
+            var end = $("eTimeEnd").value;
+            var date = $("eDate").value;
+            var room = $("eRoom").value.trim();
+
+            if (!start || !end) { showError("Please set a start and end time."); return; }
+            if (end <= start) { showError("End time must be later than start time."); return; }
+            if (!date) { showError("Please choose a defense date."); return; }
+            if (!room) { showError("Please enter a room."); return; }
+
+            names.forEach(function (n, i) { currentData.panelists[i].name = n; });
+            currentData.time = { start: start, end: end };
+            currentData.date = date;
+            currentData.room = room;
+
+            // TODO: persist currentData to your server here (AJAX/POST)
+            setEditing(false);
+        }
+
+        function openSchedule(row) {
+            currentRow = row;
+            var d = row.dataset;
+            if (!store.has(row)) store.set(row, clone(sample));
+            currentData = store.get(row);
+
+            $("mTitle").textContent = row.querySelector(".manuscript-title-text").textContent;
+            $("mDateSubmitted").textContent = d.dateSubmitted;
+            $("mProblem").textContent = d.type;
+            $("mStudent").textContent = d.student;
+            $("mProgram").textContent = d.program;
+            $("mAdviser").textContent = d.adviser;
+
+            $("mAbstract").textContent = currentData.abstract;
+            $("mKeywords").textContent = currentData.keywords;
+            $("mSubmittedNote").textContent = "Submitted " + d.dateSubmitted.replace(/^(\w+) (\d+), (\d+)$/, function (m, mon, day, yr) {
+                return (SHORT_TO_FULL[mon] || mon) + " " + day + ", " + yr;
+            });
+
+            setEditing(false);
+
+            overlay.classList.add("open");
+            overlay.setAttribute("aria-hidden", "false");
+            document.body.classList.add("modal-open");
+        }
+
+        function closeSchedule() {
+            if (editing) setEditing(false);   // discard unsaved edits
+            overlay.classList.remove("open");
+            overlay.setAttribute("aria-hidden", "true");
+            document.body.classList.remove("modal-open");
+        }
+
+        $("modalCloseIcon").addEventListener("click", closeSchedule);
+        $("modalCloseBtn").addEventListener("click", closeSchedule);
+        overlay.addEventListener("click", function (e) { if (e.target === overlay && !editing) closeSchedule(); });
+
+        btnEdit.addEventListener("click", function () { setEditing(true); });
+        btnCancel.addEventListener("click", function () { setEditing(false); });
+        btnSave.addEventListener("click", saveEdit);
+        panel.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && editing && e.target.tagName === "INPUT") {
+                e.preventDefault();
+                saveEdit();
+            }
+        });
+
+        // SUBMIT -> conflict is resolved: update the table row
+        submitBtn.addEventListener("click", function () {
+            if (editing || !currentRow) return;
+
+            var now = new Date();
+            var today = (now.getMonth() + 1) + "-" + now.getDate() + "-" + now.getFullYear();
+
+            var badge = currentRow.querySelector(".status-badge");
+            badge.className = "status-badge resolved";
+            badge.textContent = "Resolved";
+            currentRow.querySelectorAll(".date-cell")[1].textContent = today;
+            currentRow.dataset.status = "resolved";
+            currentRow.dataset.stepsDone = "4";
+
+            // TODO: send the resolved schedule to your server here (AJAX/POST)
+            closeSchedule();
+        });
+
+        // Esc: cancel editing first, otherwise close whichever popup is open
+        document.addEventListener("keydown", function (e) {
+            if (e.key !== "Escape") return;
+            if (overlay.classList.contains("open")) {
+                if (editing) setEditing(false); else closeSchedule();
+            } else if (reportOverlay.classList.contains("open")) {
+                closeReport();
+            }
+        });
+    })();
+</script>
+
+<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=1.0"></script>

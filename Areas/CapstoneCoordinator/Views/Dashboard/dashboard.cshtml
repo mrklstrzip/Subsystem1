@@ -1,4 +1,171 @@
 ﻿@{
     ViewBag.Title = "Dashboard";
 }
-<h1>Dashboard</h1>
+
+<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=2.0" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<!-- Header Banner -->
+<div class="dashboard-header">
+    <div class="header-text">
+        <span class="breadcrumb-text">Capstone Coordinator / Dashboard</span>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="welcome-text">View room schedules and check room availability by building, date, and room status</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-calendar-days"></i>
+    </div>
+</div>
+
+<!-- Dashboard Main Layout Grid -->
+<div class="dashboard-grid">
+    <!-- Left Column: Tables -->
+    <div class="dashboard-left-column">
+
+        <!-- To Submit Section -->
+        <div class="dashboard-card">
+            <div class="card-header-flex">
+                <h3 class="section-title">To Submit</h3>
+                <a href="#" class="view-all-link">View All</a>
+            </div>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th class="column-title manuscript-col">MANUSCRIPT</th>
+                        <th class="column-title program-col">PROGRAM</th>
+                        <th class="column-title date-col">DATE</th>
+                        <th class="column-title action-col">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="manuscript-title-text">Manuscript Title</div>
+                            <span class="program-badge bsit">BSIT-4A</span>
+                        </td>
+                        <td></td>
+                        <td class="date-cell">Oct 10</td>
+                        <td class="action-cell">
+                            <button class="btn-view">View</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="manuscript-title-text">Manuscript Title</div>
+                            <span class="program-badge bscs">BSCS-4A</span>
+                        </td>
+                        <td></td>
+                        <td class="date-cell">Oct 10</td>
+                        <td class="action-cell">
+                            <button class="btn-view">View</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="manuscript-title-text">Manuscript Title</div>
+                            <span class="program-badge bsis">BSIS-4A</span>
+                        </td>
+                        <td></td>
+                        <td class="date-cell">Oct 10</td>
+                        <td class="action-cell">
+                            <button class="btn-view">View</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Upcoming Defenses Section -->
+        <div class="dashboard-card">
+            <div class="card-header-flex">
+                <h3 class="section-title">Upcoming Defenses</h3>
+                <a href="#" class="view-all-link">View All</a>
+            </div>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th class="column-title manuscript-col">MANUSCRIPT</th>
+                        <th class="column-title date-col">DATE</th>
+                        <th class="column-title time-col">TIME</th>
+                        <th class="column-title action-col">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="manuscript-title-text">Manuscript Title</div>
+                            <span class="program-badge bsit">BSIT-4A</span>
+                        </td>
+                        <td class="date-cell">Oct 10</td>
+                        <td class="time-cell">8AM - 10AM</td>
+                        <td class="action-cell">
+                            <button class="btn-view">View</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="manuscript-title-text">Manuscript Title</div>
+                            <span class="program-badge bscs">BSCS-4A</span>
+                        </td>
+                        <td class="date-cell">Oct 10</td>
+                        <td class="time-cell">11AM - 1PM</td>
+                        <td class="action-cell">
+                            <button class="btn-view">View</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="manuscript-title-text">Manuscript Title</div>
+                            <span class="program-badge bsis">BSIS-4A</span>
+                        </td>
+                        <td class="date-cell">Oct 10</td>
+                        <td class="time-cell">2PM - 4PM</td>
+                        <td class="action-cell">
+                            <button class="btn-view">View</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Right Column: Metrics & Activities -->
+    <div class="dashboard-right-column">
+
+        <!-- Metric Cards Row -->
+        <div class="metrics-row">
+            <div class="metric-card">
+                <div class="metric-title">TOTAL DEFENSES</div>
+                <div class="metric-value">24</div>
+                <div class="metric-subtitle">Across all buildings</div>
+                <div class="metric-icon"><i class="fa-solid fa-door-open"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">CONFLICTS</div>
+                <div class="metric-value">2</div>
+                <div class="metric-subtitle">Across all buildings</div>
+                <div class="metric-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            </div>
+        </div>
+
+        <!-- Recent Activities Section -->
+        <div class="dashboard-card recent-activities-card">
+            <h3 class="section-title">RECENT ACTIVITIES</h3>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th class="column-title time-col">TIME</th>
+                        <th class="column-title activity-col">ACTIVITY</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="empty-row"><td colspan="2"></td></tr>
+                    <tr class="empty-row"><td colspan="2"></td></tr>
+                    <tr class="empty-row"><td colspan="2"></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>

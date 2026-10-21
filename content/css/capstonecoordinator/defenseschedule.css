@@ -1,0 +1,701 @@
+﻿body {
+    background-color: #EAECEF;
+    font-family: 'Inter', sans-serif;
+    color: #22252A;
+    margin: 0;
+}
+
+/* Header Banner Styling */
+.dashboard-header {
+    background: #1B293B;
+    background: linear-gradient(92deg, rgba(27, 41, 59, 1) 31%, rgba(74, 101, 135, 1) 100%);
+    padding: 32px 40px;
+    color: #FFFFFF;
+    position: relative;
+    overflow: hidden;
+    border-radius: 14px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.breadcrumb-text {
+    font-size: 12px;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.page-title {
+    font-family: 'Newsreader', serif;
+    font-size: 48px;
+    font-weight: 700;
+    margin: 6px 0 10px 0;
+    padding-bottom: 0;
+    letter-spacing: -0.5px;
+}
+
+.welcome-text {
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.header-bg-icon {
+    position: absolute;
+    right: 30px;
+    bottom: -20px;
+    font-size: 140px;
+    color: #1B293B;
+    pointer-events: none;
+}
+
+/* Controls Container & Filters */
+.controls-card {
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.search-container {
+    flex: 1;
+}
+
+.search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+    .search .fa-search {
+        position: absolute;
+        left: 16px;
+        color: #9092AD;
+        font-size: 15px;
+        pointer-events: none;
+    }
+
+    .search input {
+        width: 100%;
+        height: 48px;
+        padding: 0 16px 0 44px;
+        background-color: #FFFFFF;
+        border-radius: 12px;
+        border: 1.5px solid #374A60;
+        font-size: 14px;
+        color: #2D3748;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+        .search input::placeholder {
+            color: #A0AEC0;
+        }
+
+.filter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.custom-select-box {
+    position: relative;
+    background: #FFFFFF;
+    border: 1.5px solid #374A60;
+    border-radius: 12px;
+    padding: 10px 14px 6px 14px;
+    width: 160px;
+    height: 48px;
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.filter-legend {
+    position: absolute;
+    top: -7px;
+    left: 12px;
+    background-color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 700;
+    color: #374A60;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.select-selected {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1A202C;
+    height: 100%;
+}
+
+    .select-selected i:first-child {
+        color: #374A60;
+        font-size: 15px;
+    }
+
+    .select-selected .chevron {
+        margin-left: auto;
+        font-size: 12px;
+        color: #374A60;
+    }
+
+/* Table Container & Colored Table Header */
+.schedule-management-card {
+    background-color: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    margin-bottom: 30px;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .schedule-table thead tr {
+        background-color: #537B9D;
+    }
+
+.column-title {
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.8px;
+    padding: 16px 20px;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.manuscript-col {
+    width: 26%;
+}
+
+.author-col {
+    width: 16%;
+}
+
+.adviser-col {
+    width: 18%;
+}
+
+.date-col {
+    width: 10%;
+}
+
+.time-col {
+    width: 15%;
+}
+
+.room-col {
+    width: 8%;
+}
+
+.status-col {
+    width: 7%;
+}
+
+.schedule-table td {
+    padding: 18px 20px;
+    font-size: 13px;
+    color: #1a202c;
+    border-bottom: 1px solid #F4F5F7;
+    vertical-align: middle;
+}
+
+.schedule-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Clickable rows (open the Defense Schedule popup) */
+.schedule-table tbody tr.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+    .schedule-table tbody tr.clickable-row:hover,
+    .schedule-table tbody tr.clickable-row:focus {
+        background-color: #F5F8FB;
+        outline: none;
+    }
+
+.manuscript-title-text {
+    font-weight: 600;
+    color: #1a202c;
+    margin-bottom: 4px;
+}
+
+/* Program Badges */
+.program-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 700;
+    border: 1px solid #cbd5e1;
+    background-color: #f1f5f9;
+    color: #334155;
+}
+
+    .program-badge.bscs {
+        background-color: #fdf2f2;
+        color: #991b1b;
+        border-color: #fecaca;
+    }
+
+    .program-badge.bsis {
+        background-color: #f5f3ff;
+        color: #5b21b6;
+        border-color: #ddd6fe;
+    }
+
+    .program-badge.bscs-dark {
+        background-color: #fff1f2;
+        color: #be123c;
+        border-color: #fecdd3;
+    }
+
+.author-cell, .adviser-cell, .date-cell, .time-cell, .room-cell {
+    color: #475569;
+    font-weight: 500;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 5px 16px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+}
+
+    .status-badge.completed {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+
+    .status-badge.ongoing {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+    }
+
+    .status-badge.upcoming {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
+/* ==========================================================================
+   Generated Schedule Modal
+   ========================================================================== */
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+    .modal-overlay.open {
+        display: flex;
+    }
+
+.schedule-modal {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    background: #FFFFFF;
+    border-radius: 24px;
+    padding: 28px 32px 28px 32px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    animation: modalIn 0.18s ease-out;
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.modal-close-icon {
+    position: absolute;
+    top: 22px;
+    right: 26px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: #ECEBF5;
+    color: #4B3F8F;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+    .modal-close-icon:hover {
+        background: #DCDAEC;
+    }
+
+.modal-heading {
+    font-family: 'Newsreader', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: #2B5C8A;
+    margin: 0 0 2px 0;
+}
+
+.modal-subheading {
+    font-size: 11px;
+    color: #6B7280;
+    margin: 0 0 18px 0;
+}
+
+/* ---- Summary card ---- */
+.modal-summary {
+    background: #EFF1F7;
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+}
+
+.summary-row {
+    display: grid;
+    gap: 16px;
+}
+
+.summary-row-4 {
+    grid-template-columns: 1.5fr 1.1fr 1fr 1fr;
+}
+
+.summary-row-3 {
+    grid-template-columns: 1.5fr 1.4fr 1fr;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
+}
+
+.summary-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #6B6F8A;
+}
+
+.summary-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1A202C;
+}
+
+.summary-divider {
+    height: 1px;
+    background: #D5D9E4;
+    margin: 14px 0;
+}
+
+.modal-summary .status-badge {
+    padding: 2px 12px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* ---- Body: abstract + panelists ---- */
+.modal-body-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.modal-panel {
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 18px 18px;
+    box-sizing: border-box;
+}
+
+.panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1A202C;
+    margin: 0 0 8px 0;
+}
+
+    .panel-title.no-margin {
+        margin: 0;
+    }
+
+.panel-text {
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: #1F2937;
+    margin: 0 0 16px 0;
+}
+
+.panel-footnote {
+    display: block;
+    font-size: 10px;
+    color: #9CA3AF;
+    margin-top: 4px;
+}
+
+.abstract-panel .panel-text:nth-of-type(2) {
+    margin-bottom: 14px;
+}
+
+/* ---- Panelists ---- */
+.panel-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.btn-edit-panelists {
+    background: none;
+    border: none;
+    color: #374A60;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+    .btn-edit-panelists:hover {
+        color: #1B293B;
+    }
+
+.panelist-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #1A202C;
+    margin-bottom: 12px;
+}
+
+.panelist-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.panelist-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1A202C;
+}
+
+.match-pill {
+    display: inline-block;
+    width: 70px;
+    text-align: center;
+    padding: 1px 0;
+    border-radius: 10px;
+    font-size: 8.5px;
+    font-weight: 500;
+    border: 1.5px solid;
+}
+
+    .match-pill.high {
+        background: #D9F7BE;
+        border-color: #52C41A;
+        color: #237804;
+    }
+
+    .match-pill.medium {
+        background: #F4F9B9;
+        border-color: #C5D22B;
+        color: #5F6A06;
+    }
+
+    .match-pill.low {
+        background: #E5E7EB;
+        border-color: #6B7280;
+        color: #374151;
+    }
+
+.schedule-title {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.defense-schedule {
+    margin: 0;
+}
+
+    .defense-schedule > div {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        margin-bottom: 8px;
+    }
+
+    .defense-schedule dt {
+        font-weight: 600;
+        color: #374151;
+        letter-spacing: 0.3px;
+    }
+
+    .defense-schedule dd {
+        margin: 0;
+        font-weight: 500;
+        color: #1A202C;
+    }
+
+/* ---- Footer buttons ---- */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-modal {
+    padding: 11px 26px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-modal-close {
+    background: #FFFFFF;
+    color: #1A202C;
+    border: 1.5px solid #D1D5DB;
+}
+
+    .btn-modal-close:hover {
+        background: #F3F4F6;
+    }
+
+.btn-modal-submit {
+    background: #4A6283;
+    color: #FFFFFF;
+    border: 1.5px solid #374A60;
+}
+
+    .btn-modal-submit:hover {
+        background: #374A60;
+    }
+
+/* ---- Small screens ---- */
+@media (max-width: 720px) {
+    .summary-row-4,
+    .summary-row-3,
+    .modal-body-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ==========================================================================
+   Filter dropdowns + empty state (capstonecoordinator-app.js)
+   ========================================================================== */
+.custom-select-box .select-selected span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.custom-select-box .chevron {
+    transition: transform 0.2s ease;
+}
+
+.custom-select-box.open .chevron {
+    transform: rotate(180deg);
+}
+
+.custom-select-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: -1.5px;
+    right: -1.5px;
+    min-width: 160px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 6px;
+    background: #FFFFFF;
+    border: 1.5px solid #374A60;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
+    z-index: 50;
+}
+
+    .custom-select-dropdown.open {
+        display: block;
+    }
+
+.select-option {
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1A202C;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+    .select-option:hover {
+        background: #EFF1F7;
+    }
+
+    .select-option.selected {
+        background: #537B9D;
+        color: #FFFFFF;
+    }
+
+.schedule-table tbody tr.no-results-row:hover {
+    background: transparent;
+}
+
+.no-results-row td {
+    text-align: center;
+    padding: 36px 20px;
+    color: #9092AD;
+    font-weight: 500;
+}

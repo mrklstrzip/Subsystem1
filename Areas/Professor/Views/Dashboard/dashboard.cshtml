@@ -2,90 +2,90 @@
     ViewBag.Title = "Dashboard";
 }
 
-<style>
-    .prof-stats {
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 32px !important;
-    }
+<div class="pf-page">
 
-        .prof-stats .prof-stat {
-            width: auto !important;
-            min-height: 150px;
-            padding: 26px 32px;
-        }
+    <div class="pf-banner">
+        <div>
+            <div class="pf-eyebrow">@DateTime.Now.ToString("dddd, MMMM d")</div>
+            <h1>Welcome back, Dizon</h1>
+            <p>5 Panel Assignments are waiting for your decision.</p>
+        </div>
+        <svg class="pf-banner-deco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
+    </div>
 
-            .prof-stats .prof-stat span {
-                display: block !important;
-                color: #777 !important;
-                font-size: 18px;
-                font-weight: 400 !important;
-            }
+    <!-- Stats -->
+    <div class="pf-stats">
+        <div class="pf-stat">
+            <div class="pf-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5" /><path d="M2 20c0-3.5 3-6 7-6" /><circle cx="17" cy="17" r="4" /><path d="M17 15v2l1.5 1" /></svg></div>
+            <div><div class="pf-stat-num">6</div><div class="pf-stat-label">Pending Review</div></div>
+        </div>
+        <div class="pf-stat">
+            <div class="pf-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 12l3 3 5-6" /></svg></div>
+            <div><div class="pf-stat-num">6</div><div class="pf-stat-label">Accepted Panels</div></div>
+        </div>
+        <div class="pf-stat">
+            <div class="pf-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h12l-2 4 2 4H5" /></svg></div>
+            <div><div class="pf-stat-num">6</div><div class="pf-stat-label">Completed<br />Assignments</div></div>
+        </div>
+        <div class="pf-stat">
+            <div class="pf-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /><circle cx="16" cy="16" r="3" /></svg></div>
+            <div><div class="pf-stat-num">6</div><div class="pf-stat-label">Upcoming Defenses</div></div>
+        </div>
+    </div>
 
-            .prof-stats .prof-stat strong {
-                display: block !important;
-                color: #000 !important;
-                font-size: 32px;
-                font-weight: 400 !important;
-                margin-top: 18px;
-            }
+    <!-- Pending list + Next defense -->
+    <div class="pf-dash-grid">
+        <div class="pf-panel">
+            <div class="pf-panel-head">
+                <h3>Pending Panel Assignments</h3>
+                <a href="#">View All</a>
+            </div>
+            <table class="pf-table">
+                <thead>
+                    <tr>
+                        <th>Manuscript</th>
+                        <th class="c">Program</th>
+                        <th class="c">Date</th>
+                        <th class="c">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Manuscript Title<small>4th Year</small></td>
+                        <td class="c"><span class="pf-badge pf-badge-bsit">BSIT</span></td>
+                        <td class="c">Oct 10</td>
+                        <td class="c"><a href="#" class="pf-btn pf-btn-outline">View</a></td>
+                    </tr>
+                    <tr>
+                        <td>Manuscript Title<small>4th Year</small></td>
+                        <td class="c"><span class="pf-badge pf-badge-bscs">BSCS</span></td>
+                        <td class="c">Oct 10</td>
+                        <td class="c"><a href="#" class="pf-btn pf-btn-outline">View</a></td>
+                    </tr>
+                    <tr>
+                        <td>Manuscript Title<small>4th Year</small></td>
+                        <td class="c"><span class="pf-badge pf-badge-bsis">BSIS</span></td>
+                        <td class="c">Oct 10</td>
+                        <td class="c"><a href="#" class="pf-btn pf-btn-outline">View</a></td>
+                    </tr>
+                    <tr>
+                        <td>Manuscript Title<small>4th Year</small></td>
+                        <td class="c"><span class="pf-badge pf-badge-bsit">BSIT</span></td>
+                        <td class="c">Oct 10</td>
+                        <td class="c"><a href="#" class="pf-btn pf-btn-outline">View</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-    .prof-header {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        margin-bottom: 20px;
-    }
+        <div class="pf-next">
+            <div class="pf-eyebrow">Next Defense</div>
+            <h4>Date: October 14</h4>
+            <h4>Time: 10:30</h4>
+            <p style="margin-top:8px">Section: SBIT4E</p>
+            <p>Building/Room: IK603</p>
+            <a href="#" class="pf-btn">View Schedule</a>
+        </div>
+    </div>
 
-        .prof-header .prof-title {
-            margin: 0 !important;
-        }
-
-        .prof-header .prof-btn-lg {
-            display: inline-block !important;
-            padding: 14px 32px !important;
-            font-size: 16px !important;
-            font-weight: 600;
-            border-radius: 8px;
-            background: #724389;
-            color: #fff;
-            text-decoration: none;
-        }
-</style>
-
-
-<div class="prof-header">
-    <h1 class="prof-title">Dashboard</h1>
-</div>
-
-<div class="prof-stats">
-    <div class="prof-card prof-stat"><span>Panel Assignments</span><strong>6</strong></div>
-    <div class="prof-card prof-stat"><span>Accepted Panels</span><strong>6</strong></div>
-    <div class="prof-card prof-stat"><span>Completed Panel Assignments</span><strong>7</strong></div>
-</div>
-
-<p class="prof-subtitle">Pending Panel Assignments</p>
-
-<div class="prof-card">
-    <table class="prof-table">
-        <thead>
-            <tr>
-                <th>Manuscript Title</th>
-                <th>Section</th>
-                <th>Program</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var p in new[] { "BSIT", "BSCS", "BSIS", "BSIT", "BSIT" })
-            {
-                <tr>
-                    <td>Manuscript Title</td>
-                    <td>SBIT4A</td>
-                    <td>@p</td>
-                    <td><a href="@Url.Action("Index", "PanelAssignment")" class="prof-btn">View</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
 </div>

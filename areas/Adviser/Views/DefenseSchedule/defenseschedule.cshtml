@@ -1,82 +1,147 @@
 @{
     ViewBag.Title = "Defense Schedule";
-    var rows = new[] {
-        new { Date = "09-21-2026", Status = "Upcoming" },
-        new { Date = "09-21-2026", Status = "Upcoming" },
-        new { Date = "09-02-2026", Status = "Completed" },
-        new { Date = "09-21-2026", Status = "Upcoming" },
-        new { Date = "09-07-2026", Status = "Completed" },
-        new { Date = "09-09-2026", Status = "Completed" },
-        new { Date = "09-21-2026", Status = "Upcoming" },
-        new { Date = "09-21-2026", Status = "Upcoming" }
-    };
 }
-    <h1 class="prof-title">Defense Schedule</h1>
 
-    <!-- Filter Dropdown -->
-    <div class="prof-toolbar">
+<div class="av-page">
+
+    <input type="radio" name="dsTab" id="dsAll" class="av-radio av-r1" checked />
+    <input type="radio" name="dsTab" id="dsNotScheduled" class="av-radio av-r2" />
+    <input type="radio" name="dsTab" id="dsUpcoming" class="av-radio av-r3" />
+    <input type="radio" name="dsTab" id="dsCompleted" class="av-radio av-r4" />
+
+    <div class="av-banner">
         <div>
-            <label for="statusFilter">Filter by Status:</label>
-            <select id="statusFilter">
-                <option value="all" selected>All</option>
-                <option value="completed">Completed</option>
-                <option value="upcoming">Upcoming</option>
-            </select>
+            <h1>Defense Schedule</h1>
+            <p>Every defense of your advisory, in date order.</p>
         </div>
+        <svg class="av-banner-deco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="16" rx="3" />
+            <path d="M3 10h18M8 3v4M16 3v4" />
+            <circle cx="16" cy="16" r="4.5" fill="#1B293B" />
+            <path d="M16 13.8V16l1.5 1" />
+        </svg>
+        <a href="#" class="av-banner-btn">Go to Post Defense</a>
     </div>
 
-    <div class="prof-card">
-        <table class="prof-table">
-            <thead>
-                <tr>
-                    <th>Manuscript Title</th>
-                    <th>Section</th>
-                    <th>Program</th>
-                    <th>Date</th>
-                    <th>Building/Room</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var r in rows)
-                {
-                    <tr data-status="@r.Status.ToLower()">
-                        <td>Manuscript Title</td>
-                        <td>SBIT4A</td>
-                        <td>BSIT</td>
-                        <td>@r.Date</td>
-                        <td>IK 603</td>
-                        <td class="@(r.Status == "Completed" ? "prof-status-completed" : "prof-status-upcoming")">@r.Status</td>
-                    </tr>
-                }
-                <tr id="emptyRow" style="display:none;">
-                    <td colspan="6" style="text-align:center; color:#777; padding:18px;">No schedules found matching the selected filter.</td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- Tabs -->
+    <div class="av-tabs">
+        <label for="dsAll" class="av-tab av-t1">All <span class="av-count">5</span></label>
+        <label for="dsNotScheduled" class="av-tab av-t2">Not Scheduled <span class="av-count">1</span></label>
+        <label for="dsUpcoming" class="av-tab av-t3">Upcoming <span class="av-count">2</span></label>
+        <label for="dsCompleted" class="av-tab av-t4">Completed <span class="av-count">2</span></label>
     </div>
 
-    <script>
-        (function () {
-            var filter = document.getElementById('statusFilter');
-            var rows = document.querySelectorAll('tbody tr[data-status]');
-            var emptyRow = document.getElementById('emptyRow');
+    <div class="av-ds-grid">
 
-            filter.addEventListener('change', function () {
-                var selected = filter.value;
-                var matchCount = 0;
+        <div>
 
-                rows.forEach(function (row) {
-                    var status = row.getAttribute('data-status');
-                    if (selected === 'all' || status === selected) {
-                        row.style.display = '';
-                        matchCount++;
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
+            <!-- Waiting for schedule (only not scheduled) -->
+            <div class="av-g-ns">
+                <div class="av-ds-date">Waiting for Schedule</div>
 
-                emptyRow.style.display = matchCount === 0 ? '' : 'none';
-            });
-        })();
-    </script>
+                <div class="av-ds-row pending">
+                    <div class="av-ds-card pending">
+                        <div>
+                            <h4>Manuscript Title</h4>
+                            <small><span>Group No.</span><span>Program</span><span>Section</span></small>
+                            <span class="av-ds-panel">Panel not assigned yet</span>
+                        </div>
+                        <div class="av-ds-right">
+                            <div class="av-ds-room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="10" r="2.5" /></svg>IK602</div>
+                            <span class="av-pill notscheduled">Not Scheduled</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- October 6, 2026 (only upcoming defenses) -->
+            <div class="av-g-up">
+                <div class="av-ds-date">October 6, 2026</div>
+
+                <div class="av-ds-row">
+                    <div class="av-ds-time">10:30 AM<small>2:30 PM</small></div>
+                    <div class="av-ds-card">
+                        <div>
+                            <h4>Manuscript Title</h4>
+                            <small><span>Group No.</span><span>Program</span><span>Section</span></small>
+                            <span class="av-ds-panel">Panel: Regine Velazquez, Alden Richards, Manny Paquiao</span>
+                        </div>
+                        <div class="av-ds-right">
+                            <div class="av-ds-room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="10" r="2.5" /></svg>IK602</div>
+                            <span class="av-pill upcoming">Upcoming</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="av-ds-row">
+                    <div class="av-ds-time">5:30 PM<small>7:30 PM</small></div>
+                    <div class="av-ds-card">
+                        <div>
+                            <h4>Manuscript Title</h4>
+                            <small><span>Group No.</span><span>Program</span><span>Section</span></small>
+                            <span class="av-ds-panel">Panel: Regine Velazquez, Alden Richards, Manny Paquiao</span>
+                        </div>
+                        <div class="av-ds-right">
+                            <div class="av-ds-room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="10" r="2.5" /></svg>IK602</div>
+                            <span class="av-pill upcoming">Upcoming</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- October 3, 2026 (only completed defenses) -->
+            <div class="av-g-done">
+                <div class="av-ds-date">October 3, 2026</div>
+
+                <div class="av-ds-row">
+                    <div class="av-ds-time">8:00 AM<small>10:00 AM</small></div>
+                    <div class="av-ds-card">
+                        <div>
+                            <h4>Manuscript Title</h4>
+                            <small><span>Group No.</span><span>Program</span><span>Section</span></small>
+                            <span class="av-ds-panel">Panel: Regine Velazquez, Alden Richards, Manny Paquiao</span>
+                        </div>
+                        <div class="av-ds-right">
+                            <div class="av-ds-room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="10" r="2.5" /></svg>IK602</div>
+                            <span class="av-pill completed">Completed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- October 2, 2026 (only completed defenses) -->
+            <div class="av-g-done">
+                <div class="av-ds-date">October 2, 2026</div>
+
+                <div class="av-ds-row">
+                    <div class="av-ds-time">1:00 PM<small>3:00 PM</small></div>
+                    <div class="av-ds-card">
+                        <div>
+                            <h4>Manuscript Title</h4>
+                            <small><span>Group No.</span><span>Program</span><span>Section</span></small>
+                            <span class="av-ds-panel">Panel: Regine Velazquez, Alden Richards, Manny Paquiao</span>
+                        </div>
+                        <div class="av-ds-right">
+                            <div class="av-ds-room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="10" r="2.5" /></svg>IK603</div>
+                            <span class="av-pill completed">Completed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="av-next">
+            <div class="av-eyebrow">Next Defense</div>
+            <h4>Date: October 14</h4>
+            <h4>Time: 10:30 - 2:30</h4>
+            <p style="margin-top:8px"><b>Manuscript Title</b></p>
+            <p>Section: SBIT4E</p>
+            <p>Building/Room: IK603</p>
+            <hr class="av-next-divider" />
+            <p>Panel</p>
+            <p>Regine Velazquez, Alden Richards, Manny Paquiao</p>
+        </div>
+
+    </div>
+</div>
