@@ -2,18 +2,18 @@
     ViewBag.Title = "Defense Schedule";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=3.1" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=3.2" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
     <div class="header-text">
-        <span class="breadcrumb-text">Capstone Coordinator / Defense Schedule</span>
+        <span class="breadcrumb-text">Capstone Coordinator | Defense Schedule</span>
         <h1 class="page-title">Defense Schedule</h1>
         <p class="welcome-text">View submitted defense schedules and check status</p>
     </div>
     <div class="header-bg-icon">
-        <i class="fa fa-calendar-days"></i>
+        <i class="fa fa-calendar-day"></i>
     </div>
 </div>
 
@@ -74,12 +74,12 @@
             </tr>
         </thead>
         <tbody>
-            <tr class="clickable-row" tabindex="0"
+            <tr class="clickable-row" tabindex="0" data-id="ms1"
                 data-status="completed" data-date="2027-10-25"
                 data-program="BS Information Technology · 4A" data-date-submitted="Sep 22, 2026">
                 <td>
                     <div class="manuscript-title-text">Lips of An Angel</div>
-                    <span class="program-badge bsit">BSIT-4A</span>
+                    <span class="program-badge sbit">SBIT-4A</span>
                 </td>
                 <td class="author-cell">Sarah G</td>
                 <td class="adviser-cell">Naruto Uzumaki</td>
@@ -90,12 +90,12 @@
                     <span class="status-badge completed">Completed</span>
                 </td>
             </tr>
-            <tr class="clickable-row" tabindex="0"
+            <tr class="clickable-row" tabindex="0" data-id="ms2"
                 data-status="ongoing" data-date="2027-10-25"
                 data-program="BS Computer Science · 4A" data-date-submitted="Sep 22, 2026">
                 <td>
                     <div class="manuscript-title-text">Huwag na Huwag Mong Sasabihin</div>
-                    <span class="program-badge bscs">BSCS-4A</span>
+                    <span class="program-badge sbcs">SBCS-4A</span>
                 </td>
                 <td class="author-cell">Lea Salonga</td>
                 <td class="adviser-cell">Sasuke Uchiha</td>
@@ -106,12 +106,12 @@
                     <span class="status-badge ongoing">Ongoing</span>
                 </td>
             </tr>
-            <tr class="clickable-row" tabindex="0"
+            <tr class="clickable-row" tabindex="0" data-id="ms3"
                 data-status="upcoming" data-date="2027-10-25"
                 data-program="BS Information Systems · 4A" data-date-submitted="Sep 22, 2026">
                 <td>
                     <div class="manuscript-title-text">Pangarap Lang Kita</div>
-                    <span class="program-badge bsis">BSIS-4A</span>
+                    <span class="program-badge sbis">SBIS-4A</span>
                 </td>
                 <td class="author-cell">Apple D App</td>
                 <td class="adviser-cell">Bon Jovie</td>
@@ -122,12 +122,12 @@
                     <span class="status-badge upcoming">Upcoming</span>
                 </td>
             </tr>
-            <tr class="clickable-row" tabindex="0"
+            <tr class="clickable-row" tabindex="0" data-id="ms4"
                 data-status="upcoming" data-date="2027-10-25"
                 data-program="BS Computer Science · 4D" data-date-submitted="Sep 22, 2026">
                 <td>
                     <div class="manuscript-title-text">The Greatest Love of All</div>
-                    <span class="program-badge bscs-dark">BSCS-4D</span>
+                    <span class="program-badge sbcs-dark">SBCS-4D</span>
                 </td>
                 <td class="author-cell">Bamboo</td>
                 <td class="adviser-cell">The Beatles</td>
@@ -277,9 +277,11 @@
                 return (SHORT_TO_FULL[mon] || mon) + " " + day + ", " + yr;
             });
 
+            // Panelists come from the shared schedule (Schedule Management / Under Review edits)
+            var data = window.CC ? CC.getSchedule(d.id, sample) : sample;
             var list = $("mPanelists");
             list.innerHTML = "";
-            sample.panelists.forEach(function (p) {
+            data.panelists.forEach(function (p) {
                 var r = document.createElement("div");
                 r.className = "panelist-row";
                 var name = document.createElement("span");
@@ -293,7 +295,7 @@
                 list.appendChild(r);
             });
 
-            // Time, date and room come straight from the table row
+            // Time, date and room come straight from the table row (kept in sync by capstonecoordinator-app.js)
             $("mTime").textContent = row.querySelector(".time-cell").textContent.trim();
             $("mDate").textContent = fmtDate(d.date);
             $("mRoom").textContent = row.querySelector(".room-cell").textContent.trim();
@@ -323,4 +325,4 @@
     })();
 </script>
 
-<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=1.0"></script>
+<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=1.1"></script>

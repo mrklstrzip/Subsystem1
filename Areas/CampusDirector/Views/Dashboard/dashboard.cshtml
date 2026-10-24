@@ -6,53 +6,6 @@
 <link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.2" rel="stylesheet" type="text/css" />
 
 <style>
-    /* ===== Dashboard (content only) ===== */
-    .dsh-banner {
-        position: relative;
-        overflow: hidden;
-        border-radius: 8px;
-        padding: 20px 30px 22px;
-        color: #fff;
-        background: linear-gradient(100deg, #2C3F56 0%, #3a4e6a 55%, #53677F 100%);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, .25);
-        margin-bottom: 18px;
-    }
-
-        .dsh-banner .dsh-crumb {
-            font-size: 10px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .dsh-banner h2 {
-            font-family: 'Newsreader', serif;
-            font-weight: 600;
-            font-size: 3.2rem;
-            line-height: 1.1;
-            color: #fff;
-            margin: 0 0 14px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .dsh-banner .dsh-welcome {
-            font-size: 13px;
-            font-weight: 700;
-            position: relative;
-            z-index: 1;
-        }
-
-        .dsh-banner .dsh-deco {
-            position: absolute;
-            right: -26px;
-            bottom: -44px;
-            font-size: 200px;
-            color: rgba(27, 41, 59, .5);
-            line-height: 1;
-        }
-
     .dsh-grid {
         display: grid;
         gap: 18px;
@@ -255,12 +208,16 @@
     }
 </style>
 
-<section class="dsh-banner">
-    <div class="dsh-crumb">Campus Director | Dashboard</div>
-    <h2>Dashboard</h2>
-    <div class="dsh-welcome">Welcome back, <span id="dash-welcome-name">Director</span>!</div>
-    <i class="fa fa-table-cells-large dsh-deco" aria-hidden="true"></i>
-</section>
+<div class="dashboard-header">
+    <div class="header-text">
+        <span class="breadcrumb-text">Campus Director | Dashboard</span>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="welcome-text">Welcome back, Chua!</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-th-large"></i>
+    </div>
+</div>
 
 <div class="dsh-grid dsh-row-1">
     <div class="dsh-card dsh-stat">

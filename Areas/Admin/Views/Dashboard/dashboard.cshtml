@@ -1,12 +1,11 @@
 ﻿@{
     ViewBag.Title = "Dashboard";
 }
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-<link href="@Url.Content("~/Content/css/dashboard.css")?v=1.2" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/admin/dashboard.css")?v=5.0" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -58,7 +57,7 @@
     <div class="card card-adviser">
         <div class="card-info">
             <h4 class="card-title">ADVISER</h4>
-            <p class="number" id="dash-advisers">5</p>
+            <p class="number" id="dash-advisers">0</p>
             <span class="card-description">Registered adviser account</span>
         </div>
         <div class="card-icon">
@@ -91,7 +90,7 @@
     <div class="card card-dean">
         <div class="card-info">
             <h4 class="card-title">DEAN</h4>
-            <p class="number" id="dash-dean">1</p>
+            <p class="number" id="dash-dean">0</p>
             <span class="card-description">Registered dean accounts</span>
         </div>
         <div class="card-icon">
@@ -142,4 +141,4 @@
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=1.2"></script>
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=5.0"></script>

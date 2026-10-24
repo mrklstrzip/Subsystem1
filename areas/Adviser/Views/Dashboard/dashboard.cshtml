@@ -2,21 +2,18 @@
     ViewData["Title"] = "Dashboard";
 }
 
+<link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
 <div class="av-page">
 
-    <!-- Banner -->
-    <div class="av-banner">
-        <div>
-            <div class="av-eyebrow">Tuesday, October 13</div>
-            <h1>Welcome back, Dizon</h1>
-            <p>5 Panel Assignments are waiting for your decision.</p>
+    <div class="dashboard-header">
+        <div class="header-text">
+            <span class="breadcrumb-text">Adviser | Dashboard</span>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="welcome-text">Welcome back, Heron!</p>
         </div>
-        <svg class="av-banner-deco" viewBox="0 0 96 96" fill="currentColor" aria-hidden="true">
-            <rect x="4" y="4" width="38" height="52" rx="4" />
-            <rect x="50" y="4" width="42" height="20" rx="4" />
-            <rect x="50" y="32" width="42" height="40" rx="4" />
-            <rect x="4" y="64" width="38" height="28" rx="4" />
-        </svg>
+        <div class="header-bg-icon">
+            <i class="fa fa-th-large"></i>
+        </div>
     </div>
 
     <!-- Stats -->

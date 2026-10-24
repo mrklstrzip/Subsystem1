@@ -1,19 +1,19 @@
 ﻿@{
-    ViewBag.Title = "Conflict Result";
+    ViewBag.Title = "Under Review";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/conflictresult.css")?v=2.1" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/conflictresult.css")?v=2.2" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
     <div class="header-text">
-        <span class="breadcrumb-text">Capstone Coordinator / Conflict Result</span>
-        <h1 class="page-title">Conflict Result</h1>
+        <span class="breadcrumb-text">Capstone Coordinator | Under Review</span>
+        <h1 class="page-title">Under Review</h1>
         <p class="welcome-text">View and resolve defense conflict</p>
     </div>
     <div class="header-bg-icon">
-        <i class="fa fa-calendar-days"></i>
+        <i class="fa fa-clipboard-list"></i>
     </div>
 </div>
 
@@ -27,7 +27,6 @@
     </div>
 
     <div class="filter-wrapper">
-        <!-- Room Filter Box -->
         <!-- Status Filter Box -->
         <div class="custom-select-box">
             <span class="filter-legend">Status</span>
@@ -40,7 +39,6 @@
     </div>
 </div>
 
-<!-- Conflict Result Table Section (click a row to open its Conflict Report) -->
 <div class="schedule-management-card">
     <table class="schedule-table" id="conflictTable">
         <thead>
@@ -55,14 +53,14 @@
             </tr>
         </thead>
         <tbody>
-            <tr class="clickable-row" tabindex="0"
+            <tr class="clickable-row" tabindex="0" data-id="ms1" data-resolved-date="11-5-2027"
                 data-status="resolved" data-steps-done="4"
                 data-type="Room Unavailability" data-description="Aircon Not Working"
                 data-student="Sarah G" data-adviser="Naruto Uzumaki"
                 data-program="BS Information Technology · 4A" data-date-submitted="Sep 22, 2026">
                 <td>
                     <div class="manuscript-title-text">Lips of An Angel</div>
-                    <span class="program-badge bsit">BSIT-4A</span>
+                    <span class="program-badge sbit">SBIT-4A</span>
                 </td>
                 <td class="room-cell">IK505</td>
                 <td class="conflict-cell">Lorem Ipsum</td>
@@ -73,14 +71,14 @@
                     <span class="status-badge resolved">Resolved</span>
                 </td>
             </tr>
-            <tr class="clickable-row" tabindex="0"
+            <tr class="clickable-row" tabindex="0" data-id="ms2"
                 data-status="in-progress" data-steps-done="3"
                 data-type="Room Unavailability" data-description="Aircon Not Working"
                 data-student="Lea Salonga" data-adviser="Sasuke Uchiha"
                 data-program="BS Computer Science · 4A" data-date-submitted="Sep 22, 2026">
                 <td>
                     <div class="manuscript-title-text">Huwag na Huwag Mong Sasabihin</div>
-                    <span class="program-badge bscs">BSCS-4A</span>
+                    <span class="program-badge sbcs">SBCS-4A</span>
                 </td>
                 <td class="room-cell">IK505</td>
                 <td class="conflict-cell">Lorem Ipsum</td>
@@ -91,14 +89,14 @@
                     <span class="status-badge in-progress">In Progress</span>
                 </td>
             </tr>
-            <tr class="clickable-row" tabindex="0"
+            <tr class="clickable-row" tabindex="0" data-id="ms3" data-resolved-date="11-5-2027"
                 data-status="resolved" data-steps-done="4"
                 data-type="Room Unavailability" data-description="Aircon Not Working"
                 data-student="Apple D App" data-adviser="Bon Jovie"
                 data-program="BS Information Systems · 4A" data-date-submitted="Sep 22, 2026">
                 <td>
                     <div class="manuscript-title-text">Pangarap Lang Kita</div>
-                    <span class="program-badge bsis">BSIS-4A</span>
+                    <span class="program-badge sbis">SBIS-4A</span>
                 </td>
                 <td class="room-cell">IK505</td>
                 <td class="conflict-cell">Lorem Ipsum</td>
@@ -109,14 +107,14 @@
                     <span class="status-badge resolved">Resolved</span>
                 </td>
             </tr>
-            <tr class="clickable-row" tabindex="0"
+            <tr class="clickable-row" tabindex="0" data-id="ms4"
                 data-status="in-progress" data-steps-done="3"
                 data-type="Room Unavailability" data-description="Aircon Not Working"
                 data-student="Bamboo" data-adviser="The Beatles"
                 data-program="BS Computer Science · 4D" data-date-submitted="Sep 22, 2026">
                 <td>
                     <div class="manuscript-title-text">The Greatest Love of All</div>
-                    <span class="program-badge bscs-dark">BSCS-4D</span>
+                    <span class="program-badge sbcs-dark">SBCS-4D</span>
                 </td>
                 <td class="room-cell">IK505</td>
                 <td class="conflict-cell">Lorem Ipsum</td>
@@ -185,7 +183,7 @@
 </div>
 
 <!-- ==========================================================
-     MODAL 2: Generated Schedule (In Conflict) - same popup as
+     MODAL 2: Generated Schedule (Under Review) - same popup as
      Schedule Management. Opens when "Resolve" is clicked.
      ========================================================== -->
 <div class="modal-overlay" id="scheduleModal" aria-hidden="true">
@@ -215,7 +213,7 @@
                 </div>
                 <div class="summary-item">
                     <span class="summary-label">Current Status</span>
-                    <span class="status-badge in-conflict" id="mStatus">In Conflict</span>
+                    <span class="status-badge under-review" id="mStatus">Under Review</span>
                 </div>
             </div>
             <div class="summary-divider"></div>
@@ -340,7 +338,6 @@
         };
 
         function $(id) { return document.getElementById(id); }
-        function clone(o) { return JSON.parse(JSON.stringify(o)); }
 
         function fmtTime(t) {
             if (!t) return "";
@@ -387,8 +384,8 @@
             var wrap = $("rSteps");
             wrap.innerHTML = "";
             reportSteps.forEach(function (s, i) {
-                var row = document.createElement("div");
-                row.className = "step-row" + (i < done ? "" : " pending");
+                var stepRow = document.createElement("div");
+                stepRow.className = "step-row" + (i < done ? "" : " pending");
 
                 var head = document.createElement("div");
                 head.className = "step-head";
@@ -406,9 +403,9 @@
                 text.className = "step-text";
                 text.textContent = s.text;
 
-                row.appendChild(head);
-                row.appendChild(text);
-                wrap.appendChild(row);
+                stepRow.appendChild(head);
+                stepRow.appendChild(text);
+                wrap.appendChild(stepRow);
             });
 
             // Resolved reports are read-only (Close only)
@@ -436,7 +433,7 @@
         $("reportCloseBtn").addEventListener("click", function () { closeReport(); });
         reportOverlay.addEventListener("click", function (e) { if (e.target === reportOverlay) closeReport(); });
 
-        // RESOLVE -> open the In Conflict "Generated Schedule" popup
+        // RESOLVE -> open the Under Review "Generated Schedule" popup
         resolveBtn.addEventListener("click", function () {
             var row = currentRow;
             closeReport(true);          // keep page scroll locked
@@ -444,7 +441,7 @@
         });
 
         /* ==========================================================
-           MODAL 2: Generated Schedule (In Conflict)
+           MODAL 2: Generated Schedule (Under Review)
            ========================================================== */
         var overlay = $("scheduleModal");
         var submitBtn = $("modalSubmitBtn");
@@ -453,7 +450,6 @@
         var btnSave = $("btnSaveEdit");
         var btnCancel = $("btnCancelEdit");
 
-        var store = new WeakMap();   // table row -> its schedule data
         var currentData = null;
         var editing = false;
 
@@ -549,15 +545,15 @@
             currentData.date = date;
             currentData.room = room;
 
-            // TODO: persist currentData to your server here (AJAX/POST)
+            CC.saveSchedule(currentRow.dataset.id, currentData);   // shared with the other pages
+            // TODO: also POST currentData to your server here
             setEditing(false);
         }
 
         function openSchedule(row) {
             currentRow = row;
             var d = row.dataset;
-            if (!store.has(row)) store.set(row, clone(sample));
-            currentData = store.get(row);
+            currentData = CC.getSchedule(d.id, sample);
 
             $("mTitle").textContent = row.querySelector(".manuscript-title-text").textContent;
             $("mDateSubmitted").textContent = d.dateSubmitted;
@@ -600,20 +596,10 @@
             }
         });
 
-        // SUBMIT -> conflict is resolved: update the table row
+        // SUBMIT -> Under Review becomes Submitted everywhere, and this review is marked Resolved today
         submitBtn.addEventListener("click", function () {
             if (editing || !currentRow) return;
-
-            var now = new Date();
-            var today = (now.getMonth() + 1) + "-" + now.getDate() + "-" + now.getFullYear();
-
-            var badge = currentRow.querySelector(".status-badge");
-            badge.className = "status-badge resolved";
-            badge.textContent = "Resolved";
-            currentRow.querySelectorAll(".date-cell")[1].textContent = today;
-            currentRow.dataset.status = "resolved";
-            currentRow.dataset.stepsDone = "4";
-
+            CC.submit(currentRow.dataset.id, currentData);
             // TODO: send the resolved schedule to your server here (AJAX/POST)
             closeSchedule();
         });
@@ -630,4 +616,4 @@
     })();
 </script>
 
-<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=1.0"></script>
+<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=1.1"></script>

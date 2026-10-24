@@ -1,6 +1,4 @@
-﻿/* Delete confirmation pop up (same look as the Campus Director pages).
-   Used with the existing .modal-overlay from usermanagement.css / expertisetag.css */
-.cd-delete-card {
+﻿.cd-delete-card {
     background: #f8fafc;
     width: 440px;
     max-width: 90%;

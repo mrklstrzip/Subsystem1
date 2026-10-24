@@ -3,13 +3,16 @@
     ViewBag.Title = "DefenseScheduleView";
 }
 <link href="@Url.Content("~/Content/css/Dean.css")?v=1.0" rel="stylesheet" type="text/css" />
-
-<section class="sa-banner">
-    <small>Dean / Defense Schedule</small>
-    <h1>Defense Schedule</h1>
-    <p>View submitted defense schedules and check status</p>
-    <i class="fa fa-calendar-check sa-banner-icon"></i>
-</section>
+<div class="dashboard-header">
+    <div class="header-text">
+        <span class="breadcrumb-text">Dean| Defense Schedule</span>
+        <h1 class="page-title">Defense Schedule</h1>
+        <p class="welcome-text">View submitted defense schedules and check status</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-calendar-check"></i>
+    </div>
+</div>
 
 @using (Html.BeginForm("DefenseScheduleView", "DefenseSchedule", FormMethod.Get, new { id = "dsFilterForm", @class = "sa-toolbar" }))
 {

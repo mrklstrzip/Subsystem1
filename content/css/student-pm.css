@@ -33,89 +33,111 @@
     position: relative;
     overflow: hidden;
     color: #fff;
-    border-radius: 12px;
-    padding: 18px 24px;
-    margin-bottom: 14px;
-    min-height: 104px;
-    background: linear-gradient(120deg,rgba(0,0,0,.12),rgba(255,255,255,.14)),var(--pm-dark);
+    border-radius: 14px;
+    padding: 32px 40px;
+    margin-bottom: 24px;
+    min-height: 160px;
+    background: linear-gradient( 120deg, rgba(0, 0, 0, .12), rgba(255, 255, 255, .14) ), var(--pm-dark);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
 }
+
+    .pm-banner > div:first-child {
+        position: relative;
+        z-index: 1;
+    }
 
     .pm-banner small {
         display: block;
-        font-size: 9px;
-        opacity: .85
+        font-size: 12px;
+        font-weight: 500;
+        opacity: .8;
     }
 
     .pm-banner h1 {
         font-family: var(--pm-serif);
-        font-size: 32px;
+        font-size: 48px;
         font-weight: 700;
-        margin: 2px 0;
-        line-height: 1.1
+        margin: 6px 0 10px;
+        padding-bottom: 0;
+        line-height: 1.1;
+        letter-spacing: -.5px;
     }
 
     .pm-banner p {
-        font-size: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        margin: 0;
         opacity: .9;
-        margin: 0
     }
 
-.pm-banner-art {
-    position: absolute;
-    right: 24px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 84px;
-    height: 84px;
-    color: rgba(255,255,255,.12)
-}
-
+/* Decorative background icon */
+.pm-banner-art,
 .pm-banner-icon {
     position: absolute;
-    right: 28px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 76px;
-    color: rgba(255,255,255,.18)
+    right: 30px;
+    bottom: -20px;
+    top: auto;
+    transform: none;
+    width: 140px;
+    height: 140px;
+    font-size: 140px;
+    color: var(--pm-dark);
+    opacity: 0.45;
+    pointer-events: none;
 }
 
 .pm-pill {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     background: #fff;
     color: var(--pm-dark);
     border: 0;
     border-radius: 999px;
-    padding: 8px 18px;
-    font: 600 12px 'Inter',sans-serif;
+    padding: 10px 20px;
+    font: 600 12px 'Inter', sans-serif;
     cursor: pointer;
     text-decoration: none;
-    white-space: nowrap
+    white-space: nowrap;
 }
 
     .pm-pill:hover {
-        background: var(--pm-tint)
+        background: var(--pm-tint);
     }
 
-.pm-alert {
-    background: #fdecec;
-    border: 1px solid #f1b8b8;
-    color: #8a1c1c;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 14px;
-    font-size: 12px
+/* Responsive banner */
+@media (max-width: 600px) {
+    .pm-banner {
+        padding: 24px;
+        min-height: 140px;
+    }
+
+        .pm-banner h1 {
+            font-size: 36px;
+        }
+
+        .pm-banner p {
+            font-size: 13px;
+            max-width: 90%;
+        }
+
+    .pm-banner-art,
+    .pm-banner-icon {
+        right: 8px;
+        width: 100px;
+        height: 100px;
+        font-size: 100px;
+    }
+
+    .pm-banner--row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
 
-.pm-alert--ok {
-    background: #e9f7ec;
-    border-color: #b6dfbf;
-    color: #1f6b2b
-}
 
 /* ---------- Cards ---------- */
 .pm-card {

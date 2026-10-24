@@ -4,64 +4,70 @@
 
 <link href="@Url.Content("~/Content/css/profile.css")?v=1.0" rel="stylesheet" type="text/css" />
 
-<div class="role-campusdirector">
-    <h1 class="page-title">Profile</h1>
+<div class="pm role-staff">
+    <section class="pm-banner">
+        <div>
+            <small>Campus Director | Profile</small>
+            <h1>Profile</h1>
+            <p>Manage account credentials</p>
+        </div>
+        <i class="fa fa-circle-user pm-banner-icon"></i>
+    </section>
 
-    <div class="profile-card">
-        <h4 class="card-title">Profile Information</h4>
-        <table class="information-table">
-            <tbody id="profileTableBody">
-                <tr>
-                    <td class="label">NAME</td>
-                    <td class="info" id="infoName"></td>
-                </tr>
-                <tr>
-                    <td class="label">ID</td>
-                    <td class="info" id="infoNumber"></td>
-                </tr>
-                <tr>
-                    <td class="label">ROLE</td>
-                    <td class="info" id="infoRole"></td>
-                </tr>
-                <tr>
-                    <td class="label">EMAIL</td>
-                    <td class="info" id="infoEmail"></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <div class="pm-profile-grid">
+        <section class="pm-card">
+            <h2 class="pm-card-title">Profile Information</h2>
 
-    <div class="profile-card">
-        <h4 class="card-title">Change Password</h4>
-        <form class="password-form" id="changePasswordForm" onsubmit="return false;">
-            <div class="form-group">
-                <label for="current-password">CURRENT PASSWORD</label>
-                <div class="input-wrapper">
-                    <input type="password" id="current-password" required>
-                    <i class="fa fa-eye toggle-password"></i>
+            <div class="pm-profile-head">
+                <img id="pmPhoto" class="pm-avatar pm-avatar--lg" src="" alt="" />
+                <div>
+                    <strong id="pmHeadName" class="pm-profile-name"></strong>
+                    <span id="pmHeadRole" class="pm-profile-role"></span>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="new-password">NEW PASSWORD</label>
-                <div class="input-wrapper">
-                    <input type="password" id="new-password" required>
-                    <i class="fa fa-eye toggle-password"></i>
-                </div>
-            </div>
+            <table class="pm-info-table">
+                <tbody id="profileTableBody">
+                    <tr><td class="label">NAME</td><td class="info" id="infoName"></td></tr>
+                    <tr><td class="label">ID</td><td class="info" id="infoNumber"></td></tr>
+                    <tr><td class="label">ROLE</td><td class="info" id="infoRole"></td></tr>
+                    <tr><td class="label">EMAIL</td><td class="info" id="infoEmail"></td></tr>
+                </tbody>
+            </table>
+        </section>
 
-            <div class="form-group">
-                <label for="confirm-password">CONFIRM NEW PASSWORD</label>
-                <div class="input-wrapper">
-                    <input type="password" id="confirm-password" required>
-                    <i class="fa fa-eye toggle-password"></i>
-                </div>
-            </div>
-
-            <button type="submit" class="confirm-btn">Confirm</button>
-        </form>
+        <section class="pm-card">
+            <h2 class="pm-card-title">Change Password</h2>
+            <form class="pm-pw-form" id="changePasswordForm" onsubmit="return false;">
+                <label for="current-password">
+                    Current password
+                    <span class="pm-input"><input type="password" id="current-password" required /><i class="fa fa-eye toggle-password"></i></span>
+                </label>
+                <label for="new-password">
+                    New password
+                    <span class="pm-input"><input type="password" id="new-password" required /><i class="fa fa-eye toggle-password"></i></span>
+                </label>
+                <label for="confirm-password">
+                    Confirm password
+                    <span class="pm-input"><input type="password" id="confirm-password" required /><i class="fa fa-eye toggle-password"></i></span>
+                </label>
+                <div class="pm-pw-actions"><button type="submit" class="pm-primary">Confirm</button></div>
+            </form>
+        </section>
     </div>
 </div>
 
-<script src="~/Scripts/dummy-users.js"></script>
-<script src="~/Scripts/profile.js"></script>
+<script src="@Url.Content("~/Scripts/dummy-users.js")?v=1.0"></script>
+<script src="@Url.Content("~/Scripts/profile.js")?v=1.0"></script>
+<script>
+    (function () {
+        try {
+            var u = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+            if (!u) return;
+            document.getElementById('pmHeadName').textContent = u.firstName + ' ' + u.lastName;
+            document.getElementById('pmHeadRole').textContent = u.role;
+            var img = document.getElementById('pmPhoto');
+            if (u.profilePhoto) img.src = '/Content/images/' + u.profilePhoto; else img.style.display = 'none';
+        } catch (e) { }
+    })();
+</script>

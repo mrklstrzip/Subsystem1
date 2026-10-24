@@ -2,18 +2,15 @@
    Admin – demo behavior (no backend)
    --------------------------------------------------------------------------
    Powers four pages: Dashboard, Expertise Tag Management, Faculty Profile
-   and User Management. All data lives in the browser (localStorage), so a
-   change on one page shows up on the others. To wipe the demo data and start over, 
-   run AD.reset() in the browser console.
+   and User Management. All data lives in the browser (localStorage).
    ========================================================================== */
 (function () {
     'use strict';
 
-    if (window.AD) return;   // safe if the script ends up included twice
+    if (window.AD) return;
 
-    var KEY = 'adminDemoData_v5';   // v5: updated with activity badge types and icons
+    var KEY = 'adminDemoData_v6';
 
-    // role value -> label + CSS class
     var ROLES = {
         'admin': { label: 'Admin', cls: 'adm-rl' },
         'campus-director': { label: 'Campus Director', cls: 'campdirect-rl' },
@@ -24,7 +21,6 @@
         'dean': { label: 'Dean', cls: 'dean-rl' }
     };
 
-    // Dashboard "Role Distribution" rows mapped with legend dot CSS classes
     var DIST = [
         { role: 'project-manager', label: 'Student', dotCls: 'dot-project-manager' },
         { role: 'panelist', label: 'Panelist', dotCls: 'dot-panelist' },
@@ -38,15 +34,12 @@
 
     var state;
 
-    /* ------------------------------------------------------------------ *
-     *  Data
-     * ------------------------------------------------------------------ */
     function seed() {
         var today = fmtMDY(todayISO());
 
-        function user(id, last, first, middle, email, role, status, extra) {
+        function user(id, last, first, middle, suffix, email, role, status, extra) {
             var u = {
-                id: id, lastName: last, firstName: first, middleName: middle, email: email,
+                id: id, lastName: last, firstName: first, middleName: middle, suffix: suffix || '', email: email,
                 role: role, status: status, idNumber: '',
                 program: '', section: '', professor: '', department: '', expertise: []
             };
@@ -70,15 +63,15 @@
                 { id: 't11', name: 'Power Systems', description: 'Electrical power generation, transmission and distribution.', status: 'active' }
             ],
             users: [
-                user('u1', 'Dela Cruz', 'Juan', '', 'admin@qcu.edu.ph', 'admin', 'active', {}),
-                user('u2', 'Amor', 'Samantha', '', 'professor@qcu.edu.ph', 'panelist', 'active',
+                user('u1', 'Dela Cruz', 'Juan', '', '', 'admin@qcu.edu.ph', 'admin', 'active', {}),
+                user('u2', 'Amor', 'Samantha', '', '', 'professor@qcu.edu.ph', 'panelist', 'active',
                     { idNumber: 'PROF-12-3456', department: 'Computer Studies', expertise: ['Database', 'Machine Learning'] }),
-                user('u3', 'Alcantara', 'Julian', '', 'campusdirect@qcu.edu.ph', 'campus-director', 'active', { idNumber: 'CD-12-3456' }),
-                user('u4', 'Castaneda', 'Mark', '', 'student@qcu.edu.ph', 'project-manager', 'inactive',
+                user('u3', 'Alcantara', 'Julian', '', '', 'campusdirect@qcu.edu.ph', 'campus-director', 'active', { idNumber: 'CD-12-3456' }),
+                user('u4', 'Castaneda', 'Mark', '', '', 'student@qcu.edu.ph', 'project-manager', 'inactive',
                     { idNumber: '21-0421', program: 'BSIT', section: 'SBIT-4A', professor: 'u2' }),
-                user('u5', 'Batumbakal', 'Clove', '', 'capstonecoor@qcu.edu.ph', 'capstone-coordinator', 'active', { idNumber: 'CC-12-3456' }),
-                user('u6', 'Mendoza', 'Iso', '', 'dean@qcu.edu.ph', 'dean', 'active', { idNumber: 'DEAN-12-3456' }),
-                user('u7', 'Villanueva', 'Chamber', '', 'adviser@qcu.edu.ph', 'adviser', 'active',
+                user('u5', 'Batumbakal', 'Clove', '', '', 'capstonecoor@qcu.edu.ph', 'capstone-coordinator', 'active', { idNumber: 'CC-12-3456' }),
+                user('u6', 'Mendoza', 'Iso', '', '', 'dean@qcu.edu.ph', 'dean', 'active', { idNumber: 'DEAN-12-3456' }),
+                user('u7', 'Villanueva', 'Chamber', '', '', 'adviser@qcu.edu.ph', 'adviser', 'active',
                     { idNumber: 'ADV-10-1180', department: 'Computer Studies', expertise: ['Web Development', 'Cyber Security'] })
             ],
             activity: [
@@ -91,7 +84,7 @@
     }
 
     function save() {
-        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ }
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { }
     }
 
     function load() {
@@ -104,7 +97,7 @@
                     return;
                 }
             }
-        } catch (e) { /* fall through to seed */ }
+        } catch (e) { }
         state = seed();
         save();
     }
@@ -115,9 +108,6 @@
         return id;
     }
 
-    /* ------------------------------------------------------------------ *
-     *  Helpers
-     * ------------------------------------------------------------------ */
     function $(id) { return document.getElementById(id); }
     function pad(n) { return (n < 10 ? '0' : '') + n; }
 
@@ -147,10 +137,14 @@
     function tagById(id) { return state.tags.filter(function (t) { return t.id === id; })[0]; }
 
     function listName(u) {
-        return u.lastName + ', ' + u.firstName + (u.middleName ? ' ' + u.middleName : '');
+        var suf = u.suffix ? ' ' + u.suffix : '';
+        return u.lastName + ', ' + u.firstName + (u.middleName ? ' ' + u.middleName : '') + suf;
     }
 
-    function plainName(u) { return u.firstName + ' ' + u.lastName; }
+    function plainName(u) {
+        var suf = u.suffix ? ' ' + u.suffix : '';
+        return u.firstName + ' ' + u.lastName + suf;
+    }
 
     function roleLabel(role) { return (ROLES[role] || { label: role }).label; }
 
@@ -171,12 +165,8 @@
     }
 
     function getActivityIcon(a) {
-        if (a.category === 'tag') {
-            return '<i class="fa fa-tag"></i>';
-        }
-        if (a.type === 'delete') {
-            return '<i class="fa fa-ban"></i>';
-        }
+        if (a.category === 'tag') return '<i class="fa fa-tag"></i>';
+        if (a.type === 'delete') return '<i class="fa fa-ban"></i>';
         var t = (a.text || '').toLowerCase();
         if (t.indexOf('student') > -1) return '<i class="fa fa-graduation-cap"></i>';
         if (t.indexOf('panelist') > -1) return '<i class="fa fa-chalkboard-user"></i>';
@@ -193,9 +183,6 @@
         return 'badge-create';
     }
 
-    /* ------------------------------------------------------------------ *
-     *  Modals
-     * ------------------------------------------------------------------ */
     function openModal(id) { var el = $(id); if (el) el.style.display = 'flex'; }
     function closeModal(id) { var el = $(id); if (el) el.style.display = 'none'; }
 
@@ -209,9 +196,6 @@
         if (e.target && e.target.classList && e.target.classList.contains('modal-overlay')) e.target.style.display = 'none';
     });
 
-    /* ------------------------------------------------------------------ *
-     *  Tag picker
-     * ------------------------------------------------------------------ */
     function renderPicker(boxId, gridId, selected, onToggle) {
         var box = $(boxId), grid = $(gridId);
         if (!box || !grid) return;
@@ -240,9 +224,6 @@
         if (i > -1) list.splice(i, 1); else list.push(name);
     }
 
-    /* ------------------------------------------------------------------ *
-     *  Custom Dropdown Menu Binder Helper
-     * ------------------------------------------------------------------ */
     function bindCustomDropdowns() {
         document.querySelectorAll('.custom-select-box').forEach(function (box) {
             var toggle = box.querySelector('.select-selected');
@@ -289,9 +270,6 @@
         });
     }
 
-    /* ------------------------------------------------------------------ *
-     *  Dashboard
-     * ------------------------------------------------------------------ */
     function renderDashboard() {
         if (!$('dash-total')) return;
 
@@ -300,7 +278,9 @@
             return people.filter(function (u) { return u.role === role && (!status || u.status === status); }).length;
         }
 
-        $('dash-total').textContent = people.length;
+        var totalPeople = people.length;
+
+        $('dash-total').textContent = totalPeople;
         if ($('dash-students')) $('dash-students').textContent = count('project-manager');
         if ($('dash-professors')) $('dash-professors').textContent = count('panelist');
         if ($('dash-advisers')) $('dash-advisers').textContent = count('adviser');
@@ -331,11 +311,38 @@
                 '<td class="inactive-num bold">' + count(d.role, 'inactive') + '</td>' +
                 '</tr>';
         }).join('');
-    }
 
-    /* ------------------------------------------------------------------ *
-     *  Expertise Tag Management
-     * ------------------------------------------------------------------ */
+        // Dynamic Donut Chart Calculation based on Role Distribution
+        var chartEl = document.querySelector('.donut-chart');
+        if (chartEl) {
+            if (totalPeople === 0) {
+                chartEl.style.background = '#E2E8F0'; // Fallback if no users
+            } else {
+                var accumulated = 0;
+                var gradientStops = DIST.map(function (d) {
+                    var roleCount = count(d.role);
+                    var percentage = (roleCount / totalPeople) * 100;
+                    var start = accumulated;
+                    accumulated += percentage;
+                    var end = accumulated;
+
+                    // Retrieve computed CSS variable color for each role
+                    var cssVarMap = {
+                        'project-manager': 'var(--projectmanager)',
+                        'panelist': 'var(--panelist)',
+                        'adviser': 'var(--adviser)',
+                        'campus-director': 'var(--campusdirector)',
+                        'capstone-coordinator': 'var(--capstonecoordinator)',
+                        'dean': 'var(--dean)'
+                    };
+                    var color = cssVarMap[d.role] || '#ccc';
+                    return color + ' ' + start + '% ' + end + '%';
+                });
+
+                chartEl.style.background = 'conic-gradient(' + gradientStops.join(', ') + ')';
+            }
+        }
+    }
     var editTagId = null;
 
     function renderTags() {
@@ -439,8 +446,12 @@
     var delTagId = null;
 
     function deleteTag(id) {
-        if (!tagById(id)) return;
+        var t = tagById(id);
+        if (!t) return;
         delTagId = id;
+        if ($('delTagModalText')) {
+            $('delTagModalText').innerHTML = 'Do you really want to delete <strong>' + esc(t.name) + '</strong>?<br />This process cannot be undone';
+        }
         openModal('delTagModal');
     }
 
@@ -459,9 +470,6 @@
         renderTags();
     }
 
-    /* ------------------------------------------------------------------ *
-     *  Faculty Profile
-     * ------------------------------------------------------------------ */
     var facultyEditId = null, facultySelected = [];
 
     function renderFaculty() {
@@ -522,9 +530,6 @@
         renderFaculty();
     }
 
-    /* ------------------------------------------------------------------ *
-     *  User Management
-     * ------------------------------------------------------------------ */
     var isEditMode = false, editUserId = null, currentPrefix = '', userSelected = [];
 
     function renderUsers() {
@@ -595,9 +600,26 @@
         if (role === 'project-manager') {
             if ($('fieldProgram')) $('fieldProgram').style.display = 'flex';
         } else if (role === 'panelist' || role === 'adviser') {
-            if ($('fieldProfessor')) $('fieldProfessor').style.display = 'flex';
-            if ($('expertiseSection')) $('expertiseSection').style.display = isEditMode ? 'none' : 'flex';
-            if (!isEditMode) renderUserPicker();
+            // Expertise tags are ONLY displayed during Creation, NOT during Edit mode
+            if (!isEditMode && $('fieldProfessor')) {
+                $('fieldProfessor').style.display = 'flex';
+                renderUserPicker();
+            }
+        }
+    }
+
+    function updateStudentSectionPrefix(prog) {
+        var secInput = $('sectionInput');
+        if (!secInput) return;
+        var currentVal = secInput.value;
+        var prefix = '';
+        if (prog === 'BSIT') prefix = 'SBIT-';
+        else if (prog === 'BSIS') prefix = 'SBIS-';
+        else if (prog === 'BSCS') prefix = 'SBCS-';
+
+        if (prefix) {
+            var rest = currentVal.replace(/^(SBIT-|SBIS-|SBCS-)/i, '');
+            secInput.value = prefix + rest;
         }
     }
 
@@ -619,7 +641,7 @@
         var sel = $('professorInput');
         if (!sel) return;
         sel.innerHTML = profs.length
-            ? '<option value=""' + (selectedId ? '' : ' selected') + ' disabled>Select Professor/Adviser</option>' +
+            ? '<option value=""' + (selectedId ? '' : ' selected') + ' disabled>Select Adviser</option>' +
             profs.map(function (u) {
                 return '<option value="' + esc(u.id) + '"' + (u.id === selectedId ? ' selected' : '') + '>' + esc(plainName(u)) + '</option>';
             }).join('')
@@ -636,6 +658,7 @@
         if ($('lastNameInput')) $('lastNameInput').value = '';
         if ($('firstNameInput')) $('firstNameInput').value = '';
         if ($('middleNameInput')) $('middleNameInput').value = '';
+        if ($('suffixSelect')) $('suffixSelect').value = '';
         if ($('emailInput')) $('emailInput').value = '';
         if ($('programSelect')) $('programSelect').selectedIndex = 0;
         if ($('sectionInput')) $('sectionInput').value = '';
@@ -665,6 +688,7 @@
         if ($('lastNameInput')) $('lastNameInput').value = u.lastName;
         if ($('firstNameInput')) $('firstNameInput').value = u.firstName;
         if ($('middleNameInput')) $('middleNameInput').value = u.middleName;
+        if ($('suffixSelect')) $('suffixSelect').value = u.suffix || '';
         if ($('emailInput')) $('emailInput').value = u.email;
         if ($('statusActive')) $('statusActive').checked = (u.status === 'active');
         if ($('statusInactive')) $('statusInactive').checked = (u.status !== 'active');
@@ -676,8 +700,6 @@
         if ($('programSelect')) $('programSelect').value = u.program || '';
         if ($('sectionInput')) $('sectionInput').value = u.section || '';
         fillProfessorSelect(u.professor || '');
-        var activeNames = activeTagNames();
-        userSelected = u.expertise.filter(function (n) { return activeNames.indexOf(n) > -1; });
 
         handleRoleUIChange(u.role);
         openModal('userModal');
@@ -687,6 +709,7 @@
         var lastName = $('lastNameInput') ? $('lastNameInput').value.trim() : '';
         var firstName = $('firstNameInput') ? $('firstNameInput').value.trim() : '';
         var middleName = $('middleNameInput') ? $('middleNameInput').value.trim() : '';
+        var suffix = $('suffixSelect') ? $('suffixSelect').value : '';
         var email = $('emailInput') ? $('emailInput').value.trim() : '';
         var role = $('modalRoleSelect') ? $('modalRoleSelect').value : 'project-manager';
 
@@ -705,7 +728,7 @@
 
         var isPM = role === 'project-manager';
         var fields = {
-            lastName: lastName, firstName: firstName, middleName: middleName, email: email, role: role,
+            lastName: lastName, firstName: firstName, middleName: middleName, suffix: suffix, email: email, role: role,
             idNumber: idValue,
             program: isPM ? ($('programSelect') ? $('programSelect').value || '' : '') : '',
             section: isPM ? ($('sectionInput') ? $('sectionInput').value.trim() : '') : '',
@@ -722,8 +745,6 @@
             var isFaculty = (role === 'panelist' || role === 'adviser');
             if (wasFaculty && !isFaculty) clearProfessorFromStudents(u.id);
             if ($('statusActive')) u.status = $('statusActive').checked ? 'active' : 'inactive';
-            if (!isFaculty) { u.expertise = []; u.department = ''; }
-            else if (!wasFaculty) u.expertise = [];
 
             if (u.status !== oldStatus) {
                 var actType = u.status === 'active' ? 'create' : 'delete';
@@ -758,6 +779,9 @@
         if (!u) return;
         if (u.role === 'admin') { alert('Admin accounts cannot be deleted.'); return; }
         delUserId = id;
+        if ($('delUserModalText')) {
+            $('delUserModalText').innerHTML = 'Do you really want to delete <strong>' + esc(plainName(u)) + ' (' + esc(roleLabel(u.role)) + ')</strong>?<br />This process cannot be undone';
+        }
         openModal('delUserModal');
     }
 
@@ -792,6 +816,12 @@
             });
         }
 
+        if ($('programSelect')) {
+            $('programSelect').addEventListener('change', function (e) {
+                updateStudentSectionPrefix(e.target.value);
+            });
+        }
+
         if ($('modalIdInput')) {
             $('modalIdInput').addEventListener('input', function () {
                 var val = this.value;
@@ -804,9 +834,6 @@
         renderUsers();
     }
 
-    /* ------------------------------------------------------------------ *
-     *  Public API
-     * ------------------------------------------------------------------ */
     window.AD = {
         reset: function () {
             localStorage.removeItem(KEY);

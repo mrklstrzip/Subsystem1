@@ -2,18 +2,18 @@
     ViewBag.Title = "Schedule Management";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.3" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.4" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
     <div class="header-text">
-        <span class="breadcrumb-text">Capstone Coordinator / Defense Management</span>
+        <span class="breadcrumb-text">Capstone Coordinator | Defense Management</span>
         <h1 class="page-title">Schedule Management</h1>
         <p class="welcome-text">Generate and edit schedule</p>
     </div>
     <div class="header-bg-icon">
-        <i class="fa fa-calendar-days"></i>
+        <i class="fa fa-file-lines"></i>
     </div>
 </div>
 
@@ -73,10 +73,10 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
+            <tr data-id="ms1">
                 <td>
                     <div class="manuscript-title-text">Lips of An Angel</div>
-                    <span class="program-badge bsit">BSIT-4A</span>
+                    <span class="program-badge sbit">SBIT-4A</span>
                 </td>
                 <td class="author-cell">Sarah G</td>
                 <td class="adviser-cell">Naruto Uzumaki</td>
@@ -90,6 +90,7 @@
                             data-title="Lips of An Angel"
                             data-date-submitted="Sep 22, 2026"
                             data-problem=""
+                            data-conflict-type="Room Unavailability"
                             data-student="Sarah G"
                             data-program="BS Information Technology · 4A"
                             data-adviser="Naruto Uzumaki">
@@ -97,23 +98,24 @@
                     </button>
                 </td>
             </tr>
-            <tr>
+            <tr data-id="ms2">
                 <td>
                     <div class="manuscript-title-text">Huwag na Huwag Mong Sasabihin</div>
-                    <span class="program-badge bscs">BSCS-4A</span>
+                    <span class="program-badge sbcs">SBCS-4A</span>
                 </td>
                 <td class="author-cell">Lea Salonga</td>
                 <td class="adviser-cell">Sasuke Uchiha</td>
                 <td class="date-cell">10-25-27</td>
                 <td>
-                    <span class="status-badge in-conflict">In Conflict</span>
+                    <span class="status-badge under-review">Under Review</span>
                 </td>
                 <td class="action-cell">
                     <button class="btn-view"
-                            data-status="in-conflict"
+                            data-status="under-review"
                             data-title="Huwag na Huwag Mong Sasabihin"
                             data-date-submitted="Sep 22, 2026"
                             data-problem="Room Unavailability"
+                            data-conflict-type="Room Unavailability"
                             data-student="Lea Salonga"
                             data-program="BS Computer Science · 4A"
                             data-adviser="Sasuke Uchiha">
@@ -121,10 +123,10 @@
                     </button>
                 </td>
             </tr>
-            <tr>
+            <tr data-id="ms3">
                 <td>
                     <div class="manuscript-title-text">Pangarap Lang Kita</div>
-                    <span class="program-badge bsis">BSIS-4A</span>
+                    <span class="program-badge sbis">SBIS-4A</span>
                 </td>
                 <td class="author-cell">Apple D App</td>
                 <td class="adviser-cell">Bon Jovie</td>
@@ -138,6 +140,7 @@
                             data-title="Pangarap Lang Kita"
                             data-date-submitted="Sep 22, 2026"
                             data-problem=""
+                            data-conflict-type="Room Unavailability"
                             data-student="Apple D App"
                             data-program="BS Information Systems · 4A"
                             data-adviser="Bon Jovie">
@@ -145,23 +148,24 @@
                     </button>
                 </td>
             </tr>
-            <tr>
+            <tr data-id="ms4">
                 <td>
                     <div class="manuscript-title-text">The Greatest Love of All</div>
-                    <span class="program-badge bscs-dark">BSCS-4D</span>
+                    <span class="program-badge sbcs-dark">SBCS-4D</span>
                 </td>
                 <td class="author-cell">Bamboo</td>
                 <td class="adviser-cell">The Beatles</td>
                 <td class="date-cell">10-25-27</td>
                 <td>
-                    <span class="status-badge submitted">Submitted</span>
+                    <span class="status-badge under-review">Under Review</span>
                 </td>
                 <td class="action-cell">
                     <button class="btn-view"
-                            data-status="submitted"
+                            data-status="under-review"
                             data-title="The Greatest Love of All"
                             data-date-submitted="Sep 22, 2026"
-                            data-problem=""
+                            data-problem="Room Unavailability"
+                            data-conflict-type="Room Unavailability"
                             data-student="Bamboo"
                             data-program="BS Computer Science · 4D"
                             data-adviser="The Beatles">
@@ -175,9 +179,9 @@
 
 <!-- ==========================================================
      Generated Schedule Modal (one markup, 3 status variants)
-     to-submit  -> Close + Submit
-     in-conflict-> Close + Submit, problem shown
-     submitted  -> Close only
+     to-submit    -> Close + Submit
+     under-review -> Close + Submit, problem shown
+     submitted    -> Close only
      ========================================================== -->
 <div class="modal-overlay" id="scheduleModal" aria-hidden="true">
     <div class="schedule-modal" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
@@ -308,13 +312,14 @@
     (function () {
         var STATUS_LABELS = {
             "to-submit": "To Submit",
-            "in-conflict": "In Conflict",
+            "under-review": "Under Review",
             "submitted": "Submitted"
         };
         var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
         // TODO: replace this sample data with real data from your controller/API.
-        // Each table row gets its own copy, so edits are kept per manuscript.
+        // Saved edits are kept per manuscript by capstonecoordinator-app.js (CC.getSchedule / CC.saveSchedule)
+        // so the Under Review and Defense Schedule pages see the same data.
         var sample = {
             abstract: "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
             keywords: "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis",
@@ -335,14 +340,12 @@
         var btnSave = document.getElementById("btnSaveEdit");
         var btnCancel = document.getElementById("btnCancelEdit");
 
-        var store = new WeakMap();   // table row -> its schedule data
         var currentRow = null;
         var currentData = null;
         var editing = false;
         var currentStatus = "";
 
         function $(id) { return document.getElementById(id); }
-        function clone(o) { return JSON.parse(JSON.stringify(o)); }
 
         function fmtTime(t) {
             if (!t) return "";
@@ -455,7 +458,8 @@
             currentData.date = date;
             currentData.room = room;
 
-            // TODO: persist currentData to your server here (AJAX/POST)
+            CC.saveSchedule(currentRow.dataset.id, currentData);   // shared with the other pages
+            // TODO: also POST currentData to your server here
             setEditing(false);
         }
 
@@ -464,8 +468,7 @@
             var d = btn.dataset;
             currentStatus = d.status;
             currentRow = btn.closest("tr");
-            if (!store.has(currentRow)) store.set(currentRow, clone(sample));
-            currentData = store.get(currentRow);
+            currentData = CC.getSchedule(currentRow.dataset.id, sample);
 
             $("mTitle").textContent = d.title;
             $("mDateSubmitted").textContent = d.dateSubmitted;
@@ -527,19 +530,14 @@
             }
         });
 
-        // Submit -> mark row as Submitted (hook your AJAX/POST here)
+        // Submit -> status becomes Submitted everywhere (an open review is marked Resolved)
         submitBtn.addEventListener("click", function () {
-            if (editing) return;
-            if (currentRow) {
-                var rowBadge = currentRow.querySelector(".status-badge");
-                rowBadge.className = "status-badge submitted";
-                rowBadge.textContent = "Submitted";
-                currentRow.querySelector(".btn-view").dataset.status = "submitted";
-                currentRow.querySelector(".btn-view").dataset.problem = "";
-            }
+            if (editing || !currentRow) return;
+            CC.submit(currentRow.dataset.id, currentData);
+            // TODO: POST to your server here
             closeModal();
         });
     })();
 </script>
 
-<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=1.0"></script>
+<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=1.1"></script>

@@ -35,7 +35,7 @@
         </div>
 
         <button type="button" id="notifBell" class="notif-bell" aria-label="Notifications" aria-expanded="false">
-            <i class="fa fa-bell"></i>
+            <i class="fa-regular fa-bell"></i>
             <span class="notif-dot" id="notifDot"></span>
         </button>
     </header>
@@ -118,6 +118,7 @@
                     <div class="notif-item-title">Cho Miyeon submitted a defense schedule</div>
                     <p>Defense schedule for BSCS-4A, with a title "Lips of an Angel"</p>
                     <div class="notif-actions">
+                        <button type="button" class="btn-cancel" data-action="cancel">Cancel</button>
                         <button type="button" class="btn-approve" data-action="approve">Approve</button>
                         <span class="notif-time">5 min ago</span>
                     </div>
@@ -128,7 +129,7 @@
 
     <script src="~/Scripts/sidebar.js"></script>
     <script src="~/Scripts/layout-profile.js"></script>
-    <script src="~/Scripts/DeanNotifs.js"></script>
+    <script src="~/Scripts/Notifs.js"></script>
     @RenderSection("scripts", required: false)
 </body>
 </html>

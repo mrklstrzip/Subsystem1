@@ -21,44 +21,43 @@
             <img src="~/Content/images/qcu.jpeg" alt="QCU Logo" class="layout-header-logo" />
             <img src="~/Content/images/ccs-logo.png" alt="CCS Logo" class="layout-header-logo" />
         </div>
-
         <div class="layout-header-text">
             <h1>Quezon City University</h1>
             <span>College of Computer Studies</span>
         </div>
-
         <div class="header-stripes">
             <span class="stripe stripe-1"></span>
             <span class="stripe stripe-2"></span>
             <span class="stripe stripe-3"></span>
         </div>
+        <button type="button" id="notifBell" class="notif-bell" aria-label="Notifications" aria-expanded="false">
+            <i class="fa-regular fa-bell"></i>
+            <span class="notif-dot" id="notifDot"></span>
+        </button>
     </header>
 
     <div class="layout-wrapper sidebar-rail" id="layoutWrapper">
         <aside class="layout-sidebar" id="sidebar">
-
             <div class="sb-top">
                 <span class="sb-menu-label">MAIN MENU</span>
                 <button type="button" id="sidebarToggle" class="sb-toggle" aria-label="Toggle sidebar" aria-expanded="false">
                     <i class="fa fa-bars"></i>
                 </button>
             </div>
-
             <nav class="layout-nav">
                 <a href="@Url.Action("dashboard", "Dashboard")" class="@(currentController == "Dashboard" ? "active" : "")" title="Dashboard">
                     <i class="fa fa-th-large"></i><span class="nav-label">Dashboard</span>
                 </a>
                 <a href="@Url.Action("schedulemanagement", "ScheduleManagement")" class="@(currentController == "ScheduleManagement" ? "active" : "")" title="Schedule Management">
-                    <i class="fa fa-file-lines"></i></i><span class="nav-label">Schedule Management</span>
+                    <i class="fa fa-file-lines"></i><span class="nav-label">Schedule Management</span>
                 </a>
                 <a href="@Url.Action("defenseschedule", "DefenseSchedule")" class="@(currentController == "DefenseSchedule" ? "active" : "")" title="Defense Schedule">
-                    <i class="fa fa-calendar"></i></i><span class="nav-label">Defense Schedule</span>
+                    <i class="fa fa-calendar-day"></i><span class="nav-label">Defense Schedule</span>
                 </a>
-                <a href="@Url.Action("conflictresult", "ConflictResult")" class="@(currentController == "ConflictResult" ? "active" : "")" title="Conflict Result">
-                    <i class="fa fa-clipboard-check"></i></i><span class="nav-label">Conflict Result</span>
+                <a href="@Url.Action("conflictresult", "ConflictResult")" class="@(currentController == "ConflictResult" ? "active" : "")" title="Under Review">
+                    <i class="fa fa-clipboard-list"></i><span class="nav-label">Under Review</span>
                 </a>
             </nav>
-
             <div class="sb-footer">
                 <a href="@Url.Action("profile", "Profile")" class="sb-user" title="Profile">
                     <img id="profilePhoto" src="" alt="Profile" class="sb-avatar" />
@@ -76,7 +75,94 @@
         </main>
     </div>
 
+    <div class="notif-panel notif-panel-wide" id="notifPanel" hidden>
+        <div class="notif-head">
+            <div class="notif-title">
+                <h3>Notifications</h3>
+                <span class="notif-badge" id="notifBadge">6 new</span>
+            </div>
+            <button type="button" id="notifClose" class="notif-close" aria-label="Close">
+                <i class="fa fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Main Filter: All / Unread -->
+        <div class="notif-tabs">
+            <button type="button" class="notif-tab active" data-filter="all">All (<span class="notif-count" id="countAll">6</span>)</button>
+            <button type="button" class="notif-tab" data-filter="unread">Unread (<span class="notif-count" id="countUnread">6</span>)</button>
+        </div>
+
+        <!-- Category Filter Sub-tabs -->
+        <div class="notif-tabs notif-category-tabs">
+            <button type="button" class="notif-tab active" data-type="all">All</button>
+            <button type="button" class="notif-tab" data-type="title">Titles</button>
+            <button type="button" class="notif-tab" data-type="match">Matches</button>
+            <button type="button" class="notif-tab" data-type="dean">Dean</button>
+            <button type="button" class="notif-tab" data-type="review">Review</button>
+            <button type="button" class="notif-tab" data-type="cancel">Cancel</button>
+        </div>
+
+        <div class="notif-body" id="notifBody">
+            <div class="notif-group-label">RECENT</div>
+
+            <div class="notif-item unread" data-id="1" data-type="title">
+                <div class="notif-icon"><i class="fa fa-file-import"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Title Proposal Submitted <span class="unread-dot"></span></div>
+                    <p>New capstone title submitted "Manuscript Title" (SBIT-4E).</p>
+                    <div class="notif-actions"><span class="notif-time">5 min ago</span></div>
+                </div>
+            </div>
+
+            <div class="notif-item unread" data-id="2" data-type="match">
+                <div class="notif-icon"><i class="fa fa-sliders"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Panel & Schedule Matched <span class="unread-dot"></span></div>
+                    <p>Panel and Schedule matched for "Manuscript Title".</p>
+                    <div class="notif-actions"><span class="notif-time">20 min ago</span></div>
+                </div>
+            </div>
+
+            <div class="notif-item unread" data-id="3" data-type="dean">
+                <div class="notif-icon"><i class="fa fa-circle-check"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Dean Schedule Approved <span class="unread-dot"></span></div>
+                    <p>The Dean approved the submitted defense schedule for "Manuscript Title".</p>
+                    <div class="notif-actions"><span class="notif-time">1 hour ago</span></div>
+                </div>
+            </div>
+
+            <div class="notif-item unread" data-id="4" data-type="dean">
+                <div class="notif-icon"><i class="fa fa-circle-xmark"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Dean Schedule Declined <span class="unread-dot"></span></div>
+                    <p>The Dean declined the submitted defense schedule for "Manuscript Title".</p>
+                    <div class="notif-actions"><span class="notif-time">1 hour ago</span></div>
+                </div>
+            </div>
+
+            <div class="notif-item unread" data-id="5" data-type="review">
+                <div class="notif-icon"><i class="fa fa-spinner"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Schedule Under Review <span class="unread-dot"></span></div>
+                    <p>"Manuscript Title" has been placed under review due to a problem.</p>
+                    <div class="notif-actions"><span class="notif-time">3 hours ago</span></div>
+                </div>
+            </div>
+
+            <div class="notif-item unread" data-id="6" data-type="cancel">
+                <div class="notif-icon"><i class="fa fa-calendar-xmark"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Schedule Cancellation <span class="unread-dot"></span></div>
+                    <p>Adviser Chamber Villanueva cancel the defense of "Manuscript Title".</p>
+                    <div class="notif-actions"><span class="notif-time">Yesterday</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/Scripts/sidebar.js"></script>
     <script src="~/Scripts/layout-profile.js"></script>
+    <script src="~/Scripts/Notifs.js"></script>
 </body>
 </html>

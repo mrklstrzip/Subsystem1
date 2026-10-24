@@ -23,8 +23,7 @@ body {
 }
 
 .dashboard-header {
-    background: #2C3F56;
-    background: linear-gradient(92deg,rgba(44, 63, 86, 1) 31%, rgba(83, 103, 127, 1) 100%);
+    background: linear-gradient(to left, #2C3F56 0%, #263B53 25%, #20344D 60%, #172A43 100%);
     border-radius: 14px;
     padding: 32px 40px;
     color: #FFFFFF;
@@ -61,7 +60,7 @@ body {
     right: 20px;
     bottom: -15px;
     font-size: 140px;
-    color: #2C3F56;
+    color: #172A43;
     pointer-events: none;
 }
 
@@ -184,7 +183,7 @@ table {
 }
 
 .column-title {
-    color: #374A60;
+    color: #2C3F56; /* Requested Header Row Color */
     font-weight: 700;
     font-size: 12px;
     padding-bottom: 12px;

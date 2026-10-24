@@ -2,24 +2,30 @@
     ViewBag.Title = "Defense Schedule";
 }
 
+<link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
+
 <div class="pf-page">
 
     <input type="radio" name="dsTab" id="dsAll" class="pf-radio pf-r1" checked />
     <input type="radio" name="dsTab" id="dsUpcoming" class="pf-radio pf-r2" />
     <input type="radio" name="dsTab" id="dsCompleted" class="pf-radio pf-r3" />
 
-    <div class="pf-banner">
-        <div>
-            <h1>Defense Schedule</h1>
-            <p>Every defense you are part of, in date order.</p>
+    <div class="dashboard-header">
+        <div class="header-text">
+            <span class="breadcrumb-text">Panelist | Defense Schedule</span>
+            <h1 class="page-title">Defense Schedule</h1>
+            <p class="welcome-text">
+                Every defense you are part of, in date order.
+            </p>
         </div>
-        <svg class="pf-banner-deco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="5" width="18" height="16" rx="3" />
-            <path d="M3 10h18M8 3v4M16 3v4" />
-            <circle cx="16" cy="16" r="4.5" fill="#1B293B" />
-            <path d="M16 13.8V16l1.5 1" />
-        </svg>
-        <a href="#" class="pf-banner-btn">Go to Post Defense</a>
+
+        <a href="#" class="pf-banner-btn">
+            Go to Post Defense
+        </a>
+
+        <div class="header-bg-icon">
+            <i class="fa fa-calendar"></i>
+        </div>
     </div>
 
     <!-- Tabs -->

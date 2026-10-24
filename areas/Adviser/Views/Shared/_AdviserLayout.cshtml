@@ -7,9 +7,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Professor - @ViewBag.Title</title>
-    <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
+    <title>Adviser - @ViewBag.Title</title>
     <link href="@Url.Content("~/Content/css/layout.css")?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet">
@@ -17,37 +17,35 @@
     <link href="@Url.Content("~/Content/css/adviser.css")?v=1.0" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/css/profile.css")?v=1.0" rel="stylesheet" type="text/css" />
 </head>
-
 <body class="user-theme">
     <header class="layout-header">
         <div class="logo-bg">
             <img src="~/Content/images/qcu.jpeg" alt="QCU Logo" class="layout-header-logo" />
             <img src="~/Content/images/ccs-logo.png" alt="CCS Logo" class="layout-header-logo" />
         </div>
-
         <div class="layout-header-text">
             <h1>Quezon City University</h1>
             <span>College of Computer Studies</span>
         </div>
-
         <div class="header-stripes">
             <span class="stripe stripe-1"></span>
             <span class="stripe stripe-2"></span>
             <span class="stripe stripe-3"></span>
         </div>
+        <button type="button" id="notifBell" class="notif-bell" aria-label="Notifications" aria-expanded="false">
+            <i class="fa-regular fa-bell"></i>
+            <span class="notif-dot" id="notifDot"></span>
+        </button>
     </header>
 
     <div class="layout-wrapper sidebar-rail" id="layoutWrapper">
         <aside class="layout-sidebar" id="sidebar">
-
-            <!-- MAIN MENU + hamburger -->
             <div class="sb-top">
                 <span class="sb-menu-label">MAIN MENU</span>
                 <button type="button" id="sidebarToggle" class="sb-toggle" aria-label="Toggle sidebar" aria-expanded="false">
                     <i class="fa fa-bars"></i>
                 </button>
             </div>
-
             <nav class="layout-nav">
                 <a href="@Url.Action("dashboard", "Dashboard")" class="@(currentController == "Dashboard" ? "active" : "")" title="Dashboard">
                     <i class="fa fa-th-large"></i><span class="nav-label">Dashboard</span>
@@ -59,8 +57,6 @@
                     <i class="fa fa-calendar"></i><span class="nav-label">Defense Schedule</span>
                 </a>
             </nav>
-
-            <!-- logged-in user (opens Profile) + logout -->
             <div class="sb-footer">
                 <a href="@Url.Action("profile", "Profile")" class="sb-user" title="Profile">
                     <img id="profilePhoto" src="" alt="Profile" class="sb-avatar" />
@@ -78,7 +74,63 @@
         </main>
     </div>
 
+    <div class="notif-panel" id="notifPanel" hidden>
+        <div class="notif-head">
+            <div class="notif-title">
+                <h3>Notifications</h3>
+                <span class="notif-badge" id="notifBadge">4 new</span>
+            </div>
+            <button type="button" id="notifClose" class="notif-close" aria-label="Close">
+                <i class="fa fa-xmark"></i>
+            </button>
+        </div>
+        <div class="notif-tabs">
+            <button type="button" class="notif-tab active" data-filter="all">All (<span class="notif-count" id="countAll">4</span>)</button>
+            <button type="button" class="notif-tab" data-filter="unread">Unread (<span class="notif-count" id="countUnread">4</span>)</button>
+        </div>
+        <div class="notif-body" id="notifBody">
+            <div class="notif-group-label">TODAY</div>
+            <div class="notif-item unread" data-id="1">
+                <div class="notif-icon"><i class="fa fa-user-plus"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">PM Account Request <span class="unread-dot"></span></div>
+                    <p>Student Yoru Askal Dimagiba requested a Project Manager account.</p>
+                    <div class="notif-actions">
+                        <button type="button" class="btn-approve">View</button>
+                        <span class="notif-time">10 min ago</span>
+                    </div>
+                </div>
+            </div>
+            <div class="notif-item unread" data-id="2">
+                <div class="notif-icon"><i class="fa fa-file"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Manuscript Title Submitted <span class="unread-dot"></span></div>
+                    <p>Group 1 (SBIT-4E) submitted a Manuscript Title.</p>
+                    <div class="notif-actions"><span class="notif-time">1 hour ago</span></div>
+                </div>
+            </div>
+            <div class="notif-item unread" data-id="3">
+                <div class="notif-icon"><i class="fa fa-calendar-day"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Advisory Defense Today <span class="unread-dot"></span></div>
+                    <p>"Manuscript Title" has their defense today at IL505, 10:00 AM.</p>
+                    <div class="notif-actions"><span class="notif-time">2 hours ago</span></div>
+                </div>
+            </div>
+            <div class="notif-group-label">EARLIER</div>
+            <div class="notif-item unread" data-id="4">
+                <div class="notif-icon"><i class="fa fa-clock"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Advisory Defense Tomorrow <span class="unread-dot"></span></div>
+                    <p>Reminder: "Manuscript Title" is scheduled for defense tomorrow at 2:00 PM.</p>
+                    <div class="notif-actions"><span class="notif-time">1 day ago</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/Scripts/sidebar.js"></script>
     <script src="~/Scripts/layout-profile.js"></script>
+    <script src="~/Scripts/Notifs.js"></script>
 </body>
 </html>

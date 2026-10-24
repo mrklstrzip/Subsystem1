@@ -2,18 +2,18 @@
     ViewBag.Title = "Dashboard";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=2.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=2.2" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
     <div class="header-text">
-        <span class="breadcrumb-text">Capstone Coordinator / Dashboard</span>
+        <span class="breadcrumb-text">Capstone Coordinator | Dashboard</span>
         <h1 class="page-title">Dashboard</h1>
-        <p class="welcome-text">View room schedules and check room availability by building, date, and room status</p>
+        <p class="welcome-text">Welcome back, Dimagiba!</p>
     </div>
     <div class="header-bg-icon">
-        <i class="fa fa-calendar-days"></i>
+        <i class="fa fa-th-large"></i>
     </div>
 </div>
 
@@ -26,13 +26,12 @@
         <div class="dashboard-card">
             <div class="card-header-flex">
                 <h3 class="section-title">To Submit</h3>
-                <a href="#" class="view-all-link">View All</a>
+                <a href="@Url.Action("schedulemanagement", "ScheduleManagement")" class="view-all-link">View All</a>
             </div>
             <table class="dashboard-table">
                 <thead>
                     <tr>
                         <th class="column-title manuscript-col">MANUSCRIPT</th>
-                        <th class="column-title program-col">PROGRAM</th>
                         <th class="column-title date-col">DATE</th>
                         <th class="column-title action-col">ACTION</th>
                     </tr>
@@ -41,9 +40,8 @@
                     <tr>
                         <td>
                             <div class="manuscript-title-text">Manuscript Title</div>
-                            <span class="program-badge bsit">BSIT-4A</span>
+                            <span class="program-badge sbit">SBIT-4A</span>
                         </td>
-                        <td></td>
                         <td class="date-cell">Oct 10</td>
                         <td class="action-cell">
                             <button class="btn-view">View</button>
@@ -52,9 +50,8 @@
                     <tr>
                         <td>
                             <div class="manuscript-title-text">Manuscript Title</div>
-                            <span class="program-badge bscs">BSCS-4A</span>
+                            <span class="program-badge sbcs">SBCS-4A</span>
                         </td>
-                        <td></td>
                         <td class="date-cell">Oct 10</td>
                         <td class="action-cell">
                             <button class="btn-view">View</button>
@@ -63,9 +60,8 @@
                     <tr>
                         <td>
                             <div class="manuscript-title-text">Manuscript Title</div>
-                            <span class="program-badge bsis">BSIS-4A</span>
+                            <span class="program-badge sbis">SBIS-4A</span>
                         </td>
-                        <td></td>
                         <td class="date-cell">Oct 10</td>
                         <td class="action-cell">
                             <button class="btn-view">View</button>
@@ -79,7 +75,7 @@
         <div class="dashboard-card">
             <div class="card-header-flex">
                 <h3 class="section-title">Upcoming Defenses</h3>
-                <a href="#" class="view-all-link">View All</a>
+                <a href="@Url.Action("defenseschedule", "DefenseSchedule")" class="view-all-link">View All</a>
             </div>
             <table class="dashboard-table">
                 <thead>
@@ -94,7 +90,7 @@
                     <tr>
                         <td>
                             <div class="manuscript-title-text">Manuscript Title</div>
-                            <span class="program-badge bsit">BSIT-4A</span>
+                            <span class="program-badge sbit">SBIT-4A</span>
                         </td>
                         <td class="date-cell">Oct 10</td>
                         <td class="time-cell">8AM - 10AM</td>
@@ -105,7 +101,7 @@
                     <tr>
                         <td>
                             <div class="manuscript-title-text">Manuscript Title</div>
-                            <span class="program-badge bscs">BSCS-4A</span>
+                            <span class="program-badge sbcs">SBCS-4A</span>
                         </td>
                         <td class="date-cell">Oct 10</td>
                         <td class="time-cell">11AM - 1PM</td>
@@ -116,7 +112,7 @@
                     <tr>
                         <td>
                             <div class="manuscript-title-text">Manuscript Title</div>
-                            <span class="program-badge bsis">BSIS-4A</span>
+                            <span class="program-badge sbis">SBIS-4A</span>
                         </td>
                         <td class="date-cell">Oct 10</td>
                         <td class="time-cell">2PM - 4PM</td>
@@ -142,8 +138,8 @@
                 <div class="metric-icon"><i class="fa-solid fa-door-open"></i></div>
             </div>
             <div class="metric-card">
-                <div class="metric-title">CONFLICTS</div>
-                <div class="metric-value">2</div>
+                <div class="metric-title">UNDER REVIEW</div>
+                <div class="metric-value" data-metric="under-review">2</div>
                 <div class="metric-subtitle">Across all buildings</div>
                 <div class="metric-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
             </div>
@@ -169,3 +165,5 @@
 
     </div>
 </div>
+
+<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=1.1"></script>

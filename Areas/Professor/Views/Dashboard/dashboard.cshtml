@@ -1,17 +1,21 @@
 ﻿@{
     ViewBag.Title = "Dashboard";
 }
+<link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
 
 <div class="pf-page">
 
-    <div class="pf-banner">
-        <div>
-            <div class="pf-eyebrow">@DateTime.Now.ToString("dddd, MMMM d")</div>
-            <h1>Welcome back, Dizon</h1>
-            <p>5 Panel Assignments are waiting for your decision.</p>
+    <div class="dashboard-header">
+        <div class="header-text">
+            <span class="breadcrumb-text">Panelist | Dashboard</span>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="welcome-text">Welcome back, George!</p>
         </div>
-        <svg class="pf-banner-deco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
+        <div class="header-bg-icon">
+            <i class="fa fa-th-large"></i>
+        </div>
     </div>
+
 
     <!-- Stats -->
     <div class="pf-stats">

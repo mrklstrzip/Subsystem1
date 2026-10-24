@@ -1,5 +1,4 @@
-﻿
-body {
+﻿body {
     background-color: #EAECEF;
     font-family: 'Inter', sans-serif;
     color: #22252A;
@@ -7,8 +6,7 @@ body {
 }
 
 .dashboard-header {
-    background: #1B293B;
-    background: linear-gradient(92deg, rgba(27, 41, 59, 1) 31%, rgba(74, 101, 135, 1) 100%);
+    background: linear-gradient( to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100% );
     border-radius: 14px;
     padding: 32px 40px;
     color: #FFFFFF;
@@ -45,13 +43,10 @@ body {
     right: 30px;
     bottom: -20px;
     font-size: 140px;
-    color: #1B293B;
+    color: #0d192c;
     pointer-events: none;
 }
 
-/* ==========================================================================
-   Dashboard Grid Layout
-   ========================================================================== */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1.35fr 0.85fr;
@@ -66,9 +61,6 @@ body {
     gap: 24px;
 }
 
-/* ==========================================================================
-   Dashboard Cards
-   ========================================================================== */
 .dashboard-card {
     background-color: #ffffff;
     border-radius: 14px;
@@ -104,9 +96,7 @@ body {
         opacity: 0.8;
     }
 
-/* ==========================================================================
-   Tables
-   ========================================================================== */
+
 .dashboard-table {
     width: 100%;
     border-collapse: collapse;
@@ -153,19 +143,19 @@ body {
     color: #475569;
 }
 
-    .program-badge.bsit {
+    .program-badge.sbit {
         background-color: #f1f5f9;
         color: #334155;
         border-color: #cbd5e1;
     }
 
-    .program-badge.bscs {
+    .program-badge.sbcs {
         background-color: #fdf2f2;
         color: #991b1b;
         border-color: #fecaca;
     }
 
-    .program-badge.bsis {
+    .program-badge.sbis {
         background-color: #f5f3ff;
         color: #5b21b6;
         border-color: #ddd6fe;
@@ -176,6 +166,19 @@ body {
     font-weight: 500;
 }
 
+.manuscript-col {
+    width: 55%;
+}
+
+.date-col {
+    width: 20%;
+}
+
+.time-col {
+    width: 15%;
+}
+
+.action-col,
 .action-cell {
     text-align: right;
 }

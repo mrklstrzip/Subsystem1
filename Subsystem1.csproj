@@ -103,22 +103,21 @@
   <ItemGroup>
     <Content Include="Content\css\adviser.css" />
     <Content Include="Content\css\campusdirector.css" />
-    <Content Include="Content\css\capstonecoor.css" />
     <Content Include="Content\css\capstonecoordinator\conflictresult.css" />
     <Content Include="Content\css\capstonecoordinator\defenseschedule.css" />
     <Content Include="Content\css\capstonecoordinator\schedulemanagement.css" />
     <Content Include="Content\css\capstonecoordinator\dashboard.css" />
-    <Content Include="Content\css\dashboard.css" />
+    <Content Include="Content\css\admin\dashboard.css" />
     <Content Include="Content\css\Dean.css" />
     <Content Include="Content\css\delete.css" />
-    <Content Include="Content\css\expertisetag.css" />
-    <Content Include="Content\css\facultyprofile.css" />
+    <Content Include="Content\css\admin\expertisetag.css" />
+    <Content Include="Content\css\admin\facultyprofile.css" />
     <Content Include="Content\css\professor.css" />
     <Content Include="Content\css\profile.css" />
     <Content Include="Content\css\layout.css" />
     <Content Include="Content\css\auth.css" />
     <Content Include="Content\css\student-pm.css" />
-    <Content Include="Content\css\usermanagement.css" />
+    <Content Include="Content\css\admin\usermanagement.css" />
     <Content Include="Content\fontawesome\css\all.css" />
     <Content Include="Content\fontawesome\css\all.min.css" />
     <Content Include="Content\fontawesome\css\brands.css" />
@@ -156,7 +155,7 @@
     <Content Include="Scripts\campusdirector-modal.js" />
     <Content Include="Scripts\capstonecoordinator-app.js" />
     <Content Include="Scripts\DeanDefenseSched.js" />
-    <Content Include="Scripts\DeanNotifs.js" />
+    <Content Include="Scripts\Notifs.js" />
     <Content Include="Scripts\DeanSchedApproval.js" />
     <Content Include="Scripts\dummy-users.js" />
     <Content Include="Scripts\layout-profile.js" />

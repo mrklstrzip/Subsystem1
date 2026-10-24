@@ -1,17 +1,16 @@
 ﻿@{
     ViewBag.Title = "Expertise Tag Management";
 }
-
-<link href="@Url.Content("~/Content/css/expertisetag.css")?v=3.0" rel="stylesheet" type="text/css" />
-<link href="@Url.Content("~/Content/css/delete.css")?v=3.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/admin/expertisetag.css")?v=5.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/delete.css")?v=5.0" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
     <div class="header-text">
-        <span class="breadcrumb-text">Admin / Expertise Tag</span>
+        <span class="breadcrumb-text">Admin | Expertise Tag</span>
         <h1 class="page-title">Expertise Tag Management</h1>
-        <p class="welcome-text">Create ang manage expertise tags used for faculty profiling and manuscript keyword matching</p>
+        <p class="welcome-text">Create and manage expertise tags used for faculty profiling and manuscript keyword matching</p>
     </div>
     <div class="header-bg-icon">
         <i class="fa fa-tags"></i>
@@ -67,54 +66,77 @@
     </table>
 </div>
 
-<!-- Add Modal -->
+<!-- Add Modal (Unified Fieldset Design) -->
 <div id="addModal" class="modal-overlay">
     <div class="modal-card">
-        <h3 class="modal-title">ADD EXPERTISE TAG</h3>
-        <form onsubmit="AD.saveNewTag(); return false;">
-            <div class="form-group">
-                <label>Expertise Tag Name</label>
-                <input type="text" id="addTagName" required>
-            </div>
-            <div class="form-group" style="margin-top: 12px;">
-                <label>Description</label>
-                <textarea id="addTagDesc" required></textarea>
-            </div>
+        <div class="modal-header-brand">
+            <h2 class="modal-title">ADD EXPERTISE TAG</h2>
+        </div>
+        <form onsubmit="AD.saveNewTag(); return false;" class="modal-form">
+            <fieldset class="input-fieldset">
+                <legend>Expertise Tag Name</legend>
+                <div class="input-field-wrapper">
+                    <i class="fas fa-tag input-icon"></i>
+                    <input type="text" id="addTagName" required>
+                </div>
+            </fieldset>
+
+            <fieldset class="input-fieldset">
+                <legend>Description</legend>
+                <div class="input-field-wrapper">
+                    <i class="fas fa-align-left input-icon"></i>
+                    <textarea id="addTagDesc" required></textarea>
+                </div>
+            </fieldset>
+
             <div class="modal-actions">
-                <button type="submit" class="btn-confirm">Confirm</button>
                 <button type="button" class="btn-cancel" onclick="AD.closeModals()">Cancel</button>
+                <button type="submit" class="btn-confirm">Confirm</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Edit Modal -->
+<!-- Edit Modal (Unified Fieldset Design) -->
 <div id="editModal" class="modal-overlay">
     <div class="modal-card">
-        <h3 class="modal-title">EDIT EXPERTISE TAG</h3>
-        <form onsubmit="AD.saveEditedTag(); return false;">
-            <div class="form-group">
-                <label>Expertise Tag Name</label>
-                <input type="text" id="editTagName" required>
-            </div>
-            <div class="form-group" style="margin-top: 12px;">
-                <label>Description</label>
-                <textarea id="editTagDesc" required></textarea>
-            </div>
-            <div class="form-group" style="margin-top: 12px;">
-                <label>Expertise Tag Status</label>
-                <div class="radio-group">
-                    <label class="radio-label">
-                        <input type="radio" name="editStatus" id="statusActive" value="active"> Active
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="editStatus" id="statusInactive" value="inactive"> Inactive
-                    </label>
+        <div class="modal-header-brand">
+            <h2 class="modal-title">EDIT EXPERTISE TAG</h2>
+        </div>
+        <form onsubmit="AD.saveEditedTag(); return false;" class="modal-form">
+            <fieldset class="input-fieldset">
+                <legend>Expertise Tag Name</legend>
+                <div class="input-field-wrapper">
+                    <i class="fas fa-tag input-icon"></i>
+                    <input type="text" id="editTagName" required>
                 </div>
-            </div>
+            </fieldset>
+
+            <fieldset class="input-fieldset">
+                <legend>Description</legend>
+                <div class="input-field-wrapper">
+                    <i class="fas fa-align-left input-icon"></i>
+                    <textarea id="editTagDesc" required></textarea>
+                </div>
+            </fieldset>
+
+            <fieldset class="input-fieldset" id="editTagStatusGroup">
+                <legend>Expertise Tag Status</legend>
+                <div class="input-field-wrapper" style="padding: 4px 0;">
+                    <div class="radio-group" style="display: flex; gap: 20px; align-items: center; width: 100%; padding-left: 5px;">
+                        <label class="radio-label" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                            <input type="radio" name="editStatus" id="statusActive" value="active" style="accent-color: #2C3F56;"> Active
+                        </label>
+                        <label class="radio-label" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                            <input type="radio" name="editStatus" id="statusInactive" value="inactive" style="accent-color: #2C3F56;"> Inactive
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+
             <div class="modal-actions">
-                <button type="submit" class="btn-confirm">Confirm</button>
                 <button type="button" class="btn-cancel" onclick="AD.closeModals()">Cancel</button>
+                <button type="submit" class="btn-confirm">Confirm</button>
             </div>
         </form>
     </div>
@@ -125,8 +147,8 @@
     <div class="cd-delete-card">
         <div class="cd-delete-icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
         <h3 class="cd-delete-title">Are you sure?</h3>
-        <p class="cd-delete-text">
-            Do you really want to delete this <strong>EXPERTISE TAG</strong>?<br />
+        <p class="cd-delete-text" id="delTagModalText">
+            Do you really want to delete this tag?<br />
             This process cannot be undone
         </p>
         <div class="cd-delete-actions">
@@ -136,4 +158,4 @@
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=3.0"></script>
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=5.0"></script>

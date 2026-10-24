@@ -1,11 +1,16 @@
 ﻿/* ==========================================================================
-   Capstone Coordinator – search & filter behavior (no backend)
+   Capstone Coordinator – shared state + search & filter behavior (no backend)
    --------------------------------------------------------------------------
-   Powers three pages: Schedule Management, Conflict Result and Defense
-   Schedule. Each page is detected by its table id, so the same script can
-   be included on all of them. Rows are filtered in the browser by reading
-   the table itself, so rows whose status changes at runtime (Submit /
-   Resolve in the popups) are picked up automatically.
+   1. SHARED STATE: one status per manuscript (to-submit / under-review /
+      submitted) plus its saved schedule, kept in localStorage. Every page
+      reads from it, so an action on one page shows up on all the others:
+        - Schedule Management: Submit  -> Submitted (open review gets resolved)
+        - Under Review:        Resolve -> Submitted (review marked Resolved)
+        - Defense Schedule:    shows the latest saved time/date/room
+        - Dashboard:           Under Review count
+   2. SEARCH & FILTERS for Schedule Management, Under Review and
+      Defense Schedule tables.
+   Rows are linked by their data-id (ms1, ms2, ...).
    ========================================================================== */
 (function () {
     'use strict';
@@ -14,19 +19,16 @@
 
     /* ------------------------------------------------------------------ *
      *  Page config
-     *  filters: which filter boxes (matched by their legend text) are live.
-     *    - an array  -> fixed option list (status labels, in this order)
-     *    - true      -> options are built from the table's own rows
      * ------------------------------------------------------------------ */
     var PAGES = [
         {
             tableId: 'scheduleTable',
             emptyText: 'No schedules found',
-            filters: { program: true, status: ['To Submit', 'In Conflict', 'Submitted'], adviser: true }
+            filters: { program: true, status: ['To Submit', 'Under Review', 'Submitted'], adviser: true }
         },
         {
             tableId: 'conflictTable',
-            emptyText: 'No conflicts found',
+            emptyText: 'No items under review',
             filters: { status: ['Resolved', 'In Progress'] }
         },
         {
@@ -36,23 +38,176 @@
         }
     ];
 
-    var pages = [];   // initialised pages (used by CC.refresh / CC.clearFilters)
+    var pages = [];
 
     /* ------------------------------------------------------------------ *
      *  Helpers
      * ------------------------------------------------------------------ */
     function $(id) { return document.getElementById(id); }
-
+    function all(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+    function clone(o) { return JSON.parse(JSON.stringify(o)); }
     function norm(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim().toLowerCase(); }
 
-    // "BSCS-4D" -> "bscs"
+    // "SBCS-4D" -> "sbcs"
     function programCode(text) { return norm(text).split('-')[0]; }
 
     function unique(list) {
         return list.filter(function (v, i) { return v && list.indexOf(v) === i; });
     }
 
-    // Everything the filters/search need to know about one table row
+    function fmtTime(t) {                       // "08:00" -> "8:00AM"
+        if (!t) return '';
+        var p = t.split(':');
+        var h = parseInt(p[0], 10);
+        var ap = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return h + ':' + p[1] + ap;
+    }
+
+    function fmtShortDate(iso) {                // "2027-04-25" -> "04-25-27"
+        var p = iso.split('-');
+        return p[1] + '-' + p[2] + '-' + p[0].slice(2);
+    }
+
+    function todayStr() {                       // "11-5-2027" style used in the table
+        var n = new Date();
+        return (n.getMonth() + 1) + '-' + n.getDate() + '-' + n.getFullYear();
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Shared state
+     *  TODO: when you have a backend, replace readState/writeState with
+     *  your API calls. The rest of the file doesn't need to change.
+     * ------------------------------------------------------------------ */
+    var STORE_KEY = 'cc.state.v1';
+
+    var STATUS_LABELS = {
+        'to-submit': 'To Submit',
+        'under-review': 'Under Review',
+        'submitted': 'Submitted'
+    };
+
+    // Starting status of each manuscript (before anyone changes anything)
+    var SEED_STATUS = {
+        ms1: 'to-submit',
+        ms2: 'under-review',
+        ms3: 'to-submit',
+        ms4: 'under-review'
+    };
+
+    function readState() {
+        try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+        catch (e) { return {}; }
+    }
+    function writeState(s) {
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) { /* storage blocked */ }
+    }
+    function entry(id) { return readState()[id] || {}; }
+    function patch(id, p) {
+        var s = readState();
+        var cur = s[id] || {};
+        for (var k in p) if (Object.prototype.hasOwnProperty.call(p, k)) cur[k] = p[k];
+        s[id] = cur;
+        writeState(s);
+    }
+
+    function getStatus(id) { return entry(id).status || SEED_STATUS[id] || 'to-submit'; }
+
+    function setStatus(id, status) {
+        var p = { status: status };
+        if (status === 'under-review') p.resolvedDate = null;
+        patch(id, p);
+        sync();
+    }
+
+    // Schedule data (panelists, time, date, room). Returns a copy; falls back to `fallback`.
+    function getSchedule(id, fallback) {
+        var sc = entry(id).schedule;
+        return clone(sc || fallback);
+    }
+    function saveSchedule(id, data) {
+        patch(id, { schedule: clone(data) });
+        sync();
+    }
+
+    // Submit the schedule. If it was Under Review, the review is resolved today.
+    function submit(id, schedule) {
+        var p = { status: 'submitted' };
+        if (schedule) p.schedule = clone(schedule);
+        if (getStatus(id) === 'under-review') p.resolvedDate = todayStr();
+        patch(id, p);
+        sync();
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Sync: paint the shared state onto whatever page is open
+     * ------------------------------------------------------------------ */
+    function sync() {
+        // Schedule Management
+        all('#scheduleTable tbody tr[data-id]').forEach(function (row) {
+            var id = row.getAttribute('data-id');
+            var st = getStatus(id);
+            var badge = row.querySelector('.status-badge');
+            if (badge) {
+                badge.className = 'status-badge ' + st;
+                badge.textContent = STATUS_LABELS[st];
+            }
+            var btn = row.querySelector('.btn-view');
+            if (btn) {
+                btn.dataset.status = st;
+                btn.dataset.problem = st === 'under-review' ? (btn.dataset.conflictType || '') : '';
+            }
+            var sc = entry(id).schedule;
+            var dateCell = row.querySelector('.date-cell');
+            if (sc && dateCell) dateCell.textContent = fmtShortDate(sc.date);
+        });
+
+        // Under Review list: in-progress while Under Review, resolved otherwise
+        all('#conflictTable tbody tr[data-id]').forEach(function (row) {
+            var id = row.getAttribute('data-id');
+            var st = getStatus(id);
+            var resolved = st !== 'under-review';
+            var e = entry(id);
+
+            row.dataset.status = resolved ? 'resolved' : 'in-progress';
+            row.dataset.stepsDone = resolved ? '4' : '3';
+
+            var badge = row.querySelector('.status-badge');
+            if (badge) {
+                badge.className = 'status-badge ' + (resolved ? 'resolved' : 'in-progress');
+                badge.textContent = resolved ? 'Resolved' : 'In Progress';
+            }
+            var cells = row.querySelectorAll('.date-cell');
+            if (cells[1]) {
+                cells[1].textContent = resolved
+                    ? (e.resolvedDate || row.getAttribute('data-resolved-date') || '-------')
+                    : '-------';
+            }
+        });
+
+        // Defense Schedule: show the latest saved time / date / room
+        all('#defenseScheduleTable tbody tr[data-id]').forEach(function (row) {
+            var sc = entry(row.getAttribute('data-id')).schedule;
+            if (!sc) return;
+            var t = row.querySelector('.time-cell');
+            var d = row.querySelector('.date-cell');
+            var r = row.querySelector('.room-cell');
+            if (t) t.textContent = fmtTime(sc.time.start) + ' - ' + fmtTime(sc.time.end);
+            if (d) d.textContent = fmtShortDate(sc.date);
+            if (r) r.textContent = sc.room;
+            row.dataset.date = sc.date;
+        });
+
+        // Dashboard: Under Review count
+        var metrics = all('[data-metric="under-review"]');
+        if (metrics.length) {
+            var n = 0;
+            Object.keys(SEED_STATUS).forEach(function (id) { if (getStatus(id) === 'under-review') n++; });
+            metrics.forEach(function (m) { m.textContent = n; });
+        }
+    }
+
+    // Row info used by search / filters
     function rowInfo(row) {
         var program = row.querySelector('.program-badge');
         var status = row.querySelector('.status-badge');
@@ -93,8 +248,8 @@
         menu.className = 'custom-select-dropdown';
         menu.setAttribute('role', 'listbox');
 
-        var all = [{ value: 'all', label: 'All' }].concat(options);
-        all.forEach(function (o, i) {
+        var allOpts = [{ value: 'all', label: 'All' }].concat(options);
+        allOpts.forEach(function (o, i) {
             var el = document.createElement('div');
             el.className = 'select-option' + (i === 0 ? ' selected' : '');
             el.setAttribute('role', 'option');
@@ -256,11 +411,29 @@
      *  Public API
      * ------------------------------------------------------------------ */
     window.CC = {
+        // shared state
+        getStatus: getStatus,
+        setStatus: setStatus,
+        getSchedule: getSchedule,
+        saveSchedule: saveSchedule,
+        submit: submit,
+        sync: sync,
+        resetState: function () {
+            try { localStorage.removeItem(STORE_KEY); } catch (e) { }
+            location.reload();
+        },
+        // table helpers
         refresh: function () { pages.forEach(function (p) { p.apply(); }); },
         clearFilters: function () { pages.forEach(function (p) { p.clear(); }); }
     };
 
-    function init() { PAGES.forEach(initPage); }
+    // Keep other open tabs/pages in step
+    window.addEventListener('storage', function (e) { if (e.key === STORE_KEY) sync(); });
+
+    function init() {
+        sync();                    // paint shared state first
+        PAGES.forEach(initPage);   // then build filters from the painted table
+    }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();

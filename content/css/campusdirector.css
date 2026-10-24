@@ -991,52 +991,48 @@ table {
    ========================================================================== */
 
 /* ---------- Page banner (shared) ---------- */
-.cdb-banner {
+.dashboard-header {
+    background: linear-gradient( to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100% );
+    border-radius: 14px;
+    padding: 32px 40px;
+    color: #FFFFFF;
     position: relative;
     overflow: hidden;
-    border-radius: 8px;
-    padding: 20px 30px 22px;
-    color: #fff;
-    background: linear-gradient(100deg, #2C3F56 0%, #3a4e6a 55%, #53677F 100%);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, .25);
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-    .cdb-banner .cdb-crumb {
-        font-size: 10px;
-        font-weight: 600;
-        margin-bottom: 4px;
-        position: relative;
-        z-index: 1;
-    }
+.breadcrumb-text {
+    font-size: 12px;
+    opacity: 0.8;
+    font-weight: 500;
+}
 
-    .cdb-banner h2 {
-        font-family: 'Newsreader', serif;
-        font-weight: 600;
-        font-size: 3.2rem;
-        line-height: 1.1;
-        color: #fff;
-        margin: 0 0 12px;
-        position: relative;
-        z-index: 1;
-    }
+.page-title {
+    font-family: 'Newsreader', serif;
+    font-size: 48px;
+    font-weight: 700;
+    margin: 6px 0 10px 0;
+    padding-bottom: 0;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
 
-    .cdb-banner p {
-        font-size: 13px;
-        font-weight: 700;
-        position: relative;
-        z-index: 1;
-        max-width: 80%;
-    }
+.welcome-text {
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0;
+    opacity: 0.9;
+}
 
-    .cdb-banner .cdb-deco {
-        position: absolute;
-        right: -14px;
-        bottom: -34px;
-        font-size: 190px;
-        color: rgba(27, 41, 59, .5);
-        line-height: 1;
-    }
+.header-bg-icon {
+    position: absolute;
+    right: 30px;
+    bottom: -20px;
+    font-size: 140px;
+    color: #0d192c;
+    pointer-events: none;
+}
 
 /* ---------- Filter fields (selects / date) ---------- */
 .cdf-row {

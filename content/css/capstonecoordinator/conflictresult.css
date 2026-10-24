@@ -6,8 +6,7 @@
 }
 
 .dashboard-header {
-    background: #1B293B;
-    background: linear-gradient(92deg, rgba(27, 41, 59, 1) 31%, rgba(74, 101, 135, 1) 100%);
+    background: linear-gradient( to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100% );
     border-radius: 14px;
     padding: 32px 40px;
     color: #FFFFFF;
@@ -44,7 +43,7 @@
     right: 30px;
     bottom: -20px;
     font-size: 140px;
-    color: #1B293B;
+    color: #0d192c;
     pointer-events: none;
 }
 
@@ -165,7 +164,7 @@
 }
 
     .schedule-table thead tr {
-        background-color: #537B9D;
+        background-color: #223249;
     }
 
 .column-title {
@@ -244,19 +243,19 @@
     color: #334155;
 }
 
-    .program-badge.bscs {
+    .program-badge.sbcs {
         background-color: #fdf2f2;
         color: #991b1b;
         border-color: #fecaca;
     }
 
-    .program-badge.bsis {
+    .program-badge.sbis {
         background-color: #f5f3ff;
         color: #5b21b6;
         border-color: #ddd6fe;
     }
 
-    .program-badge.bscs-dark {
+    .program-badge.sbcs-dark {
         background-color: #fff1f2;
         color: #be123c;
         border-color: #fecdd3;
@@ -290,7 +289,7 @@
     }
 
     /* Used by the Generated Schedule popup */
-    .status-badge.in-conflict {
+    .status-badge.under-review {
         background-color: #F89B9E;
         color: #8C1C1E;
         border: 1px solid #F37B80;

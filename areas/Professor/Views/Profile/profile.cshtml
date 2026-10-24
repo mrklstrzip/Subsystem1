@@ -2,59 +2,72 @@
     ViewBag.Title = "Profile";
 }
 
-<div class="pf-page">
+<link href="@Url.Content("~/Content/css/profile.css")?v=1.0" rel="stylesheet" type="text/css" />
 
-    <div class="pf-banner">
+<div class="pm role-staff">
+    <section class="pm-banner">
         <div>
+            <small>Panelist | Profile</small>
             <h1>Profile</h1>
+            <p>Manage account credentials</p>
         </div>
-        <svg class="pf-banner-deco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
-            <path d="M21 12a9 9 0 1 0-4 7.5" />
-            <circle cx="13" cy="9.5" r="3" fill="currentColor" stroke="none" />
-            <path d="M7.5 18.5a5.5 5.5 0 0 1 11 0z" fill="currentColor" stroke="none" />
-        </svg>
-    </div>
+        <i class="fa fa-circle-user pm-banner-icon"></i>
+    </section>
 
-    <div class="pf-profile-grid">
+    <div class="pm-profile-grid">
+        <section class="pm-card">
+            <h2 class="pm-card-title">Profile Information</h2>
 
-        <!-- Profile Information -->
-        <div class="pf-pcard">
-            <h3>Profile Information</h3>
-
-            <div class="pf-pinfo-head">
-                <!-- Replace this svg with: <img class="pf-avatar" src="YOUR-PHOTO-PATH" alt="Profile photo" /> -->
-                <img class="pf-avatar" src="@Url.Content("~/Content/images/professor-avatar.jpg")" alt="Profile photo" />
+            <div class="pm-profile-head">
+                <img id="pmPhoto" class="pm-avatar pm-avatar--lg" src="" alt="" />
                 <div>
-                    <div class="pf-pname">Resume Dizon</div>
-                    <div class="pf-prole">Panelist</div>
+                    <strong id="pmHeadName" class="pm-profile-name"></strong>
+                    <span id="pmHeadRole" class="pm-profile-role"></span>
                 </div>
             </div>
 
-            <div class="pf-prow"><span>Name</span><span>Resume Dizon</span></div>
-            <div class="pf-prow"><span>ID</span><span>2X-XXXX</span></div>
-            <div class="pf-prow"><span>Role</span><span>Panelist</span></div>
-            <div class="pf-prow"><span>Email</span><span>adviser@qcu.edu.ph</span></div>
-        </div>
+            <table class="pm-info-table">
+                <tbody id="profileTableBody">
+                    <tr><td class="label">NAME</td><td class="info" id="infoName"></td></tr>
+                    <tr><td class="label">ID</td><td class="info" id="infoNumber"></td></tr>
+                    <tr><td class="label">ROLE</td><td class="info" id="infoRole"></td></tr>
+                    <tr><td class="label">EMAIL</td><td class="info" id="infoEmail"></td></tr>
+                </tbody>
+            </table>
+        </section>
 
-        <!-- Change Password -->
-        <div class="pf-pcard">
-            <h3>Change Password</h3>
-
-            <div class="pf-field">
-                <label for="curPass">Current password</label>
-                <input type="password" id="curPass" />
-
-                <label for="newPass">New password</label>
-                <input type="password" id="newPass" />
-
-                <label for="confPass">Confirm password</label>
-                <input type="password" id="confPass" />
-            </div>
-
-            <div class="pf-pfoot">
-                <button type="button" class="pf-confirm">Confirm</button>
-            </div>
-        </div>
-
+        <section class="pm-card">
+            <h2 class="pm-card-title">Change Password</h2>
+            <form class="pm-pw-form" id="changePasswordForm" onsubmit="return false;">
+                <label for="current-password">
+                    Current password
+                    <span class="pm-input"><input type="password" id="current-password" required /><i class="fa fa-eye toggle-password"></i></span>
+                </label>
+                <label for="new-password">
+                    New password
+                    <span class="pm-input"><input type="password" id="new-password" required /><i class="fa fa-eye toggle-password"></i></span>
+                </label>
+                <label for="confirm-password">
+                    Confirm password
+                    <span class="pm-input"><input type="password" id="confirm-password" required /><i class="fa fa-eye toggle-password"></i></span>
+                </label>
+                <div class="pm-pw-actions"><button type="submit" class="pm-primary">Confirm</button></div>
+            </form>
+        </section>
     </div>
 </div>
+
+<script src="@Url.Content("~/Scripts/dummy-users.js")?v=1.0"></script>
+<script src="@Url.Content("~/Scripts/profile.js")?v=1.0"></script>
+<script>
+    (function () {
+        try {
+            var u = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+            if (!u) return;
+            document.getElementById('pmHeadName').textContent = u.firstName + ' ' + u.lastName;
+            document.getElementById('pmHeadRole').textContent = u.role;
+            var img = document.getElementById('pmPhoto');
+            if (u.profilePhoto) img.src = '/Content/images/' + u.profilePhoto; else img.style.display = 'none';
+        } catch (e) { }
+    })();
+</script>

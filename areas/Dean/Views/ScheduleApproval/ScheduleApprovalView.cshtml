@@ -7,11 +7,16 @@
     var advisers = items.Select(x => x.Adviser).Distinct().ToList();
 }
 
-<section class="sa-banner">
-    <small>Dean / Schedule Approval</small>
-    <h1>Schedule Approval</h1>
-    <i class="fa fa-calendar sa-banner-icon"></i>
-</section>
+<div class="dashboard-header">
+    <div class="header-text">
+        <span class="breadcrumb-text">Dean| Schedule Approval</span>
+        <h1 class="page-title">Schedule Approval</h1>
+        <p class="welcome-text">View submitted defense schedules and approve</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-calendar"></i>
+    </div>
+</div>
 
 <div class="sa-toolbar">
     <div class="sa-search">

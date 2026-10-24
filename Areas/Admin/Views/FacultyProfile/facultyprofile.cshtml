@@ -1,14 +1,13 @@
 ﻿@{
     ViewBag.Title = "Faculty Profile";
 }
-
-<link href="@Url.Content("~/Content/css/facultyprofile.css")?v=3.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/admin/facultyprofile.css")?v=5.0" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
     <div class="header-text">
-        <span class="breadcrumb-text">Admin / Faculty Profile</span>
+        <span class="breadcrumb-text">Admin | Faculty Profile</span>
         <h1 class="page-title">Faculty Profile</h1>
         <p class="welcome-text">Manage faculty expertise data</p>
     </div>
@@ -41,32 +40,41 @@
     </table>
 </div>
 
-<!-- Edit Faculty Profile Modal -->
+<!-- Edit Faculty Profile Modal (Same Design Language as User Management) -->
 <div id="editFacultyModal" class="modal-overlay">
     <div class="modal-card">
-        <h3 class="modal-title">EDIT FACULTY EXPERTISE</h3>
-        <form onsubmit="AD.saveExpertise(); return false;">
-            <!-- Readonly Name Input -->
-            <div class="form-group">
-                <label>Name</label>
-                <input type="text" id="facultyName" class="readonly-field" readonly>
-            </div>
+        <div class="modal-header-brand">
+            <h2 class="modal-title">EDIT FACULTY EXPERTISE</h2>
+        </div>
+        <form onsubmit="AD.saveExpertise(); return false;" class="modal-form">
+            <!-- Readonly Name Fieldset -->
+            <fieldset class="input-fieldset">
+                <legend>Faculty Name</legend>
+                <div class="input-field-wrapper">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="facultyName" class="readonly-field" readonly>
+                </div>
+            </fieldset>
 
-            <!-- Editable Selected Tags Area -->
-            <div class="form-group" style="margin-top: 12px;">
-                <label>Expertise Tag</label>
+            <!-- Selected Tags Area Fieldset -->
+            <fieldset class="input-fieldset">
+                <legend>Selected Expertise Tags</legend>
                 <div class="selected-tags-box" id="selectedTagsBox"></div>
+            </fieldset>
+
+            <!-- Available Tags Grid Box -->
+            <div class="form-group" style="width: 100%; margin-bottom: 18px;">
+                <label style="font-size: 11px; font-weight: 600; color: #938F8F; margin-bottom: 6px; display: block;">Available Tags Pool</label>
+                <div class="tags-grid-box" id="systemTagsGrid"></div>
             </div>
 
-            <!-- Available Tags Grid -->
-            <div class="tags-grid-box" id="systemTagsGrid" style="margin-top: 12px;"></div>
-
-            <div class="modal-actions" style="margin-top: 16px;">
-                <button type="submit" class="btn-confirm">Confirm</button>
+            <!-- Modal Action Buttons (Aligned Right) -->
+            <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="AD.closeModals()">Cancel</button>
+                <button type="submit" class="btn-confirm">Confirm</button>
             </div>
         </form>
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=3.0"></script>
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=5.0"></script>

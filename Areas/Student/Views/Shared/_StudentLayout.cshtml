@@ -21,29 +21,29 @@
             <img src="~/Content/images/qcu.jpeg" alt="QCU Logo" class="layout-header-logo" />
             <img src="~/Content/images/ccs-logo.png" alt="CCS Logo" class="layout-header-logo" />
         </div>
-
         <div class="layout-header-text">
             <h1>Quezon City University</h1>
             <span>College of Computer Studies</span>
         </div>
-
         <div class="header-stripes">
             <span class="stripe stripe-1"></span>
             <span class="stripe stripe-2"></span>
             <span class="stripe stripe-3"></span>
         </div>
+        <button type="button" id="notifBell" class="notif-bell" aria-label="Notifications" aria-expanded="false">
+            <i class="fa-regular fa-bell"></i>
+            <span class="notif-dot" id="notifDot"></span>
+        </button>
     </header>
 
     <div class="layout-wrapper sidebar-rail" id="layoutWrapper">
         <aside class="layout-sidebar" id="sidebar">
-
             <div class="sb-top">
                 <span class="sb-menu-label">MAIN MENU</span>
                 <button type="button" id="sidebarToggle" class="sb-toggle" aria-label="Toggle sidebar" aria-expanded="false">
                     <i class="fa fa-bars"></i>
                 </button>
             </div>
-
             <nav class="layout-nav">
                 <a href="@Url.Action("dashboard", "Dashboard")" class="@(currentController == "Dashboard" ? "active" : "")" title="Dashboard">
                     <i class="fa fa-th-large"></i><span class="nav-label">Dashboard</span>
@@ -52,7 +52,6 @@
                     <i class="fa fa-file-arrow-up"></i><span class="nav-label">Submission</span>
                 </a>
             </nav>
-
             <div class="sb-footer">
                 <a href="@Url.Action("profile", "Profile")" class="sb-user" title="Profile">
                     <img id="profilePhoto" src="" alt="Profile" class="sb-avatar" />
@@ -70,7 +69,44 @@
         </main>
     </div>
 
+    <div class="notif-panel" id="notifPanel" hidden>
+        <div class="notif-head">
+            <div class="notif-title">
+                <h3>Notifications</h3>
+                <span class="notif-badge" id="notifBadge">2 new</span>
+            </div>
+            <button type="button" id="notifClose" class="notif-close" aria-label="Close">
+                <i class="fa fa-xmark"></i>
+            </button>
+        </div>
+        <div class="notif-tabs">
+            <button type="button" class="notif-tab active" data-filter="all">All (<span class="notif-count" id="countAll">2</span>)</button>
+            <button type="button" class="notif-tab" data-filter="unread">Unread (<span class="notif-count" id="countUnread">2</span>)</button>
+        </div>
+        <div class="notif-body" id="notifBody">
+            <div class="notif-group-label">TODAY</div>
+            <div class="notif-item unread" data-id="1">
+                <div class="notif-icon"><i class="fa fa-calendar-day"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Defense Schedule Today! <span class="unread-dot"></span></div>
+                    <p>Your Defense is scheduled today at IL505, 1:00 PM.</p>
+                    <div class="notif-actions"><span class="notif-time">Just now</span></div>
+                </div>
+            </div>
+            <div class="notif-group-label">EARLIER</div>
+            <div class="notif-item unread" data-id="2">
+                <div class="notif-icon"><i class="fa fa-clock"></i></div>
+                <div class="notif-content">
+                    <div class="notif-item-title">Defense Schedule Tomorrow <span class="unread-dot"></span></div>
+                    <p>Reminder: Your Capstone Defense is scheduled for tomorrow at 1:00 PM in IL505.</p>
+                    <div class="notif-actions"><span class="notif-time">1 day ago</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/Scripts/sidebar.js"></script>
     <script src="~/Scripts/layout-profile.js"></script>
+    <script src="~/Scripts/Notifs.js"></script>
 </body>
 </html>

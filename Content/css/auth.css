@@ -14,24 +14,24 @@ body.login-body {
 }
 
 .admin-theme {
-    --primary: #3F3F44;
-    --secondary: #535358;
-    --accent: #68686D;
-    --active: #68686D;
+    --primary: #1B2B40;
+    --secondary: #142238;
+    --accent: #354A63;
+    --active: #526780;
 }
 
 .user-theme {
-    --primary: #2C124D;
-    --secondary: #422765;
-    --accent: #593B7D;
-    --active: #593B7D;
+    --primary: #17263C;
+    --secondary: #0D192C;
+    --accent: #2B3D55;
+    --active: #526780;
 }
 
 .request-theme {
-    --primary: #4A091D;
-    --secondary: #64152D;
-    --accent: #802740;
-    --active: #802740;
+    --primary: #17263C;
+    --secondary: #0D192C;
+    --accent: #2B3D55;
+    --active: #526780;
 }
 
 .login-header {
