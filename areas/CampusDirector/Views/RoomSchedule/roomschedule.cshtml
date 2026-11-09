@@ -3,7 +3,7 @@
     ViewBag.ActiveMenu = "RoomSchedule";
 }
 
-<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.3" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.4" rel="stylesheet" type="text/css" />
 <div class="dashboard-header">
     <div class="header-text">
         <h1 class="page-title">Room Schedule</h1>
@@ -14,26 +14,46 @@
     </div>
 </div>
 
-<div class="cdf-row">
-    <div class="cdf-field">
-        <label for="sc-building">Building</label>
-        <select id="sc-building"><option value="all">All buildings</option></select>
-    </div>
-    <div class="cdf-field">
-        <label for="sc-date">Date</label>
-        <input type="date" id="sc-date" />
-    </div>
-    <div class="cdf-field">
-        <label for="sc-status">Room Status</label>
-        <select id="sc-status">
-            <option value="all">All rooms</option>
-            <option value="open">Open</option>
-            <option value="occupied">Occupied</option>
-            <option value="reserved">Reserved</option>
-            <option value="unavailable">Unavailable</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Canceled</option>
-        </select>
+<div class="cdc-card">
+    <div class="cdc-filters">
+        <!-- Building -->
+        <div class="cdc-select" id="sc-building-box">
+            <span class="cdc-legend">Building</span>
+            <div class="cdc-selected">
+                <i class="fa-solid fa-building"></i>
+                <span class="cdc-selected-text">All buildings</span>
+                <i class="fa-solid fa-chevron-down cdc-chevron"></i>
+            </div>
+            <div class="cdc-dropdown"></div>
+            <select id="sc-building" style="display:none;"><option value="all">All buildings</option></select>
+        </div>
+
+        <!-- Date -->
+        <div class="cdc-date">
+            <span class="cdc-legend">Date</span>
+            <i class="fa-solid fa-calendar-days"></i>
+            <input type="date" id="sc-date" />
+        </div>
+
+        <!-- Room Status -->
+        <div class="cdc-select" id="sc-status-box">
+            <span class="cdc-legend">Room Status</span>
+            <div class="cdc-selected">
+                <i class="fa-solid fa-sliders"></i>
+                <span class="cdc-selected-text">All rooms</span>
+                <i class="fa-solid fa-chevron-down cdc-chevron"></i>
+            </div>
+            <div class="cdc-dropdown"></div>
+            <select id="sc-status" style="display:none;">
+                <option value="all">All rooms</option>
+                <option value="open">Open</option>
+                <option value="occupied">Occupied</option>
+                <option value="reserved">Reserved</option>
+                <option value="unavailable">Unavailable</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Canceled</option>
+            </select>
+        </div>
     </div>
 </div>
 
@@ -48,12 +68,12 @@
     </div>
 
     <div class="sched-scroll">
-    <table class="sched-table">
-        <thead>
-            <tr id="sc-head"></tr>
-        </thead>
-        <tbody id="sc-body"></tbody>
-    </table>
+        <table class="sched-table">
+            <thead>
+                <tr id="sc-head"></tr>
+            </thead>
+            <tbody id="sc-body"></tbody>
+        </table>
     </div>
 </div>
 

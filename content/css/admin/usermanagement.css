@@ -1,4 +1,5 @@
-﻿body {
+﻿
+body {
     background-color: #EAECEF;
     font-family: 'Inter', sans-serif;
     color: #22252A;
@@ -11,11 +12,11 @@
 .dashboard-header {
     background: linear-gradient(to left, #2C3F56 0%, #263B53 25%, #20344D 60%, #172A43 100%);
     border-radius: 14px;
-    padding: 32px 40px;
+    padding: 27px 40px;
     color: #FFFFFF;
     position: relative;
     overflow: hidden;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -37,23 +38,22 @@
 
 .header-bg-icon {
     position: absolute;
-    right: 20px;
-    bottom: -15px;
+    right: -50px;
+    bottom: -50px;
     font-size: 140px;
     color: #172A43;
     pointer-events: none;
 }
 
-/* Outer White Card Container for Controls */
 .controls-card {
     background-color: #FFFFFF;
     border-radius: 16px;
-    padding: 16px 24px;
+    padding: 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
@@ -98,7 +98,6 @@
     gap: 14px;
 }
 
-/* Custom Styled Dropdowns with Simulated Fieldset & Legend */
 .custom-select-box {
     position: relative;
     background: #FFFFFF;
@@ -163,33 +162,41 @@
         display: block;
     }
 
+/* Filter Dropdown Options */
 .select-option {
     padding: 10px 14px;
     font-size: 13px;
     font-weight: 600;
     color: #2D3748;
+    background-color: #FFFFFF;
     display: flex;
     align-items: center;
     gap: 10px;
     transition: background 0.15s ease;
 }
 
-    .select-option:first-child {
+    /* Only the selected option gets the dark background */
+    .select-option.active {
         background-color: #374A60;
         color: #FFFFFF;
     }
 
-        .select-option:first-child i {
+        .select-option.active i {
             color: #FFFFFF;
         }
 
-    .select-option:hover:not(:first-child) {
-        background-color: #F4F6F8;
+    /* Normal option icons */
+    .select-option:not(.active) i {
+        color: #536273;
     }
 
     .select-option i {
         width: 16px;
-        color: #536273;
+    }
+
+    /* Hover only applies to unselected options */
+    .select-option:hover:not(.active) {
+        background-color: #F4F6F8;
     }
 
 /* Add Button */
@@ -215,7 +222,7 @@
 
 /* Table Container */
 .user-management {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 table {
@@ -451,7 +458,7 @@ tr:last-child td {
 
 .modal-header-brand {
     margin-bottom: 20px;
-    text-align: left; /* Title Left-aligned */
+    text-align: left;
 }
 
 .modal-title {
@@ -459,7 +466,7 @@ tr:last-child td {
     font-size: 26px;
     font-weight: 700;
     color: #2C3F56;
-    text-align: left; /* Title Left-aligned */
+    text-align: left;
     margin: 0;
 }
 
@@ -634,7 +641,7 @@ tr:last-child td {
 .modal-actions {
     display: flex;
     align-items: center;
-    justify-content: flex-end; /* Buttons Right-aligned */
+    justify-content: flex-end;
     gap: 14px;
     width: 100%;
     margin-top: 12px;
@@ -679,6 +686,7 @@ tr:last-child td {
         color: #FFFFFF;
     }
 
+/* Responsive */
 @media (max-width: 768px) {
     .name-row {
         flex-direction: column;

@@ -243,6 +243,7 @@
         if (i > -1) list.splice(i, 1); else list.push(name);
     }
 
+
     function bindCustomDropdowns() {
         document.querySelectorAll('.custom-select-box').forEach(function (box) {
             var toggle = box.querySelector('.select-selected');
@@ -256,27 +257,52 @@
                     document.querySelectorAll('.custom-select-dropdown').forEach(function (m) {
                         if (m !== menu) m.classList.remove('open');
                     });
+
                     menu.classList.toggle('open');
                     e.stopPropagation();
                 });
             }
 
             if (menu && hiddenSelect) {
+
+                // Set the initial active option based on the hidden select
                 menu.querySelectorAll('.select-option').forEach(function (opt) {
+                    var val = opt.getAttribute('data-value');
+
+                    opt.classList.toggle('active', val === hiddenSelect.value);
+
                     opt.addEventListener('click', function () {
                         var val = this.getAttribute('data-value');
-                        hiddenSelect.value = val;
-                        if (textSpan) textSpan.textContent = this.textContent.trim();
 
+                        // Update hidden select
+                        hiddenSelect.value = val;
+
+                        // Update displayed text
+                        if (textSpan) {
+                            textSpan.textContent = this.textContent.trim();
+                        }
+
+                        // Update selected icon
                         var optIcon = this.querySelector('i');
                         if (optIcon && iconElem) {
                             iconElem.className = optIcon.className;
                         }
 
+                        // Remove active from all options
+                        menu.querySelectorAll('.select-option').forEach(function (item) {
+                            item.classList.remove('active');
+                        });
+
+                        // Add active to clicked option
+                        this.classList.add('active');
+
+                        // Close dropdown
                         menu.classList.remove('open');
 
-                        var event = new Event('change', { bubbles: true });
-                        hiddenSelect.dispatchEvent(event);
+                        // Trigger filter
+                        hiddenSelect.dispatchEvent(new Event('change', {
+                            bubbles: true
+                        }));
                     });
                 });
             }

@@ -259,7 +259,6 @@
     <Content Include="Scripts\coordinator-notifications.js" />
     <Content Include="Scripts\coordinator-profile.js" />
     <Content Include="Scripts\coordinator-schedule-modal.js" />
-    <Content Include="Scripts\admin-notifications.js" />
     <Content Include="Scripts\capstonecoordinator-app.js" />
     <Content Include="Scripts\DeanDefenseSched.js" />
     <Content Include="Scripts\forgotpassword.js" />
@@ -288,7 +287,6 @@
     <Compile Include="Areas\Admin\Controllers\FacultyProfileController.cs" />
     <Compile Include="Areas\Admin\Controllers\ProfileController.cs" />
     <Compile Include="Areas\Admin\Controllers\UserManagementController.cs" />
-    <Compile Include="Areas\Admin\Controllers\NotificationController.cs" />
     <Compile Include="Areas\Dean\Controllers\DeanApiController.cs" />
     <Compile Include="Areas\Dean\Controllers\OversightController.cs" />
     <Compile Include="Areas\Dean\Models\OversightModels.cs" />
@@ -385,7 +383,6 @@
     <Content Include="Areas\CampusDirector\Views\Profile\profile.cshtml" />
     <Content Include="Areas\CampusDirector\Views\RoomManagement\roommanagement.cshtml" />
     <Content Include="Areas\CampusDirector\Views\RoomSchedule\roomschedule.cshtml" />
-    <Content Include="Areas\Admin\Views\Shared\_RequestItems.cshtml" />
     <Content Include="Areas\Dean\Views\_ViewStart.cshtml" />
     <Content Include="Areas\Dean\Views\Dashboard\dashboard.cshtml" />
     <Content Include="Areas\Dean\Views\Oversight\Index.cshtml" />
@@ -433,6 +430,9 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\ViewModels\" />
+    <Folder Include="Areas\Admin\Views\DefenseSchedule\" />
+    <Folder Include="Areas\Admin\Views\RoomSchedule\" />
+    <Folder Include="Areas\Admin\Views\ScheduleApproval\" />
     <Folder Include="Areas\Auth\Models\" />
     <Folder Include="Areas\Auth\ViewModels\" />
     <Folder Include="Areas\CampusDirector\Models\" />
@@ -473,6 +473,5 @@
   </Target>
   <ItemGroup>
     <Compile Include="Services\Mailer.cs" />
-    <Content Include="smtp.secrets.config" />
   </ItemGroup>
 </Project>
