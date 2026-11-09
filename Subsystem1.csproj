@@ -402,6 +402,7 @@
     <Content Include="Areas\CapstoneCoordinator\Views\ScheduleManagement\schedulemanagement.cshtml" />
     <Content Include="Areas\CapstoneCoordinator\Views\Shared\_NotificationItems.cshtml" />
     <Content Include="Areas\Dean\Views\Shared\_NotificationItems.cshtml" />
+    <Content Include="connectionStrings.config" />
     <None Include="packages.config" />
     <Content Include="Views\web.config" />
     <Content Include="Views\Shared\Error.cshtml" />
