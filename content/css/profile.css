@@ -1,8 +1,4 @@
-﻿/* ==========================================================================
-   Profile Page
-   Extracted from student-pm.css
-   ========================================================================== */
-
+﻿
 .pm {
     --pm-dark: var(--primary, #4a091d);
     --pm-tint: color-mix(in srgb, var(--pm-dark) 6%, #fff);
@@ -27,36 +23,23 @@
 /* ---------- Profile Banner ---------- */
 
 .pm-banner {
+    background: linear-gradient(to left, #2C3F56 0%, #263B53 25%, #20344D 60%, #172A43 100%);
+    border-radius: 14px;
+    padding: 27px 40px;
+    color: #FFFFFF;
     position: relative;
     overflow: hidden;
-    color: #fff;
-    border-radius: 14px;
-    padding: 32px 40px;
-    margin-bottom: 24px;
-    min-height: auto;
-    background: linear-gradient( 120deg, rgba(0, 0, 0, .12), rgba(255, 255, 255, .14) ), var(--pm-dark);
+    margin-bottom: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
 }
 
-    .pm-banner small {
-        display: block;
-        font-size: 12px;
-        opacity: 0.8;
-        font-weight: 500;
-    }
-
     .pm-banner h1 {
-        font-family: 'Newsreader', Georgia, serif;
+        font-family: 'Newsreader', serif;
         font-size: 40px;
         font-weight: 700;
-        margin: 6px 0 10px;
+        margin: 6px 0 10px 0;
         padding-bottom: 0;
         letter-spacing: -0.5px;
-        line-height: 1.1;
     }
 
     .pm-banner p {
@@ -68,15 +51,11 @@
 
 .pm-banner-icon {
     position: absolute;
-    right: 30px;
-    bottom: -20px;
-    top: auto;
-    transform: none;
+    right: -50px;
+    bottom: -30px;
     font-size: 140px;
-    color: rgba(255, 255, 255, 0.18);
     pointer-events: none;
 }
-
 /* ---------- Banner: Staff (all roles except student and admin) ---------- */
 
 .pm:not(.role-student):not(.role-admin) .pm-banner {
@@ -86,7 +65,6 @@
 .pm:not(.role-student):not(.role-admin) .pm-banner-icon {
     color: #0d192c;
 }
-
 /* ---------- Banner: Admin ---------- */
 
 .pm.role-admin .pm-banner {
@@ -96,7 +74,6 @@
 .pm.role-admin .pm-banner-icon {
     color: #172A43;
 }
-
 /* ---------- Responsive Banner ---------- */
 
 @media (max-width: 600px) {
@@ -114,7 +91,6 @@
         bottom: -10px;
     }
 }
-
 /* ---------- Profile Cards ---------- */
 
 .pm-card {
@@ -131,7 +107,6 @@
     color: var(--pm-dark);
     margin: 0 0 16px;
 }
-
 /* ---------- Profile Layout ---------- */
 
 .pm-profile-grid {
@@ -147,7 +122,6 @@
         flex-direction: column;
         margin-bottom: 0;
     }
-
 /* ---------- Profile Header ---------- */
 
 .pm-profile-head {
@@ -168,7 +142,6 @@
     font-size: 11px;
     color: var(--pm-muted);
 }
-
 /* ---------- Profile Avatar ---------- */
 
 .pm-avatar {
@@ -190,7 +163,6 @@
     height: 52px;
     font-size: 16px;
 }
-
 /* ---------- Profile Information Table ---------- */
 
 .pm-info-table {
@@ -216,7 +188,6 @@
     .pm-info-table td.info {
         font-weight: 600;
     }
-
 /* ---------- Change Password Form ---------- */
 
 .pm-pw-form {
@@ -235,7 +206,6 @@
         font-weight: 600;
         color: var(--pm-dark);
     }
-
 /* ---------- Password Inputs ---------- */
 
 .pm-input {
@@ -257,7 +227,6 @@
             outline: 2px solid var(--pm-dark);
             outline-offset: 1px;
         }
-
     /* ---------- Password Visibility Icons ---------- */
 
     .pm-input .toggle-password {
@@ -269,7 +238,6 @@
         color: var(--pm-muted);
         font-size: 13px;
     }
-
 /* ---------- Confirm Button ---------- */
 
 .pm-primary {
@@ -297,7 +265,6 @@
     .pm-pw-actions .pm-primary {
         width: 130px;
     }
-
 /* ---------- Responsive Layout ---------- */
 
 @media (max-width: 900px) {
@@ -305,8 +272,6 @@
         flex-direction: column;
     }
 }
-
-
 /* Profile-only edit controls */
 .pm-profile-head-details {
     min-width: 0;

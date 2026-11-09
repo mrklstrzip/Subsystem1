@@ -287,7 +287,6 @@
     <Compile Include="Areas\Admin\Controllers\FacultyProfileController.cs" />
     <Compile Include="Areas\Admin\Controllers\ProfileController.cs" />
     <Compile Include="Areas\Admin\Controllers\UserManagementController.cs" />
-    <Compile Include="Areas\Admin\Controllers\NotificationController.cs" />
     <Compile Include="Areas\Dean\Controllers\DeanApiController.cs" />
     <Compile Include="Areas\Dean\Controllers\OversightController.cs" />
     <Compile Include="Areas\Dean\Models\OversightModels.cs" />
@@ -431,6 +430,9 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\ViewModels\" />
+    <Folder Include="Areas\Admin\Views\DefenseSchedule\" />
+    <Folder Include="Areas\Admin\Views\RoomSchedule\" />
+    <Folder Include="Areas\Admin\Views\ScheduleApproval\" />
     <Folder Include="Areas\Auth\Models\" />
     <Folder Include="Areas\Auth\ViewModels\" />
     <Folder Include="Areas\CampusDirector\Models\" />
