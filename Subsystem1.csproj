@@ -247,6 +247,7 @@
     <Content Include="Content\images\qcu.jpeg" />
     <Content Include="Content\images\student-avatar.png" />
     <Content Include="Global.asax" />
+    <Content Include="HtmlPage1.html" />
     <Content Include="Scripts\admin-app.js" />
     <Content Include="Scripts\auth.js" />
     <Content Include="Scripts\campusdirector-app.js" />
