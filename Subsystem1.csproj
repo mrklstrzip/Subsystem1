@@ -255,6 +255,7 @@
     <Content Include="Scripts\coordinator-privacy.js" />
     <Content Include="Scripts\dean-notifications.js" />
     <Content Include="Scripts\dean-profile.js" />
+    <Content Include="Scripts\dean-select.js" />
     <Content Include="Scripts\xlsx.full.min.js" />
     <Content Include="Scripts\campusdirector-modal.js" />
     <Content Include="Scripts\campusdirector-profile.js" />

@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "_ScheduleApprovalModal";
 }
 
@@ -26,7 +25,7 @@
             <div><label>DATE SUBMITTED</label><strong id="mSubmitted"></strong></div>
             <div><label>CURRENT STATUS</label><span class="sa-status" id="mStatus"></span></div>
             <div class="sa-info-sep"></div>
-            <div><label>STUDENT</label><strong id="mStudent"></strong></div>
+            <div><label>PROJECT MANAGER</label><strong id="mStudent"></strong></div>
             <div><label>PROGRAM</label><strong id="mProgram"></strong></div>
             <div><label>ADVISER</label><strong id="mAdviser"></strong></div>
         </div>
@@ -51,6 +50,8 @@
                     <dd id="mTime"></dd>
                     <dt>DATE</dt>
                     <dd id="mDate"></dd>
+                    <dt>BUILDING</dt>
+                    <dd id="mBuilding">-</dd>
                     <dt>ROOM</dt>
                     <dd id="mRoom"></dd>
                 </dl>
@@ -59,8 +60,113 @@
 
         <div class="sa-modal-foot">
             <button type="button" class="sa-btn-close" id="saClose">CLOSE</button>
+            <button type="button" class="sa-btn-reject" id="saReject">REJECT</button>
             <button type="button" class="sa-btn-approve" id="saApprove">APPROVE</button>
         </div>
     </div>
 </div>
 
+<!-- Reject reason pop-up (frontend only) -->
+<div class="sa-overlay" id="saRejectOverlay" aria-hidden="true">
+    <div class="sa-reject-modal" role="dialog" aria-modal="true" aria-labelledby="saRejectTitle">
+        <h3 id="saRejectTitle">Reject Schedule</h3>
+        <p>Please state the reason for rejecting this schedule.</p>
+        <textarea id="saRejectReason" maxlength="500" placeholder="Type the reason here..."></textarea>
+        <p class="sa-reject-error" id="saRejectError" hidden>Please enter a reason.</p>
+        <div class="sa-modal-foot">
+            <button type="button" class="sa-btn-close" id="saRejectCancel">CANCEL</button>
+            <button type="button" class="sa-btn-reject sa-btn-reject-solid" id="saRejectConfirm">REJECT</button>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    //for testing lang ng frontend para makita itsura (pa remove nalang pag aayusin backend)
+    (function () {
+        var panelists = document.getElementById("mPanelists");
+        var defaultPercent = { high: 90, medium: 70, low: 40 };
+
+        function addPercents() {
+            var pills = panelists.querySelectorAll(".sa-match");
+            for (var i = 0; i < pills.length; i++) {
+                var pill = pills[i];
+                if (pill.parentNode.classList.contains("sa-match-wrap")) continue;
+
+                var level = pill.classList.contains("match-high") ? "high"
+                    : pill.classList.contains("match-medium") ? "medium" : "low";
+
+                var pct = document.createElement("span");
+                pct.className = "sa-match-pct";
+                pct.textContent = (pill.getAttribute("data-percent") || defaultPercent[level]) + "%";
+
+                var wrap = document.createElement("span");
+                wrap.className = "sa-match-wrap";
+                pill.parentNode.insertBefore(wrap, pill);
+                wrap.appendChild(pct);
+                wrap.appendChild(pill);
+            }
+        }
+        new MutationObserver(addPercents).observe(panelists, { childList: true, subtree: true });
+        addPercents();
+
+        var overlay = document.getElementById("saOverlay");
+        var rejectOverlay = document.getElementById("saRejectOverlay");
+        var reason = document.getElementById("saRejectReason");
+        var error = document.getElementById("saRejectError");
+
+        function openReject() {
+            reason.value = "";
+            error.hidden = true;
+            rejectOverlay.classList.add("open");
+            rejectOverlay.setAttribute("aria-hidden", "false");
+            reason.focus();
+        }
+        function closeReject() {
+            rejectOverlay.classList.remove("open");
+            rejectOverlay.setAttribute("aria-hidden", "true");
+        }
+
+        document.getElementById("saReject").addEventListener("click", openReject);
+        document.getElementById("saRejectCancel").addEventListener("click", closeReject);
+        rejectOverlay.addEventListener("click", function (e) {
+            if (e.target === rejectOverlay) closeReject();
+        });
+
+        document.getElementById("saRejectConfirm").addEventListener("click", function () {
+            if (!reason.value.trim()) {
+                error.hidden = false;
+                return;
+            }
+            // for testing lang ng frontend (pa-connect nalang sa backend pag aayusin)
+            closeReject();
+            overlay.classList.remove("open");
+            overlay.setAttribute("aria-hidden", "true");
+            alert("Schedule rejected.\nReason: " + reason.value.trim());
+        });
+
+        // "To Approve"-> Close, Reject, Approve
+        // Approved / Completed... -> Close only
+        var statusEl = document.getElementById("mStatus");
+        var btnReject = document.getElementById("saReject");
+        var btnApprove = document.getElementById("saApprove");
+
+        function updateButtons() {
+            var s = (statusEl.textContent || "").toLowerCase().replace(/[\s\-_]+/g, "");
+            // hide Reject/Approve only for statuses that are already done
+            var finished = /approved|completed|ongoing|upcoming|rejected/.test(s);
+            btnReject.classList.toggle("sa-hide", finished);
+            btnApprove.classList.toggle("sa-hide", finished);
+        }
+
+        new MutationObserver(updateButtons).observe(statusEl, {
+            childList: true, characterData: true, subtree: true, attributes: true
+        });
+        // also re-check each time the pop-up opens
+        new MutationObserver(updateButtons).observe(overlay, {
+            attributes: true, attributeFilter: ["class"]
+        });
+        updateButtons();
+    })();
+</script>
