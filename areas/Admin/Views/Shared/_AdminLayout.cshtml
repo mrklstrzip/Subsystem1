@@ -31,10 +31,6 @@
             <span class="stripe stripe-2"></span>
             <span class="stripe stripe-3"></span>
         </div>
-        <button type="button" id="notifBell" class="notif-bell" aria-label="Notifications" aria-expanded="false">
-            <i class="fa-regular fa-bell"></i>
-            <span class="notif-dot" id="notifDot"></span>
-        </button>
     </header>
 
     <div class="layout-wrapper sidebar-rail" id="layoutWrapper">
@@ -79,29 +75,6 @@
         <main class="layout-content">
             @RenderBody()
         </main>
-    </div>
-
-    <div class="notif-panel" id="notifPanel" hidden>
-        <div class="notif-head">
-            <div class="notif-title">
-                <h3>Notifications</h3>
-                <span class="notif-badge" id="notifBadge"></span>
-            </div>
-            <button type="button" id="notifClose" class="notif-close" aria-label="Close">
-                <i class="fa fa-xmark"></i>
-            </button>
-        </div>
-        <div class="notif-tabs">
-            <button type="button" class="notif-tab active" data-tab="all" data-filter="all">
-                All (<span class="notif-count" id="countAll">0</span>)
-            </button>
-            <button type="button" class="notif-tab" data-tab="unread" data-filter="unread">
-                Unread (<span class="notif-count" id="countUnread">0</span>)
-            </button>
-        </div>
-        <div class="notif-body" id="notifBody">
-            @Html.Action("items", "Notification", new { area = "Admin" })
-        </div>
     </div>
 
     <script src="~/Scripts/sidebar.js"></script>

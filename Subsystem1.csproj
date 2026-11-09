@@ -259,7 +259,6 @@
     <Content Include="Scripts\coordinator-notifications.js" />
     <Content Include="Scripts\coordinator-profile.js" />
     <Content Include="Scripts\coordinator-schedule-modal.js" />
-    <Content Include="Scripts\admin-notifications.js" />
     <Content Include="Scripts\capstonecoordinator-app.js" />
     <Content Include="Scripts\DeanDefenseSched.js" />
     <Content Include="Scripts\forgotpassword.js" />
@@ -385,7 +384,6 @@
     <Content Include="Areas\CampusDirector\Views\Profile\profile.cshtml" />
     <Content Include="Areas\CampusDirector\Views\RoomManagement\roommanagement.cshtml" />
     <Content Include="Areas\CampusDirector\Views\RoomSchedule\roomschedule.cshtml" />
-    <Content Include="Areas\Admin\Views\Shared\_RequestItems.cshtml" />
     <Content Include="Areas\Dean\Views\_ViewStart.cshtml" />
     <Content Include="Areas\Dean\Views\Dashboard\dashboard.cshtml" />
     <Content Include="Areas\Dean\Views\Oversight\Index.cshtml" />
