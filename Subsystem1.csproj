@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0" DefaultTargets="Build">
   <Import Project="packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -247,6 +247,7 @@
     <Content Include="Content\images\qcu.jpeg" />
     <Content Include="Content\images\student-avatar.png" />
     <Content Include="Global.asax" />
+    <Content Include="HtmlPage1.html" />
     <Content Include="Scripts\admin-app.js" />
     <Content Include="Scripts\auth.js" />
     <Content Include="Scripts\campusdirector-app.js" />
@@ -272,7 +273,11 @@
     <Content Include="Scripts\profile.js" />
     <Content Include="Scripts\sidebar.js" />
     <Content Include="Web.config" />
-  <Content Include="Areas\CapstoneCoordinator\Views\Invitation\invitations.cshtml" /><Content Include="Areas\Auth\Views\Signup\signup.cshtml" /><Content Include="Content\css\capstonecoordinator\invitations.css" /><Content Include="Scripts\coordinator-invitations.js" /></ItemGroup>
+    <Content Include="Areas\CapstoneCoordinator\Views\Invitation\invitations.cshtml" />
+    <Content Include="Areas\Auth\Views\Signup\signup.cshtml" />
+    <Content Include="Content\css\capstonecoordinator\invitations.css" />
+    <Content Include="Scripts\coordinator-invitations.js" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
@@ -347,7 +352,10 @@
     <Compile Include="Areas\Student\ViewModels\StudentDashboardViewModel.cs" />
     <Compile Include="Areas\Student\ViewModels\StudentFormat.cs" />
     <Compile Include="Areas\Student\ViewModels\StudentSubmissionViewModel.cs" />
-  <Compile Include="Areas\CapstoneCoordinator\Models\PmInvites.cs" /><Compile Include="Areas\CapstoneCoordinator\Controllers\InvitationController.cs" /><Compile Include="Areas\Auth\Controllers\SignupController.cs" /></ItemGroup>
+    <Compile Include="Areas\CapstoneCoordinator\Models\PmInvites.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Controllers\InvitationController.cs" />
+    <Compile Include="Areas\Auth\Controllers\SignupController.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Auth\Views\Login\login.cshtml" />
     <Content Include="Areas\Auth\Views\web.config" />
@@ -439,7 +447,6 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
-  
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
