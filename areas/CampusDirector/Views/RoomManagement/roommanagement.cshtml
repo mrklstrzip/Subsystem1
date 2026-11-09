@@ -3,7 +3,7 @@
     ViewBag.ActiveMenu = "RoomManagement";
 }
 
-<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.3" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.4" rel="stylesheet" type="text/css" />
 <div class="dashboard-header">
     <div class="header-text">
         <h1 class="page-title">Room Management</h1>
@@ -14,17 +14,29 @@
     </div>
 </div>
 
-<div class="rmx-toolbar">
-    <div class="rmx-search">
-        <i class="fa fa-magnifying-glass"></i>
+<div class="cdc-card">
+    <div class="cdc-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
         <input type="text" id="rm-search" placeholder="Search rooms or buildings..." autocomplete="off" />
     </div>
-    <button type="button" class="rmx-top-btn rmx-top-fill" onclick="CD.openAddRoom()">+ Add Room</button>
-    <button type="button" class="rmx-top-btn rmx-top-white" onclick="CD.openAddBuilding()">+ Add Building</button>
-</div>
 
-<div class="cdf-field rmx-filter">
-    <select id="rm-building"><option value="all">All buildings</option></select>
+    <div class="cdc-filters">
+        <div class="cdc-select" id="rm-building-box">
+            <span class="cdc-legend">Building</span>
+            <div class="cdc-selected">
+                <i class="fa-solid fa-building"></i>
+                <span class="cdc-selected-text">All buildings</span>
+                <i class="fa-solid fa-chevron-down cdc-chevron"></i>
+            </div>
+            <div class="cdc-dropdown"></div>
+            <select id="rm-building" style="display:none;"><option value="all">All buildings</option></select>
+        </div>
+    </div>
+
+    <div class="cdc-actions">
+        <button type="button" class="cdc-btn cdc-btn-fill" onclick="CD.openAddRoom()"><i class="fa-solid fa-plus"></i> Add Room</button>
+        <button type="button" class="cdc-btn cdc-btn-ghost" onclick="CD.openAddBuilding()"><i class="fa-solid fa-plus"></i> Add Building</button>
+    </div>
 </div>
 
 <div class="rmx-panels">

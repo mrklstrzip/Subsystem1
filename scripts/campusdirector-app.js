@@ -697,9 +697,66 @@
     };
 
     /* ------------------------------------------------------------------ *
+ *  Custom dropdown filters (wraps the hidden <select> in each .cdc-select)
+ * ------------------------------------------------------------------ */
+    function initCdSelect(boxId) {
+        var box = $(boxId);
+        if (!box) return;
+        var select = box.querySelector('select');
+        var menu = box.querySelector('.cdc-dropdown');
+        var label = box.querySelector('.cdc-selected-text');
+
+        function build() {
+            menu.innerHTML = '';
+            Array.prototype.forEach.call(select.options, function (o) {
+                var div = document.createElement('div');
+                div.className = 'cdc-option' + (o.value === select.value ? ' active' : '');
+                div.setAttribute('data-value', o.value);
+                div.textContent = o.text;
+                menu.appendChild(div);
+            });
+            var opt = select.options[select.selectedIndex];
+            label.textContent = opt ? opt.text : '';
+        }
+
+        box.querySelector('.cdc-selected').addEventListener('click', function (e) {
+            e.stopPropagation();
+            var wasOpen = box.classList.contains('open');
+            closeCdSelects();
+            if (!wasOpen) { build(); box.classList.add('open'); }
+        });
+
+        menu.addEventListener('click', function (e) {
+            var opt = e.target.closest('.cdc-option');
+            if (!opt) return;
+            select.value = opt.getAttribute('data-value');
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            build();
+            box.classList.remove('open');
+        });
+
+        // rebuild when other code adds/removes options (e.g. buildings loaded from the server)
+        new MutationObserver(build).observe(select, { childList: true });
+        select.addEventListener('change', build);
+        build();
+    }
+
+    function closeCdSelects() {
+        var open = document.querySelectorAll('.cdc-select.open');
+        for (var i = 0; i < open.length; i++) open[i].classList.remove('open');
+    }
+
+    document.addEventListener('click', closeCdSelects);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeCdSelects(); });
+
+    /* ------------------------------------------------------------------ *
      *  Boot
      * ------------------------------------------------------------------ */
     initDashboard();
     initSchedule();
     initRooms();
+
+    initCdSelect('rm-building-box');   // Room Management
+    initCdSelect('sc-building-box');   // Room Schedule
+    initCdSelect('sc-status-box');     // Room Schedule
 })();
