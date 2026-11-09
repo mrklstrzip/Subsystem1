@@ -272,6 +272,7 @@
     <Content Include="Scripts\login-check.js" />
     <Content Include="Scripts\profile.js" />
     <Content Include="Scripts\sidebar.js" />
+    <Content Include="TextFile2.txt" />
     <Content Include="Web.config" />
     <Content Include="Areas\CapstoneCoordinator\Views\Invitation\invitations.cshtml" />
     <Content Include="Areas\Auth\Views\Signup\signup.cshtml" />
