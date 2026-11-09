@@ -1,0 +1,66 @@
+﻿
+@{
+    ViewBag.Title = "_ScheduleApprovalModal";
+}
+
+@Html.AntiForgeryToken()
+
+<div id="saConfig"
+     data-details-url="@Url.Action("Details", "ScheduleApproval")"
+     data-approve-url="@Url.Action("Approve", "ScheduleApproval")"
+     hidden></div>
+
+<!-- Pop-up -->
+<div class="sa-overlay" id="saOverlay" aria-hidden="true">
+    <div class="sa-modal" role="dialog" aria-modal="true" aria-labelledby="saModalTitle">
+        <div class="sa-modal-head">
+            <div>
+                <h2 id="saModalTitle">Submitted Schedule</h2>
+                <p>College of Computer Studies - QCU &nbsp;·&nbsp; Defense Schedule</p>
+            </div>
+            <button type="button" class="sa-x" id="saX" aria-label="Close"><i class="fa fa-xmark"></i></button>
+        </div>
+
+        <div class="sa-info">
+            <div><label>PROJECT TITLE</label><strong id="mTitle"></strong></div>
+            <div><label>DATE SUBMITTED</label><strong id="mSubmitted"></strong></div>
+            <div><label>CURRENT STATUS</label><span class="sa-status" id="mStatus"></span></div>
+            <div class="sa-info-sep"></div>
+            <div><label>STUDENT</label><strong id="mStudent"></strong></div>
+            <div><label>PROGRAM</label><strong id="mProgram"></strong></div>
+            <div><label>ADVISER</label><strong id="mAdviser"></strong></div>
+        </div>
+
+        <div class="sa-body">
+            <div class="sa-panel">
+                <h3>Abstract</h3>
+                <p id="mAbstract"></p>
+                <h3>Keywords</h3>
+                <p id="mKeywords"></p>
+                <small class="sa-muted" id="mSubmittedSmall"></small>
+            </div>
+
+            <div class="sa-panel">
+                <h3>Assigned Panelists</h3>
+                <div class="sa-panel-row sa-panel-row-head"><span>Panelists</span><span>Expertise Match</span></div>
+                <div id="mPanelists"></div>
+
+                <h3 class="sa-mt">Proposed Defense Schedule</h3>
+                <dl class="sa-sched">
+                    <dt>TIME</dt>
+                    <dd id="mTime"></dd>
+                    <dt>DATE</dt>
+                    <dd id="mDate"></dd>
+                    <dt>ROOM</dt>
+                    <dd id="mRoom"></dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="sa-modal-foot">
+            <button type="button" class="sa-btn-close" id="saClose">CLOSE</button>
+            <button type="button" class="sa-btn-approve" id="saApprove">APPROVE</button>
+        </div>
+    </div>
+</div>
+

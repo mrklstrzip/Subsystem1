@@ -1,0 +1,255 @@
+﻿@using System.Linq
+@using Subsystem1.Areas.CapstoneCoordinator.Models
+@model CoordinatorData
+@{
+    ViewBag.Title = "Schedule Management";
+}
+
+<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.4" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<!-- Header Banner -->
+<div class="dashboard-header">
+    <div class="header-text">
+        <h1 class="page-title">Schedule Management</h1>
+        <p class="welcome-text">Generate and edit schedule</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-file-lines"></i>
+    </div>
+</div>
+
+<!-- Controls Container Card -->
+<div class="controls-card">
+    <div class="search-container">
+        <div class="search">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search">
+        </div>
+    </div>
+
+    <div class="filter-wrapper">
+        <!-- Program Filter Box -->
+        <div class="custom-select-box">
+            <span class="filter-legend">Program</span>
+            <div class="select-selected">
+                <i class="fa fa-graduation-cap"></i>
+                <span>All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+        </div>
+
+        <!-- Status Filter Box -->
+        <div class="custom-select-box">
+            <span class="filter-legend">Status</span>
+            <div class="select-selected">
+                <i class="fa-solid fa-sliders"></i>
+                <span>All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+        </div>
+
+        <!-- Adviser Filter Box -->
+        <div class="custom-select-box">
+            <span class="filter-legend">Adviser</span>
+            <div class="select-selected">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span>All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Management Table Section -->
+<div class="schedule-management-card">
+    <table class="schedule-table" id="scheduleTable">
+        <thead>
+            <tr>
+                <th class="column-title manuscript-col">MANUSCRIPT</th>
+                <th class="column-title author-col">AUTHOR</th>
+                <th class="column-title adviser-col">ADVISER</th>
+                <th class="column-title date-col">DATE</th>
+                <th class="column-title status-col">STATUS</th>
+                <th class="column-title action-col">ACTION</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model.Schedules)
+            {
+                <tr data-id="@s.Id">
+                    <td>
+                        <div class="manuscript-title-text">@s.Title</div>
+                        <span class="program-badge @s.BadgeClass">@s.Badge</span>
+                    </td>
+                    <td class="author-cell">@s.Author</td>
+                    <td class="adviser-cell">@s.Adviser</td>
+                    <td class="date-cell">@s.DateText</td>
+                    <td>
+                        <span class="status-badge @s.Status">@s.StatusLabel</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="btn-view" data-id="@s.Id">View</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ==========================================================
+     Generated Schedule Modal (one markup, 3 status variants)
+     to-submit    -> Close + Submit
+     under-review -> Close + Submit, problem shown
+     submitted    -> Close only
+     ========================================================== -->
+<div class="modal-overlay" id="scheduleModal" aria-hidden="true">
+    <div class="schedule-modal" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
+
+        <button type="button" class="modal-close-icon" id="modalCloseIcon" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <h2 class="modal-heading" id="modalHeading">Generated Schedule</h2>
+        <p class="modal-subheading">College of Computer Studies - QCU &nbsp;·&nbsp; Defense Schedule</p>
+
+        <!-- Summary card -->
+        <div class="modal-summary">
+            <div class="summary-row summary-row-4">
+                <div class="summary-item">
+                    <span class="summary-label">Project Title</span>
+                    <span class="summary-value" id="mTitle"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Date Submitted</span>
+                    <span class="summary-value" id="mDateSubmitted"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Problem</span>
+                    <span class="summary-value" id="mProblem"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Current Status</span>
+                    <span class="status-badge" id="mStatus"></span>
+                </div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row summary-row-3">
+                <div class="summary-item">
+                    <span class="summary-label">Student</span>
+                    <span class="summary-value" id="mStudent"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Program</span>
+                    <span class="summary-value" id="mProgram"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Adviser</span>
+                    <span class="summary-value" id="mAdviser"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body: Abstract + Panelists -->
+        <div class="modal-body-grid">
+            <div class="modal-panel abstract-panel">
+                <h3 class="panel-title">Abstract</h3>
+                <p class="panel-text" id="mAbstract"></p>
+
+                <h3 class="panel-title">Keywords</h3>
+                <p class="panel-text" id="mKeywords"></p>
+
+                <span class="panel-footnote" id="mSubmittedNote"></span>
+            </div>
+
+            <div class="modal-panel panelists-panel">
+                <div class="panel-header-row">
+                    <h3 class="panel-title no-margin">Assigned Panelists</h3>
+                    <div class="edit-actions">
+                        <button type="button" class="btn-edit-panelists" id="btnEditPanelists" title="Edit panelists and schedule">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button type="button" class="btn-edit-panelists btn-cancel-edit" id="btnCancelEdit" title="Cancel" hidden>
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <button type="button" class="btn-edit-panelists btn-save-edit" id="btnSaveEdit" title="Save changes" hidden>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panelist-head">
+                    <span>Panelists</span>
+                    <span>Expertise Match</span>
+                </div>
+                <div id="mPanelists"></div>
+
+                <h3 class="panel-title schedule-title">Proposed Defense Schedule</h3>
+                <dl class="defense-schedule">
+                    <div>
+                        <dt>TIME</dt>
+                        <dd>
+                            <span class="view-val" id="mTime"></span>
+                            <span class="edit-val">
+                                <input type="time" class="edit-input" id="eTimeStart" aria-label="Start time">
+                                <span class="time-sep">&ndash;</span>
+                                <input type="time" class="edit-input" id="eTimeEnd" aria-label="End time">
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>DATE</dt>
+                        <dd>
+                            <span class="view-val" id="mDate"></span>
+                            <span class="edit-val">
+                                <input type="date" class="edit-input" id="eDate" aria-label="Defense date">
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>ROOM</dt>
+                        <dd>
+                            <span class="view-val" id="mRoom"></span>
+                            <span class="edit-val">
+                                <input type="text" class="edit-input room-input" id="eRoom" maxlength="20" aria-label="Room">
+                            </span>
+                        </dd>
+                    </div>
+                </dl>
+                <p class="edit-error" id="mEditError" hidden></p>
+            </div>
+        </div>
+
+        <!-- Footer buttons -->
+        <div class="modal-footer">
+            <button type="button" class="btn-modal btn-modal-close" id="modalCloseBtn">Close</button>
+            <button type="button" class="btn-modal btn-modal-submit" id="modalSubmitBtn">Submit</button>
+        </div>
+    </div>
+</div>
+
+
+<datalist id="facultyList">
+    @foreach (var n in Model.FacultyNames)
+    {
+        <option value="@n"></option>
+    }
+</datalist>
+<datalist id="roomList">
+    @foreach (var n in Model.RoomNames)
+    {
+        <option value="@n"></option>
+    }
+</datalist>
+
+<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.0"></script>
+<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.0"></script>
+<script>
+    (function () {
+        // each "View" button opens the pop-up of its schedule (the data comes from the database)
+        document.getElementById("scheduleTable").addEventListener("click", function (e) {
+            var btn = e.target.closest ? e.target.closest(".btn-view") : null;
+            if (btn) CCSchedule.open(btn.getAttribute("data-id"));
+        });
+    })();
+</script>

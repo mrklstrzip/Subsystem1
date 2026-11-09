@@ -1,0 +1,33 @@
+@model IList<Subsystem1.Areas.CapstoneCoordinator.Models.TopicCase>
+@{
+    Layout = "~/Areas/CapstoneCoordinator/Views/Shared/_CapstoneCoordinatorLayout.cshtml";
+    Func<string, string> PillClass = s => "os-pill os-" + (s ?? "").ToLowerInvariant().Replace(" ", "-");
+}
+
+<div class="os-header">
+    <h1>Assessment Cases</h1>
+    <p>Human-reviewed recommendations and case notes.</p>
+    <i class="fa fa-clipboard-check os-bg-icon"></i>
+</div>
+
+<div class="os-card os-table-wrap">
+    <table class="os-table">
+        <thead><tr><th>Reference</th><th>Topic</th><th>Status</th><th>Notes</th><th>Updated</th></tr></thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.Reference</td>
+                    <td class="os-title">@c.Title</td>
+                    <td><span class="@PillClass(c.Status)">@c.Status</span></td>
+                    <td>@c.Notes</td>
+                    <td>@c.UpdatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="5" class="os-empty">No assessment cases yet. Save one from a screening result.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

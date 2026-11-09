@@ -1,0 +1,110 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="@Url.Content("~/Content/css/admin/dashboard.css")?v=5.0" rel="stylesheet" type="text/css" />
+
+<!-- Header Banner -->
+<div class="dashboard-header">
+    <div class="header-text">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="welcome-text" id="dash-welcome">Welcome back!</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-th-large"></i>
+    </div>
+</div>
+
+<!-- Admin Stat Cards Grid -->
+<div class="admin-cards">
+    <div class="card card-total">
+        <div class="card-info">
+            <h4 class="card-title">TOTAL USER</h4>
+            <p class="number" id="dash-total">0</p>
+            <span class="card-description">All registered accounts</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa fa-users"></i>
+        </div>
+    </div>
+
+    <div class="card card-campusdirector">
+        <div class="card-info">
+            <h4 class="card-title">CAMPUS DIRECTOR</h4>
+            <p class="number" id="dash-directors">0</p>
+            <span class="card-description">Registered campus director</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa fa-building"></i>
+        </div>
+    </div>
+
+    <div class="card card-capstonecoordinator">
+        <div class="card-info">
+            <h4 class="card-title">CAPSTONE COORDINATOR</h4>
+            <p class="number" id="dash-coordinators">0</p>
+            <span class="card-description">Registered capstone coordinator accounts</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa-solid fa-folder-open"></i>
+        </div>
+    </div>
+
+    <div class="card card-dean">
+        <div class="card-info">
+            <h4 class="card-title">DEAN</h4>
+            <p class="number" id="dash-dean">0</p>
+            <span class="card-description">Registered dean accounts</span>
+        </div>
+        <div class="card-icon">
+            <i class="fa-solid fa-user-tie"></i>
+        </div>
+    </div>
+</div>
+
+<div class="tables">
+    <div class="activity">
+        <h4 class="table-title">RECENT ACCOUNT ACTIVITY</h4>
+        <table class="activity-table">
+            <thead>
+                <tr>
+                    <th class="column-title actdate-col">DATE</th>
+                    <th class="column-title">ACTIVITY</th>
+                </tr>
+            </thead>
+            <tbody id="dash-activity">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Role Distribution Section -->
+    <div class="distribution">
+        <h4 class="table-title">ROLE DISTRIBUTION</h4>
+        <div class="distribution-content">
+            <!-- Donut Chart -->
+            <div class="donut-chart-container">
+                <div class="donut-chart"></div>
+            </div>
+
+            <!-- Distribution Table -->
+            <table class="distribution-table">
+                <thead>
+                    <tr>
+                        <th class="column-title role-col">ROLE</th>
+                        <th class="column-title num-col">TOTAL</th>
+                        <th class="column-title num-col">ACTIVE</th>
+                        <th class="column-title num-col">INACTIVE</th>
+                    </tr>
+                </thead>
+                <tbody id="dash-roles">
+                    <!-- Dynamically populated by admin-app.js -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=6.0"></script>

@@ -1,0 +1,50 @@
+/* Capstone Coordinator pop-ups (schedule / defense / conflict details):
+   no copying, blurred while a screenshot or print is attempted.
+   Same protection as the student's Capstone Title view. See Scripts/coordinator-privacy.js */
+
+.schedule-modal,
+.schedule-modal * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+    /* the editable fields (time, date, room) must stay typeable and selectable */
+    .schedule-modal input,
+    .schedule-modal textarea {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+
+    .schedule-modal > * {
+        transition: filter .12s ease;
+    }
+
+    /* everything except the title bar, the X and the footer buttons gets blurred */
+    .schedule-modal.cc-shield > *:not(.modal-close-icon):not(.modal-heading):not(.modal-subheading):not(.modal-footer) {
+        filter: blur(14px);
+        pointer-events: none;
+    }
+
+    .schedule-modal.cc-shield::after {
+        content: "Details hidden for protection";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 45%;
+        z-index: 2;
+        text-align: center;
+        font-weight: 700;
+        color: #1B293B;
+        pointer-events: none;
+    }
+
+@media print {
+    .modal-overlay {
+        display: none !important;
+    }
+}

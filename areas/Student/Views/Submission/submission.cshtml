@@ -1,0 +1,197 @@
+﻿@using System.Linq
+@using Subsystem1.Areas.Student.ViewModels
+@model StudentSubmissionViewModel
+@{
+    ViewBag.Title = "Submission";
+    var error = TempData["SubmissionError"] as string;
+    var success = TempData["SuccessMessage"] as string;
+}
+
+<link href="@Url.Content("~/Content/css/student-pm.css")?v=1.8" rel="stylesheet" type="text/css" />
+
+<div class="pm">
+    <section class="pm-banner pm-banner--row">
+        <div>
+            <small>Project Manager | Submission</small>
+            <h1>Submission</h1>
+            <p>Upload your manuscript and follow your defense scheduling</p>
+        </div>
+                <i class="fa fa-file-arrow-up pm-banner-icon" aria-hidden="true"></i>
+
+        @if (Model.AllComplete)
+        {
+            <a class="pm-pill" href="#">Go to Post Defense</a>
+        }
+        else if (!Model.HasTitle)
+        {
+            <button type="button" class="pm-pill" data-open="pmAddDialog">+ Add Capstone Title</button>
+        }
+    </section>
+
+    @if (error != null)
+    {<div class="pm-alert">@error</div>}
+    @if (success != null)
+    {<div class="pm-alert pm-alert--ok">@success</div>}
+
+    <section class="pm-card pm-stepper-card">
+        <ol class="pm-stepper">
+            @for (var i = 0; i < Model.Steps.Count; i++)
+            {
+                var s = Model.Steps[i];
+                bool isNext = i == Model.NextStepIndex;
+                <li class="pm-step @(s.Done ? "done" : "pending") @(isNext ? "next" : "")">
+
+                    @* The tracker fills in by itself from the database. Only two circles can be clicked:
+                       adding the title, and confirming the defense once it has taken place. *@
+                    @if (isNext && i == 0)
+                    {
+                        <button type="button" class="pm-dot pm-dot--click" data-open="pmAddDialog" title="Add your capstone title"></button>
+                    }
+                    else if (isNext && i == 5 && Model.AskDefenseComplete)
+                    {
+                        <button type="button" class="pm-dot pm-dot--click" data-show="pmBubble" title="Mark your defense as completed"></button>
+                    }
+                    else if (s.Done)
+                    {
+                        <span class="pm-dot"><i class="fa fa-check"></i></span>
+                    }
+                    else
+                    {
+                        <span class="pm-dot"></span>
+                    }
+
+                    <strong>@s.Label</strong>
+                    <small>@s.Detail</small>
+
+                    @if (i == 5 && Model.AskDefenseComplete)
+                    {
+                        <div class="pm-bubble" id="pmBubble">
+                            <p>Is your defense completed?</p>
+                            @using (Html.BeginForm("CompleteDefense", "Submission", new { area = "Student" }, FormMethod.Post, new { @class = "pm-bubble-actions" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button class="yes" type="submit">Yes</button>
+                                <button class="no" type="button" data-dismiss="pmBubble">No</button>
+                            }
+                        </div>
+                    }
+                </li>
+            }
+        </ol>
+    </section>
+
+    @if (!Model.HasTitle)
+    {
+        <section class="pm-card pm-empty">
+            <i class="fa fa-copy"></i>
+            <p>No Submitted Title Yet</p>
+        </section>
+    }
+    else
+    {
+        <section class="pm-card pm-titles">
+            <div><span>Title</span><span>Date &amp; Time</span><span>Status</span><span></span></div>
+            @foreach (var t in Model.Submissions)
+            {
+                <div>
+                    <span><b>@t.TitleBold</b>@t.TitleRest</span>
+                    <span class="pm-muted">@StudentFormat.Stamp(t.DateAndSubmissionTime)</span>
+                    <span><span class="pm-badge pm-badge--@t.Status.ToLower()">@t.Status</span></span>
+                    <span><a class="pm-link" href="#" data-view-title="@t.Id">View Capstone Title</a></span>
+                </div>
+            }
+        </section>
+    }
+
+    <section class="pm-card">
+        <h3 class="pm-title">Activity Log</h3>
+        @if (Model.Log.Count == 0)
+        {
+            <div class="pm-empty pm-empty--inline">
+                <i class="fa fa-box-open"></i>
+                <p>No Activity Yet</p>
+            </div>
+        }
+        else
+        {
+            <table class="pm-table">
+                <thead><tr><th>Time</th><th class="pm-center">Activity</th><th class="pm-right">Date</th></tr></thead>
+                <tbody>
+                    @foreach (var l in Model.Log)
+                    {
+                        <tr>
+                            <td class="pm-muted">@l.Timestamp.ToString("h:mm tt")</td>
+                            <td class="pm-center">@StudentFormat.Bold(l.Text)</td>
+                            <td class="pm-right pm-muted">@StudentFormat.Short(l.Timestamp)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="pm-view-all"><a class="pm-link" href="#"></a></div>
+        }
+    </section>
+
+    <!-- Add Capstone Title -->
+    <dialog id="pmAddDialog" class="pm-dialog pm-dialog--lg">
+        @using (Html.BeginForm("AddTitle", "Submission", new { area = "Student" }, FormMethod.Post, new { @class = "pm-modal-card" }))
+        {
+            @Html.AntiForgeryToken()
+            <header class="pm-modal-head">
+                <h2>Add Capstone Title</h2>
+                <button type="button" class="pm-x" data-close aria-label="Close"><i class="fa fa-xmark"></i></button>
+            </header>
+            <div class="pm-form-grid">
+                <div class="pm-col">
+                    <label>Title<textarea name="Title" rows="2" placeholder="Capstone title..." required></textarea></label>
+                    <label class="grow">Overview / Abstract<textarea name="Abstract" rows="7" placeholder="Brief summary of your study..." required></textarea></label>
+                </div>
+                <div class="pm-col">
+                    <label>Keywords<input name="Keywords" placeholder="Add Keywords seperated by comma (ex. Python, Java)" /></label>
+                    <label>Authors<input name="Authors" placeholder="Full names..." required /></label>
+                    <label>Date Published<input name="DatePublished" type="date" value="@Model.DefaultDatePublished" /></label>
+                    <div class="pm-row2">
+                    <label>
+                        Program
+                        @if (!string.IsNullOrEmpty(Model.DefaultProgram))
+                        {
+                            <input name="Program" value="@Model.DefaultProgram" readonly required />
+                        }
+                        else
+                        {
+                            <select name="Program" required>
+                                <option value="" disabled selected>Select a Program</option>
+                                @foreach (var p in Model.Programs)
+                                {
+                                    <option value="@p">@p</option>
+                                }
+                            </select>
+                        }
+                    </label>
+                    <label>
+                        Section
+                        <input name="Section" value="@Model.DefaultSection" placeholder="e.g. SBIT-4A" maxlength="20" @(string.IsNullOrEmpty(Model.DefaultSection) ? "" : "readonly") required />
+                    </label>
+                    </div>
+                    <label>
+                        Professor / Advisor
+                        <select name="AdvisorId" required>
+                            <option value="" disabled @(string.IsNullOrEmpty(Model.DefaultAdviserId) ? "selected" : "")>Select Advisor</option>
+                            @foreach (var a in Model.Advisers)
+                            {
+                                <option value="@a.Id" @(a.Id == Model.DefaultAdviserId ? "selected" : "")>@a.Name</option>
+                            }
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <footer class="pm-modal-foot"><button class="pm-primary" type="submit">Submit Title</button></footer>
+        }
+    </dialog>
+
+    <!-- View Capstone Title (filled by JS) -->
+    <dialog id="pmViewDialog" class="pm-dialog" data-details-url="@Url.Action("Details", "Submission", new { area = "Student" })">
+        <div id="pmViewBody"></div>
+    </dialog>
+</div>
+
+<script src="@Url.Content("~/Scripts/student-submission.js")?v=1.6"></script>

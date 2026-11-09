@@ -1,0 +1,128 @@
+﻿@using System.Linq
+@using Subsystem1.Areas.Student.ViewModels
+@model StudentDashboardViewModel
+@{
+    ViewBag.Title = "Dashboard";
+    bool hasSubmission = !string.IsNullOrEmpty(Model.ManuscriptStatus);
+    bool hasDefense = Model.DefenseDate.HasValue;
+    int daysLeft = hasDefense ? (Model.DefenseDate.Value.Date - DateTime.Today).Days : 0;
+}
+
+<link href="@Url.Content("~/Content/css/student-pm.css")?v=1.1" rel="stylesheet" type="text/css" />
+
+<div class="pm">
+    <section class="pm-banner">
+        <div>
+            <small>@Model.UserRole | Dashboard</small>
+            <h1>Dashboard</h1>
+            <p>Welcome back, <span id="pmFirstName">@(string.IsNullOrEmpty(Model.FirstName) ? "Student" : Model.FirstName)</span>!</p>
+        </div>
+        <i class="fa fa-th-large pm-banner-icon" aria-hidden="true"></i>
+    </section>
+
+    <section class="pm-grid2">
+        <div class="pm-status-card">
+            @if (hasSubmission)
+            {
+                <div class="pm-status-head">
+                    <h2>@Model.ManuscriptStatus</h2>
+                    <span>@(Model.StatusDate.HasValue ? Model.StatusDate.Value.ToString("MM/dd/yyyy") : "")</span>
+                </div>
+                <div class="pm-stage">
+                    <span>Stage @Model.Stage of @Model.TotalStages</span>
+                    <div class="pm-stage-bar">
+                        @for (var i = 1; i <= (Model.TotalStages ?? 0); i++)
+                        {
+                            <i class="@(i <= (Model.Stage ?? 0) ? "on" : "")"></i>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="pm-status-head"><h2>No Submission Yet</h2></div>
+                <div class="pm-stage"><span>Upload your manuscript to begin review</span></div>
+            }
+            <i class="fa fa-file-lines pm-status-icon"></i>
+        </div>
+
+        <div class="pm-card pm-defense">
+            <div class="pm-defense-head">
+                <strong>Defense</strong>
+                @if (hasDefense && daysLeft >= 0)
+                {
+                    <span class="pm-remaining"><b>@daysLeft</b> days remaining</span>
+                }
+            </div>
+            @if (hasDefense)
+            {
+                <div class="pm-defense-date">@Model.DefenseDate.Value.ToString("MMM. d, yyyy")</div>
+                <div class="pm-defense-room">@(string.IsNullOrEmpty(Model.DefenseVenue) ? "No Venue Scheduled" : Model.DefenseVenue)</div>
+            }
+            else
+            {
+                <div class="pm-defense-date">No Defense Scheduled</div>
+                <div class="pm-defense-room">No Venue Scheduled</div>
+            }
+            <i class="fa fa-calendar pm-defense-icon"></i>
+        </div>
+    </section>
+
+    <section class="pm-card">
+        <h3 class="pm-label">Panelist</h3>
+        @if (Model.Panel.Any())
+        {
+            <div class="pm-panel-row">
+                @foreach (var p in Model.Panel)
+                {
+                    <div class="pm-panelist">
+                        @if (!string.IsNullOrEmpty(p.PhotoUrl))
+                        {
+                            <img class="pm-avatar" src="@p.PhotoUrl" alt="@p.Name" />
+                        }
+                        else
+                        {
+                            <div class="pm-avatar">@p.Initials</div>
+                        }
+                        <div class="pm-panelist-info">
+                            <strong>@p.Name</strong>
+                            <span>@p.Role</span>
+                            @if (!string.IsNullOrEmpty(p.Department))
+                            {<span>@p.Department</span>}
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="pm-muted-text">No panelists assigned yet.</p>
+        }
+    </section>
+
+    <section class="pm-card">
+        <h3 class="pm-title">Recent Activity</h3>
+        @if (Model.Activity.Any())
+        {
+            <table class="pm-table">
+                <thead><tr><th>Activity</th><th class="pm-right">Date</th></tr></thead>
+                <tbody>
+                    @foreach (var a in Model.Activity)
+                    {
+                        <tr>
+                            <td>@StudentFormat.Bold(a.Description)</td>
+                            <td class="pm-right pm-muted">@StudentFormat.TimeAgo(a.Date)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="pm-empty pm-empty--inline">
+                <p>No activity yet</p>
+                <small>Updates on your manuscript and panel show up here.</small>
+            </div>
+        }
+    </section>
+</div>

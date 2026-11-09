@@ -1,0 +1,277 @@
+﻿@{
+    ViewBag.Title = "User Management";
+}
+
+<link href="@Url.Content("~/Content/css/admin/usermanagement.css")?v=5.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/delete.css")?v=5.0" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<div class="dashboard-header">
+    <div class="header-text">
+        <h1 class="page-title">User Management</h1>
+        <p class="welcome-text">Create and manage user accounts and account details</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa-solid fa-users"></i>
+    </div>
+</div>
+
+<div class="controls-card">
+    <div class="search-container">
+        <div class="search">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search users">
+        </div>
+    </div>
+
+    <div class="filter-wrapper">
+        <!-- Role Filter Box -->
+        <div class="custom-select-box" id="roleDropdownToggle">
+            <span class="filter-legend">Role</span>
+            <div class="select-selected">
+                <i class="fa-solid fa-users" id="selectedRoleIcon"></i>
+                <span id="selectedRoleText">All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="custom-select-dropdown" id="roleDropdownMenu">
+                <div class="select-option" data-value="all"><i class="fa-solid fa-users"></i> All</div>
+                <div class="select-option" data-value="admin"><i class="fa-solid fa-user-gear"></i> Admin</div>
+                <div class="select-option" data-value="dean"><i class="fa-solid fa-user-tie"></i> Dean</div>
+                <div class="select-option" data-value="capstone-coordinator"><i class="fa-solid fa-folder-open"></i> Capstone Coordinator</div>
+                <div class="select-option" data-value="campus-director"><i class="fa-solid fa-building"></i> Campus Director</div>
+
+            </div>
+            <select id="roleFilter" name="role" style="display:none;">
+                <option value="all" selected>All</option>
+                <option value="admin">Admin</option>
+                <option value="dean">Dean</option>
+                <option value="capstone-coordinator">Capstone Coordinator</option>
+                <option value="campus-director">Campus Director</option>
+
+            </select>
+        </div>
+
+        <!-- Status Filter Box -->
+        <div class="custom-select-box" id="statusDropdownToggle">
+            <span class="filter-legend">Status</span>
+            <div class="select-selected">
+                <i class="fa-solid fa-sliders"></i>
+                <span id="selectedStatusText">All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+            <div class="custom-select-dropdown" id="statusDropdownMenu">
+                <div class="select-option active" data-value="all"><i class="fa-solid fa-sliders"></i> All</div>
+                <div class="select-option" data-value="active"><i class="fa-solid fa-toggle-on"></i> Active</div>
+                <div class="select-option" data-value="inactive"><i class="fa-solid fa-toggle-off"></i> Inactive</div>
+            </div>
+            <select id="statusFilter" name="status" style="display:none;">
+                <option value="all" selected>All</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+
+        <button class="add-btn" id="openModalBtn"><i class="fa fa-plus"></i></button>
+    </div>
+</div>
+
+<!-- User Table Section -->
+<div class="user-management">
+    <table class="user-management-table" id="usersTable">
+        <thead>
+            <tr>
+                <th class="column-title name-col">NAME</th>
+                <th class="column-title email-col">EMAIL</th>
+                <th class="column-title role-col">ROLE</th>
+                <th class="column-title status-col">STATUS</th>
+                <th class="column-title action-col">ACTION</th>
+            </tr>
+        </thead>
+        <tbody id="users-tbody"></tbody>
+    </table>
+</div>
+
+<!-- Dynamic User Modal (Create / Edit) -->
+<div class="modal-overlay" id="userModal">
+    <div class="modal-card">
+
+        <div class="modal-header-brand">
+            <h2 class="modal-title" id="modalHeaderTitle">Create User Account</h2>
+        </div>
+
+        <form action="" method="post" class="modal-form" onsubmit="return false;">
+
+            <!-- Name Row (Last Name, First Name, Middle Name, Suffix) -->
+            <div class="name-row">
+                <fieldset class="input-fieldset">
+                    <legend>Last Name</legend>
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" id="lastNameInput" placeholder="" required />
+                    </div>
+                </fieldset>
+
+                <fieldset class="input-fieldset">
+                    <legend>First Name</legend>
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" id="firstNameInput" placeholder="" required />
+                    </div>
+                </fieldset>
+
+                <fieldset class="input-fieldset">
+                    <legend>Middle Name</legend>
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" id="middleNameInput" placeholder="" />
+                    </div>
+                </fieldset>
+
+                <fieldset class="input-fieldset suffix-fieldset">
+                    <legend>Suffix</legend>
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-id-badge input-icon"></i>
+                        <select id="suffixSelect">
+                            <option value="" selected>None</option>
+                            <option value="Jr.">Jr.</option>
+                            <option value="Sr.">Sr.</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                            <option value="IV">IV</option>
+                            <option value="V">V</option>
+                        </select>
+                    </div>
+                </fieldset>
+            </div>
+
+            <!-- Email & ID Number -->
+            <fieldset class="input-fieldset">
+                <legend>Email</legend>
+                <div class="input-field-wrapper">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="emailInput" placeholder="" required />
+                </div>
+            </fieldset>
+
+            <fieldset class="input-fieldset">
+                <legend>ID Number</legend>
+                <div class="input-field-wrapper">
+                    <i class="fas fa-id-card input-icon"></i>
+                    <input type="text" id="modalIdInput" placeholder="" required />
+                </div>
+            </fieldset>
+
+            <!-- Role Selection -->
+            <fieldset class="input-fieldset">
+                <legend>Role</legend>
+                <div class="input-field-wrapper">
+                    <i class="fas fa-user-shield input-icon"></i>
+                    <select id="modalRoleSelect" required>
+                        <option value="project-manager" selected>Student</option>
+                        <option value="panelist">Panelist</option>
+                        <option value="adviser">Adviser</option>
+                        <option value="campus-director">Campus Director</option>
+                        <option value="capstone-coordinator">Capstone Coordinator</option>
+                        <option value="dean">Dean</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <!-- Conditional Student Fields -->
+            <div class="role-field" id="fieldProgram" style="display: flex; flex-direction: column; width: 100%;">
+                <fieldset class="input-fieldset">
+                    <legend>Program</legend>
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-graduation-cap input-icon"></i>
+                        <select id="programSelect">
+                            <option value="" disabled selected>Select Program</option>
+                            <option value="BSIT">Bachelor of Science in Information Technology</option>
+                            <option value="BSIS">Bachelor of Science in Information Systems</option>
+                            <option value="BSCS">Bachelor of Science in Computer Science</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <fieldset class="input-fieldset">
+                    <legend>Section</legend>
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-users input-icon"></i>
+                        <input type="text" id="sectionInput" placeholder="e.g. SBIT-4A" />
+                    </div>
+                </fieldset>
+
+                <fieldset class="input-fieldset">
+                    <legend>Adviser</legend>
+                    <div class="input-field-wrapper">
+                        <i class="fa-solid fa-chalkboard-user input-icon"></i>
+                        <select id="professorInput">
+                            <option value="" selected disabled>Select Adviser</option>
+                        </select>
+                    </div>
+                </fieldset>
+            </div>
+
+            <!-- Conditional Professor / Expertise Tags Fields (Only in Create Mode) -->
+            <div class="role-field" id="fieldProfessor" style="display: none; flex-direction: column; width: 100%;">
+                <fieldset class="input-fieldset">
+                    <legend>Selected Expertise Tags</legend>
+                    <div class="selected-tags-box" id="selectedTagsBox"></div>
+                </fieldset>
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label style="font-size: 11px; font-weight: 600; color: #938F8F; margin-bottom: 6px; display: block;">Available Tags Pool</label>
+                    <div class="tags-grid-box" id="systemTagsGrid"></div>
+                </div>
+            </div>
+
+            <!-- Status Group (Active / Inactive) -->
+            <fieldset class="input-fieldset" id="statusGroup" style="display: none;">
+                <legend>Status</legend>
+                <div class="input-field-wrapper" style="padding: 4px 0;">
+                    <div class="radio-group" style="display: flex; gap: 20px; align-items: center; width: 100%; padding-left: 5px;">
+                        <label class="radio-label" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                            <input type="radio" name="modalStatusRadio" id="statusActive" value="active" checked style="accent-color: #2C3F56;"> Active
+                        </label>
+                        <label class="radio-label" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                            <input type="radio" name="modalStatusRadio" id="statusInactive" value="inactive" style="accent-color: #2C3F56;"> Inactive
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Temporary Password -->
+            <fieldset class="input-fieldset" id="passwordGroup">
+                <legend>Temporary Password</legend>
+                <div class="input-field-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="passwordInput" placeholder="" />
+                </div>
+            </fieldset>
+
+            <!-- Modal Action Buttons -->
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+                <button type="button" class="btn-confirm" id="confirmBtn">Confirm</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<!-- Delete User Pop up -->
+<div class="modal-overlay" id="delUserModal">
+    <div class="cd-delete-card">
+        <div class="cd-delete-icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3 class="cd-delete-title">Are you sure?</h3>
+        <p class="cd-delete-text" id="delUserModalText">
+            Do you really want to delete this account?<br />
+            This process cannot be undone
+        </p>
+        <div class="cd-delete-actions">
+            <button type="button" class="btn-cd-delete-confirm" onclick="AD.confirmDelUser()">Delete</button>
+            <button type="button" class="btn-cd-delete-cancel" onclick="AD.closeModals()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=6.1"></script>

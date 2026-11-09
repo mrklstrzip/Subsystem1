@@ -1,0 +1,150 @@
+﻿@using System.Linq
+@using Subsystem1.Areas.CapstoneCoordinator.Models
+@model CoordinatorData
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=2.2" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<!-- Header Banner -->
+<div class="dashboard-header">
+    <div class="header-text">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="welcome-text">Welcome back, @ViewBag.LastName!</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-th-large"></i>
+    </div>
+</div>
+
+<!-- Dashboard Main Layout Grid -->
+<div class="dashboard-grid">
+    <!-- Left Column: Tables -->
+    <div class="dashboard-left-column">
+
+        <!-- To Submit Section -->
+        <div class="dashboard-card">
+            <div class="card-header-flex">
+                <h3 class="section-title">To Submit</h3>
+                <a href="@Url.Action("schedulemanagement", "ScheduleManagement")" class="view-all-link">View All</a>
+            </div>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th class="column-title manuscript-col">MANUSCRIPT</th>
+                        <th class="column-title date-col">DATE</th>
+                        <th class="column-title action-col">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Schedules.Any(s => s.Status == "to-submit"))
+                    {
+                        <tr class="empty-row"><td colspan="3">Nothing to submit right now.</td></tr>
+                    }
+                    @foreach (var s in Model.Schedules.Where(x => x.Status == "to-submit").Take(3))
+                    {
+                        <tr>
+                            <td>
+                                <div class="manuscript-title-text">@s.Title</div>
+                                <span class="program-badge @s.BadgeClass">@s.Badge</span>
+                            </td>
+                            <td class="date-cell">@(s.Date.HasValue ? s.Date.Value.ToString("MMM d", System.Globalization.CultureInfo.InvariantCulture) : "-")</td>
+                            <td class="action-cell">
+                                <a class="btn-view" href="@Url.Action("schedulemanagement", "ScheduleManagement")">View</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Upcoming Defenses Section -->
+        <div class="dashboard-card">
+            <div class="card-header-flex">
+                <h3 class="section-title">Upcoming Defenses</h3>
+                <a href="@Url.Action("defenseschedule", "DefenseSchedule")" class="view-all-link">View All</a>
+            </div>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th class="column-title manuscript-col">MANUSCRIPT</th>
+                        <th class="column-title date-col">DATE</th>
+                        <th class="column-title time-col">TIME</th>
+                        <th class="column-title action-col">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Upcoming.Any())
+                    {
+                        <tr class="empty-row"><td colspan="4">No upcoming defenses yet.</td></tr>
+                    }
+                    @foreach (var d in Model.Upcoming.Take(3))
+                    {
+                        <tr>
+                            <td>
+                                <div class="manuscript-title-text">@d.Title</div>
+                                <span class="program-badge @d.BadgeClass">@d.Badge</span>
+                            </td>
+                            <td class="date-cell">@d.ShortDate</td>
+                            <td class="time-cell">@d.ShortTime</td>
+                            <td class="action-cell">
+                                <a class="btn-view" href="@Url.Action("defenseschedule", "DefenseSchedule")">View</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Right Column: Metrics & Activities -->
+    <div class="dashboard-right-column">
+
+        <!-- Metric Cards Row -->
+        <div class="metrics-row">
+            <div class="metric-card">
+                <div class="metric-title">TOTAL DEFENSES</div>
+                <div class="metric-value">@Model.TotalDefenses</div>
+                <div class="metric-subtitle">Across all buildings</div>
+                <div class="metric-icon"><i class="fa-solid fa-door-open"></i></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">UNDER REVIEW</div>
+                <div class="metric-value">@Model.UnderReview</div>
+                <div class="metric-subtitle">Across all buildings</div>
+                <div class="metric-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            </div>
+        </div>
+
+        <!-- Recent Activities Section -->
+        <div class="dashboard-card recent-activities-card">
+            <h3 class="section-title">RECENT ACTIVITIES</h3>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th class="column-title time-col">TIME</th>
+                        <th class="column-title activity-col">ACTIVITY</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Recent)
+                    {
+                        <tr>
+                            <td class="time-col">@a.At.ToString("MMM d, h:mm tt", System.Globalization.CultureInfo.InvariantCulture)</td>
+                            <td class="activity-col">@a.Text</td>
+                        </tr>
+                    }
+                    @for (int k = Model.Recent.Count; k < 3; k++)
+                    {
+                        <tr class="empty-row"><td colspan="2"></td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+

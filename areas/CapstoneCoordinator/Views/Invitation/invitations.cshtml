@@ -1,0 +1,115 @@
+﻿@{
+    ViewBag.Title = "PM Invitations";
+}
+
+<link href="@Url.Content("~/Content/css/capstonecoordinator/conflictresult.css")?v=2.2" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/invitations.css")?v=1.0" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<!-- Header Banner -->
+<div class="dashboard-header">
+    <div class="header-text">
+        <h1 class="page-title">PM Invitations</h1>
+        <p class="welcome-text">Validate students as Project Managers. They get an email with a link to sign up.</p>
+    </div>
+    <div class="header-bg-icon">
+        <i class="fa fa-user-plus"></i>
+    </div>
+</div>
+
+<!-- Controls -->
+<div class="controls-card">
+    <div class="search-container">
+        <div class="search">
+            <i class="fa fa-search"></i>
+            <input type="text" id="invSearch" placeholder="Search email">
+        </div>
+    </div>
+    <div class="filter-wrapper">
+        <div class="inv-filter">
+            <span class="filter-legend">Status</span>
+            <select id="invStatus" aria-label="Filter by status">
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="accepted">Signed up</option>
+                <option value="expired">Expired</option>
+                <option value="failed">Not sent</option>
+                <option value="revoked">Cancelled</option>
+            </select>
+        </div>
+        <button type="button" class="inv-btn inv-btn--primary" id="invOpen">
+            <i class="fa fa-user-plus"></i> Invite Project Managers
+        </button>
+    </div>
+</div>
+
+<div class="schedule-management-card">
+    <table class="schedule-table" id="invTable">
+        <thead>
+            <tr>
+                <th class="column-title">EMAIL</th>
+                <th class="column-title inv-col-status">STATUS</th>
+                <th class="column-title inv-col-date">LAST SENT</th>
+                <th class="column-title inv-col-date">LINK EXPIRES</th>
+                <th class="column-title inv-col-actions">ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody id="invBody">
+            <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ==========================================================
+     Modal: Add multiple users (Project Manager)
+     ========================================================== -->
+<div class="inv-overlay" id="invModal" aria-hidden="true">
+    <div class="inv-modal" role="dialog" aria-modal="true" aria-labelledby="invTitle">
+
+        <!-- step 1: the form -->
+        <div id="invStepForm">
+            <span class="inv-eyebrow">Account setup</span>
+            <h2 class="inv-title" id="invTitle">Add multiple users</h2>
+
+            <div class="inv-grid">
+                <div class="inv-field">
+                    <label class="inv-label" for="invEmailInput">Email addresses</label>
+                    <div class="inv-chipbox" id="invChipBox">
+                        <span id="invChips"></span>
+                        <input type="text" id="invEmailInput" autocomplete="off" spellcheck="false"
+                               placeholder="Add email addresses" aria-describedby="invHelp" />
+                    </div>
+                </div>
+                <div class="inv-field">
+                    <label class="inv-label" for="invRole">Role</label>
+                    <select id="invRole" class="inv-select">
+                        <option value="project-manager">Project Manager</option>
+                    </select>
+                </div>
+            </div>
+
+            <p class="inv-help" id="invHelp">Enter an address and press Enter, or paste multiple addresses separated by commas.</p>
+            <p class="inv-error" id="invError" role="alert" hidden></p>
+
+            <div class="inv-actions">
+                <button type="button" class="inv-btn inv-btn--ghost" id="invCancel">Cancel</button>
+                <button type="button" class="inv-btn inv-btn--primary" id="invSubmit">Send invitations</button>
+            </div>
+        </div>
+
+        <!-- step 2: what happened to each address -->
+        <div id="invStepDone" hidden>
+            <span class="inv-eyebrow">Account setup</span>
+            <h2 class="inv-title" id="invDoneTitle">Invitations</h2>
+            <p class="inv-help" id="invDoneText"></p>
+            <ul class="inv-results" id="invResults"></ul>
+            <div class="inv-actions">
+                <button type="button" class="inv-btn inv-btn--primary" id="invDone">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="inv-toast" id="invToast" role="status" aria-live="polite" hidden></div>
+
+<script src="@Url.Content("~/Scripts/coordinator-invitations.js")?v=1.0"></script>

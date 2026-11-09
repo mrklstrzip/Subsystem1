@@ -1,0 +1,68 @@
+@model Subsystem1.Areas.Dean.Models.OversightVm
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+    Func<string, string> PillClass = s => "os-pill os-" + (s ?? "").ToLowerInvariant().Replace(" ", "-");
+    string currentAction = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="os-header">
+    <h1>@Model.PageTitle</h1>
+    <p>Read-only view of the manuscript records in the shared repository. Defense approvals stay in Schedule Approval.</p>
+    <i class="fa fa-book-open os-bg-icon"></i>
+</div>
+
+<div class="os-stats">
+    <div class="os-stat"><small>Total records</small><strong>@Model.Total</strong></div>
+    <div class="os-stat"><small>Submitted / Pending</small><strong>@Model.Submitted</strong></div>
+    <div class="os-stat"><small>Approved / Cleared</small><strong>@Model.Approved</strong></div>
+    <div class="os-stat"><small>Returned</small><strong>@Model.Returned</strong></div>
+</div>
+
+<div class="os-card">
+    <form method="get" class="os-filters">
+        <input name="q" value="@Model.Query" class="os-input" placeholder="Search title, author, keywords..." />
+        <select name="program" class="os-select">
+            <option value="">All programs</option>
+            @foreach (var item in Model.Programs)
+            {
+                <option value="@item.Key" @(Model.Program == item.Key ? "selected" : "")>@item.Key (@item.Value)</option>
+            }
+        </select>
+        @if (currentAction == "Records" || currentAction == "Exceptions" || currentAction == "Performance")
+        {
+            <select name="status" class="os-select">
+                <option value="">All statuses</option>
+                @foreach (var st in new[] { "Submitted", "Approved", "Returned", "Pending" })
+                {
+                    <option @(string.Equals(Model.Status, st, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@st</option>
+                }
+            </select>
+        }
+        <button type="submit" class="os-btn">Filter</button>
+    </form>
+</div>
+
+<div class="os-card os-table-wrap">
+    <table class="os-table">
+        <thead>
+            <tr><th>Title</th><th>Authors / Manager</th><th>Program</th><th>Adviser</th><th>Status</th><th>Last updated</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model.Records)
+            {
+                <tr>
+                    <td><div class="os-title">@r.Title</div><div class="os-sub">@r.Keywords</div></td>
+                    <td>@r.Authors</td>
+                    <td>@r.Program</td>
+                    <td>@r.Adviser</td>
+                    <td><span class="@PillClass(r.Status)">@r.Status</span></td>
+                    <td>@(r.UpdatedAt.HasValue ? r.UpdatedAt.Value.ToString("MMM d, yyyy") : "—")</td>
+                </tr>
+            }
+            @if (Model.Records.Count == 0)
+            {
+                <tr><td colspan="6" class="os-empty">No records match these filters.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,387 @@
+﻿/* ==========================================================================
+   Profile Page
+   Extracted from student-pm.css
+   ========================================================================== */
+
+.pm {
+    --pm-dark: var(--primary, #4a091d);
+    --pm-tint: color-mix(in srgb, var(--pm-dark) 6%, #fff);
+    --pm-soft: color-mix(in srgb, var(--pm-dark) 18%, #fff);
+    --pm-field: color-mix(in srgb, var(--pm-dark) 4%, #fff);
+    --pm-line: #e9dfe1;
+    --pm-muted: #7a6b6f;
+    --pm-ink: #1c1215;
+    --pm-serif: 'Newsreader', Georgia, serif;
+    color: var(--pm-ink);
+    font-size: 14px;
+}
+
+    .pm * {
+        box-sizing: border-box;
+    }
+
+    .pm i.fa {
+        line-height: 1;
+    }
+
+/* ---------- Profile Banner ---------- */
+
+.pm-banner {
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    border-radius: 14px;
+    padding: 32px 40px;
+    margin-bottom: 24px;
+    min-height: auto;
+    background: linear-gradient( 120deg, rgba(0, 0, 0, .12), rgba(255, 255, 255, .14) ), var(--pm-dark);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+    .pm-banner small {
+        display: block;
+        font-size: 12px;
+        opacity: 0.8;
+        font-weight: 500;
+    }
+
+    .pm-banner h1 {
+        font-family: 'Newsreader', Georgia, serif;
+        font-size: 40px;
+        font-weight: 700;
+        margin: 6px 0 10px;
+        padding-bottom: 0;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
+    }
+
+    .pm-banner p {
+        font-size: 12px;
+        font-weight: 500;
+        margin: 0;
+        opacity: 0.9;
+    }
+
+.pm-banner-icon {
+    position: absolute;
+    right: 30px;
+    bottom: -20px;
+    top: auto;
+    transform: none;
+    font-size: 140px;
+    color: rgba(255, 255, 255, 0.18);
+    pointer-events: none;
+}
+
+/* ---------- Banner: Staff (all roles except student and admin) ---------- */
+
+.pm:not(.role-student):not(.role-admin) .pm-banner {
+    background: linear-gradient(to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100%);
+}
+
+.pm:not(.role-student):not(.role-admin) .pm-banner-icon {
+    color: #0d192c;
+}
+
+/* ---------- Banner: Admin ---------- */
+
+.pm.role-admin .pm-banner {
+    background: linear-gradient(to left, #2C3F56 0%, #263B53 25%, #20344D 60%, #172A43 100%);
+}
+
+.pm.role-admin .pm-banner-icon {
+    color: #172A43;
+}
+
+/* ---------- Responsive Banner ---------- */
+
+@media (max-width: 600px) {
+    .pm-banner {
+        padding: 24px;
+    }
+
+        .pm-banner h1 {
+            font-size: 36px;
+        }
+
+    .pm-banner-icon {
+        right: 12px;
+        font-size: 90px;
+        bottom: -10px;
+    }
+}
+
+/* ---------- Profile Cards ---------- */
+
+.pm-card {
+    background: #fff;
+    border: 1px solid var(--pm-line);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 14px;
+}
+
+.pm-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--pm-dark);
+    margin: 0 0 16px;
+}
+
+/* ---------- Profile Layout ---------- */
+
+.pm-profile-grid {
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+}
+
+    .pm-profile-grid .pm-card {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0;
+    }
+
+/* ---------- Profile Header ---------- */
+
+.pm-profile-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--pm-line);
+}
+
+.pm-profile-name {
+    display: block;
+    font-size: 15px;
+}
+
+.pm-profile-role {
+    display: block;
+    font-size: 11px;
+    color: var(--pm-muted);
+}
+
+/* ---------- Profile Avatar ---------- */
+
+.pm-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex: none;
+    object-fit: cover;
+    display: grid;
+    place-items: center;
+    background: var(--pm-tint);
+    color: var(--pm-dark);
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.pm-avatar--lg {
+    width: 52px;
+    height: 52px;
+    font-size: 16px;
+}
+
+/* ---------- Profile Information Table ---------- */
+
+.pm-info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .pm-info-table td {
+        padding: 13px 4px;
+        border-bottom: 1px solid var(--pm-line);
+        font-size: 11px;
+    }
+
+    .pm-info-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .pm-info-table td.label {
+        width: 90px;
+        color: var(--pm-muted);
+    }
+
+    .pm-info-table td.info {
+        font-weight: 600;
+    }
+
+/* ---------- Change Password Form ---------- */
+
+.pm-pw-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 12px;
+    margin: 0;
+}
+
+    .pm-pw-form label {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--pm-dark);
+    }
+
+/* ---------- Password Inputs ---------- */
+
+.pm-input {
+    position: relative;
+    display: block;
+}
+
+    .pm-input input {
+        width: 100%;
+        height: 46px;
+        border: 1px solid var(--pm-soft);
+        background: var(--pm-field);
+        border-radius: 999px;
+        padding: 10px;
+        font: 400 12px 'Inter', sans-serif;
+    }
+
+        .pm-input input:focus {
+            outline: 2px solid var(--pm-dark);
+            outline-offset: 1px;
+        }
+
+    /* ---------- Password Visibility Icons ---------- */
+
+    .pm-input .toggle-password {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: var(--pm-muted);
+        font-size: 13px;
+    }
+
+/* ---------- Confirm Button ---------- */
+
+.pm-primary {
+    background: var(--pm-dark, #4a091d);
+    color: #fff;
+    border: 0;
+    border-radius: 999px;
+    padding: 9px 0;
+    width: 200px;
+    font: 600 12px 'Inter', sans-serif;
+    cursor: pointer;
+}
+
+    .pm-primary:hover {
+        filter: brightness(1.15);
+    }
+
+.pm-pw-actions {
+    display: flex;
+    justify-content: center;
+    padding: 0 0 30px;
+    margin-top: auto;
+}
+
+    .pm-pw-actions .pm-primary {
+        width: 130px;
+    }
+
+/* ---------- Responsive Layout ---------- */
+
+@media (max-width: 900px) {
+    .pm-profile-grid {
+        flex-direction: column;
+    }
+}
+
+
+/* Profile-only edit controls */
+.pm-profile-head-details {
+    min-width: 0;
+}
+
+.pm-profile-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 9px;
+}
+
+.pm-secondary {
+    border: 1px solid var(--pm-soft);
+    border-radius: 999px;
+    padding: 7px 13px;
+    background: #fff;
+    color: var(--pm-dark);
+    font: 600 11px 'Inter', sans-serif;
+    cursor: pointer;
+}
+
+    .pm-secondary:hover {
+        background: var(--pm-tint);
+    }
+
+.pm-edit-profile-form {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px solid var(--pm-line);
+    border-radius: 10px;
+    background: #fff;
+}
+
+    .pm-edit-profile-form[hidden] {
+        display: none !important;
+    }
+
+    .pm-edit-profile-form label {
+        display: block;
+        margin: 10px 0 5px;
+        color: var(--pm-muted);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .pm-edit-profile-form input {
+        width: 100%;
+        min-height: 38px;
+        border: 1px solid var(--pm-soft);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font: 400 13px 'Inter', sans-serif;
+    }
+
+.pm-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 14px;
+}
+
+    .pm-edit-actions .pm-primary {
+        width: auto;
+        padding: 9px 18px;
+    }
+
+.pm-profile-message {
+    color: var(--pm-muted);
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    .pm-profile-edit-actions {
+        gap: 6px;
+    }
+}

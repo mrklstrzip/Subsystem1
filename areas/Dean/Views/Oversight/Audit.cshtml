@@ -1,0 +1,38 @@
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+    var events = ViewBag.Events as System.Collections.Generic.List<MongoDB.Bson.BsonDocument>;
+}
+
+<div class="os-header">
+    <h1>Audit History</h1>
+    <p>Events recorded by Dean oversight and Capstone Coordinator screening and assessment actions.</p>
+    <i class="fa fa-clock-rotate-left os-bg-icon"></i>
+</div>
+
+<div class="os-card os-table-wrap">
+    <table class="os-table">
+        <thead>
+            <tr><th>Date / Time</th><th>Module</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr>
+        </thead>
+        <tbody>
+            @if (events != null && events.Count > 0)
+            {
+                foreach (var e in events)
+                {
+                    <tr>
+                        <td>@(e.Contains("at") && e["at"].IsBsonDateTime ? e["at"].ToUniversalTime().ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</td>
+                        <td>@(e.Contains("auditSource") ? e["auditSource"].ToString() : "Dean")</td>
+                        <td>@(e.Contains("actor") ? e["actor"].ToString() : "")</td>
+                        <td>@(e.Contains("action") ? e["action"].ToString() : "")</td>
+                        <td>@(e.Contains("target") ? e["target"].ToString() : "")</td>
+                        <td>@(e.Contains("details") ? e["details"].ToString() : "")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="6" class="os-empty">No audit events have been recorded yet.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

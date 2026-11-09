@@ -1,0 +1,35 @@
+﻿@using System.Linq
+@using System.Collections.Generic
+@using Subsystem1.Areas.CapstoneCoordinator.Models
+@using Subsystem1.Data
+@model List<CoNotification>
+@{
+    var today = DisplayFormat.Now().Date;
+    var recent = Model.Where(n => n.CreatedAt.Date == today).ToList();
+    var earlier = Model.Where(n => n.CreatedAt.Date != today).ToList();
+}
+@helper Item(CoNotification n)
+{
+    <div class="notif-item @(n.Read ? "" : "unread")" data-id="@n.Id" data-type="@n.Type">
+        <div class="notif-icon"><i class="fa @n.Icon"></i></div>
+        <div class="notif-content">
+            <div class="notif-item-title">@n.Title @if (!n.Read) {<span class="unread-dot"></span>}</div>
+            <p>@n.Text</p>
+            <div class="notif-actions"><span class="notif-time">@DisplayFormat.TimeAgo(n.CreatedAt)</span></div>
+        </div>
+    </div>
+}
+@if (Model.Count == 0)
+{
+    <p style="padding:24px 20px; color:#6b7280; font-size:13px; text-align:center;">No notifications yet. New titles, generated schedules, conflicts and Dean decisions show up here.</p>
+}
+@if (recent.Count > 0)
+{
+    <div class="notif-group-label">TODAY</div>
+    foreach (var n in recent) { @Item(n) }
+}
+@if (earlier.Count > 0)
+{
+    <div class="notif-group-label">EARLIER</div>
+    foreach (var n in earlier) { @Item(n) }
+}

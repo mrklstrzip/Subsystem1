@@ -1,0 +1,234 @@
+﻿
+@using System.Linq
+@using System.Collections.Generic
+@using Subsystem1.Areas.Auth.Controllers
+@{
+    var v = ViewBag.Values as RequestInput ?? new RequestInput();
+    var advisers = ViewBag.Advisers as List<KeyValuePair<string, string>> ?? new List<KeyValuePair<string, string>>();
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewBag.Title = "Request Account";
+    ViewBag.CardClass = "auth-card--wide";
+}
+
+<section class="auth-panel" aria-labelledby="auth-title">
+    <header class="auth-panel__head">
+        <h2 id="auth-title" class="auth-title">Request Account</h2>
+    </header>
+
+    @if (ViewBag.Error != null)
+    {<p class="auth-login-errors" role="alert">@ViewBag.Error</p>}
+
+    <form action="" method="post" class="auth-form" data-auth-form="request">
+        @Html.AntiForgeryToken()
+
+        <div class="auth-row auth-row--names">
+
+            <div class="auth-field">
+                <div class="f">
+                    <label class="f__label" for="LastName">Last Name</label>
+                    <input id="LastName" name="LastName" value="@v.LastName"
+                           class="f__control" type="text" required
+                           data-required="Enter your last name."
+                           autocomplete="family-name" />
+                </div>
+                <p class="auth-error" data-error-for="LastName" role="alert"></p>
+            </div>
+
+            <div class="auth-field">
+                <div class="f">
+                    <label class="f__label" for="FirstName">First Name</label>
+                    <input id="FirstName" name="FirstName" value="@v.FirstName"
+                           class="f__control" type="text" required
+                           data-required="Enter your first name."
+                           autocomplete="given-name" />
+                </div>
+                <p class="auth-error" data-error-for="FirstName" role="alert"></p>
+            </div>
+
+            <div class="auth-field">
+                <div class="f">
+                    <label class="f__label" for="MiddleName">Middle Name</label>
+                    <input id="MiddleName" name="MiddleName" value="@v.MiddleName"
+                           class="f__control" type="text"
+                           autocomplete="additional-name" />
+                </div>
+            </div>
+
+            <div class="auth-field">
+                <div class="f">
+                    <label class="f__label" for="Suffix">Suffix</label>
+                    <select id="Suffix" name="Suffix"
+                            class="f__control f__control--select">
+                        <option value="">None</option>
+                        <option @(v.Suffix == "Jr." ? "selected" : "")>Jr.</option>
+                        <option @(v.Suffix == "Sr." ? "selected" : "")>Sr.</option>
+                        <option @(v.Suffix == "II" ? "selected" : "")>II</option>
+                        <option @(v.Suffix == "III" ? "selected" : "")>III</option>
+                        <option @(v.Suffix == "IV" ? "selected" : "")>IV</option>
+                        <option @(v.Suffix == "V" ? "selected" : "")>V</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="auth-field">
+            <div class="f">
+                <label class="f__label" for="Email">Email</label>
+                <input id="Email" name="Email" type="email" value="@v.Email"
+                       class="f__control" required
+                       data-required="Enter your email address."
+                       data-email="Enter a valid email address."
+                       autocomplete="email" />
+            </div>
+            <p class="auth-error" data-error-for="Email" role="alert"></p>
+        </div>
+
+        <div class="auth-field">
+            <div class="f">
+                <label class="f__label" for="IDNumber">ID Number</label>
+                <input id="IDNumber" name="IDNumber" type="text" value="@v.IDNumber"
+                       class="f__control" required
+                       data-required="Enter your ID number." />
+            </div>
+            <p class="auth-error" data-error-for="IDNumber" role="alert"></p>
+        </div>
+
+        <!-- PROGRAM -->
+        <div class="auth-field">
+            <div class="f">
+                <label class="f__label" for="Program">Program</label>
+
+                <select id="Program" name="Program"
+                        class="f__control f__control--select"
+                        required
+                        data-required="Choose your program.">
+
+                    <option value="">Select Program</option>
+
+                    <option value="BSIT" @(v.Program == "BSIT" ? "selected" : "")>
+                        Bachelor of Science in Information Technology
+                    </option>
+
+                    <option value="BSCS" @(v.Program == "BSCS" ? "selected" : "")>
+                        Bachelor of Science in Computer Science
+                    </option>
+
+                    <option value="BSIS" @(v.Program == "BSIS" ? "selected" : "")>
+                        Bachelor of Science in Information Systems
+                    </option>
+
+                </select>
+            </div>
+
+            <p class="auth-error" data-error-for="Program" role="alert"></p>
+        </div>
+
+        <!-- SECTION WITH AUTOMATIC PREFIX -->
+        <div class="auth-field">
+            <div class="f">
+                <label class="f__label" for="Section">Section</label>
+
+                <input id="Section" name="Section"
+                       type="text"
+                       class="f__control"
+                       placeholder="Select program first"
+                       value="@v.Section"
+                       required
+                       disabled
+                       data-required="Enter your section." />
+            </div>
+
+            <p class="auth-error" data-error-for="Section" role="alert"></p>
+        </div>
+
+        <div class="auth-field">
+            <div class="f">
+                <label class="f__label" for="Adviser">Adviser</label>
+
+                <select id="Adviser" name="Adviser"
+                        class="f__control f__control--select"
+                        required
+                        data-required="Choose your adviser.">
+
+                    <option value="">Select Adviser</option>
+                    @foreach (var a in advisers)
+                    {
+                        <option value="@a.Key" @(v.Adviser == a.Key ? "selected" : "")>@a.Value</option>
+                    }
+
+                </select>
+            </div>
+
+            <p class="auth-error" data-error-for="Adviser" role="alert"></p>
+        </div>
+
+        <div class="auth-actions">
+            <button type="submit" class="auth-btn">Submit</button>
+        </div>
+
+    </form>
+
+    <p class="auth-sub">
+        Already have an account?
+        <a href="@Url.Action("login", "Login", new { area = "Auth" })">Login</a>
+    </p>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+        const programSelect = document.getElementById("Program");
+        const sectionInput = document.getElementById("Section");
+
+        const prefixes = {
+            "BSIT": "SBIT-",
+            "BSCS": "SBCS-",
+            "BSIS": "SBIS-"
+        };
+
+        function updateSectionPrefix() {
+
+            const prefix = prefixes[programSelect.value];
+
+            if (!prefix) {
+                sectionInput.value = "";
+                sectionInput.disabled = true;
+                sectionInput.placeholder = "Select program first";
+                return;
+            }
+
+            sectionInput.disabled = false;
+            sectionInput.placeholder = prefix + "4A";
+            sectionInput.value = prefix;
+        }
+
+        programSelect.addEventListener("change", updateSectionPrefix);
+
+        sectionInput.addEventListener("input", function () {
+
+            const prefix = prefixes[programSelect.value];
+
+            if (!prefix) {
+                return;
+            }
+
+            // Keep only the section suffix entered by the student.
+            let suffix = sectionInput.value
+                .replace(/^(SBIT-|SBCS-|SBIS-)/i, "")
+                .replace(/[^a-zA-Z0-9]/g, "")
+                .toUpperCase();
+
+            sectionInput.value = prefix + suffix;
+        });
+
+        // After a rejected submit the browser gives back what was typed: keep the section.
+        var typedSection = sectionInput.value.toUpperCase();
+        updateSectionPrefix();
+        var keepPrefix = prefixes[programSelect.value];
+        if (keepPrefix && typedSection.indexOf(keepPrefix) === 0) {
+            sectionInput.value = typedSection;
+        }
+
+});
+</script>
