@@ -214,6 +214,7 @@
     <Content Include="Content\css\delete.css" />
     <Content Include="Content\css\admin\expertisetag.css" />
     <Content Include="Content\css\admin\facultyprofile.css" />
+    <Content Include="Content\css\fonts.css" />
     <Content Include="Content\css\logout-confirm.css" />
     <Content Include="Content\css\profile.css" />
     <Content Include="Content\css\layout.css" />
@@ -403,6 +404,10 @@
     <Content Include="Areas\CapstoneCoordinator\Views\Shared\_NotificationItems.cshtml" />
     <Content Include="Areas\Dean\Views\Shared\_NotificationItems.cshtml" />
     <Content Include="connectionStrings.config" />
+    <Content Include="Content\fonts\Inter\InterVariable.ttf" />
+    <Content Include="Content\fonts\Inter\InterVariable-Italic.ttf" />
+    <Content Include="Content\fonts\Newsreader\Newsreader-Italic-Variable.ttf" />
+    <Content Include="Content\fonts\Newsreader\Newsreader-Variable.ttf" />
     <None Include="packages.config" />
     <Content Include="Views\web.config" />
     <Content Include="Views\Shared\Error.cshtml" />
