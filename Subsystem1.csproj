@@ -201,6 +201,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\css\capstonecoordinator\audit.css" />
+    <Content Include="Content\css\capstonecoordinator\cases.css" />
     <Content Include="Content\css\capstonecoordinator\privacy.css" />
     <Content Include="Content\css\campusdirector.css" />
     <Content Include="Content\css\capstonecoordinator\conflictresult.css" />

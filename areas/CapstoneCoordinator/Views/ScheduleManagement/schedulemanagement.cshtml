@@ -2,16 +2,15 @@
 @using Subsystem1.Areas.CapstoneCoordinator.Models
 @model CoordinatorData
 @{
-    ViewBag.Title = "Schedule Management";
+    ViewBag.Title = "Manuscript Management";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.4" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.5" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
     <div class="header-text">
-        <h1 class="page-title">Schedule Management</h1>
+        <h1 class="page-title">Manuscript Management</h1>
         <p class="welcome-text">Generate and edit schedule</p>
     </div>
     <div class="header-bg-icon">
@@ -58,6 +57,12 @@
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
         </div>
+
+        <!-- Notify PM Button -->
+        <button type="button" class="btn-notify-pm" id="btnNotifyPm">
+            <i class="fa-solid fa-bell"></i>
+            <span>Notify PM</span>
+        </button>
     </div>
 </div>
 
@@ -67,7 +72,7 @@
         <thead>
             <tr>
                 <th class="column-title manuscript-col">MANUSCRIPT</th>
-                <th class="column-title author-col">AUTHOR</th>
+                <th class="column-title author-col">PROJECT MANAGER</th>
                 <th class="column-title adviser-col">ADVISER</th>
                 <th class="column-title date-col">DATE</th>
                 <th class="column-title status-col">STATUS</th>
@@ -97,12 +102,7 @@
     </table>
 </div>
 
-<!-- ==========================================================
-     Generated Schedule Modal (one markup, 3 status variants)
-     to-submit    -> Close + Submit
-     under-review -> Close + Submit, problem shown
-     submitted    -> Close only
-     ========================================================== -->
+
 <div class="modal-overlay" id="scheduleModal" aria-hidden="true">
     <div class="schedule-modal" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
 
@@ -136,7 +136,7 @@
             <div class="summary-divider"></div>
             <div class="summary-row summary-row-3">
                 <div class="summary-item">
-                    <span class="summary-label">Student</span>
+                    <span class="summary-label">Project Manager</span>
                     <span class="summary-value" id="mStudent"></span>
                 </div>
                 <div class="summary-item">
@@ -207,6 +207,15 @@
                         </dd>
                     </div>
                     <div>
+                        <dt>BUILDING</dt>
+                        <dd>
+                            <span class="view-val" id="mBuilding"></span>
+                            <span class="edit-val">
+                                <input type="text" class="edit-input building-input" id="eBuilding" maxlength="30" aria-label="Building">
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
                         <dt>ROOM</dt>
                         <dd>
                             <span class="view-val" id="mRoom"></span>
@@ -251,5 +260,51 @@
             var btn = e.target.closest ? e.target.closest(".btn-view") : null;
             if (btn) CCSchedule.open(btn.getAttribute("data-id"));
         });
+
+
+        //for testing lang ng frontend para makita itsura (pa remove nalang pag aayusin backend)
+        var notifyBtn = document.getElementById("btnNotifyPm");
+        if (notifyBtn) notifyBtn.addEventListener("click", function () {
+            alert("Notification sent to the project manager(s).");
+        });
+
+        var panelists = document.getElementById("mPanelists");
+        var defaultPercent = { high: 90, medium: 70, low: 40 };
+
+        function addPercents() {
+            var pills = panelists.querySelectorAll(".match-pill");
+            for (var i = 0; i < pills.length; i++) {
+                var pill = pills[i];
+                if (pill.parentNode.classList.contains("match-wrap")) continue;
+
+                var level = pill.classList.contains("high") ? "high"
+                    : pill.classList.contains("medium") ? "medium" : "low";
+
+                var pct = document.createElement("span");
+                pct.className = "match-percent";
+                pct.textContent = (pill.getAttribute("data-percent") || defaultPercent[level]) + "%";
+
+                var wrap = document.createElement("span");
+                wrap.className = "match-wrap";
+                pill.parentNode.insertBefore(wrap, pill);
+                wrap.appendChild(pct);
+                wrap.appendChild(pill);
+            }
+        }
+        new MutationObserver(addPercents).observe(panelists, { childList: true, subtree: true });
+        addPercents();
+
+        var mBuilding = document.getElementById("mBuilding");
+        var eBuilding = document.getElementById("eBuilding");
+        mBuilding.textContent = "-";
+
+        document.getElementById("btnEditPanelists").addEventListener("click", function () {
+            eBuilding.value = mBuilding.textContent === "-" ? "" : mBuilding.textContent;
+        });
+        document.getElementById("btnSaveEdit").addEventListener("click", function () {
+            mBuilding.textContent = eBuilding.value.trim() || "-";
+        });
+        new MutationObserver(function () { mBuilding.textContent = "-"; })
+            .observe(document.getElementById("mTitle"), { childList: true, characterData: true, subtree: true });
     })();
 </script>

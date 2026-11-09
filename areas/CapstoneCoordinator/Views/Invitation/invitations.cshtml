@@ -6,6 +6,20 @@
 <link href="@Url.Content("~/Content/css/capstonecoordinator/invitations.css")?v=1.0" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
+<style>
+    /* Status filter: same look as the filters in schedulemanagement.
+       The box/legend/dropdown styles come from conflictresult.css;
+       only the small differences are handled here. */
+    #invStatusBox .inv-native-select {
+        display: none !important; /* the real <select id="invStatus"> stays in the page for the existing script */
+    }
+
+    #invStatusBox .select-option.selected {
+        background: #223249;
+        color: #FFFFFF;
+    }
+</style>
+
 <!-- Header Banner -->
 <div class="dashboard-header">
     <div class="header-text">
@@ -26,9 +40,17 @@
         </div>
     </div>
     <div class="filter-wrapper">
-        <div class="inv-filter">
+        <!-- Status Filter Box (same design as schedulemanagement) -->
+        <div class="custom-select-box" id="invStatusBox">
             <span class="filter-legend">Status</span>
-            <select id="invStatus" aria-label="Filter by status">
+            <div class="select-selected" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false">
+                <i class="fa-solid fa-sliders"></i>
+                <span>All</span>
+                <i class="fa-solid fa-chevron-down chevron"></i>
+            </div>
+
+            <!-- Kept as-is: the existing script reads and listens to this select -->
+            <select id="invStatus" class="inv-native-select" aria-label="Filter by status">
                 <option value="">All</option>
                 <option value="pending">Pending</option>
                 <option value="accepted">Signed up</option>
@@ -37,6 +59,7 @@
                 <option value="revoked">Cancelled</option>
             </select>
         </div>
+
         <button type="button" class="inv-btn inv-btn--primary" id="invOpen">
             <i class="fa fa-user-plus"></i> Invite Project Managers
         </button>
@@ -113,3 +136,76 @@
 <div class="inv-toast" id="invToast" role="status" aria-live="polite" hidden></div>
 
 <script src="@Url.Content("~/Scripts/coordinator-invitations.js")?v=1.0"></script>
+<script>
+    // Visual dropdown for the Status filter. The hidden <select id="invStatus"> stays the
+    // source of truth: picking an option sets its value and fires its "change" event,
+    // so coordinator-invitations.js works exactly as before.
+    (function () {
+        var box = document.getElementById("invStatusBox");
+        var select = document.getElementById("invStatus");
+        if (!box || !select) return;
+
+        var toggle = box.querySelector(".select-selected");
+        var label = toggle.querySelector("span");
+
+        var menu = document.createElement("div");
+        menu.className = "custom-select-dropdown";
+        menu.setAttribute("role", "listbox");
+
+        Array.prototype.forEach.call(select.options, function (o) {
+            var el = document.createElement("div");
+            el.className = "select-option";
+            el.setAttribute("role", "option");
+            el.setAttribute("data-value", o.value);
+            el.textContent = o.textContent;
+            menu.appendChild(el);
+        });
+        box.appendChild(menu);
+
+        function syncFromSelect() {
+            var current = select.value;
+            var opts = menu.querySelectorAll(".select-option");
+            for (var i = 0; i < opts.length; i++) {
+                var on = opts[i].getAttribute("data-value") === current;
+                opts[i].classList.toggle("selected", on);
+                if (on) label.textContent = opts[i].textContent;
+            }
+        }
+
+        function setOpen(on) {
+            box.classList.toggle("open", on);
+            menu.classList.toggle("open", on);
+            toggle.setAttribute("aria-expanded", on ? "true" : "false");
+        }
+
+        toggle.addEventListener("click", function (e) {
+            setOpen(!menu.classList.contains("open"));
+            e.stopPropagation();
+        });
+        toggle.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setOpen(!menu.classList.contains("open"));
+            }
+        });
+
+        menu.addEventListener("click", function (e) {
+            var opt = e.target.closest(".select-option");
+            if (!opt) return;
+            select.value = opt.getAttribute("data-value");
+            syncFromSelect();
+            setOpen(false);
+            var evt;
+            if (typeof Event === "function") evt = new Event("change", { bubbles: true });
+            else { evt = document.createEvent("Event"); evt.initEvent("change", true, true); }
+            select.dispatchEvent(evt);
+            e.stopPropagation();
+        });
+
+        select.addEventListener("change", syncFromSelect);   // keeps the label right if the select changes elsewhere
+        document.addEventListener("click", function () { setOpen(false); });
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape") setOpen(false); });
+
+        syncFromSelect();
+    })();
+</script>
