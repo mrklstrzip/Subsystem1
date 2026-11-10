@@ -68,7 +68,7 @@
                 <th>ADVISER</th>
                 <th>DATE</th>
                 <th>STATUS</th>
-                <th>ACTION</th>
+                <th class="sa-action">ACTION</th>
             </tr>
         </thead>
         <tbody>
@@ -89,7 +89,7 @@
                     <td>
                         <span class="sa-status @(m.Status == "Approved" ? "st-approved" : "st-toapprove")">@m.Status</span>
                     </td>
-                    <td><button type="button" class="sa-btn-view" data-sa-open data-id="@m.Id">View</button></td>
+                    <td class="sa-action"><button type="button" class="sa-btn-view" data-sa-open data-id="@m.Id">View</button></td>
                 </tr>
             }
         </tbody>
@@ -100,3 +100,4 @@
 
 @Html.Partial("_ScheduleApprovalModal")
 <script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.2"></script>
+<script src="@Url.Content("~/Scripts/dean-select.js")?v=1.0"></script>

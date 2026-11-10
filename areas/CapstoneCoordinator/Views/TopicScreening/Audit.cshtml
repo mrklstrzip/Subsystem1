@@ -1,7 +1,11 @@
+
 @{
     Layout = "~/Areas/CapstoneCoordinator/Views/Shared/_CapstoneCoordinatorLayout.cshtml";
     var events = ViewBag.Events as System.Collections.Generic.List<MongoDB.Bson.BsonDocument>;
 }
+
+<link href="@Url.Content("~/Content/css/capstonecoordinator/audit.css")?v=3.5" rel="stylesheet" type="text/css" />
+
 
 <div class="os-header">
     <h1>Audit History</h1>
@@ -9,9 +13,17 @@
     <i class="fa fa-clock-rotate-left os-bg-icon"></i>
 </div>
 
-<div class="os-card os-table-wrap">
-    <table class="os-table">
-        <thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+<div class="audit-management-card">
+    <table class="audit-table">
+        <thead>
+            <tr>
+                <th class="column-title">When</th>
+                <th class="column-title">Actor</th>
+                <th class="column-title">Action</th>
+                <th class="column-title">Target</th>
+                <th class="column-title">Details</th>
+            </tr>
+        </thead>
         <tbody>
             @if (events != null && events.Count > 0)
             {
@@ -28,7 +40,7 @@
             }
             else
             {
-                <tr><td colspan="5" class="os-empty">No audit events have been recorded yet.</td></tr>
+                <tr><td colspan="5" class="audit-empty">No audit events have been recorded yet.</td></tr>
             }
         </tbody>
     </table>

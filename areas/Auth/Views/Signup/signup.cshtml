@@ -10,6 +10,9 @@
     ViewBag.CardClass = "auth-card--wide";
 }
 
+<link href="@Url.Content("~/Content/css/fonts.css")?v=1.0" rel="stylesheet" type="text/css" />
+
+
 <section class="auth-panel" aria-labelledby="auth-title">
     @if (invalid != null)
     {
@@ -23,217 +26,217 @@
     }
     else
     {
-    <text>
-    <header class="auth-panel__head">
-        <h2 id="auth-title" class="auth-title">Create Account</h2>
-    </header>
+        <text>
+            <header class="auth-panel__head">
+                <h2 id="auth-title" class="auth-title">Create Account</h2>
+            </header>
 
-    @if (ViewBag.Error != null)
-    {<p class="auth-login-errors" role="alert">@ViewBag.Error</p>}
+            @if (ViewBag.Error != null)
+            {<p class="auth-login-errors" role="alert">@ViewBag.Error</p>}
 
-    <form action="" method="post" class="auth-form" data-auth-form="signup">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="Token" value="@ViewBag.Token" />
+            <form action="" method="post" class="auth-form" data-auth-form="signup">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Token" value="@ViewBag.Token" />
 
-        <div class="auth-field">
-            <div class="f">
-                <label class="f__label" for="InviteEmail">Email</label>
-                <input id="InviteEmail" type="email" value="@ViewBag.InviteEmail"
-                       class="f__control" readonly tabindex="-1" aria-readonly="true" />
-            </div>
-        </div>
-
-        <div class="auth-row auth-row--names">
-
-            <div class="auth-field">
-                <div class="f">
-                    <label class="f__label" for="LastName">Last Name</label>
-                    <input id="LastName" name="LastName" value="@v.LastName"
-                           class="f__control" type="text" required
-                           data-required="Enter your last name."
-                           autocomplete="family-name" />
+                <div class="auth-field">
+                    <div class="f">
+                        <label class="f__label" for="InviteEmail">Email</label>
+                        <input id="InviteEmail" type="email" value="@ViewBag.InviteEmail"
+                               class="f__control" readonly tabindex="-1" aria-readonly="true" />
+                    </div>
                 </div>
-                <p class="auth-error" data-error-for="LastName" role="alert"></p>
-            </div>
 
-            <div class="auth-field">
-                <div class="f">
-                    <label class="f__label" for="FirstName">First Name</label>
-                    <input id="FirstName" name="FirstName" value="@v.FirstName"
-                           class="f__control" type="text" required
-                           data-required="Enter your first name."
-                           autocomplete="given-name" />
+                <div class="auth-row auth-row--names">
+
+                    <div class="auth-field">
+                        <div class="f">
+                            <label class="f__label" for="LastName">Last Name</label>
+                            <input id="LastName" name="LastName" value="@v.LastName"
+                                   class="f__control" type="text" required
+                                   data-required="Enter your last name."
+                                   autocomplete="family-name" />
+                        </div>
+                        <p class="auth-error" data-error-for="LastName" role="alert"></p>
+                    </div>
+
+                    <div class="auth-field">
+                        <div class="f">
+                            <label class="f__label" for="FirstName">First Name</label>
+                            <input id="FirstName" name="FirstName" value="@v.FirstName"
+                                   class="f__control" type="text" required
+                                   data-required="Enter your first name."
+                                   autocomplete="given-name" />
+                        </div>
+                        <p class="auth-error" data-error-for="FirstName" role="alert"></p>
+                    </div>
+
+                    <div class="auth-field">
+                        <div class="f">
+                            <label class="f__label" for="MiddleName">Middle Name</label>
+                            <input id="MiddleName" name="MiddleName" value="@v.MiddleName"
+                                   class="f__control" type="text"
+                                   autocomplete="additional-name" />
+                        </div>
+                    </div>
+
+                    <div class="auth-field">
+                        <div class="f">
+                            <label class="f__label" for="Suffix">Suffix</label>
+                            <select id="Suffix" name="Suffix" class="f__control f__control--select">
+                                <option value="">None</option>
+                                <option @(v.Suffix == "Jr." ? "selected" : "")>Jr.</option>
+                                <option @(v.Suffix == "Sr." ? "selected" : "")>Sr.</option>
+                                <option @(v.Suffix == "II" ? "selected" : "")>II</option>
+                                <option @(v.Suffix == "III" ? "selected" : "")>III</option>
+                                <option @(v.Suffix == "IV" ? "selected" : "")>IV</option>
+                                <option @(v.Suffix == "V" ? "selected" : "")>V</option>
+                            </select>
+                        </div>
+                    </div>
+
                 </div>
-                <p class="auth-error" data-error-for="FirstName" role="alert"></p>
-            </div>
 
-            <div class="auth-field">
-                <div class="f">
-                    <label class="f__label" for="MiddleName">Middle Name</label>
-                    <input id="MiddleName" name="MiddleName" value="@v.MiddleName"
-                           class="f__control" type="text"
-                           autocomplete="additional-name" />
+                <div class="auth-field">
+                    <div class="f">
+                        <label class="f__label" for="IDNumber">ID Number</label>
+                        <input id="IDNumber" name="IDNumber" type="text" value="@v.IDNumber"
+                               class="f__control" required
+                               data-required="Enter your ID number." />
+                    </div>
+                    <p class="auth-error" data-error-for="IDNumber" role="alert"></p>
                 </div>
-            </div>
 
-            <div class="auth-field">
-                <div class="f">
-                    <label class="f__label" for="Suffix">Suffix</label>
-                    <select id="Suffix" name="Suffix" class="f__control f__control--select">
-                        <option value="">None</option>
-                        <option @(v.Suffix == "Jr." ? "selected" : "")>Jr.</option>
-                        <option @(v.Suffix == "Sr." ? "selected" : "")>Sr.</option>
-                        <option @(v.Suffix == "II" ? "selected" : "")>II</option>
-                        <option @(v.Suffix == "III" ? "selected" : "")>III</option>
-                        <option @(v.Suffix == "IV" ? "selected" : "")>IV</option>
-                        <option @(v.Suffix == "V" ? "selected" : "")>V</option>
-                    </select>
+                <div class="auth-field">
+                    <div class="f">
+                        <label class="f__label" for="Program">Program</label>
+                        <select id="Program" name="Program"
+                                class="f__control f__control--select"
+                                required
+                                data-required="Choose your program.">
+                            <option value="">Select Program</option>
+                            <option value="BSIT" @(v.Program == "BSIT" ? "selected" : "")>Bachelor of Science in Information Technology</option>
+                            <option value="BSCS" @(v.Program == "BSCS" ? "selected" : "")>Bachelor of Science in Computer Science</option>
+                            <option value="BSIS" @(v.Program == "BSIS" ? "selected" : "")>Bachelor of Science in Information Systems</option>
+                        </select>
+                    </div>
+                    <p class="auth-error" data-error-for="Program" role="alert"></p>
                 </div>
-            </div>
 
-        </div>
+                <div class="auth-field">
+                    <div class="f">
+                        <label class="f__label" for="Section">Section</label>
+                        <input id="Section" name="Section" type="text"
+                               class="f__control"
+                               placeholder="Select program first"
+                               value="@v.Section"
+                               required
+                               disabled
+                               data-required="Enter your section." />
+                    </div>
+                    <p class="auth-error" data-error-for="Section" role="alert"></p>
+                </div>
 
-        <div class="auth-field">
-            <div class="f">
-                <label class="f__label" for="IDNumber">ID Number</label>
-                <input id="IDNumber" name="IDNumber" type="text" value="@v.IDNumber"
-                       class="f__control" required
-                       data-required="Enter your ID number." />
-            </div>
-            <p class="auth-error" data-error-for="IDNumber" role="alert"></p>
-        </div>
+                <div class="auth-field">
+                    <div class="f">
+                        <label class="f__label" for="Adviser">Adviser</label>
+                        <select id="Adviser" name="Adviser"
+                                class="f__control f__control--select"
+                                required
+                                data-required="Choose your adviser.">
+                            <option value="">Select Adviser</option>
+                            @foreach (var a in advisers)
+                            {
+                                <option value="@a.Key" @(v.Adviser == a.Key ? "selected" : "")>@a.Value</option>
+                            }
+                        </select>
+                    </div>
+                    <p class="auth-error" data-error-for="Adviser" role="alert"></p>
+                </div>
 
-        <div class="auth-field">
-            <div class="f">
-                <label class="f__label" for="Program">Program</label>
-                <select id="Program" name="Program"
-                        class="f__control f__control--select"
-                        required
-                        data-required="Choose your program.">
-                    <option value="">Select Program</option>
-                    <option value="BSIT" @(v.Program == "BSIT" ? "selected" : "")>Bachelor of Science in Information Technology</option>
-                    <option value="BSCS" @(v.Program == "BSCS" ? "selected" : "")>Bachelor of Science in Computer Science</option>
-                    <option value="BSIS" @(v.Program == "BSIS" ? "selected" : "")>Bachelor of Science in Information Systems</option>
-                </select>
-            </div>
-            <p class="auth-error" data-error-for="Program" role="alert"></p>
-        </div>
+                <div class="auth-field">
+                    <div class="f">
+                        <label class="f__label" for="Password">Password</label>
+                        <input type="password" id="Password" name="Password" class="f__control has-eye"
+                               autocomplete="new-password" required
+                               data-required="Choose a password."
+                               data-rules="pw-rules" data-caps="Password-hint" />
+                        <button type="button" class="auth-eye" data-toggle-password="Password" aria-label="Show password" aria-pressed="false"><svg class="auth-eye__on" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C7.5 5 3.7 8 2.5 12 3.7 16 7.5 19 12 19s8.3-3 9.5-7C20.3 8 16.5 5 12 5zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" /></svg><svg class="auth-eye__off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M9.8 9.9A3 3 0 0 0 14.2 14M6.5 6.7C4.6 7.9 3.2 9.8 2.5 12 3.7 16 7.5 19 12 19c2 0 3.8-.6 5.4-1.6M11 5.1h1c4.5 0 8.3 3 9.5 6.9-.3.9-.7 1.7-1.2 2.5" /></svg></button>
+                    </div>
+                    <p class="auth-hint" id="Password-hint" hidden>Caps Lock is on.</p>
+                    <p class="auth-error" data-error-for="Password" role="alert"></p>
+                </div>
 
-        <div class="auth-field">
-            <div class="f">
-                <label class="f__label" for="Section">Section</label>
-                <input id="Section" name="Section" type="text"
-                       class="f__control"
-                       placeholder="Select program first"
-                       value="@v.Section"
-                       required
-                       disabled
-                       data-required="Enter your section." />
-            </div>
-            <p class="auth-error" data-error-for="Section" role="alert"></p>
-        </div>
+                <ul class="auth-rules" id="pw-rules">
+                    <li data-rule="length">8 or more characters</li>
+                    <li data-rule="case">Upper and lower case</li>
+                    <li data-rule="number">A number</li>
+                </ul>
 
-        <div class="auth-field">
-            <div class="f">
-                <label class="f__label" for="Adviser">Adviser</label>
-                <select id="Adviser" name="Adviser"
-                        class="f__control f__control--select"
-                        required
-                        data-required="Choose your adviser.">
-                    <option value="">Select Adviser</option>
-                    @foreach (var a in advisers)
-                    {
-                        <option value="@a.Key" @(v.Adviser == a.Key ? "selected" : "")>@a.Value</option>
-                    }
-                </select>
-            </div>
-            <p class="auth-error" data-error-for="Adviser" role="alert"></p>
-        </div>
+                <div class="auth-field">
+                    <div class="f">
+                        <label class="f__label" for="ConfirmPassword">Confirm Password</label>
+                        <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="f__control has-eye"
+                               autocomplete="new-password" required
+                               data-required="Confirm your password."
+                               data-match="Password" data-match-message="The passwords do not match." />
+                        <button type="button" class="auth-eye" data-toggle-password="ConfirmPassword" aria-label="Show password" aria-pressed="false"><svg class="auth-eye__on" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C7.5 5 3.7 8 2.5 12 3.7 16 7.5 19 12 19s8.3-3 9.5-7C20.3 8 16.5 5 12 5zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" /></svg><svg class="auth-eye__off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M9.8 9.9A3 3 0 0 0 14.2 14M6.5 6.7C4.6 7.9 3.2 9.8 2.5 12 3.7 16 7.5 19 12 19c2 0 3.8-.6 5.4-1.6M11 5.1h1c4.5 0 8.3 3 9.5 6.9-.3.9-.7 1.7-1.2 2.5" /></svg></button>
+                    </div>
+                    <p class="auth-error" data-error-for="ConfirmPassword" role="alert"></p>
+                </div>
 
-        <div class="auth-field">
-            <div class="f">
-                <label class="f__label" for="Password">Password</label>
-                <input type="password" id="Password" name="Password" class="f__control has-eye"
-                       autocomplete="new-password" required
-                       data-required="Choose a password."
-                       data-rules="pw-rules" data-caps="Password-hint" />
-                <button type="button" class="auth-eye" data-toggle-password="Password" aria-label="Show password" aria-pressed="false"><svg class="auth-eye__on" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C7.5 5 3.7 8 2.5 12 3.7 16 7.5 19 12 19s8.3-3 9.5-7C20.3 8 16.5 5 12 5zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" /></svg><svg class="auth-eye__off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M9.8 9.9A3 3 0 0 0 14.2 14M6.5 6.7C4.6 7.9 3.2 9.8 2.5 12 3.7 16 7.5 19 12 19c2 0 3.8-.6 5.4-1.6M11 5.1h1c4.5 0 8.3 3 9.5 6.9-.3.9-.7 1.7-1.2 2.5" /></svg></button>
-            </div>
-            <p class="auth-hint" id="Password-hint" hidden>Caps Lock is on.</p>
-            <p class="auth-error" data-error-for="Password" role="alert"></p>
-        </div>
+                <div class="auth-actions">
+                    <button type="submit" class="auth-btn" data-busy-text="Signing up...">Sign Up</button>
+                </div>
+            </form>
 
-        <ul class="auth-rules" id="pw-rules">
-            <li data-rule="length">8 or more characters</li>
-            <li data-rule="case">Upper and lower case</li>
-            <li data-rule="number">A number</li>
-        </ul>
-
-        <div class="auth-field">
-            <div class="f">
-                <label class="f__label" for="ConfirmPassword">Confirm Password</label>
-                <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="f__control has-eye"
-                       autocomplete="new-password" required
-                       data-required="Confirm your password."
-                       data-match="Password" data-match-message="The passwords do not match." />
-                <button type="button" class="auth-eye" data-toggle-password="ConfirmPassword" aria-label="Show password" aria-pressed="false"><svg class="auth-eye__on" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C7.5 5 3.7 8 2.5 12 3.7 16 7.5 19 12 19s8.3-3 9.5-7C20.3 8 16.5 5 12 5zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" /></svg><svg class="auth-eye__off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M9.8 9.9A3 3 0 0 0 14.2 14M6.5 6.7C4.6 7.9 3.2 9.8 2.5 12 3.7 16 7.5 19 12 19c2 0 3.8-.6 5.4-1.6M11 5.1h1c4.5 0 8.3 3 9.5 6.9-.3.9-.7 1.7-1.2 2.5" /></svg></button>
-            </div>
-            <p class="auth-error" data-error-for="ConfirmPassword" role="alert"></p>
-        </div>
-
-        <div class="auth-actions">
-            <button type="submit" class="auth-btn" data-busy-text="Signing up...">Sign Up</button>
-        </div>
-    </form>
-
-    <p class="auth-sub">
-        Already have an account?
-        <a href="@Url.Action("login", "Login", new { area = "Auth" })">Login</a>
-    </p>
-    </text>
+            <p class="auth-sub">
+                Already have an account?
+                <a href="@Url.Action("login", "Login", new { area = "Auth" })">Login</a>
+            </p>
+        </text>
     }
 </section>
 
 @if (invalid == null)
 {
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    var programSelect = document.getElementById("Program");
-    var sectionInput = document.getElementById("Section");
-    var prefixes = { "BSIT": "SBIT-", "BSCS": "SBCS-", "BSIS": "SBIS-" };
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var programSelect = document.getElementById("Program");
+            var sectionInput = document.getElementById("Section");
+            var prefixes = { "BSIT": "SBIT-", "BSCS": "SBCS-", "BSIS": "SBIS-" };
 
-    function updateSectionPrefix() {
-        var prefix = prefixes[programSelect.value];
-        if (!prefix) {
-            sectionInput.value = "";
-            sectionInput.disabled = true;
-            sectionInput.placeholder = "Select program first";
-            return;
-        }
-        sectionInput.disabled = false;
-        sectionInput.placeholder = prefix + "4A";
-        sectionInput.value = prefix;
-    }
+            function updateSectionPrefix() {
+                var prefix = prefixes[programSelect.value];
+                if (!prefix) {
+                    sectionInput.value = "";
+                    sectionInput.disabled = true;
+                    sectionInput.placeholder = "Select program first";
+                    return;
+                }
+                sectionInput.disabled = false;
+                sectionInput.placeholder = prefix + "4A";
+                sectionInput.value = prefix;
+            }
 
-    programSelect.addEventListener("change", updateSectionPrefix);
+            programSelect.addEventListener("change", updateSectionPrefix);
 
-    sectionInput.addEventListener("input", function () {
-        var prefix = prefixes[programSelect.value];
-        if (!prefix) return;
-        var suffix = sectionInput.value
-            .replace(/^(SBIT-|SBCS-|SBIS-)/i, "")
-            .replace(/[^a-zA-Z0-9]/g, "")
-            .toUpperCase();
-        sectionInput.value = prefix + suffix;
-    });
+            sectionInput.addEventListener("input", function () {
+                var prefix = prefixes[programSelect.value];
+                if (!prefix) return;
+                var suffix = sectionInput.value
+                    .replace(/^(SBIT-|SBCS-|SBIS-)/i, "")
+                    .replace(/[^a-zA-Z0-9]/g, "")
+                    .toUpperCase();
+                sectionInput.value = prefix + suffix;
+            });
 
-    // After a rejected submit the browser gives back what was typed: keep the section.
-    var typedSection = sectionInput.value.toUpperCase();
-    updateSectionPrefix();
-    var keepPrefix = prefixes[programSelect.value];
-    if (keepPrefix && typedSection.indexOf(keepPrefix) === 0) {
-        sectionInput.value = typedSection;
-    }
-});
-</script>
+            // After a rejected submit the browser gives back what was typed: keep the section.
+            var typedSection = sectionInput.value.toUpperCase();
+            updateSectionPrefix();
+            var keepPrefix = prefixes[programSelect.value];
+            if (keepPrefix && typedSection.indexOf(keepPrefix) === 0) {
+                sectionInput.value = typedSection;
+            }
+        });
+    </script>
 }
