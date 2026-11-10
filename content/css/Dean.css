@@ -1,4 +1,9 @@
-﻿.dashboard-header {
+﻿html {
+    scrollbar-gutter: stable;
+}
+
+
+.dashboard-header {
     background: linear-gradient( to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100% );
     border-radius: 14px;
     padding: 27px 40px;

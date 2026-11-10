@@ -1,4 +1,9 @@
-﻿:root {
+﻿html {
+    scrollbar-gutter: stable;
+}
+
+
+:root {
     --primary-color: #2E5C8A;
     --primary-hover: #24496e;
     --primary-light: #e6eef5;
@@ -1891,10 +1896,12 @@ table.cdp2-info {
     width: calc(100% + 3px);
     max-height: 260px;
     overflow-y: auto;
+    padding: 6px;
     background: #FFFFFF;
     border: 1.5px solid #374A60;
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
     z-index: 100;
 }
 
@@ -1903,7 +1910,8 @@ table.cdp2-info {
 }
 
 .cdc-option {
-    padding: 10px 14px;
+    padding: 9px 12px;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
     color: #2D3748;

@@ -1,4 +1,7 @@
-﻿
+﻿html {
+    scrollbar-gutter: stable;
+}
+
 body {
     background-color: #EAECEF;
     font-family: 'Inter', sans-serif;
