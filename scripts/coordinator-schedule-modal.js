@@ -115,15 +115,33 @@
         $('pdfPage').textContent = $('pdfPages').textContent = '\u2014';
         var parsed;
         try { parsed = new URL(url || '', window.location.href); } catch (e) { parsed = null; }
-        var valid = parsed && (parsed.protocol === 'https:' || parsed.protocol === 'http:') &&
-            (/\.pdf(?:$|[&#?])/i.test(parsed.pathname + parsed.search) || /\/CoordinatorApi\/manuscript$/i.test(parsed.pathname));
+        var valid = parsed && parsed.origin === window.location.origin &&
+            /\/CapstoneCoordinator\/CoordinatorApi\/manuscript$/i.test(parsed.pathname);
         link.hidden = !valid;
         if (valid) link.href = parsed.href;
         if (!valid) { message.textContent = 'No PDF manuscript is available for this submission.'; return; }
         message.hidden = false;
         message.textContent = 'Loading manuscript…';
         if (!window.pdfjsLib) { message.textContent = 'The PDF viewer could not be loaded. Use Open PDF to view the manuscript.'; return; }
-        window.pdfjsLib.getDocument({ url: parsed.href, withCredentials: parsed.origin === window.location.origin }).promise.then(function (doc) {
+        fetch(parsed.href, { method: 'GET', credentials: 'same-origin', cache: 'no-store' }).then(function (response) {
+            if (!response.ok) {
+                var error = new Error('The manuscript could not be loaded.');
+                error.status = response.status;
+                throw error;
+            }
+            return response.arrayBuffer();
+        }).then(function (buffer) {
+            if (id !== pdfLoadId) return null;
+            var bytes = new Uint8Array(buffer);
+            if (new TextDecoder('ascii').decode(bytes.subarray(0, 1024)).indexOf('%PDF-') < 0)
+                throw new Error('The manuscript response is not a readable PDF.');
+            return window.pdfjsLib.getDocument({
+                data: bytes,
+                isEvalSupported: false,
+                enableXfa: false
+            }).promise;
+        }).then(function (doc) {
+            if (!doc) return;
             if (id !== pdfLoadId) { doc.destroy(); return; }
             pdfDocument = doc;
             pdfPageNumber = 1;
@@ -131,8 +149,14 @@
             canvas.hidden = false;
             message.hidden = true;
             renderPdfPage();
-        }).catch(function () {
-            if (id === pdfLoadId) message.textContent = 'Could not render this PDF. Check that the Cloudinary file is accessible, then use Open PDF.';
+        }).catch(function (error) {
+            if (id !== pdfLoadId) return;
+            if (error && error.status === 415) {
+                link.hidden = true;
+                message.textContent = 'No PDF manuscript is attached to this submission.';
+                return;
+            }
+            message.textContent = 'Could not load this read-only PDF preview. Check that the manuscript file is accessible, then use Open PDF.';
         });
     }
 

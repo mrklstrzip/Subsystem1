@@ -363,7 +363,7 @@
     <Compile Include="Areas\CapstoneCoordinator\Models\PmInvites.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\InvitationController.cs" />
     <Compile Include="Areas\Auth\Controllers\SignupController.cs" />
-<Compile Include="Areas\CapstoneCoordinator\Models\Subsystem2Manuscripts.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Models\Subsystem2Manuscripts.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Models\Subsystem3Clearances.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -446,6 +446,7 @@
     <Content Include="Areas\Student\Views\Submission\submission.cshtml" />
     <Content Include="Areas\Student\Views\Submission\_TitleDetails.cshtml" />
     <Content Include="Areas\Auth\Views\Request\request.cshtml" />
+    <Content Include="smtp.secrets.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

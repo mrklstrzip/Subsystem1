@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Subsystem1.Data;
@@ -25,6 +26,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             public string Subsystem2Id;
             public string StudentNumber;
             public string StudentUserId;
+            public string SubmittedById;
+            public string Program;
+            public string Section;
             public string Title;
             public DateTime SubmittedAt;
             public int Version;
@@ -56,6 +60,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
                 string studentNumber = First(manuscript, "StudentId", submission, "studentId");
                 string userId = StudentUserId(studentNumber);
+                string submittedById = AnyStr(submission, "submittedById");
 
                 BsonValue managerValue = Value(submission, "projectManagerId");
                 if (userId == "" && managerValue != null && managerValue.IsObjectId)
@@ -98,6 +103,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     Subsystem2Id = subsystem2Id,
                     StudentNumber = studentNumber,
                     StudentUserId = userId,
+                    SubmittedById = submittedById,
+                    Program = First(manuscript, "Program", submission, "program"),
+                    Section = First(manuscript, "Section", submission, "section"),
                     Title = title,
                     SubmittedAt = submittedAt,
                     Version = version
@@ -107,34 +115,68 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return records;
         }
 
-        private static IEnumerable<Record> LatestRecords(bool includeRevisionCase = true)
+        private static IEnumerable<Record> SchedulableRecords(bool includeRevisionCase = true)
         {
             return ReadRecords(includeRevisionCase)
                 .GroupBy(VersionGroupKey, StringComparer.OrdinalIgnoreCase)
-                .Select(g => g.OrderByDescending(r => r.Version)
-                    .ThenByDescending(r => r.SubmittedAt)
+                .Select(group => group.OrderByDescending(record => record.Version)
+                    .ThenByDescending(record => record.SubmittedAt)
                     .First())
                 .Where(r => !IsFinal(r.Manuscript));
         }
 
         private static string VersionGroupKey(Record record)
         {
-            // The Coordinator list is one latest submission per Project Manager / Student,
-            // regardless of older versions or project/group metadata on those records.
-            if (!String.IsNullOrWhiteSpace(record.StudentUserId)) return "student:" + record.StudentUserId.Trim();
-            if (!String.IsNullOrWhiteSpace(record.StudentNumber)) return "student-number:" + record.StudentNumber.Trim();
-            return "version:" + record.Subsystem2Id;
+            string submitter = !String.IsNullOrWhiteSpace(record.SubmittedById)
+                ? record.SubmittedById
+                : record.StudentUserId;
+
+            if (String.IsNullOrWhiteSpace(record.GroupId) || record.GroupId == record.Subsystem2Id ||
+                String.IsNullOrWhiteSpace(submitter) && String.IsNullOrWhiteSpace(record.StudentNumber))
+                return "submission:" + record.Subsystem2Id;
+
+            return String.Join("|", new[]
+            {
+                "project",
+                Normalize(record.GroupId),
+                ScopeKey(record.Program, record.Section),
+                Normalize(submitter),
+                Normalize(record.StudentNumber)
+            });
+        }
+
+        private static string ScopeKey(string program, string section)
+        {
+            string p = (program ?? "").Trim().ToUpperInvariant();
+            if (p == "SBIT") p = "BSIT";
+            else if (p == "SBCS") p = "BSCS";
+            else if (p == "SBIS") p = "BSIS";
+
+            string s = (section ?? "").Trim().ToUpperInvariant();
+            Match prefix = Regex.Match(s, @"^(SBIT|BSIT|SBCS|BSCS|SBIS|BSIS)[\s-]*");
+            if (prefix.Success)
+            {
+                string prefixValue = prefix.Groups[1].Value;
+                string inferred = prefixValue == "SBIT" ? "BSIT"
+                    : prefixValue == "SBCS" ? "BSCS"
+                    : prefixValue == "SBIS" ? "BSIS"
+                    : prefixValue;
+                if (p == "") p = inferred;
+                s = inferred + "-" + s.Substring(prefix.Length);
+            }
+
+            return p + ":" + s;
         }
 
         public static List<BsonDocument> SchedulingTitles()
         {
-            return LatestRecords(true).Select(ToCoordinatorTitle).ToList();
+            return SchedulableRecords(true).Select(ToCoordinatorTitle).ToList();
         }
 
         public static HashSet<string> SubmissionIds()
         {
             return new HashSet<string>(
-                LatestRecords(false).Select(r => DocId(r.Submission)),
+                SchedulableRecords(false).Select(r => DocId(r.Submission)),
                 StringComparer.OrdinalIgnoreCase);
         }
 
@@ -353,6 +395,10 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 return "";
 
             string cloudinaryUrl = Environment.GetEnvironmentVariable("CLOUDINARY_URL");
+            if (String.IsNullOrWhiteSpace(cloudinaryUrl))
+                cloudinaryUrl = System.Configuration.ConfigurationManager.AppSettings["CLOUDINARY_URL"];
+            if (String.IsNullOrWhiteSpace(cloudinaryUrl))
+                cloudinaryUrl = System.Configuration.ConfigurationManager.AppSettings["Cloudinary:Url"];
 
             Uri configured;
             if (!Uri.TryCreate(cloudinaryUrl, UriKind.Absolute, out configured) ||
@@ -413,7 +459,6 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             Guid id;
             if (Guid.TryParse(subsystem2Id, out id))
             {
-                matches.Add(filters.Eq("submissionID", id));
                 matches.Add(filters.Eq("submissionID", new BsonBinaryData(id, GuidRepresentation.Standard)));
             }
             return cases.Find(filters.Or(matches)).FirstOrDefault();
