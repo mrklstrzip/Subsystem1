@@ -5,7 +5,7 @@
     ViewBag.Title = "Manuscript Management";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.5" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.6" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -153,12 +153,23 @@
         <!-- Body: Abstract + Panelists -->
         <div class="modal-body-grid">
             <div class="modal-panel abstract-panel">
-                <h3 class="panel-title">Abstract</h3>
-                <p class="panel-text" id="mAbstract"></p>
-
-                <h3 class="panel-title">Keywords</h3>
-                <p class="panel-text" id="mKeywords"></p>
-
+                <div class="manuscript-viewer-header">
+                    <h3 class="panel-title">Manuscript</h3>
+                    <a id="mManuscriptOpen" class="manuscript-open-link" target="_blank" rel="noopener" hidden>Open PDF</a>
+                </div>
+                <div class="pdf-viewer" id="mPdfViewer" aria-label="Manuscript PDF viewer">
+                    <div class="pdf-toolbar">
+                        <button type="button" id="pdfPrev" aria-label="Previous page">‹</button>
+                        <span><span id="pdfPage">—</span> / <span id="pdfPages">—</span></span>
+                        <button type="button" id="pdfNext" aria-label="Next page">›</button>
+                        <button type="button" id="pdfZoomOut" aria-label="Zoom out">−</button>
+                        <button type="button" id="pdfZoomIn" aria-label="Zoom in">+</button>
+                    </div>
+                    <div class="pdf-canvas-wrap" id="pdfCanvasWrap">
+                        <canvas id="pdfCanvas"></canvas>
+                        <p class="pdf-message" id="pdfMessage">No PDF manuscript is available for this submission.</p>
+                    </div>
+                </div>
                 <span class="panel-footnote" id="mSubmittedNote"></span>
             </div>
 
@@ -252,7 +263,8 @@
 </datalist>
 
 <script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.0"></script>
-<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.1"></script>
 <script>
     (function () {
         // each "View" button opens the pop-up of its schedule (the data comes from the database)

@@ -296,7 +296,9 @@
     <Compile Include="Areas\Admin\Controllers\UserManagementController.cs" />
     <Compile Include="Areas\Dean\Controllers\DeanApiController.cs" />
     <Compile Include="Areas\Dean\Controllers\OversightController.cs" />
+    <Compile Include="Areas\Dean\Controllers\RepositoryController.cs" />
     <Compile Include="Areas\Dean\Models\OversightModels.cs" />
+    <Compile Include="Areas\Dean\Models\DeanRepositoryModels.cs" />
     <Compile Include="Areas\Dean\Controllers\DeanControllerBase.cs" />
     <Compile Include="Areas\Dean\Models\DeanData.cs" />
     <Compile Include="Areas\Auth\AuthAreaRegistration.cs" />
@@ -312,6 +314,7 @@
     <Compile Include="Areas\CapstoneCoordinator\Controllers\ConflictResultController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\DashboardController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\CoordinatorApiController.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Controllers\ClearedSubmissionsController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\TopicScreeningController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Models\TopicScreeningModels.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\CoordinatorControllerBase.cs" />
@@ -360,6 +363,8 @@
     <Compile Include="Areas\CapstoneCoordinator\Models\PmInvites.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\InvitationController.cs" />
     <Compile Include="Areas\Auth\Controllers\SignupController.cs" />
+<Compile Include="Areas\CapstoneCoordinator\Models\Subsystem2Manuscripts.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Models\Subsystem3Clearances.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Auth\Views\Login\login.cshtml" />
@@ -394,6 +399,12 @@
     <Content Include="Areas\Dean\Views\_ViewStart.cshtml" />
     <Content Include="Areas\Dean\Views\Dashboard\dashboard.cshtml" />
     <Content Include="Areas\Dean\Views\Oversight\Index.cshtml" />
+    <Content Include="Areas\Dean\Views\Oversight\Records.cshtml" />
+    <Content Include="Areas\Dean\Views\Oversight\Monitoring.cshtml" />
+    <Content Include="Areas\Dean\Views\Oversight\Reports.cshtml" />
+    <Content Include="Areas\Dean\Views\Repository\Index.cshtml" />
+    <Content Include="Areas\Dean\Views\Repository\Paper.cshtml" />
+    <Content Include="Areas\Dean\Views\Repository\Read.cshtml" />
     <Content Include="Areas\Dean\Views\Oversight\Audit.cshtml" />
     <Content Include="Areas\Dean\Views\Profile\profile.cshtml" />
     <Content Include="Areas\Dean\Views\Shared\_DeanLayout.cshtml" />
@@ -405,6 +416,8 @@
     <Content Include="Areas\CapstoneCoordinator\Views\ConflictResult\conflictresult.cshtml" />
     <Content Include="Areas\Auth\Views\ForgotPassword\forgotpassword.cshtml" />
     <Content Include="Areas\CapstoneCoordinator\Views\ScheduleManagement\schedulemanagement.cshtml" />
+    <Content Include="Areas\CapstoneCoordinator\Views\ClearedSubmissions\Index.cshtml" />
+    <Content Include="Content\css\capstonecoordinator\clearedsubmissions.css" />
     <Content Include="Areas\CapstoneCoordinator\Views\Shared\_NotificationItems.cshtml" />
     <Content Include="Areas\Dean\Views\Shared\_NotificationItems.cshtml" />
     <Content Include="connectionStrings.config" />
@@ -418,6 +431,7 @@
     <Content Include="Views\Shared\_AuthLayout.cshtml" />
     <Content Include="Content\css\student-pm.css" />
     <Content Include="Content\css\oversight.css" />
+    <Content Include="Content\css\dean-repository.css" />
     <Content Include="Content\css\student-profile.css" />
     <Content Include="Content\images\student-avatar.png" />
     <Content Include="Scripts\student-notifications.js" />

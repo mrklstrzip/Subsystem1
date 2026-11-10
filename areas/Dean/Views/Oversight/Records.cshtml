@@ -1,0 +1,39 @@
+@model Subsystem1.Areas.Dean.Models.OversightVm
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+}
+<section class="dean-page">
+    <header class="dean-page-banner"><h1>Submission &amp; Clearance Records</h1><p>Every capstone submission, its current status and clearance outcome (view only).</p></header>
+    <nav class="dean-page-tabs" aria-label="Repository pages">
+        <a href="@Url.Action("Index", "Repository", new { area = "Dean" })">Exclusive Repository</a>
+        <a class="active" href="@Url.Action("Records", "Oversight", new { area = "Dean" })">Submission Records</a>
+    </nav>
+    <form method="get" class="dean-record-tools">
+        <input type="search" name="q" value="@Model.Query" placeholder="⌕  Search by group, title or author" aria-label="Search submissions" />
+        <select name="program"><option value="">All Programs</option>@foreach (var p in Model.Programs) { <option value="@p.Key" @(Model.Program == p.Key ? "selected" : "")>@p.Key</option> }</select>
+        <select name="status">
+            <option value="">All Statuses</option>
+            @foreach (var state in new[] { "Submitted", "Validated", "Disseminated", "Filed", "Returned", "Revision Required" })
+            { <option value="@state" @(String.Equals(Model.Status, state, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@state</option> }
+        </select>
+        <button type="submit" class="dean-page-btn">Search</button>
+        <div class="dean-more-filters"><span>More Filters</span><a href="@Url.Action("Records", "Oversight", new { area = "Dean" })">Reset filters</a><span>@Model.Records.Count records</span></div>
+    </form>
+    <div style="overflow-x:auto">
+        <table class="dean-record-table">
+            <thead><tr><th>Submission ID</th><th>Title</th><th>Program</th><th>Submission Status</th><th>Clearance Outcome</th><th>Last Updated</th></tr></thead>
+            <tbody>
+                @foreach (var r in Model.Records)
+                {
+                    var cleared = String.Equals(r.Status, "Disseminated", StringComparison.OrdinalIgnoreCase) || String.Equals(r.Status, "Filed", StringComparison.OrdinalIgnoreCase) || String.Equals(r.Status, "Cleared", StringComparison.OrdinalIgnoreCase);
+                    <tr>
+                        <td>@r.Id</td><td><strong>@r.Title</strong><small>@r.Authors · Adviser: @(String.IsNullOrWhiteSpace(r.Adviser) ? "Not recorded" : r.Adviser)</small></td>
+                        <td>@r.Program</td><td>@r.Status</td><td><span class="dean-status-pill">@(cleared ? "Cleared" : "Pending")</span></td>
+                        <td>@(r.UpdatedAt.HasValue ? r.UpdatedAt.Value.ToString("MMM d, yyyy") : "—")</td>
+                    </tr>
+                }
+                @if (Model.Records.Count == 0) { <tr><td colspan="6" class="dean-empty">No records match these filters.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</section>
