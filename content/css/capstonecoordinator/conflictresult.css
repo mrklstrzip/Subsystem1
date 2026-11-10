@@ -1,4 +1,9 @@
-﻿body {
+﻿html {
+    scrollbar-gutter: stable;
+}
+
+
+body {
     background-color: #EAECEF;
     font-family: 'Inter', sans-serif;
     color: #22252A;
@@ -8,11 +13,11 @@
 .dashboard-header {
     background: linear-gradient( to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100% );
     border-radius: 14px;
-    padding: 32px 40px;
+    padding: 27px 40px;
     color: #FFFFFF;
     position: relative;
     overflow: hidden;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -27,17 +32,17 @@
 
 .welcome-text {
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     margin: 0;
     opacity: 0.9;
 }
 
 .header-bg-icon {
     position: absolute;
-    right: 30px;
-    bottom: -20px;
+    right: -50px;
+    bottom: -50px;
     font-size: 140px;
-    color: #0d192c;
+    color: #060c18;
     pointer-events: none;
 }
 
@@ -910,7 +915,7 @@ body.modal-open {
     }
 
     .select-option.selected {
-        background: #537B9D;
+        background: #223249;
         color: #FFFFFF;
     }
 
@@ -923,4 +928,32 @@ body.modal-open {
     padding: 36px 20px;
     color: #9092AD;
     font-weight: 500;
+}
+
+
+/* Panel role: highest percentage = Chairman, others = Members */
+.panelist-role {
+    display: block;
+    margin-top: 2px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    color: #595C6E;
+}
+
+    .panelist-role.chairman {
+        color: #A33F53;
+    }
+
+.match-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.match-percent {
+    font-size: 10px;
+    font-weight: 700;
+    color: #374151;
 }

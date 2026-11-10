@@ -562,6 +562,7 @@
         send('saveRoom', { buildingId: b.id, name: typed }, function () {
             closeModal('modal-add-room');
             renderRooms();
+            if (window.Notice) Notice.success('Room added', 'Successfully added room ' + typed + ' to ' + b.name + '.');
         }, function (msg) { setErr('add-room-error', msg); });
     }
 
@@ -589,6 +590,7 @@
         send('saveRoom', { id: r.id, buildingId: bid, name: name, status: getRadio('edit-rm-status') || r.status }, function () {
             closeModal('modal-edit-room');
             renderRooms();
+            if (window.Notice) Notice.success('Room updated', 'Successfully edited room ' + name + '.');
         }, function (msg) { setErr('edit-room-error', msg); });
     }
 
@@ -602,13 +604,16 @@
 
     function confirmDelRoom() {
         if (!delRoomId) { closeModal('modal-del-room'); return; }
+        var r = roomById(delRoomId);
+        var rname = r ? r.name : 'the room';
         send('deleteRoom', { id: delRoomId }, function () {
             delRoomId = null;
             closeModal('modal-del-room');
             renderRooms();
+            if (window.Notice) Notice.success('Room deleted', 'Successfully deleted room ' + rname + '.');
         }, function (msg) {
             closeModal('modal-del-room');
-            alert(msg);
+            if (window.Notice) Notice.error('Could not delete room', msg); else alert(msg);
         });
     }
 
@@ -629,6 +634,7 @@
         send('saveBuilding', { name: name, code: code }, function () {
             closeModal('modal-add-building');
             renderRooms();
+            if (window.Notice) Notice.success('Building added', 'Successfully added ' + name + ' (' + code + ').');
         }, function (msg) { setErr('add-bld-error', msg); });
     }
 
@@ -654,6 +660,7 @@
         send('saveBuilding', { id: b.id, name: name, code: code, status: getRadio('edit-bld-status') || b.status }, function () {
             closeModal('modal-edit-building');
             renderRooms();
+            if (window.Notice) Notice.success('Building updated', 'Successfully edited ' + name + '.');
         }, function (msg) { setErr('edit-bld-error', msg); });
     }
 
@@ -669,13 +676,16 @@
 
     function confirmDelBuilding() {
         if (!delBldId) { closeModal('modal-del-building'); return; }
+        var b = bldgById(delBldId);
+        var bname = b ? b.name : 'the building';
         send('deleteBuilding', { id: delBldId }, function () {
             delBldId = null;
             closeModal('modal-del-building');
             renderRooms();
+            if (window.Notice) Notice.success('Building deleted', 'Successfully deleted ' + bname + '.');
         }, function (msg) {
             closeModal('modal-del-building');
-            alert(msg);
+            if (window.Notice) Notice.error('Could not delete building', msg); else alert(msg);
         });
     }
 
@@ -697,9 +707,66 @@
     };
 
     /* ------------------------------------------------------------------ *
+ *  Custom dropdown filters (wraps the hidden <select> in each .cdc-select)
+ * ------------------------------------------------------------------ */
+    function initCdSelect(boxId) {
+        var box = $(boxId);
+        if (!box) return;
+        var select = box.querySelector('select');
+        var menu = box.querySelector('.cdc-dropdown');
+        var label = box.querySelector('.cdc-selected-text');
+
+        function build() {
+            menu.innerHTML = '';
+            Array.prototype.forEach.call(select.options, function (o) {
+                var div = document.createElement('div');
+                div.className = 'cdc-option' + (o.value === select.value ? ' active' : '');
+                div.setAttribute('data-value', o.value);
+                div.textContent = o.text;
+                menu.appendChild(div);
+            });
+            var opt = select.options[select.selectedIndex];
+            label.textContent = opt ? opt.text : '';
+        }
+
+        box.querySelector('.cdc-selected').addEventListener('click', function (e) {
+            e.stopPropagation();
+            var wasOpen = box.classList.contains('open');
+            closeCdSelects();
+            if (!wasOpen) { build(); box.classList.add('open'); }
+        });
+
+        menu.addEventListener('click', function (e) {
+            var opt = e.target.closest('.cdc-option');
+            if (!opt) return;
+            select.value = opt.getAttribute('data-value');
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            build();
+            box.classList.remove('open');
+        });
+
+        // rebuild when other code adds/removes options (e.g. buildings loaded from the server)
+        new MutationObserver(build).observe(select, { childList: true });
+        select.addEventListener('change', build);
+        build();
+    }
+
+    function closeCdSelects() {
+        var open = document.querySelectorAll('.cdc-select.open');
+        for (var i = 0; i < open.length; i++) open[i].classList.remove('open');
+    }
+
+    document.addEventListener('click', closeCdSelects);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeCdSelects(); });
+
+    /* ------------------------------------------------------------------ *
      *  Boot
      * ------------------------------------------------------------------ */
     initDashboard();
     initSchedule();
     initRooms();
+
+    initCdSelect('rm-building-box');   // Room Management
+    initCdSelect('sc-building-box');   // Room Schedule
+    initCdSelect('sc-status-box');     // Room Schedule
 })();

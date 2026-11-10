@@ -11,10 +11,11 @@
     <link href="@Url.Content("~/Content/css/layout.css")?v=1.1" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
     <link href="@Url.Content("~/Content/css/logout-confirm.css")?v=1.0" rel="stylesheet" type="text/css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link href="@Url.Content("~/Content/css/fonts.css")?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/css/loading.css")?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/css/notice.css")?v=1.0" rel="stylesheet" type="text/css" />
+
+
 </head>
 <body class="admin-theme">
     <header class="layout-header">
@@ -31,10 +32,6 @@
             <span class="stripe stripe-2"></span>
             <span class="stripe stripe-3"></span>
         </div>
-        <button type="button" id="notifBell" class="notif-bell" aria-label="Notifications" aria-expanded="false">
-            <i class="fa-regular fa-bell"></i>
-            <span class="notif-dot" id="notifDot"></span>
-        </button>
     </header>
 
     <div class="layout-wrapper sidebar-rail" id="layoutWrapper">
@@ -65,7 +62,7 @@
             </nav>
             <div class="sb-footer">
                 <a href="@Url.Action("profile", "Profile")" class="sb-user" title="Profile">
-                    <img id="profilePhoto" src="" alt="Profile" class="sb-avatar" />
+                    <span id="profilePhoto" class="sb-avatar sb-initials" aria-hidden="true"></span>
                     <span class="sb-user-text">
                         <span id="profileName" class="sb-name"></span>
                         <span id="profileRole" class="sb-role"></span>
@@ -81,33 +78,11 @@
         </main>
     </div>
 
-    <div class="notif-panel" id="notifPanel" hidden>
-        <div class="notif-head">
-            <div class="notif-title">
-                <h3>Notifications</h3>
-                <span class="notif-badge" id="notifBadge"></span>
-            </div>
-            <button type="button" id="notifClose" class="notif-close" aria-label="Close">
-                <i class="fa fa-xmark"></i>
-            </button>
-        </div>
-        <div class="notif-tabs">
-            <button type="button" class="notif-tab active" data-tab="all" data-filter="all">
-                All (<span class="notif-count" id="countAll">0</span>)
-            </button>
-            <button type="button" class="notif-tab" data-tab="unread" data-filter="unread">
-                Unread (<span class="notif-count" id="countUnread">0</span>)
-            </button>
-        </div>
-        <div class="notif-body" id="notifBody">
-            @Html.Action("items", "Notification", new { area = "Admin" })
-        </div>
-    </div>
 
     <script src="~/Scripts/sidebar.js"></script>
     <script src="~/Scripts/layout-profile.js"></script>
-    <script src="~/Scripts/Notifs.js"></script>
-    <script src="@Url.Content("~/Scripts/admin-notifications.js")?v=1.0"></script>
     <script src="@Url.Content("~/Scripts/logout-confirm.js")?v=1.0"></script>
+    <script src="@Url.Content("~/Scripts/loading.js")?v=1.1"></script>
+    <script src="@Url.Content("~/Scripts/notice.js")?v=1.0"></script>
 </body>
 </html>

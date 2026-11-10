@@ -11,10 +11,10 @@
     <link href="@Url.Content("~/Content/css/layout.css")?v=1.0" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
     <link href="@Url.Content("~/Content/css/logout-confirm.css")?v=1.0" rel="stylesheet" type="text/css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link href="@Url.Content("~/Content/css/fonts.css")?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/css/loading.css")?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/css/notice.css")?v=1.0" rel="stylesheet" type="text/css" />
+
 </head>
 <body class="user-theme">
     <header class="layout-header">
@@ -59,7 +59,7 @@
 
             <div class="sb-footer">
                 <a href="@Url.Action("profile", "Profile")" class="sb-user" title="Profile">
-                    <img id="profilePhoto" src="" alt="Profile" class="sb-avatar" />
+                    <span id="profilePhoto" class="sb-avatar sb-initials" aria-hidden="true"></span>
                     <span class="sb-user-text">
                         <span id="profileName" class="sb-name"></span>
                         <span id="profileRole" class="sb-role"></span>
@@ -78,7 +78,8 @@
     <script src="@Url.Content("~/Scripts/campusdirector-modal.js")?v=1.0"></script>
     <script src="@Url.Content("~/Scripts/campusdirector-app.js")?v=2.0"></script>
     <script src="~/Scripts/sidebar.js"></script>
-    <script src="~/Scripts/layout-profile.js"></script>
     <script src="@Url.Content("~/Scripts/logout-confirm.js")?v=1.1"></script>
+    <script src="@Url.Content("~/Scripts/loading.js")?v=1.1"></script>
+    <script src="@Url.Content("~/Scripts/notice.js")?v=1.0"></script>
 </body>
 </html>

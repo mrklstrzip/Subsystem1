@@ -1,7 +1,15 @@
 @model Subsystem1.Areas.Dean.Models.OversightVm
 @{
     Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
-    Func<string, string> PillClass = s => "os-pill os-" + (s ?? "").ToLowerInvariant().Replace(" ", "-");
+    Func<string, string> PillClass = s => "sa-status os-st-" + (s ?? "").ToLowerInvariant().Replace(" ", "-");
+    Func<string, string> ProgramShort = p =>
+    {
+        var s = (p ?? "").ToLowerInvariant();
+        if (s.Contains("computer science")) return "BSCS";
+        if (s.Contains("information technology")) return "BSIT";
+        if (s.Contains("information system")) return "BSIS";
+        return p;
+    };
     string currentAction = ViewContext.RouteData.Values["action"].ToString();
 }
 
@@ -18,32 +26,46 @@
     <div class="os-stat"><small>Returned</small><strong>@Model.Returned</strong></div>
 </div>
 
-<div class="os-card">
-    <form method="get" class="os-filters">
-        <input name="q" value="@Model.Query" class="os-input" placeholder="Search title, author, keywords..." />
-        <select name="program" class="os-select">
-            <option value="">All programs</option>
+<form method="get" class="sa-toolbar">
+    <div class="sa-search">
+        <i class="fa fa-magnifying-glass"></i>
+        <input type="text" name="q" value="@Model.Query" placeholder="Search title, author, keywords..." autocomplete="off" />
+    </div>
+
+    <div class="sa-filter">
+        <label>Program</label>
+        <i class="fa-solid fa-graduation-cap"></i>
+        <select name="program">
+            <option value="">All</option>
             @foreach (var item in Model.Programs)
             {
-                <option value="@item.Key" @(Model.Program == item.Key ? "selected" : "")>@item.Key (@item.Value)</option>
+                <option value="@item.Key" @(Model.Program == item.Key ? "selected" : "")>@ProgramShort(item.Key)</option>
             }
         </select>
-        @if (currentAction == "Records" || currentAction == "Exceptions" || currentAction == "Performance")
-        {
-            <select name="status" class="os-select">
-                <option value="">All statuses</option>
+        <i class="fa-solid fa-chevron-down sa-chev"></i>
+    </div>
+
+    @if (currentAction == "Records" || currentAction == "Exceptions" || currentAction == "Performance")
+    {
+        <div class="sa-filter">
+            <label>Status</label>
+            <i class="fa-solid fa-sliders"></i>
+            <select name="status">
+                <option value="">All</option>
                 @foreach (var st in new[] { "Submitted", "Approved", "Returned", "Pending" })
                 {
                     <option @(string.Equals(Model.Status, st, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@st</option>
                 }
             </select>
-        }
-        <button type="submit" class="os-btn">Filter</button>
-    </form>
-</div>
+            <i class="fa-solid fa-chevron-down sa-chev"></i>
+        </div>
+    }
 
-<div class="os-card os-table-wrap">
-    <table class="os-table">
+    <button type="submit" class="sa-btn-filter"><i class="fa-solid fa-filter"></i><span>Filter</span></button>
+</form>
+
+<div class="sa-card">
+    <table class="sa-table">
         <thead>
             <tr><th>Title</th><th>Authors / Manager</th><th>Program</th><th>Adviser</th><th>Status</th><th>Last updated</th></tr>
         </thead>
@@ -51,9 +73,9 @@
             @foreach (var r in Model.Records)
             {
                 <tr>
-                    <td><div class="os-title">@r.Title</div><div class="os-sub">@r.Keywords</div></td>
+                    <td class="sa-title"><strong>@r.Title</strong><div class="sa-sub">@r.Keywords</div></td>
                     <td>@r.Authors</td>
-                    <td>@r.Program</td>
+                    <td>@ProgramShort(r.Program)</td>
                     <td>@r.Adviser</td>
                     <td><span class="@PillClass(r.Status)">@r.Status</span></td>
                     <td>@(r.UpdatedAt.HasValue ? r.UpdatedAt.Value.ToString("MMM d, yyyy") : "—")</td>
@@ -61,8 +83,12 @@
             }
             @if (Model.Records.Count == 0)
             {
-                <tr><td colspan="6" class="os-empty">No records match these filters.</td></tr>
+                <tr><td colspan="6" class="sa-empty">No records match these filters.</td></tr>
             }
         </tbody>
     </table>
 </div>
+
+@section scripts {
+    <script src="@Url.Content("~/Scripts/dean-select.js")?v=1.0"></script>
+}

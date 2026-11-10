@@ -1,12 +1,12 @@
-﻿@using System.Linq
+﻿
+@using System.Linq
 @using Subsystem1.Areas.CapstoneCoordinator.Models
 @model CoordinatorData
 @{
     ViewBag.Title = "Defense Schedule";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=3.2" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=2.3" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -67,7 +67,7 @@
         <thead>
             <tr>
                 <th class="column-title manuscript-col">MANUSCRIPT</th>
-                <th class="column-title author-col">AUTHOR</th>
+                <th class="column-title author-col">PROJECT MANAGER</th>
                 <th class="column-title adviser-col">ADVISER</th>
                 <th class="column-title date-col">DATE</th>
                 <th class="column-title time-col">TIME</th>
@@ -135,7 +135,7 @@
             <div class="summary-divider"></div>
             <div class="summary-row summary-row-3">
                 <div class="summary-item">
-                    <span class="summary-label">Student</span>
+                    <span class="summary-label">Project Manager</span>
                     <span class="summary-value" id="mStudent"></span>
                 </div>
                 <div class="summary-item">
@@ -176,6 +176,7 @@
                 <dl class="defense-schedule">
                     <div><dt>TIME</dt><dd id="mTime"></dd></div>
                     <div><dt>DATE</dt><dd id="mDate"></dd></div>
+                    <div><dt>BUILDING</dt><dd id="mBuilding"></dd></div>
                     <div><dt>ROOM</dt><dd id="mRoom"></dd></div>
                 </dl>
             </div>
@@ -194,16 +195,21 @@
         var API = "/CapstoneCoordinator/CoordinatorApi/";
         var STATUS_LABELS = { "upcoming": "Upcoming", "ongoing": "Ongoing", "completed": "Completed" };
         var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        var DEFAULT_PERCENT = { high: 90, medium: 70, low: 40 };
 
         var overlay = document.getElementById("defenseModal");
         var busy = false;
-        function $(id) { return document.getElementById(id); }
+
+        function $(id) {
+            return document.getElementById(id);
+        }
 
         function fmtDate(iso) {
             if (!iso) return "\u2014";
             var p = iso.split("-");
             return MONTHS[parseInt(p[1], 10) - 1] + " " + parseInt(p[2], 10) + ", " + p[0];
         }
+
         function fmtTime(t) {
             if (!t) return "";
             var p = t.split(":");
@@ -227,26 +233,51 @@
 
             $("mAbstract").textContent = d.abstract || "\u2014";
             $("mKeywords").textContent = d.keywords || "\u2014";
-            $("mSubmittedNote").textContent = d.dateSubmitted && d.dateSubmitted !== "-" ? "Submitted " + d.dateSubmitted : "";
+            $("mSubmittedNote").textContent = d.dateSubmitted && d.dateSubmitted !== "-"
+                ? "Submitted " + d.dateSubmitted
+                : "";
 
             var list = $("mPanelists");
             list.innerHTML = "";
-            d.panelists.forEach(function (p) {
+
+            (d.panelists || []).forEach(function (p) {
+                var lvl = String(p.match || "").toLowerCase();
+
                 var r = document.createElement("div");
                 r.className = "panelist-row";
+
                 var name = document.createElement("span");
                 name.className = "panelist-name";
                 name.textContent = p.name;
+                var role = document.createElement("small");
+                role.className = "panelist-role " + String(p.role || "Member").toLowerCase();
+                role.textContent = p.role || "Member";
+                name.appendChild(role);
+
+                var wrap = document.createElement("span");
+                wrap.className = "match-wrap";
+
+                var pct = document.createElement("span");
+                pct.className = "match-percent";
+                pct.textContent = (p.percent != null && !isNaN(p.percent))
+                    ? Number(p.percent).toFixed(1) + "%"
+                    : "\u2014";
+
                 var pill = document.createElement("span");
-                pill.className = "match-pill " + p.match;
-                pill.textContent = p.match.charAt(0).toUpperCase() + p.match.slice(1);
+                pill.className = "match-pill " + lvl;
+                pill.textContent = lvl.charAt(0).toUpperCase() + lvl.slice(1);
+
+                wrap.appendChild(pct);
+                wrap.appendChild(pill);
+
                 r.appendChild(name);
-                r.appendChild(pill);
+                r.appendChild(wrap);
                 list.appendChild(r);
             });
 
             $("mTime").textContent = fmtTime(d.start) + " - " + fmtTime(d.end);
             $("mDate").textContent = fmtDate(d.date);
+            $("mBuilding").textContent = d.building || "\u2014";
             $("mRoom").textContent = d.room || "\u2014";
 
             overlay.classList.add("open");
@@ -254,15 +285,30 @@
             document.body.classList.add("modal-open");
         }
 
+        //for testing lang ng frontend para makita itsura (pa remove nalang pag aayusin backend)
         function openModal(row) {
             if (busy) return;
             busy = true;
+
             fetch(API + "schedule?id=" + encodeURIComponent(row.getAttribute("data-id")), {
-                credentials: "same-origin", cache: "no-store", headers: { "X-Requested-With": "XMLHttpRequest" }
-            }).then(function (r) { return r.json(); }).then(function (res) {
+                credentials: "same-origin",
+                cache: "no-store",
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            }).then(function (r) {
+                return r.json();
+            }).then(function (res) {
                 busy = false;
-                if (res && res.unauthorized) { window.location.href = "/Auth/Login/login"; return; }
-                if (!res || !res.success) { alert((res && res.message) || "Could not open this schedule."); return; }
+
+                if (res && res.unauthorized) {
+                    window.location.href = "/Auth/Login/login";
+                    return;
+                }
+
+                if (!res || !res.success) {
+                    alert((res && res.message) || "Could not open this schedule.");
+                    return;
+                }
+
                 show(row, res.schedule);
             }, function () {
                 busy = false;
@@ -277,15 +323,27 @@
         }
 
         document.querySelectorAll(".clickable-row").forEach(function (row) {
-            row.addEventListener("click", function () { openModal(row); });
+            row.addEventListener("click", function () {
+                openModal(row);
+            });
+
             row.addEventListener("keydown", function (e) {
-                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openModal(row); }
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openModal(row);
+                }
             });
         });
 
         $("modalCloseIcon").addEventListener("click", closeModal);
         $("modalCloseBtn").addEventListener("click", closeModal);
-        overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(); });
-        document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+
+        overlay.addEventListener("click", function (e) {
+            if (e.target === overlay) closeModal();
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") closeModal();
+        });
     })();
 </script>

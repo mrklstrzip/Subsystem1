@@ -1,4 +1,4 @@
-/* Campus Director - Profile page: real profile info + Change Password via the database */
+/* Campus Director - Profile page: real profile info, Edit Profile (name + email) and Change Password via the database */
 (function () {
     'use strict';
 
@@ -38,6 +38,19 @@
         try { return JSON.parse(localStorage.getItem('loggedInUser') || 'null'); } catch (e) { return null; }
     }
 
+    function saveUser(u) {
+        try { localStorage.setItem('loggedInUser', JSON.stringify(u)); } catch (e) { }
+    }
+
+    // "Samantha Nicole Amor" -> "SA" (no profile picture, only initials)
+    function initialsOf(u) {
+        var f = String(u.firstName || '').trim().charAt(0);
+        var l = String(u.lastName || '').trim().charAt(0);
+        return (f + l).toUpperCase() || '?';
+    }
+
+    var current = readSaved() || {};
+
     function fill(u) {
         var full = [u.firstName, u.middleName, u.lastName].filter(Boolean).join(' ');
         var role = u.role || 'Campus Director';
@@ -48,35 +61,143 @@
         if ($('infoEmail')) $('infoEmail').textContent = u.email || '';
         if ($('pmHeadName')) $('pmHeadName').textContent = [u.firstName, u.lastName].filter(Boolean).join(' ');
         if ($('pmHeadRole')) $('pmHeadRole').textContent = role;
+        if ($('pmPhoto')) $('pmPhoto').textContent = initialsOf(u);
 
-        // Same photo rules as the sidebar: the saved photo, or the default avatar.
-        var DEFAULT_PHOTO = '/Content/images/student-avatar.png';
-        var img = $('pmPhoto');
-        if (img) {
-            img.onerror = function () {
-                this.onerror = null;
-                this.src = DEFAULT_PHOTO;
-            };
-            var photo = (u.profilePhoto || '').trim();
-            if (photo.indexOf('data:image/') === 0) img.src = photo;
-            else img.src = photo ? '/Content/images/' + photo : DEFAULT_PHOTO;
-            img.style.display = '';
+        // PROGRAM and SECTION rows (added once, then refreshed)
+        var body = $('profileTableBody');
+        if (body) {
+            [['PROGRAM', 'infoProgram', u.program], ['SECTION', 'infoSection', u.section]].forEach(function (r) {
+                var cell = $(r[1]);
+                if (!r[2]) { if (cell) cell.parentNode.remove(); return; }
+                if (!cell) {
+                    var tr = document.createElement('tr');
+                    var label = document.createElement('td');
+                    label.className = 'label';
+                    label.textContent = r[0];
+                    cell = document.createElement('td');
+                    cell.className = 'info';
+                    cell.id = r[1];
+                    tr.appendChild(label);
+                    tr.appendChild(cell);
+                    body.appendChild(tr);
+                }
+                cell.textContent = r[2];
+            });
         }
     }
 
     // 1) show what was saved at login straight away, 2) replace it with the database values
-    var saved = readSaved();
-    if (saved) fill(saved);
+    fill(current);
 
     api('me').then(function (res) {
         if (!res || !res.success || !res.me) return;
         var merged = {};
         var k;
-        for (k in (saved || {})) merged[k] = saved[k];
+        for (k in current) merged[k] = current[k];
         for (k in res.me) merged[k] = res.me[k];
-        fill(merged);
-        try { localStorage.setItem('loggedInUser', JSON.stringify(merged)); } catch (e) { }
+        current = merged;
+        fill(current);
+        saveUser(current);
+        if (window.refreshSidebarProfile) window.refreshSidebarProfile();
     }).catch(function () { /* keep the saved values */ });
+
+    // ---------------------------------------------------------------
+    // Edit Profile (name and email)
+    // ---------------------------------------------------------------
+    var editBtn = $('editProfileBtn');
+    var editForm = $('editProfileForm');
+    var modal = $('editProfileModal');
+    var cancelBtn = $('cancelEditProfileBtn');
+    var saveBtn = $('saveProfileBtn');
+    var message = $('profileEditMessage');
+
+    function say(text, bad) {
+        if (!message) return;
+        message.textContent = text || '';
+        message.style.color = bad ? '#B42318' : '';
+    }
+
+    if (editBtn && editForm) {
+        editBtn.addEventListener('click', function () {
+            $('editFirstName').value = current.firstName || '';
+            $('editMiddleName').value = current.middleName || '';
+            $('editLastName').value = current.lastName || '';
+            $('editEmail').value = current.email || '';
+            say('');
+            modal.hidden = false;
+            $('editFirstName').focus();
+        });
+    }
+
+    function closeEdit() {
+        if (editForm) editForm.reset();
+        if (modal) modal.hidden = true;
+        say('');
+    }
+
+    // close with Escape or by clicking the dark area outside the pop-up
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal && !modal.hidden) closeEdit();
+    });
+    if (modal) modal.addEventListener('mousedown', function (e) { if (e.target === modal) closeEdit(); });
+
+    if (cancelBtn) cancelBtn.addEventListener('click', closeEdit);
+
+    if (editForm) {
+        var busyEdit = false;
+        editForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (busyEdit) return;
+
+            var body = {
+                firstName: $('editFirstName').value.trim(),
+                middleName: $('editMiddleName').value.trim(),
+                lastName: $('editLastName').value.trim(),
+                email: $('editEmail').value.trim()
+            };
+
+            if (!body.firstName || !body.lastName || !body.email) {
+                say('Please fill in your first name, last name and email.', true);
+                return;
+            }
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email)) {
+                say('Please enter a valid email address.', true);
+                return;
+            }
+
+            busyEdit = true;
+            if (saveBtn) saveBtn.disabled = true;
+            say('Saving...');
+
+            api('updateProfile', body).then(function (res) {
+                busyEdit = false;
+                if (saveBtn) saveBtn.disabled = false;
+
+                if (!res || !res.success) {
+                    say((res && res.message) || 'Something went wrong. Please try again.', true);
+                    return;
+                }
+
+                // keep the browser copy in step with the database, then redraw page + sidebar
+                var saved = res.me || body;
+                var merged = {};
+                var k;
+                for (k in current) merged[k] = current[k];
+                for (k in saved) merged[k] = saved[k];
+                current = merged;
+                saveUser(current);
+                fill(current);
+                if (window.refreshSidebarProfile) window.refreshSidebarProfile();
+
+                closeEdit();
+                alert('Profile updated successfully.');
+            }, function () {
+                busyEdit = false;
+                if (saveBtn) saveBtn.disabled = false;
+                say('Could not reach the server. Please check your connection and try again.', true);
+            });
+        });
+    }
 
     // Show / hide password eye icons
     Array.prototype.forEach.call(document.querySelectorAll('.toggle-password'), function (btn) {
@@ -103,16 +224,16 @@
             e.preventDefault();
             if (busy) return;
 
-            var current = $('current-password').value;
+            var currentPw = $('current-password').value;
             var next = $('new-password').value;
             var confirm = $('confirm-password').value;
 
             if (next !== confirm) { alert('New password and confirmation do not match.'); return; }
             if (next.length < 8) { alert('New password must be at least 8 characters long.'); return; }
-            if (next === current) { alert('New password must be different from the current password.'); return; }
+            if (next === currentPw) { alert('New password must be different from the current password.'); return; }
 
             busy = true;
-            api('changePassword', { currentPassword: current, newPassword: next }).then(function (res) {
+            api('changePassword', { currentPassword: currentPw, newPassword: next }).then(function (res) {
                 busy = false;
                 if (!res || !res.success) {
                     alert((res && res.message) || 'Something went wrong. Please try again.');

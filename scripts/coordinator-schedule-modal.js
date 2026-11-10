@@ -67,6 +67,8 @@
         el.hidden = !msg;
     }
     function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    // exact percentage with one decimal (66.7%), never rounded to a level
+    function fmtPercent(v) { return (v === null || v === undefined || isNaN(v)) ? '\u2014' : Number(v).toFixed(1) + '%'; }
 
     /* ---------- drawing ---------- */
     function renderPanelists() {
@@ -102,14 +104,25 @@
                 var name = document.createElement('span');
                 name.className = 'panelist-name';
                 name.textContent = p.name;
+                var role = document.createElement('small');
+                role.className = 'panelist-role ' + String(p.role || 'Member').toLowerCase();
+                role.textContent = p.role || 'Member';
+                name.appendChild(role);
                 row.appendChild(name);
             }
 
-            if (p) {   // expertise match is read-only (worked out by the system)
+            if (p) {   // percentage, match level and role are read-only (worked out by the system)
+                var wrap = document.createElement('span');
+                wrap.className = 'match-wrap';
+                var pct = document.createElement('span');
+                pct.className = 'match-percent';
+                pct.textContent = fmtPercent(p.percent);
                 var pill = document.createElement('span');
                 pill.className = 'match-pill ' + p.match;
                 pill.textContent = cap(p.match);
-                row.appendChild(pill);
+                wrap.appendChild(pct);
+                wrap.appendChild(pill);
+                row.appendChild(wrap);
             }
             list.appendChild(row);
         }
@@ -119,7 +132,7 @@
         var has = current.start && current.end && current.date;
         $('mTime').textContent = has ? fmtTime(current.start) + ' - ' + fmtTime(current.end) : '—';
         $('mDate').textContent = current.date ? fmtDate(current.date) : '—';
-        $('mRoom').textContent = current.room || '—';
+        $('mRoom').textContent = String(current.room || '').trim() || 'TBA';
 
         $('eTimeStart').value = current.start || '';
         $('eTimeEnd').value = current.end || '';
@@ -240,10 +253,12 @@
         busy = true;
         submitBtn.disabled = true;
         showError('');
+        var title = current.title;
         call('submit', { id: current.id }).then(function (res) {
             busy = false;
             submitBtn.disabled = false;
             if (!res || !res.success) { showError((res && res.message) || 'Something went wrong. Please try again.'); return; }
+            if (window.Notice) Notice.after('success', 'Schedule submitted', 'The generated schedule for "' + title + '" was submitted successfully.');
             window.location.reload();     // the lists show the new status
         }, function () {
             busy = false;

@@ -14,10 +14,10 @@
     <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
     <link href="@Url.Content("~/Content/css/logout-confirm.css")?v=1.0" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/css/capstonecoordinator/privacy.css")?v=1.0" rel="stylesheet" type="text/css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link href="@Url.Content("~/Content/css/fonts.css")?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/css/loading.css")?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/css/notice.css")?v=1.0" rel="stylesheet" type="text/css" />
+
 </head>
 <body class="user-theme">
     <header class="layout-header">
@@ -53,7 +53,7 @@
                     <i class="fa fa-th-large"></i><span class="nav-label">Dashboard</span>
                 </a>
                 <a href="@Url.Action("schedulemanagement", "ScheduleManagement")" class="@(currentController == "ScheduleManagement" ? "active" : "")" title="Schedule Management">
-                    <i class="fa fa-file-lines"></i><span class="nav-label">Schedule Management</span>
+                    <i class="fa fa-file-lines"></i><span class="nav-label">Manuscript Management</span>
                 </a>
                 <a href="@Url.Action("defenseschedule", "DefenseSchedule")" class="@(currentController == "DefenseSchedule" ? "active" : "")" title="Defense Schedule">
                     <i class="fa fa-calendar-day"></i><span class="nav-label">Defense Schedule</span>
@@ -68,7 +68,7 @@
             </nav>
             <div class="sb-footer">
                 <a href="@Url.Action("profile", "Profile")" class="sb-user" title="Profile">
-                    <img id="profilePhoto" src="" alt="Profile" class="sb-avatar" />
+                    <span id="profilePhoto" class="sb-avatar sb-initials" aria-hidden="true"></span>
                     <span class="sb-user-text">
                         <span id="profileName" class="sb-name"></span>
                         <span id="profileRole" class="sb-role"></span>
@@ -121,5 +121,7 @@
     <script src="@Url.Content("~/Scripts/coordinator-notifications.js")?v=1.0"></script>
     <script src="@Url.Content("~/Scripts/logout-confirm.js")?v=1.1"></script>
     <script src="@Url.Content("~/Scripts/coordinator-privacy.js")?v=1.0"></script>
+    <script src="@Url.Content("~/Scripts/loading.js")?v=1.1"></script>
+    <script src="@Url.Content("~/Scripts/notice.js")?v=1.0"></script>
 </body>
 </html>

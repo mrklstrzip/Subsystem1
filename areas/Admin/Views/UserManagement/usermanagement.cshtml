@@ -4,7 +4,6 @@
 
 <link href="@Url.Content("~/Content/css/admin/usermanagement.css")?v=5.0" rel="stylesheet" type="text/css" />
 <link href="@Url.Content("~/Content/css/delete.css")?v=5.0" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <div class="dashboard-header">
     <div class="header-text">
@@ -167,9 +166,6 @@
                 <div class="input-field-wrapper">
                     <i class="fas fa-user-shield input-icon"></i>
                     <select id="modalRoleSelect" required>
-                        <option value="project-manager" selected>Student</option>
-                        <option value="panelist">Panelist</option>
-                        <option value="adviser">Adviser</option>
                         <option value="campus-director">Campus Director</option>
                         <option value="capstone-coordinator">Capstone Coordinator</option>
                         <option value="dean">Dean</option>
@@ -243,7 +239,7 @@
                 <legend>Temporary Password</legend>
                 <div class="input-field-wrapper">
                     <i class="fas fa-lock input-icon"></i>
-                    <input type="password" id="passwordInput" placeholder="" />
+                    <input type="text" id="passwordInput" value="Generated automatically" disabled />
                 </div>
             </fieldset>
 
@@ -274,4 +270,19 @@
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=6.1"></script>
+<!-- Temporary password (shown once, right after an account is created) -->
+<div class="modal-overlay" id="tempPassModal">
+    <div class="cd-delete-card">
+        <div class="cd-delete-icon-wrap" style="background:#E6F4EA;color:#1E7A3C;"><i class="fa-solid fa-key"></i></div>
+        <h3 class="cd-delete-title">Account created</h3>
+        <p class="cd-delete-text" id="tempPassText"></p>
+        <div id="tempPassValue" style="margin:10px auto 6px;padding:10px 14px;border:1.5px dashed #2C3F56;border-radius:8px;font-family:Consolas,monospace;font-size:20px;letter-spacing:2px;font-weight:700;color:#2C3F56;user-select:all;text-align:center;"></div>
+        <p class="cd-delete-text" style="font-size:12px;">Give this temporary password to the user. It will not be shown again, and they can change it in their Profile.</p>
+        <div class="cd-delete-actions">
+            <button type="button" class="btn-cd-delete-confirm" id="tempPassCopy" style="background:#2C3F56;">Copy</button>
+            <button type="button" class="btn-cd-delete-cancel" onclick="AD.closeModals()">Done</button>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=6.4"></script>

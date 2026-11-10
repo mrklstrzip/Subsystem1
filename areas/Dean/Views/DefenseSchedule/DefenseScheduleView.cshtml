@@ -65,7 +65,7 @@
         <thead>
             <tr>
                 <th>MANUSCRIPT</th>
-                <th>AUTHOR</th>
+                <th>PROJECT MANAGER</th>
                 <th>ADVISER</th>
                 <th>DATE</th>
                 <th>TIME</th>
@@ -81,7 +81,7 @@
             }
             @foreach (var i in Model.Items)
             {
-                <tr>
+                <tr class="sa-row-click" data-sa-open data-id="@i.Id">
                     <td class="sa-title">
                         <strong>@i.Manuscript</strong>
                         <span class="sa-chip chip-@i.ProgramClass">@i.Section</span>
@@ -99,6 +99,10 @@
     </table>
 </div>
 
+@Html.Partial("_ScheduleApprovalModal")
+
 @section scripts {
+    <script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.2"></script>
     <script src="@Url.Content("~/Scripts/DeanDefenseSched.js")?v=1.0"></script>
+    <script src="@Url.Content("~/Scripts/dean-select.js")?v=1.0"></script>
 }

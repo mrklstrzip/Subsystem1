@@ -1,4 +1,8 @@
-﻿body {
+﻿html {
+    scrollbar-gutter: stable;
+}
+
+body {
     background-color: #EAECEF;
     font-family: 'Inter', sans-serif;
     color: #22252A;
@@ -9,11 +13,11 @@
 .dashboard-header {
     background: linear-gradient(to left, #2C3F56 0%, #263B53 25%, #20344D 60%, #172A43 100%);
     border-radius: 14px;
-    padding: 32px 40px;
+    padding: 27px 40px;
     color: #FFFFFF;
     position: relative;
     overflow: hidden;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -35,8 +39,8 @@
 
 .header-bg-icon {
     position: absolute;
-    right: 20px;
-    bottom: -15px;
+    right: -50px;
+    bottom: -50px;
     font-size: 140px;
     color: #172A43;
     pointer-events: none;
@@ -51,7 +55,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
@@ -103,7 +107,7 @@
     border: 1.5px solid #374A60;
     border-radius: 12px;
     padding: 10px 14px 6px 14px;
-    width: 180px;
+    width: 200px;
     height: 48px;
     cursor: pointer;
     user-select: none;
@@ -120,6 +124,7 @@
     color: #374A60;
     padding: 0 4px;
     line-height: 1;
+    z-index: 1;
 }
 
 .select-selected {
@@ -137,11 +142,25 @@
         font-size: 15px;
     }
 
+    .select-selected span {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     .select-selected .chevron {
         margin-left: auto;
         font-size: 12px;
         color: #374A60;
+        transition: transform .15s ease;
     }
+
+/* chevron flips when the dropdown is open */
+.custom-select-box:has(.custom-select-dropdown.open) .chevron {
+    transform: rotate(180deg);
+}
 
 .custom-select-dropdown {
     display: none;
@@ -149,12 +168,15 @@
     top: calc(100% + 6px);
     left: -1.5px;
     width: calc(100% + 3px);
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 6px;
     background: #FFFFFF;
     border: 1.5px solid #374A60;
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
     z-index: 100;
-    overflow: hidden;
 }
 
     .custom-select-dropdown.open {
@@ -162,32 +184,41 @@
     }
 
 .select-option {
-    padding: 10px 14px;
+    padding: 9px 12px;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
     color: #2D3748;
+    background-color: #FFFFFF;
     display: flex;
     align-items: center;
     gap: 10px;
+    white-space: nowrap;
     transition: background 0.15s ease;
 }
 
-    .select-option:first-child {
+    /* Only the selected option gets the dark background */
+    .select-option.active {
         background-color: #374A60;
         color: #FFFFFF;
     }
 
-        .select-option:first-child i {
+        .select-option.active i {
             color: #FFFFFF;
         }
 
-    .select-option:hover:not(:first-child) {
-        background-color: #F4F6F8;
+    /* Normal option icons */
+    .select-option:not(.active) i {
+        color: #536273;
     }
 
     .select-option i {
         width: 16px;
-        color: #536273;
+    }
+
+    /* Hover only applies to unselected options */
+    .select-option:hover:not(.active) {
+        background-color: #F4F6F8;
     }
 
 /* Add Button */
@@ -213,7 +244,7 @@
 
 /* Expertise Table Container (no card, table only) */
 .expertise-tag-management {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 table {

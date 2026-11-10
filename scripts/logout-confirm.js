@@ -6,6 +6,10 @@
     function getProfileName() {
         var profileName = document.getElementById("profileName");
 
+        if (profileName && profileName.getAttribute("data-fullname")) {
+            return profileName.getAttribute("data-fullname");
+        }
+
         if (profileName && profileName.textContent.trim() !== "") {
             return profileName.textContent.trim();
         }
@@ -68,6 +72,9 @@
         confirmButton.onclick = function (event) {
             event.preventDefault();
             event.stopImmediatePropagation();
+
+            closeModal();                                        // close the "Log out?" card
+            if (window.Loading) Loading.show("Signing out...");  // show the loader
 
             // End the server-side session (every role uses the same login/logout).
             try {

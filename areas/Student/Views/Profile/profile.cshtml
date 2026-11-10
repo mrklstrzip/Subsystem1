@@ -3,7 +3,7 @@
     ViewBag.Title = "Profile";
 }
 
-<link href="@Url.Content("~/Content/css/profile.css")?v=1.1"
+<link href="@Url.Content("~/Content/css/profile.css")?v=1.2"
       rel="stylesheet"
       type="text/css" />
 
@@ -24,14 +24,13 @@
             <h2 class="pm-card-title">Profile Information</h2>
 
             <div class="pm-profile-head">
-                <img id="pmPhoto"
-                     class="pm-avatar pm-avatar--lg"
-                     src="@Url.Content("~/Content/images/student-avatar.png")"
-                     alt="Student profile picture" />
-
-                <div>
+                <span id="pmPhoto" class="pm-avatar pm-avatar--lg" aria-hidden="true"></span>
+                <div class="pm-profile-head-details">
                     <strong id="pmHeadName" class="pm-profile-name"></strong>
                     <span id="pmHeadRole" class="pm-profile-role"></span>
+                    <div class="pm-profile-edit-actions">
+                        <button type="button" class="pm-secondary" id="editProfileBtn">Edit Profile</button>
+                    </div>
                 </div>
             </div>
 
@@ -106,4 +105,31 @@
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/student-profile.js")?v=1.0"></script>
+<!-- Edit Profile pop-up -->
+<div class="pm-modal" id="editProfileModal" hidden>
+    <div class="pm-modal-card" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle">
+        <h2 class="pm-card-title" id="editProfileTitle">Edit Profile</h2>
+
+            <form class="pm-edit-profile-form" id="editProfileForm" novalidate onsubmit="return false;">
+                <label for="editFirstName">First name</label>
+                <input type="text" id="editFirstName" maxlength="50" autocomplete="given-name" />
+
+                <label for="editMiddleName">Middle name (optional)</label>
+                <input type="text" id="editMiddleName" maxlength="50" autocomplete="additional-name" />
+
+                <label for="editLastName">Last name</label>
+                <input type="text" id="editLastName" maxlength="50" autocomplete="family-name" />
+
+                <label for="editEmail">Email</label>
+                <input type="email" id="editEmail" maxlength="254" autocomplete="email" />
+
+                <div class="pm-edit-actions">
+                    <button type="submit" class="pm-primary" id="saveProfileBtn">Save</button>
+                    <button type="button" class="pm-secondary" id="cancelEditProfileBtn">Cancel</button>
+                    <span class="pm-profile-message" id="profileEditMessage" role="status"></span>
+                </div>
+            </form>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/student-profile.js")?v=2.0"></script>

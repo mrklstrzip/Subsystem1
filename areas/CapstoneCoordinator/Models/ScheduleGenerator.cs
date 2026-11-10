@@ -54,9 +54,10 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             foreach (BsonDocument r in Rooms_().Find(new BsonDocument()).ToList())
             {
                 if (!CoDb.IsFree(r)) continue;
-                BsonDocument b;
+                BsonDocument b = null;
                 string bid = AnyStr(r, "buildingId");
                 if (bid != "" && buildings.TryGetValue(bid, out b) && !CoDb.IsFree(b)) continue;
+                if (IsExcludedRoom(r, b)) continue;     // IE (Korphil) is never used for defenses
                 c.Rooms.Add(new EngRoom { Id = DocId(r), Name = Str(r, "name") });
             }
 
@@ -97,6 +98,26 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         }
 
         private static IMongoCollection<BsonDocument> Rooms_() { return SharedDb.Rooms(); }
+
+        // Rooms of the IE (Korphil) building are not used when generating or editing a schedule.
+        private static bool IsExcludedRoom(BsonDocument room, BsonDocument building)
+        {
+            string[] texts =
+            {
+                Str(room, "name"),
+                building == null ? "" : Str(building, "name"),
+                building == null ? "" : Str(building, "code")
+            };
+            foreach (string t in texts)
+            {
+                string v = (t ?? "").Trim();
+                if (v.IndexOf("korphil", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+                if (string.Equals(v, "IE", StringComparison.OrdinalIgnoreCase)) return true;
+                if (v.StartsWith("IE ", StringComparison.OrdinalIgnoreCase) || v.StartsWith("IE-", StringComparison.OrdinalIgnoreCase)
+                    || v.StartsWith("IE(", StringComparison.OrdinalIgnoreCase)) return true;
+            }
+            return false;
+        }
 
         public string IdByName(string name)
         {
@@ -321,9 +342,10 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                         {
                             { "userId", pick.Faculty.Id },
                             { "name", PlainName(u) },
-                            { "role", "Panelist" },
+                            { "role", pick.Role },
                             { "photo", Str(u, "profilePhoto") },
-                            { "match", pick.Match }
+                            { "match", pick.Match },
+                            { "percent", pick.Percent }
                         });
                         ids.Add(pick.Faculty.Id);
                     }
@@ -472,16 +494,29 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         {
             var p = new EngProblem { Title = Str(title, "title"), Abstract = Str(title, "abstract"), Keywords = CoDb.Keywords(title) };
             var arr = new BsonArray();
+
+            // same rule as the generator: highest percentage = Chairman, the rest = Members
+            var picks = new List<EngPick>();
+            var users = new Dictionary<string, BsonDocument>();
             foreach (BsonDocument u in panel)
             {
-                int pts = ScheduleEngine.Points(new EngFaculty { Id = DocId(u), Name = PlainName(u), Tags = CoDb.Expertise(u) }, p);
+                var f = new EngFaculty { Id = DocId(u), Name = PlainName(u), Tags = CoDb.Expertise(u) };
+                int pts = ScheduleEngine.Points(f, p);
+                picks.Add(new EngPick { Faculty = f, Points = pts, Percent = ScheduleEngine.Percent(f, p), Match = ScheduleEngine.Level(pts) });
+                users[f.Id] = u;
+            }
+
+            foreach (EngPick pick in ScheduleEngine.AssignRoles(picks, id => 0))
+            {
+                BsonDocument u = users[pick.Faculty.Id];
                 arr.Add(new BsonDocument
                 {
-                    { "userId", DocId(u) },
+                    { "userId", pick.Faculty.Id },
                     { "name", PlainName(u) },
-                    { "role", "Panelist" },
+                    { "role", pick.Role },
                     { "photo", Str(u, "profilePhoto") },
-                    { "match", ScheduleEngine.Level(pts) }
+                    { "match", pick.Match },
+                    { "percent", pick.Percent }
                 });
             }
             return arr;

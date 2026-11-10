@@ -1,0 +1,61 @@
+﻿html {
+    scrollbar-gutter: stable;
+}
+
+
+.audit-management-card {
+    background-color: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    margin-bottom: 30px;
+}
+
+.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .audit-table thead tr {
+        background-color: #223249;
+    }
+
+    .audit-table .column-title {
+        color: #FFFFFF;
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: 0.8px;
+        padding: 16px 20px;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    .audit-table td {
+        padding: 18px 20px;
+        font-size: 13px;
+        color: #475569;
+        font-weight: 500;
+        border-bottom: 1px solid #F4F5F7;
+        vertical-align: middle;
+    }
+
+    .audit-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .audit-table tbody tr:hover {
+        background-color: #F5F8FB;
+    }
+
+    .audit-table td.audit-empty {
+        text-align: center;
+        padding: 36px 20px;
+        color: #9092AD;
+    }
+
+    .audit-table tbody tr:has(td.audit-empty):hover {
+        background: transparent;
+    }
+

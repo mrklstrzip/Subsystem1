@@ -1,4 +1,8 @@
-﻿body {
+﻿html {
+    scrollbar-gutter: stable;
+}
+
+body {
     background-color: #EAECEF;
     font-family: 'Inter', sans-serif;
     color: #22252A;
@@ -6,13 +10,13 @@
 }
 
 .dashboard-header {
-    background: linear-gradient( to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100% );
+    background: linear-gradient(to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100%);
     border-radius: 14px;
-    padding: 32px 40px;
+    padding: 27px 40px;
     color: #FFFFFF;
     position: relative;
     overflow: hidden;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -27,32 +31,48 @@
 
 .welcome-text {
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     margin: 0;
     opacity: 0.9;
 }
 
 .header-bg-icon {
     position: absolute;
-    right: 30px;
-    bottom: -20px;
+    right: -50px;
+    bottom: -50px;
     font-size: 140px;
-    color: #0d192c;
+    color: #060c18;
     pointer-events: none;
 }
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1.35fr 0.85fr;
+    grid-template-columns: 1fr 1fr;
     gap: 24px;
     align-items: start;
 }
 
-.dashboard-left-column,
-.dashboard-right-column {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+.dashboard-left-column .dashboard-card:first-child table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.dashboard-left-column .dashboard-card:first-child .manuscript-col {
+    width: 75%;
+}
+
+.dashboard-left-column .dashboard-card:first-child .date-col,
+.dashboard-left-column .dashboard-card:first-child .date-cell {
+    width: 15%;
+    text-align: left;
+    padding-right: 0;
+}
+
+.dashboard-left-column .dashboard-card:first-child .action-col,
+.dashboard-left-column .dashboard-card:first-child .action-cell {
+    width: 10%;
+    text-align: right;
+    white-space: nowrap;
 }
 
 .dashboard-card {
@@ -61,6 +81,7 @@
     padding: 24px 28px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
     border: 1px solid #e2e8f0;
+    margin-bottom: 20px;
 }
 
 .card-header-flex {
@@ -89,7 +110,6 @@
     .view-all-link:hover {
         opacity: 0.8;
     }
-
 
 .dashboard-table {
     width: 100%;
@@ -144,9 +164,9 @@
     }
 
     .program-badge.sbcs {
-        background-color: #fdf2f2;
-        color: #991b1b;
-        border-color: #fecaca;
+        background-color: #CCFBF1;
+        color: #0F766E;
+        border-color: #99F6E4;
     }
 
     .program-badge.sbis {
@@ -155,7 +175,8 @@
         border-color: #ddd6fe;
     }
 
-.date-cell, .time-cell {
+.date-cell,
+.time-cell {
     color: #475569;
     font-weight: 500;
 }
@@ -197,6 +218,7 @@
 /* ==========================================================================
    Metrics Row
    ========================================================================== */
+
 .metrics-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -211,6 +233,7 @@
     border: 1px solid #e2e8f0;
     position: relative;
     overflow: hidden;
+    margin-bottom: 20px;
 }
 
 .metric-title {
@@ -241,10 +264,17 @@
     bottom: 16px;
     font-size: 36px;
     color: #cbd5e1;
-    opacity: 0.4;
 }
 
-/* Recent Activities Empty Rows */
-.recent-activities-card .empty-row td {
-    height: 38px;
+.recent-activities-card .time-col {
+    width: 30%;
+    white-space: nowrap;
+}
+
+.under-review-card .metric-icon {
+    color: #991b1b;
+}
+
+.total-defense-card .metric-icon {
+    color: #3B82F6;
 }

@@ -10,6 +10,9 @@
     ViewBag.CardClass = "auth-card--wide";
 }
 
+<link href="@Url.Content("~/Content/css/fonts.css")?v=1.0" rel="stylesheet" type="text/css" />
+
+
 <section class="auth-panel" aria-labelledby="auth-title">
     <header class="auth-panel__head">
         <h2 id="auth-title" class="auth-title">Request Account</h2>
@@ -176,7 +179,7 @@
 </section>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
 
         const programSelect = document.getElementById("Program");
         const sectionInput = document.getElementById("Section");
@@ -230,5 +233,5 @@ document.addEventListener("DOMContentLoaded", function () {
             sectionInput.value = typedSection;
         }
 
-});
+    });
 </script>
