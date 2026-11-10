@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Web.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -211,19 +213,81 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
 
         // ---------------- Project Manager invitations ----------------
 
-        // Absolute link to the Sign Up page. App:BaseUrl (Web.config) wins, so the e-mail never
-        // depends on the Host header of whoever made the request.
-        private string SignupLink(string token)
+        private string StudentSignupEndpoint()
         {
             string configured = Environment.GetEnvironmentVariable("SUBSYSTEM2_STUDENT_SIGNUP_URL");
-            if (String.IsNullOrWhiteSpace(configured))
-                configured = "https://subsystem2.vercel.app/Account/StudentSignup";
+            if (!String.IsNullOrWhiteSpace(configured))
+                return ValidateStudentSignupEndpoint(configured);
+
+            Uri currentUrl = Request == null ? null : Request.Url;
+            bool runningLocally = currentUrl != null &&
+                (currentUrl.IsLoopback || currentUrl.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase));
+            if (runningLocally)
+            {
+                configured = Environment.GetEnvironmentVariable("SUBSYSTEM2_LOCAL_STUDENT_SIGNUP_URL");
+                if (!String.IsNullOrWhiteSpace(configured))
+                {
+                    configured = ValidateStudentSignupEndpoint(configured);
+                    if (IsLocalStudentSignupRunning(configured)) return configured;
+                }
+
+                string[] localEndpoints =
+                {
+                    "http://localhost:5068/Account/StudentSignup",
+                    "http://localhost:51978/Account/StudentSignup"
+                };
+                foreach (string localEndpoint in localEndpoints)
+                    if (IsLocalStudentSignupRunning(localEndpoint)) return localEndpoint;
+            }
+
+            return "https://subsystem2.vercel.app/Account/StudentSignup";
+        }
+
+        private static string ValidateStudentSignupEndpoint(string configured)
+        {
             Uri signupUri;
             if (!Uri.TryCreate(configured, UriKind.Absolute, out signupUri) ||
-                !(signupUri.Scheme == Uri.UriSchemeHttps || signupUri.Scheme == Uri.UriSchemeHttp &&
+                !(signupUri.Scheme == Uri.UriSchemeHttps || Uri.UriSchemeHttp.Equals(signupUri.Scheme, StringComparison.OrdinalIgnoreCase) &&
                     (signupUri.IsLoopback || signupUri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase))))
                 throw new InvalidOperationException("Subsystem 2 student signup URL is not configured safely.");
-            var builder = new UriBuilder(signupUri);
+            return signupUri.AbsoluteUri;
+        }
+
+        private static bool IsLocalStudentSignupRunning(string endpoint)
+        {
+            try
+            {
+                var request = (HttpWebRequest)WebRequest.Create(endpoint);
+                request.Method = "GET";
+                request.Timeout = 400;
+                request.ReadWriteTimeout = 400;
+                request.AllowAutoRedirect = false;
+                using (var response = (HttpWebResponse)request.GetResponse())
+                using (var reader = new StreamReader(response.GetResponseStream()))
+                {
+                    string body = reader.ReadToEnd();
+                    return body.IndexOf("Create student account", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        body.IndexOf("Student signup is temporarily unavailable", StringComparison.OrdinalIgnoreCase) >= 0;
+                }
+            }
+            catch (WebException ex)
+            {
+                var response = ex.Response as HttpWebResponse;
+                if (response == null) return false;
+                using (response)
+                using (var reader = new StreamReader(response.GetResponseStream()))
+                {
+                    string body = reader.ReadToEnd();
+                    return body.IndexOf("Student signup is temporarily unavailable", StringComparison.OrdinalIgnoreCase) >= 0;
+                }
+            }
+            catch (IOException) { return false; }
+            catch (InvalidOperationException) { return false; }
+        }
+
+        private static string SignupLink(string token, string endpoint)
+        {
+            var builder = new UriBuilder(new Uri(endpoint, UriKind.Absolute));
             builder.Query = "token=" + Uri.EscapeDataString(token ?? "");
             return builder.Uri.AbsoluteUri;
         }
@@ -251,7 +315,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
                 if (dto == null) return Json(new { success = false, message = "No data received." });
 
                 string fatal;
-                List<InviteResult> results = PmInvites.Send(Me, dto.Emails, SignupLink, out fatal);
+                string signupEndpoint = StudentSignupEndpoint();
+                List<InviteResult> results = PmInvites.Send(Me, dto.Emails,
+                    token => SignupLink(token, signupEndpoint), out fatal);
                 if (fatal != null) return Json(new { success = false, message = fatal });
 
                 int sent = 0, skipped = 0, failed = 0;
@@ -286,7 +352,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
             try
             {
                 if (dto == null) return Json(new { success = false, message = "No data received." });
-                string error = PmInvites.Resend(Me, dto.Id, SignupLink);
+                string signupEndpoint = StudentSignupEndpoint();
+                string error = PmInvites.Resend(Me, dto.Id,
+                    token => SignupLink(token, signupEndpoint));
                 if (error != null) return Json(new { success = false, message = error });
                 return Json(new { success = true, message = "Invitation sent again." });
             }
