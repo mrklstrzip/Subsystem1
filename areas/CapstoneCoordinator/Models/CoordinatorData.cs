@@ -162,7 +162,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     data.Defenses.Add(new DefenseRow
                     {
                         Id = DocId(d), Title = title, Author = author, Adviser = adviser, Program = program, Section = section,
-                        Date = day.Value, Start = st.Value, End = en.Value, Room = room != "" ? room : "-", Status = s
+                        Date = day.Value, Start = st.Value, End = en.Value, Room = room != "" ? room : "TBA", Status = s
                     });
                 }
             }

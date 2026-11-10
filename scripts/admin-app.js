@@ -20,14 +20,13 @@
     // Hierarchy order used for the users table
     var ROLE_ORDER = ['admin', 'dean', 'capstone-coordinator', 'campus-director', 'panelist', 'adviser', 'project-manager'];
 
+
     var DIST = [
         { role: 'dean', label: 'Dean', dotCls: 'dot-dean' },
         { role: 'capstone-coordinator', label: 'Capstone Coordinator', dotCls: 'dot-capstone-coordinator' },
-        { role: 'campus-director', label: 'Campus Director', dotCls: 'dot-campus-director' },
-        { role: 'panelist', label: 'Panelist', dotCls: 'dot-panelist' },
-        { role: 'adviser', label: 'Adviser', dotCls: 'dot-adviser' },
-        { role: 'project-manager', label: 'Student', dotCls: 'dot-project-manager' }
+        { role: 'campus-director', label: 'Campus Director', dotCls: 'dot-campus-director' }
     ];
+
 
     var SINGLE_ROLES = ['admin', 'campus-director', 'capstone-coordinator', 'dean'];
 
@@ -319,6 +318,57 @@
        Dashboard
        --------------------------------------------------------------- */
 
+
+    function isAllowedSystemActivity(a) {
+        var text = String(a.text || '').trim().toLowerCase();
+        var action;
+
+        // ADMIN
+        if (text.startsWith('admin: ')) {
+            action = text.substring(7);
+
+            return (
+                /^new (campus director|capstone coordinator|dean) account created:/.test(action) ||
+                action.startsWith('account updated:') ||
+                action.startsWith('account activated:') ||
+                action.startsWith('account deactivated:') ||
+                action.startsWith('new expertise tag created:') ||
+                action.startsWith('expertise tag modified:') ||
+                action.startsWith('faculty profile updated:')
+            );
+        }
+
+        // CAMPUS DIRECTOR
+        if (text.startsWith('campus director: ')) {
+            action = text.substring('campus director: '.length);
+
+            return (
+                /^building .+ added$/.test(action) ||
+                /^building .+ details updated$/.test(action) ||
+                /^building .+ status changed to /.test(action) ||
+                /^room .+ added to /.test(action)
+            );
+        }
+
+        // CAPSTONE COORDINATOR
+        if (text.startsWith('capstone coordinator: ')) {
+            action = text.substring('capstone coordinator: '.length);
+
+            return (
+                action.startsWith('panel and schedule generated for') ||
+                action.startsWith('schedule submitted to the dean for') ||
+                action.startsWith('schedule edited for')
+            );
+        }
+
+        // DEAN
+        return (
+            text.startsWith('dean approved the defense schedule for') ||
+            text.startsWith('dean rejected the defense schedule for')
+        );
+    }
+
+
     function renderDashboard() {
         if (!$('dash-total')) return;
 
@@ -338,7 +388,11 @@
         if ($('dash-directors')) $('dash-directors').textContent = count('campus-director');
         if ($('dash-dean')) $('dash-dean').textContent = count('dean');
 
-        $('dash-activity').innerHTML = state.activity.slice(0, 6).map(function (a) {
+        $('dash-activity').innerHTML = state.activity
+            .filter(isAllowedSystemActivity)
+            .slice(0, 6)
+            .map(function (a) {
+
             return '<tr>' +
                 '<td class="actdate">' +
                 '<div class="activity-date-wrapper">' +
@@ -591,10 +645,26 @@
         var role = $('roleFilter').value;
         var st = $('statusFilter').value;
 
+
+        var allowedRoles = [
+            'admin',
+            'dean',
+            'campus-director',
+            'capstone-coordinator'
+        ];
+
         var list = state.users.filter(function (u) {
-            var matchesSearch = !q || norm(listName(u) + ' ' + u.email).indexOf(q) > -1;
-            return matchesSearch && (role === 'all' || u.role === role) && (st === 'all' || u.status === st);
+            var isAllowed = allowedRoles.indexOf(u.role) !== -1;
+
+            var matchesSearch = !q ||
+                norm(listName(u) + ' ' + u.email).indexOf(q) > -1;
+
+            return isAllowed &&
+                matchesSearch &&
+                (role === 'all' || u.role === role) &&
+                (st === 'all' || u.status === st);
         });
+
 
         // Sort by role hierarchy, then by name
         list.sort(function (a, b) {
@@ -688,18 +758,17 @@
         }
     }
 
+
     function setRoleOptions() {
         var roleSel = $('modalRoleSelect');
-        if (roleSel) {
-            roleSel.innerHTML =
-                '<option value="project-manager">Student</option>' +
-                '<option value="panelist">Panelist</option>' +
-                '<option value="adviser">Adviser</option>' +
-                '<option value="campus-director">Campus Director</option>' +
-                '<option value="capstone-coordinator">Capstone Coordinator</option>' +
-                '<option value="dean">Dean</option>';
-        }
+        if (!roleSel) return;
+
+        roleSel.innerHTML =
+            '<option value="campus-director">Campus Director</option>' +
+            '<option value="capstone-coordinator">Capstone Coordinator</option>' +
+            '<option value="dean">Dean</option>';
     }
+
 
     // Advisers shown in the student form: panelists/advisers that are active
     // (plus the one already chosen, even if that person was deactivated later).
@@ -743,9 +812,13 @@
         userSelected = [];
 
         setRoleOptions();
-        if ($('modalRoleSelect')) $('modalRoleSelect').value = 'project-manager';
-        updateIdPrefix('project-manager');
-        handleRoleUIChange('project-manager');
+
+        if ($('modalRoleSelect')) {
+            $('modalRoleSelect').value = 'campus-director';
+        }
+
+        updateIdPrefix('campus-director');
+        handleRoleUIChange('campus-director');
         openModal('userModal');
     }
 
@@ -801,9 +874,11 @@
         if ($('statusActive')) $('statusActive').checked = (u.status === 'active');
         if ($('statusInactive')) $('statusInactive').checked = (u.status !== 'active');
 
+       
         setRoleOptions();
-        if ($('modalRoleSelect')) $('modalRoleSelect').value = u.role;
-        updateIdPrefix(u.role, u.idNumber);
+        if ($('modalRoleSelect')) $('modalRoleSelect').value = 'campus-director';
+        updateIdPrefix('campus-director');
+        handleRoleUIChange('campus-director');
 
         if ($('programSelect')) $('programSelect').value = u.program || '';
         if ($('sectionInput')) $('sectionInput').value = u.section || '';

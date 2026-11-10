@@ -119,7 +119,7 @@
         var has = current.start && current.end && current.date;
         $('mTime').textContent = has ? fmtTime(current.start) + ' - ' + fmtTime(current.end) : '—';
         $('mDate').textContent = current.date ? fmtDate(current.date) : '—';
-        $('mRoom').textContent = current.room || '—';
+        $('mRoom').textContent = String(current.room || '').trim() || 'TBA';
 
         $('eTimeStart').value = current.start || '';
         $('eTimeEnd').value = current.end || '';

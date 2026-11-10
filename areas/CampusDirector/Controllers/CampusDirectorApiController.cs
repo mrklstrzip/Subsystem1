@@ -396,7 +396,18 @@ namespace Subsystem1.Areas.CampusDirector.Controllers
                 if (user == null) return Expired();
 
                 var emptyFilter = new BsonDocument();
-                List<BsonDocument> buildingDocs = Buildings().Find(emptyFilter).ToList();
+                List<BsonDocument> buildingDocs = Buildings()
+    .Find(emptyFilter)
+    .ToList()
+    .Where(b =>
+        !string.Equals(Str(b, "name").Trim(), "TBA",
+            StringComparison.OrdinalIgnoreCase) &&
+        !string.Equals(Str(b, "name").Trim(), "To Be Announced",
+            StringComparison.OrdinalIgnoreCase) &&
+        !string.Equals(Str(b, "code").Trim(), "TBA",
+            StringComparison.OrdinalIgnoreCase)
+    )
+    .ToList();
                 List<BsonDocument> roomDocs = Rooms().Find(emptyFilter).ToList();
 
                 var buildingById = new Dictionary<string, BsonDocument>();
@@ -579,6 +590,15 @@ namespace Subsystem1.Areas.CampusDirector.Controllers
 
                 string name = Regex.Replace(Clean(dto.Name), @"\s+", " ");
                 string code = Clean(dto.Code).ToUpperInvariant();
+                
+                if (string.Equals(name, "TBA", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(name, "To Be Announced", StringComparison.OrdinalIgnoreCase) ||
+                code == "TBA")
+                {
+                    return Fail(
+                        "TBA is not a physical building. Please enter a valid building."
+                    );
+                }
 
                 if (name == "" || code == "") return Fail("Please enter the building name and code.");
                 if (name.Length > 80) return Fail("Building name is too long (80 characters max).");
@@ -715,6 +735,16 @@ namespace Subsystem1.Areas.CampusDirector.Controllers
                 BsonDocument building = Buildings()
                     .Find(Builders<BsonDocument>.Filter.Eq("_id", buildingOid)).FirstOrDefault();
                 if (building == null) return Fail("Please choose a building.");
+                 
+                if (string.Equals(Str(building, "name").Trim(), "TBA",
+        StringComparison.OrdinalIgnoreCase) ||
+    string.Equals(Str(building, "code").Trim(), "TBA",
+        StringComparison.OrdinalIgnoreCase) ||
+    string.Equals(Str(building, "name").Trim(), "To Be Announced",
+        StringComparison.OrdinalIgnoreCase))
+                {
+                    return Fail("Cannot add a room under TBA.");
+                }
 
                 string buildingId = buildingOid.ToString();
                 string name = RoomName(dto.Name, Str(building, "code"));

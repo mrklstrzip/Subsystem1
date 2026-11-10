@@ -442,6 +442,82 @@ namespace Subsystem1.Areas.Admin.Controllers
             }
         }
 
+        private static DateTime ActivityDate(BsonDocument doc, string field)
+        {
+            BsonValue value;
+
+            if (doc.TryGetValue(field, out value) &&
+                value != null &&
+                value.IsBsonDateTime)
+            {
+                return value.ToUniversalTime();
+            }
+
+            return DateTime.MinValue;
+        }
+
+
+        private static bool IsTrackedSystemActivity(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+
+            string t = text.Trim();
+            var c = StringComparison.OrdinalIgnoreCase;
+
+            // ADMIN
+            if (t.StartsWith("Admin: ", c))
+            {
+                t = t.Substring("Admin: ".Length);
+
+                return
+                    t.StartsWith("New dean account created:", c) ||
+                    t.StartsWith("New campus director account created:", c) ||
+                    t.StartsWith("New capstone coordinator account created:", c) ||
+                    t.StartsWith("Account updated:", c) ||
+                    t.StartsWith("Account activated:", c) ||
+                    t.StartsWith("Account deactivated:", c) ||
+                    t.StartsWith("New Expertise Tag created:", c) ||
+                    t.StartsWith("Expertise Tag modified:", c) ||
+                    t.StartsWith("Faculty profile updated:", c);
+            }
+
+            // CAMPUS DIRECTOR
+            if (t.StartsWith("Campus Director: ", c))
+            {
+                t = t.Substring("Campus Director: ".Length);
+
+                bool buildingAction =
+                    t.StartsWith("Building ", c) &&
+                    (t.EndsWith(" added", c) ||
+                     t.EndsWith(" details updated", c) ||
+                     t.IndexOf(" status changed to ", c) >= 0);
+
+                bool roomAdded =
+                    t.StartsWith("Room ", c) &&
+                    t.IndexOf(" added to ", c) >= 0;
+
+                return buildingAction || roomAdded;
+            }
+
+            // CAPSTONE COORDINATOR
+            if (t.StartsWith("Capstone Coordinator: ", c))
+            {
+                t = t.Substring("Capstone Coordinator: ".Length);
+
+                return
+                    t.StartsWith("Panel and schedule generated for", c) ||
+                    t.StartsWith("Schedule submitted to the Dean for", c) ||
+                    t.StartsWith("Schedule edited for", c);
+            }
+
+            // DEAN
+            return
+                t.StartsWith("Dean approved the defense schedule for", c) ||
+                t.StartsWith("Dean rejected the defense schedule for", c);
+        }
+
+
         [HttpGet]
         public ActionResult state()
         {
@@ -456,26 +532,67 @@ namespace Subsystem1.Areas.Admin.Controllers
                     .Select(t => TagRow(t))
                     .ToList();
 
-                var activity = Activity()
+                var adminLogs = Activity()
+    .Find(new BsonDocument())
+    .Sort(Builders<BsonDocument>.Sort.Descending("ts"))
+    .Limit(50)
+    .ToList()
+    .Select(a => new
+    {
+        at = ActivityDate(a, "ts"),
+        text = "Admin: " + Str(a, "text"),
+        type = Str(a, "type"),
+        category = Str(a, "category")
+    });
+
+                var campusLogs = Db.Database
+                    .GetCollection<BsonDocument>("campus_activity")
                     .Find(new BsonDocument())
                     .Sort(Builders<BsonDocument>.Sort.Descending("ts"))
                     .Limit(50)
                     .ToList()
-                    .Select(a =>
+                    .Select(a => new
                     {
-                        BsonValue ts;
-                        DateTime when = DateTime.UtcNow;
-                        if (a.TryGetValue("ts", out ts) && ts.IsBsonDateTime)
-                        {
-                            when = ts.ToUniversalTime();
-                        }
-                        return new
-                        {
-                            at = when.ToString("o"),
-                            text = Str(a, "text"),
-                            type = Str(a, "type"),
-                            category = Str(a, "category")
-                        };
+                        at = ActivityDate(a, "ts"),
+                        text = "Campus Director: " + Str(a, "text"),
+                        type = Str(a, "type"),
+                        category = Str(a, "category")
+                    });
+
+                var coordinatorLogs = Db.Database
+                    .GetCollection<BsonDocument>("coordinator_activity")
+                    .Find(new BsonDocument())
+                    .Sort(Builders<BsonDocument>.Sort.Descending("at"))
+                    .Limit(50)
+                    .ToList()
+                    .Select(a => new
+                    {
+                        at = ActivityDate(a, "at"),
+                        text = Str(a, "text").StartsWith(
+                            "Dean approved",
+                            StringComparison.OrdinalIgnoreCase)
+                            ? Str(a, "text")
+                            : "Capstone Coordinator: " + Str(a, "text"),
+                        type = Str(a, "text").IndexOf(
+                            "generated", StringComparison.OrdinalIgnoreCase) >= 0
+                            ? "create" : "edit",
+                        category = "schedule"
+                    });
+
+                var activity = adminLogs
+                    .Concat(campusLogs)
+                    .Concat(coordinatorLogs)
+                    .Where(a => a.at != DateTime.MinValue &&
+                                !string.IsNullOrWhiteSpace(a.text) && 
+                                IsTrackedSystemActivity(a.text))
+                    .OrderByDescending(a => a.at)
+                    .Take(50)
+                    .Select(a => new
+                    {
+                        at = a.at.ToString("o"),
+                        text = a.text,
+                        type = a.type,
+                        category = a.category
                     })
                     .ToList();
 
@@ -522,6 +639,17 @@ namespace Subsystem1.Areas.Admin.Controllers
                 bool isFaculty = IsFacultyKey(roleKey);
 
                 bool isEdit = Clean(dto.Id) != "";
+                
+                if (!isEdit &&
+    roleKey != "campus-director" &&
+    roleKey != "capstone-coordinator" &&
+    roleKey != "dean")
+                {
+                    return Fail(
+                        "Only Campus Director, Capstone Coordinator, and Dean accounts can be created."
+                    );
+                }
+
                 ObjectId oid = ObjectId.Empty;
                 BsonDocument existing = null;
 
