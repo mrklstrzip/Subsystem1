@@ -71,6 +71,8 @@
         alert('Could not reach the server. Please check your connection and try again.');
     }
 
+    function notify(title, message) { if (window.Notice) Notice.success(title, message); }
+
     function refresh() {
         return api('state').then(function (res) {
             if (!res || !res.success) {
@@ -460,6 +462,7 @@
         send('saveTag', { name: name, description: desc, status: 'active' }, function () {
             closeModal('addModal');
             renderTags();
+            notify('Expertise tag created', 'Successfully created "' + name + '".');
         });
     }
 
@@ -488,6 +491,7 @@
             closeModal('editModal');
             editTagId = null;
             renderTags();
+            notify('Expertise tag updated', 'Successfully edited "' + name + '".');
         });
     }
 
@@ -570,10 +574,14 @@
     function saveExpertise() {
         if (!facultyEditId) { closeModal('editFacultyModal'); return; }
 
+        var fu = userById(facultyEditId);
+        var fname = fu ? plainName(fu) : 'the faculty member';
+
         send('saveFaculty', { id: facultyEditId, expertise: facultySelected.slice() }, function () {
             facultyEditId = null;
             closeModal('editFacultyModal');
             renderFaculty();
+            notify('Faculty profile updated', 'Successfully edited ' + fname + '.');
         });
     }
 
@@ -866,10 +874,15 @@
             expertise: (!isEditMode && (role === 'panelist' || role === 'adviser')) ? userSelected.slice() : []
         };
 
+        var wasEdit = isEditMode;
+        var shownName = (firstName + ' ' + lastName + (suffix ? ' ' + suffix : '')).trim();
+
         send('saveUser', payload, function () {
             closeModal('userModal');
             if ($('passwordInput')) $('passwordInput').value = '';
             renderUsers();
+            notify(wasEdit ? 'User updated' : 'User created',
+                'Successfully ' + (wasEdit ? 'edited ' : 'created ') + shownName + '.');
         });
     }
 

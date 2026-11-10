@@ -240,10 +240,12 @@
         busy = true;
         submitBtn.disabled = true;
         showError('');
+        var title = current.title;
         call('submit', { id: current.id }).then(function (res) {
             busy = false;
             submitBtn.disabled = false;
             if (!res || !res.success) { showError((res && res.message) || 'Something went wrong. Please try again.'); return; }
+            if (window.Notice) Notice.after('success', 'Schedule submitted', 'The generated schedule for "' + title + '" was submitted successfully.');
             window.location.reload();     // the lists show the new status
         }, function () {
             busy = false;

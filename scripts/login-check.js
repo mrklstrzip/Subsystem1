@@ -23,6 +23,7 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
     }
 
     function fail(message) {
+        if (window.Loading) Loading.reset();   // hide "Signing in..."
         resetButton();
         if (errorBox) {
             errorBox.textContent = message;
@@ -58,6 +59,7 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
             }
 
             localStorage.setItem('loggedInUser', JSON.stringify(result.user));
+            if (window.Loading) Loading.show('Signing in...');   // stays up until the next page loads
             window.location.href = home;
         })
         .catch(function () {

@@ -138,7 +138,18 @@
     function act(action, row, btn) {
         btn.disabled = true;
         call(action, { id: row.id }).then(function (res) {
-            toast((res && res.message) || 'Done.');
+            var failed = res && res.success === false;
+            var cancelled = action === 'revokeInvite';
+            if (window.Notice) {
+                if (failed) {
+                    Notice.error(cancelled ? 'Could not cancel' : 'Could not resend', (res && res.message) || 'Something went wrong. Please try again.');
+                } else {
+                    Notice.success(cancelled ? 'Invitation cancelled' : 'Invitation resent',
+                        (res && res.message) || (cancelled ? 'The invitation for ' + row.email + ' was cancelled.' : 'The invitation was resent to ' + row.email + '.'));
+                }
+            } else {
+                toast((res && res.message) || 'Done.');
+            }
             return load();
         }).catch(function () {
             toast('Could not reach the server.');
@@ -269,6 +280,20 @@
         $('invStepDone').hidden = false;
     }
 
+    function notifyResult(res) {
+        if (!window.Notice) return;
+        var sent = res.sent || 0, failed = res.failed || 0, skipped = res.skipped || 0;
+        if (failed) {
+            Notice.error('Some invitations were not sent',
+                sent + ' sent, ' + failed + ' failed' + (skipped ? ', ' + skipped + ' skipped' : '') + '. See the list for details.');
+        } else if (sent) {
+            Notice.success(sent === 1 ? 'Invitation sent' : 'Invitations sent',
+                sent + ' invitation' + (sent === 1 ? '' : 's') + ' sent successfully' + (skipped ? ' (' + skipped + ' skipped).' : '.'));
+        } else {
+            Notice.info('Nothing was sent', 'Every address was skipped. See the list for details.');
+        }
+    }
+
     submit.addEventListener('click', function () {
         takeInput();
         if (sending) return;
@@ -285,7 +310,7 @@
 
         call('invite', { emails: emails }).then(function (res) {
             sending = false;
-            if (res && res.results && res.results.length) { showResults(res); load(); return; }
+            if (res && res.results && res.results.length) { showResults(res); notifyResult(res); load(); return; }
             submit.disabled = false;
             submit.textContent = 'Send invitations';
             showError((res && res.message) || 'Something went wrong. Please try again.');
