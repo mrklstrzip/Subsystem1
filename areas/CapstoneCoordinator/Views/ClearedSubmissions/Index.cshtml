@@ -1,0 +1,99 @@
+@using System.Globalization
+@using Subsystem1.Areas.CapstoneCoordinator.Models
+@model IList<ClearedSubmission>
+@{
+    ViewBag.Title = "Cleared Submissions";
+}
+
+<link href="@Url.Content("~/Content/css/capstonecoordinator/clearedsubmissions.css")?v=1.0" rel="stylesheet" type="text/css" />
+
+<div class="dashboard-header">
+    <div class="header-text">
+        <h1 class="page-title">Cleared Submissions</h1>
+        <p class="welcome-text">Disseminated manuscripts and their clearance review details</p>
+    </div>
+    <div class="header-bg-icon"><i class="fa fa-circle-check"></i></div>
+</div>
+
+<div class="cleared-card">
+    <table class="cleared-table">
+        <thead>
+            <tr><th>MANUSCRIPT</th><th>PROGRAM / SECTION</th><th>STATUS</th><th>DISSEMINATED</th><th>REVIEW</th></tr>
+        </thead>
+        <tbody>
+            @if (Model == null || Model.Count == 0)
+            {
+                <tr><td colspan="5" class="cleared-empty">No disseminated submissions have been cleared yet.</td></tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>@item.Title</strong>
+                            <small>Submission ID: @item.Id</small>
+                        </td>
+                        <td>@item.Program <span>@item.Section</span></td>
+                        <td><span class="cleared-status">@item.Status</span></td>
+                        <td>@(item.DisseminatedAt.HasValue ? item.DisseminatedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "—")</td>
+                        <td>
+                            <details class="cleared-details">
+                                <summary>Review details</summary>
+                                <div class="cleared-detail-body">
+                                    <h3>Capstone clearance</h3>
+                                    <dl>
+                                        <dt>Reference</dt><dd>@(String.IsNullOrWhiteSpace(item.ClearanceReference) ? "—" : item.ClearanceReference)</dd>
+                                        <dt>Group</dt><dd>@(String.IsNullOrWhiteSpace(item.ClearanceGroup) ? "—" : item.ClearanceGroup)</dd>
+                                        <dt>Issued by</dt><dd>@(String.IsNullOrWhiteSpace(item.ClearanceIssuedBy) ? "—" : item.ClearanceIssuedBy)</dd>
+                                        <dt>Issued</dt><dd>@(item.ClearanceIssuedAt.HasValue ? item.ClearanceIssuedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "—")</dd>
+                                        <dt>Repository</dt><dd>@(item.FiledAt.HasValue ? "Filed " + item.FiledAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "Not filed yet")</dd>
+                                    </dl>
+                                    <h3>Validation summaries</h3>
+                                    @if (item.ValidationSummaries.Count == 0)
+                                    {
+                                        <p>No validation summaries recorded.</p>
+                                    }
+                                    else
+                                    {
+                                        foreach (var summary in item.ValidationSummaries)
+                                        {
+                                            <div class="validation-summary">
+                                                <p><strong>@(String.IsNullOrWhiteSpace(summary.Staff) ? "Review" : summary.Staff)</strong>
+                                                   · @(summary.CompletedAt.HasValue ? summary.CompletedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "Completion time not recorded")</p>
+                                                @if (!String.IsNullOrWhiteSpace(summary.Comments)) { <p>@summary.Comments</p> }
+                                                @if (summary.Items.Count > 0)
+                                                {
+                                                    <ul>
+                                                        @foreach (var check in summary.Items)
+                                                        {
+                                                            <li><b>@check.Requirement</b> — @check.Status
+                                                                @if (!String.IsNullOrWhiteSpace(check.Feedback)) { <span>: @check.Feedback</span> }
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                    <h3>Approved manuscript</h3>
+                                    @if (String.IsNullOrWhiteSpace(item.ApprovedManuscriptId))
+                                    {
+                                        <p class="manuscript-unavailable">No approved manuscript file ID is recorded in Subsystem 3.</p>
+                                    }
+                                    else
+                                    {
+                                        <p>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptName) ? "Approved manuscript" : item.ApprovedManuscriptName)</p>
+                                        <p>File ID: <code>@item.ApprovedManuscriptId</code></p>
+                                        <p>SHA-256: <code>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptHash) ? "not recorded" : item.ApprovedManuscriptHash)</code></p>
+                                        <p class="manuscript-unavailable">Subsystem 3 provides file metadata here but no secure file URL or download token, so this screen cannot open the PDF yet.</p>
+                                    }
+                                </div>
+                            </details>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

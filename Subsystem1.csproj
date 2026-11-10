@@ -312,6 +312,7 @@
     <Compile Include="Areas\CapstoneCoordinator\Controllers\ConflictResultController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\DashboardController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\CoordinatorApiController.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Controllers\ClearedSubmissionsController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\TopicScreeningController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Models\TopicScreeningModels.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\CoordinatorControllerBase.cs" />
@@ -360,6 +361,8 @@
     <Compile Include="Areas\CapstoneCoordinator\Models\PmInvites.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\InvitationController.cs" />
     <Compile Include="Areas\Auth\Controllers\SignupController.cs" />
+<Compile Include="Areas\CapstoneCoordinator\Models\Subsystem2Manuscripts.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Models\Subsystem3Clearances.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Auth\Views\Login\login.cshtml" />
@@ -405,6 +408,8 @@
     <Content Include="Areas\CapstoneCoordinator\Views\ConflictResult\conflictresult.cshtml" />
     <Content Include="Areas\Auth\Views\ForgotPassword\forgotpassword.cshtml" />
     <Content Include="Areas\CapstoneCoordinator\Views\ScheduleManagement\schedulemanagement.cshtml" />
+    <Content Include="Areas\CapstoneCoordinator\Views\ClearedSubmissions\Index.cshtml" />
+    <Content Include="Content\css\capstonecoordinator\clearedsubmissions.css" />
     <Content Include="Areas\CapstoneCoordinator\Views\Shared\_NotificationItems.cshtml" />
     <Content Include="Areas\Dean\Views\Shared\_NotificationItems.cshtml" />
     <Content Include="connectionStrings.config" />

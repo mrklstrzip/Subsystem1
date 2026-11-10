@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Web.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -163,6 +165,64 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ErrorText(ex) }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // Stream authenticated Cloudinary PDFs through this same-origin endpoint so PDF.js
+        // does not depend on Cloudinary CORS configuration.
+        [HttpGet]
+        public ActionResult manuscript(string id)
+        {
+            ObjectId oid;
+            if (!ObjectId.TryParse(id, out oid)) return new HttpStatusCodeResult(404);
+
+            BsonDocument scheduleDoc = Schedules()
+                .Find(Builders<BsonDocument>.Filter.Eq("_id", oid))
+                .FirstOrDefault();
+            if (scheduleDoc == null) return new HttpStatusCodeResult(404);
+
+            BsonDocument title = Subsystem2Manuscripts.LatestForSchedule(
+                Str(scheduleDoc, "titleId"),
+                Str(scheduleDoc, "projectManagerId"),
+                Str(scheduleDoc, "title"));
+            string url = title == null ? "" : Str(title, "manuscriptUrl");
+            string fileName = title == null ? "" : Str(title, "fileName");
+            if (!fileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                return new HttpStatusCodeResult(415, "This submission does not contain a PDF manuscript.");
+
+            Uri source;
+            if (!Uri.TryCreate(url, UriKind.Absolute, out source) ||
+                source.Scheme != Uri.UriSchemeHttps ||
+                !(source.Host.Equals("api.cloudinary.com", StringComparison.OrdinalIgnoreCase) ||
+                  source.Host.Equals("res.cloudinary.com", StringComparison.OrdinalIgnoreCase)))
+                return new HttpStatusCodeResult(404);
+
+            try
+            {
+                var request = (HttpWebRequest)WebRequest.Create(source);
+                request.Method = "GET";
+                request.Timeout = 30000;
+                request.ReadWriteTimeout = 30000;
+                request.UserAgent = "Subsystem1-Manuscript-Viewer";
+
+                using (var upstream = (HttpWebResponse)request.GetResponse())
+                using (Stream input = upstream.GetResponseStream())
+                {
+                    Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
+                    Response.Cache.SetNoStore();
+                    Response.BufferOutput = false;
+                    Response.ContentType = "application/pdf";
+                    Response.AddHeader("Content-Disposition", "inline; filename=manuscript.pdf");
+                    Response.AddHeader("X-Content-Type-Options", "nosniff");
+                    if (upstream.ContentLength >= 0)
+                        Response.AddHeader("Content-Length", upstream.ContentLength.ToString());
+                    input.CopyTo(Response.OutputStream);
+                    return new EmptyResult();
+                }
+            }
+            catch (WebException)
+            {
+                return new HttpStatusCodeResult(502, "Cloudinary could not provide this manuscript.");
             }
         }
 

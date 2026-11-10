@@ -6,7 +6,7 @@
     ViewBag.Title = "Defense Schedule";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=2.3" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=2.4" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -152,12 +152,23 @@
         <!-- Body: Abstract + Panelists -->
         <div class="modal-body-grid">
             <div class="modal-panel abstract-panel">
-                <h3 class="panel-title">Abstract</h3>
-                <p class="panel-text" id="mAbstract"></p>
-
-                <h3 class="panel-title">Keywords</h3>
-                <p class="panel-text" id="mKeywords"></p>
-
+                <div class="manuscript-viewer-header">
+                    <h3 class="panel-title">Manuscript</h3>
+                    <a id="mManuscriptOpen" class="manuscript-open-link" target="_blank" rel="noopener" hidden>Open PDF</a>
+                </div>
+                <div class="pdf-viewer" aria-label="Manuscript PDF viewer">
+                    <div class="pdf-toolbar">
+                        <button type="button" id="pdfPrev" aria-label="Previous page">‹</button>
+                        <span><span id="pdfPage">—</span> / <span id="pdfPages">—</span></span>
+                        <button type="button" id="pdfNext" aria-label="Next page">›</button>
+                        <button type="button" id="pdfZoomOut" aria-label="Zoom out">−</button>
+                        <button type="button" id="pdfZoomIn" aria-label="Zoom in">+</button>
+                    </div>
+                    <div class="pdf-canvas-wrap" id="pdfCanvasWrap">
+                        <canvas id="pdfCanvas" hidden></canvas>
+                        <p class="pdf-message" id="pdfMessage">No PDF manuscript is available for this submission.</p>
+                    </div>
+                </div>
                 <span class="panel-footnote" id="mSubmittedNote"></span>
             </div>
 
@@ -190,6 +201,7 @@
 </div>
 
 <script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
     (function () {
         var API = "/CapstoneCoordinator/CoordinatorApi/";
@@ -199,6 +211,15 @@
 
         var overlay = document.getElementById("defenseModal");
         var busy = false;
+        var pdfDocument = null;
+        var pdfPageNumber = 1;
+        var pdfZoom = 1;
+        var pdfLoadId = 0;
+        var pdfRenderTask = null;
+        if (window.pdfjsLib) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        }
 
         function $(id) {
             return document.getElementById(id);
@@ -219,6 +240,62 @@
             return h + ":" + p[1] + ap;
         }
 
+        function renderPdfPage() {
+            if (!pdfDocument) return;
+            var canvas = $("pdfCanvas");
+            var context = canvas.getContext("2d");
+            pdfDocument.getPage(pdfPageNumber).then(function (page) {
+                var base = page.getViewport({ scale: 1 });
+                var maxWidth = $("pdfCanvasWrap").clientWidth - 24;
+                var viewport = page.getViewport({ scale: Math.min(maxWidth / base.width, 1.5) * pdfZoom });
+                var ratio = window.devicePixelRatio || 1;
+                canvas.width = Math.floor(viewport.width * ratio);
+                canvas.height = Math.floor(viewport.height * ratio);
+                canvas.style.width = Math.floor(viewport.width) + "px";
+                canvas.style.height = Math.floor(viewport.height) + "px";
+                context.setTransform(ratio, 0, 0, ratio, 0, 0);
+                if (pdfRenderTask) pdfRenderTask.cancel();
+                pdfRenderTask = page.render({ canvasContext: context, viewport: viewport });
+                pdfRenderTask.promise.catch(function () { });
+                $("pdfPage").textContent = pdfPageNumber;
+                $("pdfPages").textContent = pdfDocument.numPages;
+                $("pdfPrev").disabled = pdfPageNumber <= 1;
+                $("pdfNext").disabled = pdfPageNumber >= pdfDocument.numPages;
+            });
+        }
+
+        function loadManuscript(url) {
+            var id = ++pdfLoadId;
+            var link = $("mManuscriptOpen");
+            var message = $("pdfMessage");
+            var canvas = $("pdfCanvas");
+            if (pdfRenderTask) { pdfRenderTask.cancel(); pdfRenderTask = null; }
+            if (pdfDocument) { pdfDocument.destroy(); pdfDocument = null; }
+            canvas.hidden = true;
+            $("pdfPage").textContent = $("pdfPages").textContent = "—";
+            var parsed;
+            try { parsed = new URL(url || "", window.location.href); } catch (e) { parsed = null; }
+            var valid = parsed && (parsed.protocol === "https:" || parsed.protocol === "http:") &&
+                (/\.pdf(?:$|[&#?])/i.test(parsed.pathname + parsed.search) || /\/CoordinatorApi\/manuscript$/i.test(parsed.pathname));
+            link.hidden = !valid;
+            if (valid) link.href = parsed.href;
+            if (!valid) { message.hidden = false; message.textContent = "No PDF manuscript is available for this submission."; return; }
+            message.hidden = false;
+            message.textContent = "Loading manuscript…";
+            if (!window.pdfjsLib) { message.textContent = "The PDF viewer could not be loaded. Use Open PDF to view the manuscript."; return; }
+            window.pdfjsLib.getDocument({ url: parsed.href, withCredentials: parsed.origin === window.location.origin }).promise.then(function (doc) {
+                if (id !== pdfLoadId) { doc.destroy(); return; }
+                pdfDocument = doc;
+                pdfPageNumber = 1;
+                pdfZoom = 1;
+                canvas.hidden = false;
+                message.hidden = true;
+                renderPdfPage();
+            }).catch(function () {
+                if (id === pdfLoadId) message.textContent = "Could not render this PDF. Check that the Cloudinary file is accessible, then use Open PDF.";
+            });
+        }
+
         function show(row, d) {
             $("mTitle").textContent = d.title;
             $("mDateSubmitted").textContent = d.dateSubmitted;
@@ -231,11 +308,10 @@
             badge.className = "status-badge " + st;
             badge.textContent = STATUS_LABELS[st] || st;
 
-            $("mAbstract").textContent = d.abstract || "\u2014";
-            $("mKeywords").textContent = d.keywords || "\u2014";
             $("mSubmittedNote").textContent = d.dateSubmitted && d.dateSubmitted !== "-"
                 ? "Submitted " + d.dateSubmitted
                 : "";
+            loadManuscript("/CapstoneCoordinator/CoordinatorApi/manuscript?id=" + encodeURIComponent(d.id));
 
             var list = $("mPanelists");
             list.innerHTML = "";
@@ -337,6 +413,11 @@
 
         $("modalCloseIcon").addEventListener("click", closeModal);
         $("modalCloseBtn").addEventListener("click", closeModal);
+        $("pdfPrev").addEventListener("click", function () { if (pdfPageNumber > 1) { pdfPageNumber--; renderPdfPage(); } });
+        $("pdfNext").addEventListener("click", function () { if (pdfDocument && pdfPageNumber < pdfDocument.numPages) { pdfPageNumber++; renderPdfPage(); } });
+        $("pdfZoomOut").addEventListener("click", function () { pdfZoom = Math.max(.6, pdfZoom - .15); renderPdfPage(); });
+        $("pdfZoomIn").addEventListener("click", function () { pdfZoom = Math.min(2, pdfZoom + .15); renderPdfPage(); });
+        window.addEventListener("resize", function () { if (pdfDocument && overlay.classList.contains("open")) renderPdfPage(); });
 
         overlay.addEventListener("click", function (e) {
             if (e.target === overlay) closeModal();

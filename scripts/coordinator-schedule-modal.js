@@ -24,6 +24,16 @@
     var current = null;      // the schedule being shown (from the server)
     var editing = false;
     var busy = false;
+    var pdfDocument = null;
+    var pdfPageNumber = 1;
+    var pdfZoom = 1;
+    var pdfLoadId = 0;
+    var pdfRenderTask = null;
+
+    if (window.pdfjsLib) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
 
     /* ---------- server ---------- */
     function call(action, body) {
@@ -69,6 +79,62 @@
     function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
     // exact percentage with one decimal (66.7%), never rounded to a level
     function fmtPercent(v) { return (v === null || v === undefined || isNaN(v)) ? '\u2014' : Number(v).toFixed(1) + '%'; }
+
+    function renderPdfPage() {
+        if (!pdfDocument) return;
+        var canvas = $('pdfCanvas');
+        var context = canvas.getContext('2d');
+        pdfDocument.getPage(pdfPageNumber).then(function (page) {
+            var base = page.getViewport({ scale: 1 });
+            var maxWidth = $('pdfCanvasWrap').clientWidth - 24;
+            var viewport = page.getViewport({ scale: Math.min(maxWidth / base.width, 1.5) * pdfZoom });
+            var ratio = window.devicePixelRatio || 1;
+            canvas.width = Math.floor(viewport.width * ratio);
+            canvas.height = Math.floor(viewport.height * ratio);
+            canvas.style.width = Math.floor(viewport.width) + 'px';
+            canvas.style.height = Math.floor(viewport.height) + 'px';
+            context.setTransform(ratio, 0, 0, ratio, 0, 0);
+            if (pdfRenderTask) pdfRenderTask.cancel();
+            pdfRenderTask = page.render({ canvasContext: context, viewport: viewport });
+            pdfRenderTask.promise.catch(function () { });
+            $('pdfPage').textContent = pdfPageNumber;
+            $('pdfPages').textContent = pdfDocument.numPages;
+            $('pdfPrev').disabled = pdfPageNumber <= 1;
+            $('pdfNext').disabled = pdfPageNumber >= pdfDocument.numPages;
+        });
+    }
+
+    function loadManuscript(url) {
+        var id = ++pdfLoadId;
+        var link = $('mManuscriptOpen');
+        var message = $('pdfMessage');
+        var canvas = $('pdfCanvas');
+        if (pdfRenderTask) { pdfRenderTask.cancel(); pdfRenderTask = null; }
+        if (pdfDocument) { pdfDocument.destroy(); pdfDocument = null; }
+        canvas.hidden = true;
+        $('pdfPage').textContent = $('pdfPages').textContent = '\u2014';
+        var parsed;
+        try { parsed = new URL(url || '', window.location.href); } catch (e) { parsed = null; }
+        var valid = parsed && (parsed.protocol === 'https:' || parsed.protocol === 'http:') &&
+            (/\.pdf(?:$|[&#?])/i.test(parsed.pathname + parsed.search) || /\/CoordinatorApi\/manuscript$/i.test(parsed.pathname));
+        link.hidden = !valid;
+        if (valid) link.href = parsed.href;
+        if (!valid) { message.textContent = 'No PDF manuscript is available for this submission.'; return; }
+        message.hidden = false;
+        message.textContent = 'Loading manuscript…';
+        if (!window.pdfjsLib) { message.textContent = 'The PDF viewer could not be loaded. Use Open PDF to view the manuscript.'; return; }
+        window.pdfjsLib.getDocument({ url: parsed.href, withCredentials: parsed.origin === window.location.origin }).promise.then(function (doc) {
+            if (id !== pdfLoadId) { doc.destroy(); return; }
+            pdfDocument = doc;
+            pdfPageNumber = 1;
+            pdfZoom = 1;
+            canvas.hidden = false;
+            message.hidden = true;
+            renderPdfPage();
+        }).catch(function () {
+            if (id === pdfLoadId) message.textContent = 'Could not render this PDF. Check that the Cloudinary file is accessible, then use Open PDF.';
+        });
+    }
 
     /* ---------- drawing ---------- */
     function renderPanelists() {
@@ -170,9 +236,8 @@
         badge.className = 'status-badge ' + d.status;
         badge.textContent = STATUS_LABELS[d.status] || d.status;
 
-        $('mAbstract').textContent = d.abstract || '—';
-        $('mKeywords').textContent = d.keywords || '—';
         $('mSubmittedNote').textContent = d.dateSubmitted && d.dateSubmitted !== '-' ? 'Submitted ' + d.dateSubmitted : '';
+        loadManuscript('/CapstoneCoordinator/CoordinatorApi/manuscript?id=' + encodeURIComponent(d.id));
 
         submitBtn.style.display = d.editable ? '' : 'none';
         setEditing(false);
@@ -282,6 +347,11 @@
         if (e.key === 'Enter' && editing && e.target.tagName === 'INPUT') { e.preventDefault(); saveEdit(false); }
     });
     submitBtn.addEventListener('click', submit);
+    $('pdfPrev').addEventListener('click', function () { if (pdfPageNumber > 1) { pdfPageNumber--; renderPdfPage(); } });
+    $('pdfNext').addEventListener('click', function () { if (pdfDocument && pdfPageNumber < pdfDocument.numPages) { pdfPageNumber++; renderPdfPage(); } });
+    $('pdfZoomOut').addEventListener('click', function () { pdfZoom = Math.max(.6, pdfZoom - .15); renderPdfPage(); });
+    $('pdfZoomIn').addEventListener('click', function () { pdfZoom = Math.min(2, pdfZoom + .15); renderPdfPage(); });
+    window.addEventListener('resize', function () { if (pdfDocument && overlay.classList.contains('open')) renderPdfPage(); });
 
     window.CCSchedule = { open: open, close: close };
 })();
