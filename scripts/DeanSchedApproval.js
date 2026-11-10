@@ -158,7 +158,9 @@
                         row.remove();
                     }
                 }
+                var approvedTitle = $('mTitle').textContent;
                 closeModal();
+                if (window.Notice) Notice.success('Schedule approved', '"' + approvedTitle + '" has been approved.');
             })
             .catch(function () {
                 alert('Something went wrong.');

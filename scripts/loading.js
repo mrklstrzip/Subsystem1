@@ -101,7 +101,7 @@
         setTimeout(function () { skipUnload = false; }, 1500);
     }
 
-    //public API
+    // ---------- public API ----------
     window.Loading = {
         show: function (text) { begin(text, 0); },
         hide: end,
@@ -110,7 +110,7 @@
         texts: texts
     };
 
-    //form submits
+    // ---------- form submits ----------
     document.addEventListener("submit", function (e) {
         var form = e.target;
         if (form.hasAttribute && form.hasAttribute("data-no-loading")) dontShowForNextUnload();
@@ -132,7 +132,7 @@
         return nativeSubmit.apply(this, arguments);
     };
 
-    //links to other pages
+    // ---------- links to other pages ----------
     document.addEventListener("click", function (e) {
         if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
         var a = e.target.closest ? e.target.closest("a[href]") : null;
@@ -150,13 +150,13 @@
         }, 0);
     });
 
-    //any other navigation (location.href = ..., redirects from scripts)
+    // ---------- any other navigation (location.href = ..., redirects from scripts) ----------
     window.addEventListener("beforeunload", function () {
         if (skipUnload || count > 0) return;
         startNavigation(PAGE_TEXT);
     });
 
-    //fetch
+    // ---------- fetch ----------
     if (window.fetch) {
         var nativeFetch = window.fetch;
         window.fetch = function (input) {
@@ -174,7 +174,7 @@
         };
     }
 
-    //XMLHttpRequest (jQuery $.ajax, etc.)
+    // ---------- XMLHttpRequest (jQuery $.ajax, etc.) ----------
     var nativeOpen = XMLHttpRequest.prototype.open;
     var nativeSend = XMLHttpRequest.prototype.send;
     XMLHttpRequest.prototype.open = function (method, url) {
@@ -193,6 +193,6 @@
         return nativeSend.apply(this, arguments);
     };
 
-    //back/forward button restores the page from cache
+    // ---------- back/forward button restores the page from cache ----------
     window.addEventListener("pageshow", reset);
 })();

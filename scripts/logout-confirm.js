@@ -69,6 +69,9 @@
             event.preventDefault();
             event.stopImmediatePropagation();
 
+            closeModal();                                        // close the "Log out?" card
+            if (window.Loading) Loading.show("Signing out...");  // show the loader
+
             // End the server-side session (every role uses the same login/logout).
             try {
                 fetch("/Auth/Login/logout", {

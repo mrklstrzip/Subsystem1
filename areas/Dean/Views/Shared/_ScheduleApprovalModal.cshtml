@@ -140,15 +140,18 @@
                 return;
             }
             // for testing lang ng frontend (pa-connect nalang sa backend pag aayusin)
+            var rejTitle = document.getElementById("mTitle").textContent;
             closeReject();
             overlay.classList.remove("open");
             overlay.setAttribute("aria-hidden", "true");
-
-            Notice.info("Schedule Rejected", "The schedule has been rejected.");
+            document.body.style.overflow = "";
+            if (window.Notice) {
+                Notice.success("Schedule rejected", "\"" + rejTitle + "\" has been rejected.");
+            }
         });
 
         // "To Approve"-> Close, Reject, Approve
-        // Approved / Completed -> Close only
+        // Approved / Completed... -> Close only
         var statusEl = document.getElementById("mStatus");
         var btnReject = document.getElementById("saReject");
         var btnApprove = document.getElementById("saApprove");
