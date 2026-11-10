@@ -296,7 +296,9 @@
     <Compile Include="Areas\Admin\Controllers\UserManagementController.cs" />
     <Compile Include="Areas\Dean\Controllers\DeanApiController.cs" />
     <Compile Include="Areas\Dean\Controllers\OversightController.cs" />
+    <Compile Include="Areas\Dean\Controllers\RepositoryController.cs" />
     <Compile Include="Areas\Dean\Models\OversightModels.cs" />
+    <Compile Include="Areas\Dean\Models\DeanRepositoryModels.cs" />
     <Compile Include="Areas\Dean\Controllers\DeanControllerBase.cs" />
     <Compile Include="Areas\Dean\Models\DeanData.cs" />
     <Compile Include="Areas\Auth\AuthAreaRegistration.cs" />
@@ -397,6 +399,12 @@
     <Content Include="Areas\Dean\Views\_ViewStart.cshtml" />
     <Content Include="Areas\Dean\Views\Dashboard\dashboard.cshtml" />
     <Content Include="Areas\Dean\Views\Oversight\Index.cshtml" />
+    <Content Include="Areas\Dean\Views\Oversight\Records.cshtml" />
+    <Content Include="Areas\Dean\Views\Oversight\Monitoring.cshtml" />
+    <Content Include="Areas\Dean\Views\Oversight\Reports.cshtml" />
+    <Content Include="Areas\Dean\Views\Repository\Index.cshtml" />
+    <Content Include="Areas\Dean\Views\Repository\Paper.cshtml" />
+    <Content Include="Areas\Dean\Views\Repository\Read.cshtml" />
     <Content Include="Areas\Dean\Views\Oversight\Audit.cshtml" />
     <Content Include="Areas\Dean\Views\Profile\profile.cshtml" />
     <Content Include="Areas\Dean\Views\Shared\_DeanLayout.cshtml" />
@@ -423,6 +431,7 @@
     <Content Include="Views\Shared\_AuthLayout.cshtml" />
     <Content Include="Content\css\student-pm.css" />
     <Content Include="Content\css\oversight.css" />
+    <Content Include="Content\css\dean-repository.css" />
     <Content Include="Content\css\student-profile.css" />
     <Content Include="Content\images\student-avatar.png" />
     <Content Include="Scripts\student-notifications.js" />

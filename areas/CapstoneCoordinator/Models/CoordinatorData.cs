@@ -448,6 +448,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return new
             {
                 id = DocId(d),
+                subsystem2Id = t == null ? "" : Str(t, "subsystem2Id"),
                 status = status,
                 rawStatus = raw,
                 editable = CoDb.IsEditable(d),
@@ -460,6 +461,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 keywords = string.Join(", ", CoDb.Keywords(t)),
                 manuscriptUrl = t == null ? "" : Str(t, "manuscriptUrl"),
                 manuscriptFileName = t == null ? "" : Str(t, "fileName"),
+                revisionCase = t != null && t.Contains("revisionCase") && t["revisionCase"].IsBsonDocument
+                    ? BsonTypeMapper.MapToDotNetValue(t["revisionCase"])
+                    : null,
                 panelists = panel,
                 date = Str(d, "date"),
                 start = st.HasValue ? CoDb.Hhmm(st.Value) : "",

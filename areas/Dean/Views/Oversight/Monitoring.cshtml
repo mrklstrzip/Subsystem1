@@ -1,0 +1,48 @@
+@model Subsystem1.Areas.Dean.Models.OversightVm
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+    var action = Convert.ToString(ViewContext.RouteData.Values["action"]);
+    var cohort = action == "Cohort";
+    var exceptions = action == "Exceptions";
+}
+<section class="dean-page">
+    <header class="dean-page-banner"><h1>@Model.PageTitle</h1><p>@(cohort ? "Compare capstone submission groups across available program data." : exceptions ? "Review returned and incomplete submissions that may need attention." : "Review clearance and processing patterns across submissions.")</p></header>
+    <nav class="dean-page-tabs" aria-label="Monitoring pages">
+        <a class="@(cohort ? "active" : "")" href="@Url.Action("Cohort", "Oversight", new { area = "Dean" })">Cohort Comparison</a>
+        <a class="@(exceptions ? "active" : "")" href="@Url.Action("Exceptions", "Oversight", new { area = "Dean" })">Compliance Exceptions</a>
+        <a class="@(!cohort && !exceptions ? "active" : "")" href="@Url.Action("Performance", "Oversight", new { area = "Dean" })">Processing Performance</a>
+    </nav>
+    @if (cohort)
+    {
+        <div class="dean-page-panel">
+            <h2>No cohorts available</h2>
+            <p>Cohort comparisons appear when submission records include academic-year identifiers.</p>
+        </div>
+    }
+    else if (exceptions)
+    {
+        var flagged = Model.Records.Where(x => String.Equals(x.Status, "Returned", StringComparison.OrdinalIgnoreCase) || String.Equals(x.Status, "Revision Required", StringComparison.OrdinalIgnoreCase) || String.Equals(x.Status, "Rejected", StringComparison.OrdinalIgnoreCase)).ToList();
+        <div class="dean-page-panel">
+            <h2>Compliance exceptions <span class="dean-result-meta">@flagged.Count items</span></h2>
+            @if (flagged.Count == 0) { <p>No unresolved compliance exceptions are recorded.</p> }
+            else
+            {
+                <table class="dean-record-table"><thead><tr><th>Manuscript</th><th>Program</th><th>Status</th><th>Last action</th></tr></thead><tbody>
+                @foreach (var r in flagged) { <tr><td><strong>@r.Title</strong><small>@r.Id</small></td><td>@r.Program</td><td>@r.Status</td><td>@(r.UpdatedAt.HasValue ? r.UpdatedAt.Value.ToString("MMM d, yyyy") : "—")</td></tr> }
+                </tbody></table>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="dean-report-stats">
+            <div class="dean-report-stat">Records<strong>@Model.Total</strong></div>
+            <div class="dean-report-stat">Cleared<strong>@Model.Approved</strong></div>
+            <div class="dean-report-stat">Returned<strong>@Model.Returned</strong></div>
+            <div class="dean-report-stat">Average age (days)<strong>@Math.Round(Model.AverageAgeDays, 1)</strong></div>
+        </div>
+        <div class="dean-page-panel"><h2>Processing overview</h2><p>Current status totals from the shared submission collection.</p>
+            <div class="dean-chart"><div class="dean-chart-bar" style="height:@(Model.Total == 0 ? 2 : Math.Max(2, 100 * Model.Approved / Model.Total))%"><span>Cleared</span></div><div class="dean-chart-bar" style="height:@(Model.Total == 0 ? 2 : Math.Max(2, 100 * Model.Submitted / Model.Total))%"><span>Pending</span></div><div class="dean-chart-bar" style="height:@(Model.Total == 0 ? 2 : Math.Max(2, 100 * Model.Returned / Model.Total))%"><span>Returned</span></div></div>
+        </div>
+    }
+</section>

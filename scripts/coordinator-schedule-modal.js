@@ -237,7 +237,7 @@
         badge.textContent = STATUS_LABELS[d.status] || d.status;
 
         $('mSubmittedNote').textContent = d.dateSubmitted && d.dateSubmitted !== '-' ? 'Submitted ' + d.dateSubmitted : '';
-        loadManuscript('/CapstoneCoordinator/CoordinatorApi/manuscript?id=' + encodeURIComponent(d.id));
+        loadManuscript('/CapstoneCoordinator/CoordinatorApi/manuscript?id=' + encodeURIComponent(d.subsystem2Id || d.id || ''));
 
         submitBtn.style.display = d.editable ? '' : 'none';
         setEditing(false);

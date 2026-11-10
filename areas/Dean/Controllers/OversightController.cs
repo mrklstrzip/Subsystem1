@@ -27,37 +27,114 @@ namespace Subsystem1.Areas.Dean.Controllers
         private static List<OversightRecord> Load()
         {
             var docs = SharedDb.Titles().Find(FilterDefinition<BsonDocument>.Empty).Limit(2000).ToList();
-            return docs.Select(d => new OversightRecord {
+            var records = docs.Select(d => new OversightRecord {
                 Id = SharedDb.DocId(d), Title = Read(d,"title"),
                 Authors = Read(d,"authors") != "" ? Read(d,"authors") : Read(d,"projectManager"),
                 Program = Read(d,"program"), Adviser = Read(d,"adviser"), Abstract = Read(d,"abstract"),
                 Keywords = Read(d,"keywords"), Status = Read(d,"status"),
                 SubmittedAt = Date(d,"submittedAt"), UpdatedAt = Date(d,"updatedAt")
             }).Where(x => !String.IsNullOrWhiteSpace(x.Title)).ToList();
+
+            // The Subsystem 3 Dean package reads the live capstone workflow. Keep the existing
+            // Subsystem 1 title records visible, and add current Subsystem 3 submissions from
+            // the same central database without creating a second handoff or local copy.
+            var s3 = Db.Database.GetCollection<BsonDocument>("capstone_submissions")
+                .Find(FilterDefinition<BsonDocument>.Empty).Limit(3000).ToList();
+            foreach (var d in s3)
+            {
+                BsonDocument state = Child(d, "subsystem3");
+                BsonDocument clearance = Child(state, "CapstoneClearance");
+                string title = First(Read(d, "title"), First(Read(state, "Title"), Read(state, "title")));
+                if (String.IsNullOrWhiteSpace(title)) continue;
+                string id = d.Contains("_id") ? d["_id"].ToString() : "";
+                records.RemoveAll(x => String.Equals(x.Id, id, StringComparison.OrdinalIgnoreCase));
+                records.Add(new OversightRecord {
+                    Id = id, Title = title,
+                    Authors = First(Read(d, "student"), First(Read(d, "studentName"), Read(clearance, "GroupName"))),
+                    Program = First(Read(state, "Program"), First(Read(clearance, "Program"), Read(d, "program"))),
+                    Adviser = First(Read(d, "adviser"), Read(state, "Adviser")),
+                    Abstract = First(Read(state, "Abstract"), Read(d, "abstract")),
+                    Keywords = First(Read(state, "Keywords"), Read(d, "keywords")),
+                    Status = Read(state, "Status"),
+                    SubmittedAt = Date(state, "SubmittedAt") ?? Date(d, "submittedAt"),
+                    UpdatedAt = Date(state, "FiledAt") ?? Date(state, "DisseminatedAt") ?? Date(state, "UpdatedAt")
+                });
+            }
+            return records;
         }
-        private ActionResult Page(string title, string q, string program, string status)
+
+        private static BsonDocument Child(BsonDocument document, string key)
+        {
+            BsonValue value;
+            return document != null && document.TryGetValue(key, out value) && value != null && value.IsBsonDocument
+                ? value.AsBsonDocument : null;
+        }
+
+        private static string First(string first, string second)
+        {
+            return String.IsNullOrWhiteSpace(first) ? (second ?? "") : first;
+        }
+        private ActionResult Page(string title, string q, string program, string status, string viewName = "Index", DateTime? from = null, DateTime? to = null, string reportType = null, int? batch = null)
         {
             var all = Load();
             IEnumerable<OversightRecord> filtered = all;
+            if (from.HasValue) filtered = filtered.Where(x => (x.UpdatedAt ?? x.SubmittedAt).HasValue && (x.UpdatedAt ?? x.SubmittedAt).Value.Date >= from.Value.Date);
+            if (to.HasValue) filtered = filtered.Where(x => (x.UpdatedAt ?? x.SubmittedAt).HasValue && (x.UpdatedAt ?? x.SubmittedAt).Value.Date <= to.Value.Date);
+            if (batch.HasValue) filtered = filtered.Where(x => (x.SubmittedAt ?? x.UpdatedAt).HasValue && (x.SubmittedAt ?? x.UpdatedAt).Value.Year == batch.Value);
             if (!String.IsNullOrWhiteSpace(q)) filtered = filtered.Where(x => (x.Title+" "+x.Authors+" "+x.Keywords+" "+x.Adviser).IndexOf(q.Trim(), StringComparison.OrdinalIgnoreCase)>=0);
             if (!String.IsNullOrWhiteSpace(program)) filtered = filtered.Where(x => String.Equals(x.Program,program,StringComparison.OrdinalIgnoreCase));
             if (!String.IsNullOrWhiteSpace(status)) filtered = filtered.Where(x => String.Equals(x.Status,status,StringComparison.OrdinalIgnoreCase));
             var rows = filtered.OrderByDescending(x => x.UpdatedAt ?? x.SubmittedAt ?? DateTime.MinValue).ToList();
-            var vm = new OversightVm { PageTitle=title, Query=q, Program=program, Status=status, Records=rows, Total=all.Count,
-                Submitted=all.Count(x=>x.Status.Equals("submitted",StringComparison.OrdinalIgnoreCase)||x.Status.Equals("pending",StringComparison.OrdinalIgnoreCase)),
-                Approved=all.Count(x=>x.Status.Equals("approved",StringComparison.OrdinalIgnoreCase)||x.Status.Equals("cleared",StringComparison.OrdinalIgnoreCase)),
-                Returned=all.Count(x=>x.Status.Equals("returned",StringComparison.OrdinalIgnoreCase)||x.Status.Equals("revision required",StringComparison.OrdinalIgnoreCase)),
-                AverageAgeDays=all.Where(x=>x.SubmittedAt.HasValue).Select(x=>(DateTime.UtcNow.AddHours(8)-x.SubmittedAt.Value).TotalDays).DefaultIfEmpty(0).Average() };
+            var vm = new OversightVm { PageTitle=title, Query=q, Program=program, Status=status, Records=rows, From=from, To=to, ReportType=reportType, Batch=batch, Total=rows.Count,
+                Submitted=rows.Count(x=>String.Equals(x.Status,"submitted",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"pending",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"validated",StringComparison.OrdinalIgnoreCase)),
+                Approved=rows.Count(x=>String.Equals(x.Status,"approved",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"cleared",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"disseminated",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"filed",StringComparison.OrdinalIgnoreCase)),
+                Returned=rows.Count(x=>String.Equals(x.Status,"returned",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"revision required",StringComparison.OrdinalIgnoreCase)),
+                AverageAgeDays=rows.Where(x=>x.SubmittedAt.HasValue).Select(x=>(DateTime.UtcNow.AddHours(8)-x.SubmittedAt.Value).TotalDays).DefaultIfEmpty(0).Average() };
             vm.Programs = all.Where(x=>!String.IsNullOrWhiteSpace(x.Program)).GroupBy(x=>x.Program).OrderBy(x=>x.Key).Select(g=>new KeyValuePair<string,int>(g.Key,g.Count())).ToList();
-            ViewBag.Title=title; return View("Index",vm);
+            vm.Batches = all.Select(x => (x.SubmittedAt ?? x.UpdatedAt)?.Year).Where(x => x.HasValue).Select(x => x.Value).Distinct().OrderByDescending(x => x).ToList();
+            vm.BatchSummaries = rows.Where(x => (x.SubmittedAt ?? x.UpdatedAt).HasValue)
+                .GroupBy(x => (x.SubmittedAt ?? x.UpdatedAt).Value.Year).OrderBy(g => g.Key)
+                .Select(g => {
+                    int cleared = g.Count(x => IsCleared(x.Status));
+                    int pending = g.Count(x => IsPending(x.Status));
+                    int incomplete = g.Count(x => IsIncomplete(x.Status));
+                    return new ReportBatchSummary { Batch = g.Key, Total = g.Count(), Cleared = cleared, Pending = pending, Incomplete = incomplete, CompletionRate = g.Count() == 0 ? 0 : (int)Math.Round(100.0 * cleared / g.Count()) };
+                }).ToList();
+            ViewBag.Title=title; return View(viewName,vm);
         }
+        private static bool IsCleared(string status) { return new[] { "approved", "cleared", "disseminated", "filed" }.Contains(status ?? "", StringComparer.OrdinalIgnoreCase); }
+        private static bool IsPending(string status) { return new[] { "submitted", "pending", "validated", "reviewing", "under validation" }.Contains(status ?? "", StringComparer.OrdinalIgnoreCase); }
+        private static bool IsIncomplete(string status) { return new[] { "returned", "revision required", "rejected", "draft" }.Contains(status ?? "", StringComparer.OrdinalIgnoreCase); }
         public ActionResult Index(string q, string program) { return Page("Research Oversight",q,program,null); }
         public ActionResult Repository(string q, string program) { return Page("Research Repository",q,program,null); }
-        public ActionResult Records(string q, string program, string status) { return Page("Submission Records",q,program,status); }
+        public ActionResult Records(string q, string program, string status) { return Page("Submission & Clearance Records",q,program,status,"Records"); }
         public ActionResult Monitoring(string q, string program) { return Page("Research Monitoring",q,program,null); }
-        public ActionResult Cohort(string q, string program) { return Page("Cohort Monitoring",q,program,null); }
-        public ActionResult Exceptions(string q, string program, string status) { return Page("Compliance Exceptions",q,program,status); }
-        public ActionResult Performance(string q, string program, string status) { return Page("Processing Performance",q,program,status); }
+        public ActionResult Cohort(string q, string program) { return Page("Cohort Comparison",q,program,null,"Monitoring"); }
+        public ActionResult Exceptions(string q, string program, string status) { return Page("Compliance Exceptions",q,program,status,"Monitoring"); }
+        public ActionResult Performance(string q, string program, string status) { return Page("Processing Performance",q,program,status,"Monitoring"); }
+        public ActionResult Reports(DateTime? from, DateTime? to, int? batch, string program, string type)
+        {
+            if (!from.HasValue) from = new DateTime(2022, 1, 1);
+            if (!to.HasValue) to = SharedDb.NowManila().Date;
+            return Page("Reports", null, program, null, "Reports", from, to, type, batch);
+        }
+
+        public ActionResult ExportReport(DateTime? from, DateTime? to, int? batch, string program, string type)
+        {
+            var data = Load().Where(x => !from.HasValue || ((x.UpdatedAt ?? x.SubmittedAt).HasValue && (x.UpdatedAt ?? x.SubmittedAt).Value.Date >= from.Value.Date))
+                .Where(x => !to.HasValue || ((x.UpdatedAt ?? x.SubmittedAt).HasValue && (x.UpdatedAt ?? x.SubmittedAt).Value.Date <= to.Value.Date))
+                .Where(x => !batch.HasValue || ((x.SubmittedAt ?? x.UpdatedAt).HasValue && (x.SubmittedAt ?? x.UpdatedAt).Value.Year == batch.Value))
+                .Where(x => String.IsNullOrWhiteSpace(program) || String.Equals(x.Program, program, StringComparison.OrdinalIgnoreCase)).ToList();
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Batch,Submission ID,Title,Program,Status,Submitted,Last Updated");
+            foreach (var row in data)
+            {
+                int? rowBatch = (row.SubmittedAt ?? row.UpdatedAt)?.Year;
+                csv.AppendLine(String.Join(",", new[] { rowBatch.HasValue ? rowBatch.Value.ToString() : "", Csv(row.Id), Csv(row.Title), Csv(row.Program), Csv(row.Status), Csv(row.SubmittedAt.HasValue ? row.SubmittedAt.Value.ToString("yyyy-MM-dd") : ""), Csv(row.UpdatedAt.HasValue ? row.UpdatedAt.Value.ToString("yyyy-MM-dd") : "") }));
+            }
+            return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", "dean-compliance-report.csv");
+        }
+        private static string Csv(string value) { return "\"" + (value ?? "").Replace("\"", "\"\"") + "\""; }
 
         // Combined audit timeline from Dean oversight events and Coordinator screening/case events.
         // Both collections live in the same Subsystem 1 MongoDB database.

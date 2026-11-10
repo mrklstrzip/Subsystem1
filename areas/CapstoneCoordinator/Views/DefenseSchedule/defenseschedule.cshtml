@@ -311,7 +311,7 @@
             $("mSubmittedNote").textContent = d.dateSubmitted && d.dateSubmitted !== "-"
                 ? "Submitted " + d.dateSubmitted
                 : "";
-            loadManuscript("/CapstoneCoordinator/CoordinatorApi/manuscript?id=" + encodeURIComponent(d.id));
+            loadManuscript("/CapstoneCoordinator/CoordinatorApi/manuscript?id=" + encodeURIComponent(d.subsystem2Id || d.id || ""));
 
             var list = $("mPanelists");
             list.innerHTML = "";

@@ -18,29 +18,61 @@
 <div class="cleared-card">
     <table class="cleared-table">
         <thead>
-            <tr><th>MANUSCRIPT</th><th>PROGRAM / SECTION</th><th>STATUS</th><th>DISSEMINATED</th><th>REVIEW</th></tr>
+            <tr><th>MANUSCRIPT</th><th>PROGRAM / SECTION</th><th>STATUS</th><th>DISSEMINATED / FILED</th><th>REVIEW</th></tr>
         </thead>
         <tbody>
             @if (Model == null || Model.Count == 0)
             {
-                <tr><td colspan="5" class="cleared-empty">No disseminated submissions have been cleared yet.</td></tr>
+                <tr><td colspan="5" class="cleared-empty">No disseminated or filed submissions are available yet.</td></tr>
             }
             else
             {
                 foreach (var item in Model)
                 {
+                    var clearedDate = item.IsFiledImport ? item.FiledAt : item.DisseminatedAt;
                     <tr>
                         <td>
                             <strong>@item.Title</strong>
                             <small>Submission ID: @item.Id</small>
                         </td>
                         <td>@item.Program <span>@item.Section</span></td>
-                        <td><span class="cleared-status">@item.Status</span></td>
-                        <td>@(item.DisseminatedAt.HasValue ? item.DisseminatedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "—")</td>
+                        <td><span class="cleared-status">@(item.IsFiledImport ? "Filed manuscript import" : item.Status)</span></td>
+                        <td>@(clearedDate.HasValue ? clearedDate.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "—")</td>
                         <td>
                             <details class="cleared-details">
                                 <summary>Review details</summary>
                                 <div class="cleared-detail-body">
+                                    @if (item.IsFiledImport)
+                                    {
+                                        <h3>Subsystem 2 adviser approval</h3>
+                                        <dl>
+                                            <dt>Adviser ID</dt><dd>@(String.IsNullOrWhiteSpace(item.Subsystem2AdviserId) ? "—" : item.Subsystem2AdviserId)</dd>
+                                            <dt>Approved</dt><dd>@(item.Subsystem2AdviserApprovedAt.HasValue ? item.Subsystem2AdviserApprovedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "—")</dd>
+                                            <dt>Manuscript ID</dt><dd><code>@item.CurrentManuscriptId</code></dd>
+                                            <dt>Adviser PDF hash</dt><dd><code>@item.CurrentManuscriptHash</code></dd>
+                                        </dl>
+                                        <h3>Subsystem 3 staff review</h3>
+                                        <dl>
+                                            <dt>Reviewer</dt><dd>@item.StaffReviewer <span>@item.StaffReviewRole</span></dd>
+                                            <dt>Reviewer ID</dt><dd><code>@item.StaffReviewerId</code></dd>
+                                            <dt>Action time</dt><dd>@(item.StaffReviewAt.HasValue ? item.StaffReviewAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "—")</dd>
+                                            <dt>Revalidated</dt><dd>@(item.RepositoryRevalidatedAt.HasValue ? item.RepositoryRevalidatedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "—")</dd>
+                                            <dt>Metadata approved</dt><dd>@(item.MetadataApprovedAt.HasValue ? item.MetadataApprovedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "—")</dd>
+                                            <dt>Filed</dt><dd>@(item.FiledAt.HasValue ? item.FiledAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "—")</dd>
+                                        </dl>
+                                        <p>@item.StaffReviewAction</p>
+                                        <h3>Manuscript match</h3>
+                                        <dl>
+                                            <dt>Import reference</dt><dd><code>@item.RepositoryReference</code></dd>
+                                            <dt>Repository state</dt><dd>@item.RepositoryState</dd>
+                                            <dt>Approved file ID</dt><dd><code>@item.ApprovedManuscriptId</code></dd>
+                                            <dt>Cloud file ID</dt><dd><code>@item.CloudFileId</code> · @item.CloudFileLength bytes</dd>
+                                            <dt>Cloud file SHA-256</dt><dd><code>@item.CloudFileHash</code></dd>
+                                            <dt>Integrity check</dt><dd>Current manuscript ID and adviser-approved hash match the staff-approved filed file.</dd>
+                                        </dl>
+                                    }
+                                    else
+                                    {
                                     <h3>Capstone clearance</h3>
                                     <dl>
                                         <dt>Reference</dt><dd>@(String.IsNullOrWhiteSpace(item.ClearanceReference) ? "—" : item.ClearanceReference)</dd>
@@ -50,43 +82,27 @@
                                         <dt>Repository</dt><dd>@(item.FiledAt.HasValue ? "Filed " + item.FiledAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "Not filed yet")</dd>
                                     </dl>
                                     <h3>Validation summaries</h3>
-                                    @if (item.ValidationSummaries.Count == 0)
+                                    foreach (var summary in item.ValidationSummaries)
                                     {
-                                        <p>No validation summaries recorded.</p>
-                                    }
-                                    else
-                                    {
-                                        foreach (var summary in item.ValidationSummaries)
-                                        {
-                                            <div class="validation-summary">
-                                                <p><strong>@(String.IsNullOrWhiteSpace(summary.Staff) ? "Review" : summary.Staff)</strong>
-                                                   · @(summary.CompletedAt.HasValue ? summary.CompletedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "Completion time not recorded")</p>
-                                                @if (!String.IsNullOrWhiteSpace(summary.Comments)) { <p>@summary.Comments</p> }
-                                                @if (summary.Items.Count > 0)
+                                        <div class="validation-summary">
+                                            <p><strong>@(String.IsNullOrWhiteSpace(summary.Staff) ? "Review" : summary.Staff)</strong>
+                                               · @(summary.CompletedAt.HasValue ? summary.CompletedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "Completion time not recorded")</p>
+                                            @if (!String.IsNullOrWhiteSpace(summary.Comments)) { <p>@summary.Comments</p> }
+                                            <ul>
+                                                @foreach (var check in summary.Items)
                                                 {
-                                                    <ul>
-                                                        @foreach (var check in summary.Items)
-                                                        {
-                                                            <li><b>@check.Requirement</b> — @check.Status
-                                                                @if (!String.IsNullOrWhiteSpace(check.Feedback)) { <span>: @check.Feedback</span> }
-                                                            </li>
-                                                        }
-                                                    </ul>
+                                                    <li><b>@check.Requirement</b> — @check.Status
+                                                        @if (!String.IsNullOrWhiteSpace(check.Feedback)) { <span>: @check.Feedback</span> }
+                                                    </li>
                                                 }
-                                            </div>
-                                        }
+                                            </ul>
+                                        </div>
                                     }
                                     <h3>Approved manuscript</h3>
-                                    @if (String.IsNullOrWhiteSpace(item.ApprovedManuscriptId))
-                                    {
-                                        <p class="manuscript-unavailable">No approved manuscript file ID is recorded in Subsystem 3.</p>
-                                    }
-                                    else
-                                    {
-                                        <p>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptName) ? "Approved manuscript" : item.ApprovedManuscriptName)</p>
-                                        <p>File ID: <code>@item.ApprovedManuscriptId</code></p>
-                                        <p>SHA-256: <code>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptHash) ? "not recorded" : item.ApprovedManuscriptHash)</code></p>
-                                        <p class="manuscript-unavailable">Subsystem 3 provides file metadata here but no secure file URL or download token, so this screen cannot open the PDF yet.</p>
+                                    <p>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptName) ? "Approved manuscript" : item.ApprovedManuscriptName)</p>
+                                    <p>File ID: <code>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptId) ? "not recorded" : item.ApprovedManuscriptId)</code></p>
+                                    <p>SHA-256: <code>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptHash) ? "not recorded" : item.ApprovedManuscriptHash)</code></p>
+                                    <p class="manuscript-unavailable">Subsystem 3 provides file metadata here but no secure file URL or download token, so this screen cannot open the PDF yet.</p>
                                     }
                                 </div>
                             </details>

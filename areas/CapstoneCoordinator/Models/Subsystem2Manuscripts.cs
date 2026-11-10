@@ -20,7 +20,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         {
             public BsonDocument Submission;
             public BsonDocument Manuscript;
+            public BsonDocument RevisionCase;
             public string GroupId;
+            public string Subsystem2Id;
             public string StudentNumber;
             public string StudentUserId;
             public string Title;
@@ -33,19 +35,24 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return Db.Database.GetCollection<BsonDocument>("capstone_submissions");
         }
 
-        private static List<Record> ReadRecords()
+        private static List<Record> ReadRecords(bool includeRevisionCase = false)
         {
             var records = new List<Record>();
-
-            foreach (BsonDocument submission in Collection().Find(new BsonDocument()).ToList())
+            var ownerFilter = Builders<BsonDocument>.Filter.Eq("subsystem2Owner", "DigitalRevisionAndPanelApproval");
+            foreach (BsonDocument submission in Collection().Find(ownerFilter).ToList())
             {
                 BsonDocument state = Document(submission, "subsystem2Data");
                 BsonDocument manuscript = Document(state, "manuscript");
-
-                // Also support the top-level schema in the JSON export.
-                bool topLevelSchema = manuscript == null && Value(submission, "title") != null;
-                if (topLevelSchema) manuscript = submission;
+                if (manuscript == null) manuscript = Document(submission, "manuscript");
+                // Current Subsystem 2 writes scalar title data under subsystem2Data.title,
+                // with the remaining manuscript metadata on the submission document.
+                if (manuscript == null && state != null && Value(state, "title") != null) manuscript = state;
+                // The Subsystem 2 workflow model may be stored directly on its version document.
+                if (manuscript == null && (Value(submission, "Title") != null || Value(submission, "title") != null)) manuscript = submission;
                 if (manuscript == null) continue;
+
+                string subsystem2Id = GuidText(Value(submission, "subsystem2Id"));
+                if (subsystem2Id == "") continue;
 
                 string studentNumber = First(manuscript, "StudentId", submission, "studentId");
                 string userId = StudentUserId(studentNumber);
@@ -55,42 +62,40 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     userId = managerValue.AsObjectId.ToString();
                 if (userId == "" && managerValue != null && managerValue.IsString)
                     userId = managerValue.AsString;
-                if (userId == "") continue;
+                if (userId == "") userId = AnyStr(submission, "submittedById");
+                if (userId == "") userId = studentNumber;
 
                 string id = First(manuscript, "GroupId", submission, "groupId");
-                if (id == "") id = First(manuscript, "Id", submission, "subsystem2Id");
+                if (id == "") id = subsystem2Id;
 
-                string title = First(manuscript, "Title", submission, "title");
-                if (topLevelSchema && id == "") id = userId + "|" + Normalize(title);
+                string title = First(manuscript, "Title", submission, "Title");
+                if (title == "") title = First(manuscript, "Title", submission, "title");
+                if (title == "") title = First(manuscript, "title", submission, "title");
                 if (id == "" || title == "") continue;
 
                 BsonValue submitted = Value(manuscript, "SubmittedAt");
                 if (submitted == null || submitted.IsBsonNull)
-                    submitted = Value(submission, "submissionDate");
+                    submitted = Value(submission, "SubmittedAt");
+                if (submitted == null || submitted.IsBsonNull) submitted = Value(submission, "submissionDate");
 
                 DateTime submittedAt = submitted != null && submitted.IsBsonDateTime
                     ? submitted.ToUniversalTime()
                     : DateTime.MinValue;
 
                 BsonValue versionValue = Value(manuscript, "VersionNumber");
-                if (versionValue == null || versionValue.IsBsonNull)
-                    versionValue = Value(submission, "versions");
-
+                if (versionValue == null || versionValue.IsBsonNull) versionValue = Value(submission, "VersionNumber");
+                if (versionValue == null || versionValue.IsBsonNull) versionValue = Value(submission, "versions");
                 int version;
-                if (versionValue != null && versionValue.IsInt32)
-                    version = versionValue.AsInt32;
-                else if (!int.TryParse(
-                    versionValue == null ? "" : versionValue.ToString(),
-                    NumberStyles.Integer,
-                    CultureInfo.InvariantCulture,
-                    out version))
-                    version = 1;
+                if (versionValue != null && versionValue.IsNumeric) version = versionValue.ToInt32();
+                else if (!int.TryParse(versionValue == null ? "" : versionValue.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out version)) version = 1;
 
                 records.Add(new Record
                 {
                     Submission = submission,
                     Manuscript = manuscript,
+                    RevisionCase = includeRevisionCase ? FindRevisionCase(subsystem2Id) : null,
                     GroupId = id,
+                    Subsystem2Id = subsystem2Id,
                     StudentNumber = studentNumber,
                     StudentUserId = userId,
                     Title = title,
@@ -102,26 +107,44 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return records;
         }
 
-        private static IEnumerable<Record> LatestRecords()
+        private static IEnumerable<Record> LatestRecords(bool includeRevisionCase = true)
         {
-            return ReadRecords()
-                .GroupBy(r => r.GroupId, StringComparer.OrdinalIgnoreCase)
+            return ReadRecords(includeRevisionCase)
+                .GroupBy(VersionGroupKey, StringComparer.OrdinalIgnoreCase)
                 .Select(g => g.OrderByDescending(r => r.Version)
                     .ThenByDescending(r => r.SubmittedAt)
                     .First())
                 .Where(r => !IsFinal(r.Manuscript));
         }
 
+        private static string VersionGroupKey(Record record)
+        {
+            // The Coordinator list is one latest submission per Project Manager / Student,
+            // regardless of older versions or project/group metadata on those records.
+            if (!String.IsNullOrWhiteSpace(record.StudentUserId)) return "student:" + record.StudentUserId.Trim();
+            if (!String.IsNullOrWhiteSpace(record.StudentNumber)) return "student-number:" + record.StudentNumber.Trim();
+            return "version:" + record.Subsystem2Id;
+        }
+
         public static List<BsonDocument> SchedulingTitles()
         {
-            return LatestRecords().Select(ToCoordinatorTitle).ToList();
+            return LatestRecords(true).Select(ToCoordinatorTitle).ToList();
         }
 
         public static HashSet<string> SubmissionIds()
         {
             return new HashSet<string>(
-                ReadRecords().Select(r => DocId(r.Submission)),
+                LatestRecords(false).Select(r => DocId(r.Submission)),
                 StringComparer.OrdinalIgnoreCase);
+        }
+
+        public static BsonDocument ForVersion(string subsystem2Id)
+        {
+            string requested = GuidText(subsystem2Id == null ? null : new BsonString(subsystem2Id));
+            if (requested == "") return null;
+            Record record = ReadRecords(true).FirstOrDefault(r =>
+                String.Equals(r.Subsystem2Id, requested, StringComparison.OrdinalIgnoreCase));
+            return record == null ? null : ToCoordinatorTitle(record);
         }
 
         public static BsonDocument LatestForSchedule(
@@ -129,15 +152,16 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             string managerId,
             string title)
         {
-            List<Record> records = ReadRecords();
-            Record source = records.FirstOrDefault(r => DocId(r.Submission) == titleId);
+            List<Record> records = ReadRecords(true);
+            Record source = records.FirstOrDefault(r => DocId(r.Submission) == titleId ||
+                String.Equals(r.Subsystem2Id, titleId, StringComparison.OrdinalIgnoreCase));
 
             IEnumerable<Record> candidates;
             if (source != null)
             {
-                candidates = records.Where(r =>
-                    r.GroupId.Equals(source.GroupId, StringComparison.OrdinalIgnoreCase) &&
-                    r.StudentUserId == source.StudentUserId);
+                // A schedule's titleId points at the exact submission/version. Do not replace
+                // its manuscript with a later version from the same student or group.
+                return ToCoordinatorTitle(source);
             }
             else if (!string.IsNullOrWhiteSpace(managerId))
             {
@@ -176,8 +200,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
             if (studentName == "")
             {
-                ObjectId? managerId =
-                    ParseId(AnyStr(record.Submission, "projectManagerId"));
+                ObjectId? managerId = ParseId(record.StudentUserId);
+                if (!managerId.HasValue) managerId = ParseId(AnyStr(record.Submission, "submittedById"));
+                if (!managerId.HasValue) managerId = ParseId(AnyStr(record.Submission, "projectManagerId"));
 
                 if (managerId.HasValue)
                 {
@@ -188,6 +213,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     if (manager != null) studentName = PlainName(manager);
                 }
             }
+            if (studentName == "") studentName = record.StudentNumber;
 
             string adviserId = First(
                 manuscript, "AdviserId",
@@ -207,15 +233,15 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
             BsonDocument file = Document(record.Submission, "preDefenseFile");
 
-            string publicId = First(
-                manuscript, "CloudinaryPublicId",
-                record.Submission, "cloudinaryPublicId");
-            if (publicId == "") publicId = AnyStr(file, "cloudinaryPublicId");
+            string publicId = First(manuscript, "CloudinaryPublicId", record.Submission, "cloudinaryPublicId");
+            if (publicId == "") publicId = First(manuscript, "cloudinaryPublicId", record.Submission, "CloudinaryPublicId");
+            if (publicId == "") publicId = First(file, "CloudinaryPublicId", file, "cloudinaryPublicId");
+            if (publicId == "") publicId = First(file, "publicId", file, "PublicId");
 
-            string resourceType = First(
-                manuscript, "CloudinaryResourceType",
-                record.Submission, "cloudinaryResourceType");
-            if (resourceType == "") resourceType = AnyStr(file, "cloudinaryResourceType");
+            string resourceType = First(manuscript, "CloudinaryResourceType", record.Submission, "cloudinaryResourceType");
+            if (resourceType == "") resourceType = First(manuscript, "cloudinaryResourceType", record.Submission, "CloudinaryResourceType");
+            if (resourceType == "") resourceType = First(file, "CloudinaryResourceType", file, "cloudinaryResourceType");
+            if (resourceType == "") resourceType = First(file, "resourceType", file, "ResourceType");
 
             // Subsystem 2 has shipped both a nested preDefenseFile object and a
             // top-level filepath field. Accept either shape when locating the PDF.
@@ -225,11 +251,15 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             if (filePath == "") filePath = First(
                 manuscript, "FilePath",
                 record.Submission, "filePath");
-            if (filePath == "") filePath = AnyStr(file, "FilePath");
+            if (filePath == "") filePath = First(file, "FilePath", file, "filepath");
+            if (filePath == "") filePath = First(file, "filePath", file, "path");
             string cloudinaryUrl = First(
-                manuscript, "cloudinaryUrl",
+                manuscript, "CloudinaryUrl",
                 record.Submission, "cloudinaryUrl");
-            if (cloudinaryUrl == "") cloudinaryUrl = AnyStr(file, "cloudinaryUrl");
+            if (cloudinaryUrl == "") cloudinaryUrl = First(manuscript, "cloudinaryUrl", record.Submission, "CloudinaryUrl");
+            if (cloudinaryUrl == "") cloudinaryUrl = First(manuscript, "cloudinaryUrl", record.Submission, "cloudinaryUrl");
+            if (cloudinaryUrl == "") cloudinaryUrl = First(file, "CloudinaryUrl", file, "cloudinaryUrl");
+            if (cloudinaryUrl == "") cloudinaryUrl = First(file, "url", file, "Url");
 
             // Some export rows store only the Cloudinary public ID in FilePath.
             // In that shape there is no separate CloudinaryPublicId field.
@@ -246,7 +276,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             string fileName = First(
                 manuscript, "FileName",
                 record.Submission, "fileName");
-            if (fileName == "") fileName = AnyStr(file, "FileName");
+            if (fileName == "") fileName = First(file, "FileName", file, "fileName");
+            if (fileName == "") fileName = First(file, "filename", file, "name");
 
             string status = First(
                 manuscript, "Status",
@@ -255,6 +286,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             var title = new BsonDocument
             {
                 { "_id", record.Submission["_id"] },
+                { "subsystem2Id", record.Subsystem2Id },
                 { "studentId", record.StudentUserId },
                 { "title", record.Title },
                 { "abstract", First(manuscript, "Abstract", record.Submission, "abstract") },
@@ -276,6 +308,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 { "cloudinaryResourceType", resourceType },
                 { "submittedAt", new BsonDateTime(record.SubmittedAt) }
             };
+
+            if (record.RevisionCase != null)
+                title["revisionCase"] = record.RevisionCase.DeepClone();
 
             BsonValue keywords = Value(manuscript, "Keywords");
             if (keywords == null || !keywords.IsBsonArray)
@@ -363,6 +398,37 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 expiresAt.ToString(CultureInfo.InvariantCulture) +
                 "&attachment=false&api_key=" + apiKey +
                 "&signature=" + signature;
+        }
+
+        private static BsonDocument FindRevisionCase(string subsystem2Id)
+        {
+            if (String.IsNullOrWhiteSpace(subsystem2Id)) return null;
+            var cases = Db.Database.GetCollection<BsonDocument>("revision_case");
+            var filters = Builders<BsonDocument>.Filter;
+            var matches = new List<FilterDefinition<BsonDocument>>
+            {
+                filters.Eq("submissionID", subsystem2Id),
+                filters.Eq("submissionID", subsystem2Id.Replace("-", ""))
+            };
+            Guid id;
+            if (Guid.TryParse(subsystem2Id, out id))
+            {
+                matches.Add(filters.Eq("submissionID", id));
+                matches.Add(filters.Eq("submissionID", new BsonBinaryData(id, GuidRepresentation.Standard)));
+            }
+            return cases.Find(filters.Or(matches)).FirstOrDefault();
+        }
+
+        private static string GuidText(BsonValue value)
+        {
+            if (value == null || value.IsBsonNull) return "";
+            if (value.IsBsonBinaryData)
+            {
+                try { return value.AsBsonBinaryData.ToGuid(GuidRepresentation.Standard).ToString("D"); }
+                catch { return ""; }
+            }
+            Guid id;
+            return Guid.TryParse(value.ToString(), out id) ? id.ToString("D") : "";
         }
 
         private static string StudentUserId(string studentNumber)

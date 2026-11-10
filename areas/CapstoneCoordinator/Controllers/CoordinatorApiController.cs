@@ -173,18 +173,23 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
         [HttpGet]
         public ActionResult manuscript(string id)
         {
-            ObjectId oid;
-            if (!ObjectId.TryParse(id, out oid)) return new HttpStatusCodeResult(404);
-
-            BsonDocument scheduleDoc = Schedules()
-                .Find(Builders<BsonDocument>.Filter.Eq("_id", oid))
-                .FirstOrDefault();
-            if (scheduleDoc == null) return new HttpStatusCodeResult(404);
-
-            BsonDocument title = Subsystem2Manuscripts.LatestForSchedule(
-                Str(scheduleDoc, "titleId"),
-                Str(scheduleDoc, "projectManagerId"),
-                Str(scheduleDoc, "title"));
+            Guid versionId;
+            BsonDocument title;
+            if (Guid.TryParse(id, out versionId))
+            {
+                // The reader receives subsystem2Id, preserving the exact selected version.
+                title = Subsystem2Manuscripts.ForVersion(versionId.ToString("D"));
+            }
+            else
+            {
+                // Legacy Subsystem 1 schedules still use their schedule ObjectId as the file key.
+                ObjectId scheduleId;
+                if (!ObjectId.TryParse(id, out scheduleId)) return new HttpStatusCodeResult(404);
+                BsonDocument scheduleDoc = Schedules().Find(Builders<BsonDocument>.Filter.Eq("_id", scheduleId)).FirstOrDefault();
+                if (scheduleDoc == null) return new HttpStatusCodeResult(404);
+                title = Subsystem2Manuscripts.LatestForSchedule(
+                    Str(scheduleDoc, "titleId"), Str(scheduleDoc, "projectManagerId"), Str(scheduleDoc, "title"));
+            }
             string url = title == null ? "" : Str(title, "manuscriptUrl");
             string fileName = title == null ? "" : Str(title, "fileName");
             if (!fileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
