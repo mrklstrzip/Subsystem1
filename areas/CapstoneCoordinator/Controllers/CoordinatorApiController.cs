@@ -215,10 +215,17 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
         // depends on the Host header of whoever made the request.
         private string SignupLink(string token)
         {
-            string path = Url.Action("signup", "Signup", new { area = "Auth", token = token });
-            string baseUrl = Subsystem1.Services.Mailer.BaseUrl;
-            if (baseUrl != "") return baseUrl + path;
-            return new Uri(Request.Url, path).AbsoluteUri;
+            string configured = Environment.GetEnvironmentVariable("SUBSYSTEM2_STUDENT_SIGNUP_URL");
+            if (String.IsNullOrWhiteSpace(configured))
+                configured = "https://subsystem2.vercel.app/Account/StudentSignup";
+            Uri signupUri;
+            if (!Uri.TryCreate(configured, UriKind.Absolute, out signupUri) ||
+                !(signupUri.Scheme == Uri.UriSchemeHttps || signupUri.Scheme == Uri.UriSchemeHttp &&
+                    (signupUri.IsLoopback || signupUri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase))))
+                throw new InvalidOperationException("Subsystem 2 student signup URL is not configured safely.");
+            var builder = new UriBuilder(signupUri);
+            builder.Query = "token=" + Uri.EscapeDataString(token ?? "");
+            return builder.Uri.AbsoluteUri;
         }
 
         [HttpGet]
