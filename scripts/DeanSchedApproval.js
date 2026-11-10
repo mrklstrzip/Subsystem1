@@ -74,8 +74,12 @@
                 $('mRoom').textContent = d.Room;
 
                 $('mPanelists').innerHTML = d.Panelists.map(function (p) {
-                    return '<div class="sa-panel-row"><span>' + esc(p.Name) + '</span>' +
-                        '<span class="sa-match match-' + esc(p.Expertise).toLowerCase() + '">' + esc(p.Expertise) + '</span></div>';
+                    var pct = (p.Percent === null || p.Percent === undefined) ? '\u2014' : Number(p.Percent).toFixed(1) + '%';
+                    var role = p.Role || 'Member';
+                    return '<div class="sa-panel-row"><span>' + esc(p.Name) +
+                        '<small class="panelist-role ' + esc(role).toLowerCase() + '">' + esc(role) + '</small></span>' +
+                        '<span class="sa-match-wrap"><span class="sa-match-pct">' + pct + '</span>' +
+                        '<span class="sa-match match-' + esc(p.Expertise).toLowerCase() + '">' + esc(p.Expertise) + '</span></span></div>';
                 }).join('');
 
                 var approved = d.Status === 'Approved';

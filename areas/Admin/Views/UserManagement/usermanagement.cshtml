@@ -2,7 +2,7 @@
     ViewBag.Title = "User Management";
 }
 
-<link href="@Url.Content("~/Content/css/admin/usermanagement.css")?v=5.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/admin/usermanagement.css")?v=5.1" rel="stylesheet" type="text/css" />
 <link href="@Url.Content("~/Content/css/delete.css")?v=5.0" rel="stylesheet" type="text/css" />
 
 <div class="dashboard-header">
@@ -166,15 +166,28 @@
                 <div class="input-field-wrapper">
                     <i class="fas fa-user-shield input-icon"></i>
                     <select id="modalRoleSelect" required>
-                        <option value="project-manager" selected>Student</option>
-                        <option value="panelist">Panelist</option>
-                        <option value="adviser">Adviser</option>
                         <option value="campus-director">Campus Director</option>
                         <option value="capstone-coordinator">Capstone Coordinator</option>
                         <option value="dean">Dean</option>
                     </select>
                 </div>
             </fieldset>
+
+            <!-- Capstone Coordinator: program handled -->
+            <div class="role-field" id="fieldCoordProgram" style="display: none; flex-direction: column; width: 100%;">
+                <fieldset class="input-fieldset">
+                    <legend>Program</legend>
+                    <div class="input-field-wrapper">
+                        <i class="fas fa-graduation-cap input-icon"></i>
+                        <select id="coordProgramSelect">
+                            <option value="" disabled selected>Select Program</option>
+                            <option value="BSIT">BSIT</option>
+                            <option value="BSCS">BSCS</option>
+                            <option value="BSIS">BSIS</option>
+                        </select>
+                    </div>
+                </fieldset>
+            </div>
 
             <!-- Conditional Student Fields -->
             <div class="role-field" id="fieldProgram" style="display: flex; flex-direction: column; width: 100%;">
@@ -242,7 +255,9 @@
                 <legend>Temporary Password</legend>
                 <div class="input-field-wrapper">
                     <i class="fas fa-lock input-icon"></i>
-                    <input type="password" id="passwordInput" placeholder="" />
+                    <input type="password" id="passwordInput" value="" readonly autocomplete="new-password" spellcheck="false" />
+                    <button type="button" class="pw-btn" id="pwRegenBtn" title="Generate a new password" aria-label="Generate a new password"><i class="fas fa-rotate"></i></button>
+                    <button type="button" class="pw-btn" id="pwToggleBtn" title="Show password" aria-label="Show password"><i class="fas fa-eye"></i></button>
                 </div>
             </fieldset>
 
@@ -273,4 +288,20 @@
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=6.1"></script>
+<!-- Temporary password (shown once, right after an account is created) -->
+<div class="modal-overlay" id="tempPassModal">
+    <div class="cd-delete-card">
+        <div class="cd-delete-icon-wrap" style="background:#E6F4EA;color:#1E7A3C;"><i class="fa-solid fa-key"></i></div>
+        <h3 class="cd-delete-title">Account created</h3>
+        <p class="cd-delete-text" id="tempPassText"></p>
+        <div id="tempPassValue" style="margin:10px auto 6px;padding:10px 14px;border:1.5px dashed #2C3F56;border-radius:8px;font-family:Consolas,monospace;font-size:20px;letter-spacing:2px;font-weight:700;color:#2C3F56;user-select:all;text-align:center;"></div>
+        <p class="cd-delete-text" id="tempPassMail" style="font-size:13px;font-weight:600;"></p>
+        <p class="cd-delete-text" style="font-size:12px;">Give this temporary password to the user. It will not be shown again, and they can change it in their Profile.</p>
+        <div class="cd-delete-actions">
+            <button type="button" class="btn-cd-delete-confirm" id="tempPassCopy" style="background:#2C3F56;">Copy</button>
+            <button type="button" class="btn-cd-delete-cancel" onclick="AD.closeModals()">Done</button>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=8.1"></script>

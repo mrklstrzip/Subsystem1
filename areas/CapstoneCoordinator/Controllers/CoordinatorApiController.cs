@@ -74,6 +74,29 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
             }
         }
 
+        // Edit Profile: name and e-mail (the picture is replaced by the user's initials).
+        [HttpPost]
+        public ActionResult updateProfile(Subsystem1.Data.ProfileDto dto)
+        {
+            try
+            {
+                string first, middle, last, email;
+                string error = Subsystem1.Data.ProfileUpdater.Update(Me, dto, out first, out middle, out last, out email);
+                if (error != null) return Json(new { success = false, message = error });
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Profile updated successfully.",
+                    me = new { firstName = first, middleName = middle, lastName = last, email = email }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ErrorText(ex) });
+            }
+        }
+
         [HttpPost]
         public ActionResult changePassword(CoPasswordDto dto)
         {

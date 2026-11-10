@@ -929,3 +929,31 @@ body.modal-open {
     color: #9092AD;
     font-weight: 500;
 }
+
+
+/* Panel role: highest percentage = Chairman, others = Members */
+.panelist-role {
+    display: block;
+    margin-top: 2px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    color: #595C6E;
+}
+
+    .panelist-role.chairman {
+        color: #A33F53;
+    }
+
+.match-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.match-percent {
+    font-size: 10px;
+    font-weight: 700;
+    color: #374151;
+}

@@ -196,15 +196,23 @@ namespace Subsystem1.Areas.Dean.Models
             BsonValue pv;
             if (d.TryGetValue("panelists", out pv) && pv != null && pv.IsBsonArray)
             {
+                int idx = 0;
                 foreach (BsonValue p in pv.AsBsonArray)
                 {
                     if (!p.IsBsonDocument) continue;
-                    string m = Str(p.AsBsonDocument, "match").ToLowerInvariant();
+                    BsonDocument pd = p.AsBsonDocument;
+                    string m = Str(pd, "match").ToLowerInvariant();
+                    BsonValue pc;
+                    string role = Str(pd, "role");
+                    if (role != "Chairman" && role != "Member") role = idx == 0 ? "Chairman" : "Member";   // older records
                     panel.Add(new PanelistVM
                     {
-                        Name = Str(p.AsBsonDocument, "name"),
-                        Expertise = m == "high" ? "High" : m == "medium" ? "Medium" : "Low"
+                        Name = Str(pd, "name"),
+                        Expertise = m == "high" ? "High" : m == "medium" ? "Medium" : "Low",
+                        Percent = pd.TryGetValue("percent", out pc) && pc.IsNumeric ? (double?)pc.ToDouble() : null,
+                        Role = role
                     });
+                    idx++;
                 }
             }
 

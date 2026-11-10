@@ -454,13 +454,37 @@ body {
         min-width: 0;
     }
 
+    /* Surname on the first line, given name + middle initial below it.
+       Long names wrap instead of being cut off. */
     .layout-wrapper.sidebar-rail .sb-name {
+        display: flex;
+        flex-direction: column;
         font-size: 12px;
         font-weight: 700;
         color: #FFFFFF;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .layout-wrapper.sidebar-rail .sb-surname {
+        letter-spacing: .3px;
+    }
+
+    .layout-wrapper.sidebar-rail .sb-given {
+        font-weight: 600;
+    }
+
+    /* initials instead of a profile picture */
+    .layout-wrapper.sidebar-rail .sb-initials {
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        color: #FFFFFF;
+        background-color: rgba(255, 255, 255, 0.25);
+        user-select: none;
     }
 
     .layout-wrapper.sidebar-rail .sb-role {
