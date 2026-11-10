@@ -1,4 +1,8 @@
-﻿:root {
+﻿html {
+    scrollbar-gutter: stable;
+}
+
+:root {
     --total: #2C2C2C;
     --campusdirector: #2E5C8A;
     --capstonecoordinator: #ED640F;

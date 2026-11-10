@@ -1,4 +1,9 @@
-﻿.audit-management-card {
+﻿html {
+    scrollbar-gutter: stable;
+}
+
+
+.audit-management-card {
     background-color: #ffffff;
     border-radius: 14px;
     border: 1px solid #e2e8f0;
