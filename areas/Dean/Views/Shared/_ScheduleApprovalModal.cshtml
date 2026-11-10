@@ -99,7 +99,7 @@
 
                 var pct = document.createElement("span");
                 pct.className = "sa-match-pct";
-                pct.textContent = (pill.getAttribute("data-percent") || defaultPercent[level]) + "%";
+                pct.textContent = pill.getAttribute("data-percent") ? pill.getAttribute("data-percent") + "%" : "\u2014";
 
                 var wrap = document.createElement("span");
                 wrap.className = "sa-match-wrap";

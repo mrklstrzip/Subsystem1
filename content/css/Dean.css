@@ -1022,3 +1022,19 @@
     max-width: 160px;
     margin: 0 auto;
 }
+
+
+/* Panel role: highest percentage = Chairman, others = Members */
+.panelist-role {
+    display: block;
+    margin-top: 2px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    color: #595C6E;
+}
+
+    .panelist-role.chairman {
+        color: #A33F53;
+    }

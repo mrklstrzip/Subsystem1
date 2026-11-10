@@ -59,7 +59,7 @@
 
             <div class="sb-footer">
                 <a href="@Url.Action("profile", "Profile")" class="sb-user" title="Profile">
-                    <img id="profilePhoto" src="" alt="Profile" class="sb-avatar" />
+                    <span id="profilePhoto" class="sb-avatar sb-initials" aria-hidden="true"></span>
                     <span class="sb-user-text">
                         <span id="profileName" class="sb-name"></span>
                         <span id="profileRole" class="sb-role"></span>
@@ -78,7 +78,6 @@
     <script src="@Url.Content("~/Scripts/campusdirector-modal.js")?v=1.0"></script>
     <script src="@Url.Content("~/Scripts/campusdirector-app.js")?v=2.0"></script>
     <script src="~/Scripts/sidebar.js"></script>
-    <script src="~/Scripts/layout-profile.js"></script>
     <script src="@Url.Content("~/Scripts/logout-confirm.js")?v=1.1"></script>
     <script src="@Url.Content("~/Scripts/loading.js")?v=1.1"></script>
     <script src="@Url.Content("~/Scripts/notice.js")?v=1.0"></script>

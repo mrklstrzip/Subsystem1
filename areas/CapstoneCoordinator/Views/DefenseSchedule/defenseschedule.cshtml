@@ -249,15 +249,19 @@
                 var name = document.createElement("span");
                 name.className = "panelist-name";
                 name.textContent = p.name;
+                var role = document.createElement("small");
+                role.className = "panelist-role " + String(p.role || "Member").toLowerCase();
+                role.textContent = p.role || "Member";
+                name.appendChild(role);
 
                 var wrap = document.createElement("span");
                 wrap.className = "match-wrap";
 
                 var pct = document.createElement("span");
                 pct.className = "match-percent";
-                pct.textContent = (p.percent != null
-                    ? p.percent
-                    : (DEFAULT_PERCENT[lvl] || 0)) + "%";
+                pct.textContent = (p.percent != null && !isNaN(p.percent))
+                    ? Number(p.percent).toFixed(1) + "%"
+                    : "\u2014";
 
                 var pill = document.createElement("span");
                 pill.className = "match-pill " + lvl;

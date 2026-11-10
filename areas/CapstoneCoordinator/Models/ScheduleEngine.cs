@@ -37,7 +37,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
     {
         public EngFaculty Faculty;
         public int Points;
+        public double Percent;        // exact expertise match, one decimal (e.g. 66.7)
         public string Match;          // high | medium | low
+        public string Role = "Member"; // Chairman (highest percentage) | Member
     }
 
     public class EngStep
@@ -130,6 +132,35 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return points;
         }
 
+        /// <summary>
+        /// Exact expertise match in percent (one decimal, not rounded to a level).
+        /// Every topic keyword that a faculty tag covers is worth 2 points, so 100% means
+        /// the faculty's tags cover every keyword of the title.
+        /// </summary>
+        public static double Percent(EngFaculty f, EngProblem p)
+        {
+            int topic = p.Keywords.Select(Norm).Where(k => k != "").Distinct().Count();
+            if (topic == 0) topic = Words(p.Title).Count;
+            if (topic < 1) topic = 1;
+
+            double pct = Points(f, p) * 100.0 / (topic * 2.0);
+            if (pct > 100.0) pct = 100.0;
+            return Math.Round(pct, 1);
+        }
+
+        /// <summary>Highest percentage first; the first one is the Chairman, the others are Members.</summary>
+        public static List<EngPick> AssignRoles(List<EngPick> panel, Func<string, int> totalLoad)
+        {
+            List<EngPick> ordered = panel
+                .OrderByDescending(x => x.Percent)
+                .ThenByDescending(x => x.Points)
+                .ThenBy(x => totalLoad(x.Faculty.Id))
+                .ThenBy(x => x.Faculty.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            for (int i = 0; i < ordered.Count; i++) ordered[i].Role = i == 0 ? "Chairman" : "Member";
+            return ordered;
+        }
+
         private static string Pl(int n, string word) { return n + " " + word + (n == 1 ? "" : "s"); }
 
         // ------------------------------------------------------------------
@@ -140,8 +171,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             // ---- step 1: expertise match ----
             List<EngPick> cands = p.Faculty
                 .Where(f => p.AdviserId == null || f.Id != p.AdviserId)
-                .Select(f => { int pts = Points(f, p); return new EngPick { Faculty = f, Points = pts, Match = Level(pts) }; })
-                .OrderByDescending(c => c.Points)
+                .Select(f => { int pts = Points(f, p); return new EngPick { Faculty = f, Points = pts, Percent = Percent(f, p), Match = Level(pts) }; })
+                .OrderByDescending(c => c.Percent)
+                .ThenByDescending(c => c.Points)
                 .ThenBy(c => p.TotalLoad(c.Faculty.Id))
                 .ThenBy(c => c.Faculty.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -199,7 +231,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     r.Start = start;
                     r.End = end;
                     r.Room = room;
-                    r.Panel = panel;
+                    r.Panel = AssignRoles(panel, p.TotalLoad);
                     r.WeakMatch = panel.All(x => x.Match == "low");
                     return r;
                 }

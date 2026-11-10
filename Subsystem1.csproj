@@ -58,6 +58,9 @@
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Extensions.Logging.Abstractions.2.0.0\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
@@ -196,11 +199,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
-      <HintPath>packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Content\css\capstonecoordinator\audit.css" />
     <Content Include="Content\css\capstonecoordinator\cases.css" />
     <Content Include="Content\css\capstonecoordinator\privacy.css" />
@@ -277,6 +275,7 @@
     <Content Include="Scripts\layout-profile.js" />
     <Content Include="Scripts\login-check.js" />
     <Content Include="Scripts\profile.js" />
+    <Content Include="Scripts\admin-profile.js" />
     <Content Include="Scripts\sidebar.js" />
     <Content Include="Web.config" />
     <Content Include="Areas\CapstoneCoordinator\Views\Invitation\invitations.cshtml" />
@@ -335,6 +334,7 @@
     <Compile Include="Areas\Dean\Models\NotificationModels.cs" />
     <Compile Include="Areas\Dean\Models\ScheduleApprovalModels.cs" />
     <Compile Include="Data\Db.cs" />
+    <Compile Include="Data\ProfileUpdater.cs" />
     <Compile Include="Data\FacultyNames.cs" />
     <Compile Include="Data\SharedDb.cs" />
     <Compile Include="Data\DisplayFormat.cs" />
@@ -477,13 +477,13 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <ItemGroup>
+    <Compile Include="Services\Mailer.cs" />
+  </ItemGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
-  <ItemGroup>
-    <Compile Include="Services\Mailer.cs" />
-  </ItemGroup>
 </Project>

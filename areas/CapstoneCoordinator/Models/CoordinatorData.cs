@@ -162,7 +162,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     data.Defenses.Add(new DefenseRow
                     {
                         Id = DocId(d), Title = title, Author = author, Adviser = adviser, Program = program, Section = section,
-                        Date = day.Value, Start = st.Value, End = en.Value, Room = room != "" ? room : "-", Status = s
+                        Date = day.Value, Start = st.Value, End = en.Value, Room = room != "" ? room : "TBA", Status = s
                     });
                 }
             }
@@ -241,11 +241,18 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             BsonValue pv;
             if (d.TryGetValue("panelists", out pv) && pv != null && pv.IsBsonArray)
             {
+                int idx = 0;
                 foreach (BsonValue p in pv.AsBsonArray)
                 {
                     if (!p.IsBsonDocument) continue;
-                    string m = Str(p.AsBsonDocument, "match").ToLowerInvariant();
-                    panel.Add(new { name = Str(p.AsBsonDocument, "name"), match = (m == "high" || m == "medium") ? m : "low" });
+                    BsonDocument pd = p.AsBsonDocument;
+                    string m = Str(pd, "match").ToLowerInvariant();
+                    BsonValue pc;
+                    double? percent = pd.TryGetValue("percent", out pc) && pc.IsNumeric ? (double?)pc.ToDouble() : null;
+                    string role = Str(pd, "role");
+                    if (role != "Chairman" && role != "Member") role = idx == 0 ? "Chairman" : "Member";   // older records
+                    panel.Add(new { name = Str(pd, "name"), match = (m == "high" || m == "medium") ? m : "low", percent = percent, role = role });
+                    idx++;
                 }
             }
 
