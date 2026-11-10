@@ -5,7 +5,7 @@
     ViewBag.Title = "Cleared Submissions";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/clearedsubmissions.css")?v=1.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/clearedsubmissions.css")?v=1.1" rel="stylesheet" type="text/css" />
 
 <div class="dashboard-header">
     <div class="header-text">
@@ -16,6 +16,13 @@
 </div>
 
 <div class="cleared-card">
+    <div class="cleared-card-heading">
+        <div>
+            <h2>Cleared manuscript records</h2>
+            <p>Read-only clearance and repository history</p>
+        </div>
+        <span class="cleared-count">@(Model == null ? 0 : Model.Count) submissions</span>
+    </div>
     <table class="cleared-table">
         <thead>
             <tr><th>MANUSCRIPT</th><th>PROGRAM / SECTION</th><th>STATUS</th><th>DISSEMINATED / FILED</th><th>REVIEW</th></tr>
@@ -30,15 +37,15 @@
                 foreach (var item in Model)
                 {
                     var clearedDate = item.IsFiledImport ? item.FiledAt : item.DisseminatedAt;
-                    <tr>
-                        <td>
+                    <tr class="@(item.IsFiledImport ? "filed-import-row" : "")">
+                        <td data-label="Manuscript">
                             <strong>@item.Title</strong>
                             <small>Submission ID: @item.Id</small>
                         </td>
-                        <td>@item.Program <span>@item.Section</span></td>
-                        <td><span class="cleared-status">@(item.IsFiledImport ? "Filed manuscript import" : item.Status)</span></td>
-                        <td>@(clearedDate.HasValue ? clearedDate.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) : "—")</td>
-                        <td>
+                        <td data-label="Program / section"><span class="program-name">@item.Program</span><span class="section-name">@item.Section</span></td>
+                        <td data-label="Status"><span class="cleared-status">@(item.IsFiledImport ? "Filed manuscript import" : item.Status)</span></td>
+                        <td data-label="Disseminated / filed"><span class="cleared-date">@(clearedDate.HasValue ? clearedDate.Value.ToLocalTime().ToString("MMM d, yyyy", CultureInfo.InvariantCulture) : "—")</span>@if (clearedDate.HasValue) { <small class="cleared-time">@clearedDate.Value.ToLocalTime().ToString("h:mm tt", CultureInfo.InvariantCulture)</small> }</td>
+                        <td data-label="Review">
                             <details class="cleared-details">
                                 <summary>Review details</summary>
                                 <div class="cleared-detail-body">
