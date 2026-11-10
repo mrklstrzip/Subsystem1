@@ -1,0 +1,69 @@
+﻿.ld-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000; /* above the other pop-ups (2000) */
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(17, 24, 39, 0.55);
+}
+
+    .ld-overlay.open {
+        display: flex;
+        animation: ldFade .15s ease-out;
+    }
+
+.ld-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    min-width: 200px;
+    padding: 28px 36px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    font-family: 'Inter', sans-serif;
+}
+
+.ld-spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #E5E7EB;
+    border-top-color: #223249;
+    border-radius: 50%;
+    animation: ldSpin .8s linear infinite;
+}
+
+.ld-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1A202C;
+    text-align: center;
+}
+
+@keyframes ldSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes ldFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ld-spinner {
+        animation-duration: 1.6s;
+    }
+
+    .ld-overlay.open {
+        animation: none;
+    }
+}

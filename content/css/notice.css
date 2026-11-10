@@ -1,0 +1,116 @@
+﻿.nt-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 6000; /* above the loader (5000) and the other pop-ups */
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(17, 24, 39, 0.55);
+}
+
+    .nt-overlay.open {
+        display: flex;
+        animation: ntFade .15s ease-out;
+    }
+
+.nt-box {
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+    padding: 30px 32px 26px;
+    background: #fff;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    font-family: 'Inter', sans-serif;
+    animation: ntPop .18s ease-out;
+}
+
+.nt-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.nt-success .nt-icon {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+.nt-error .nt-icon {
+    background: #FEE2E2;
+    color: #B91C1C;
+}
+
+.nt-info .nt-icon {
+    background: #E0E7FF;
+    color: #3730A3;
+}
+
+.nt-title {
+    margin: 0 0 6px;
+    font-family: 'Newsreader', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #17263c;
+}
+
+.nt-text {
+    margin: 0 0 22px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #475569;
+    overflow-wrap: anywhere;
+}
+
+.nt-btn {
+    min-width: 120px;
+    padding: 11px 30px;
+    border: 0;
+    border-radius: 10px;
+    background: #223249;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s ease;
+}
+
+    .nt-btn:hover {
+        background: #374A60;
+    }
+
+@keyframes ntFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes ntPop {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nt-overlay.open, .nt-box {
+        animation: none;
+    }
+}

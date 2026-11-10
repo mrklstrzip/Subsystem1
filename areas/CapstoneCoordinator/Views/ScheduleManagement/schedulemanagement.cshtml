@@ -265,7 +265,7 @@
         //for testing lang ng frontend para makita itsura (pa remove nalang pag aayusin backend)
         var notifyBtn = document.getElementById("btnNotifyPm");
         if (notifyBtn) notifyBtn.addEventListener("click", function () {
-            alert("Notification sent to the project manager(s).");
+            Notice.success("Notification sent", "All project managers who haven't submitted their manuscript have been notified.");
         });
 
         var panelists = document.getElementById("mPanelists");

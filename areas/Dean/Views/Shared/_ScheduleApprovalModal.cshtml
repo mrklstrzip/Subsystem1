@@ -143,11 +143,12 @@
             closeReject();
             overlay.classList.remove("open");
             overlay.setAttribute("aria-hidden", "true");
-            alert("Schedule rejected.\nReason: " + reason.value.trim());
+
+            Notice.info("Schedule Rejected", "The schedule has been rejected.");
         });
 
         // "To Approve"-> Close, Reject, Approve
-        // Approved / Completed... -> Close only
+        // Approved / Completed -> Close only
         var statusEl = document.getElementById("mStatus");
         var btnReject = document.getElementById("saReject");
         var btnApprove = document.getElementById("saApprove");
