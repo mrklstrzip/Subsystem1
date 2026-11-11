@@ -6,6 +6,7 @@
 }
 
 <link href="@Url.Content("~/Content/css/capstonecoordinator/cases.css")?v=3.5" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/conflictresult.css")?v=2.2" rel="stylesheet" type="text/css" />
 
 <div class="os-header">
     <h1>Assessment Cases</h1>
@@ -13,8 +14,12 @@
     <i class="fa fa-clipboard-check os-bg-icon"></i>
 </div>
 
+<div class="controls-card cases-controls">
+    <div class="search-container"><div class="search"><i class="fa fa-search"></i><input type="text" id="searchInput" placeholder="Search cases" aria-label="Search assessment cases"></div></div>
+    <div class="filter-wrapper"><div class="custom-select-box"><span class="filter-legend">Status</span><div class="select-selected"><i class="fa-solid fa-sliders"></i><span>All</span><i class="fa-solid fa-chevron-down chevron"></i></div></div></div>
+</div>
 <div class="cases-management-card">
-    <table class="cases-table">
+    <table class="cases-table" id="assessmentCasesTable">
         <thead>
             <tr>
                 <th class="column-title">Reference</th>
@@ -51,3 +56,4 @@
         </tbody>
     </table>
 </div>
+<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.1"></script>

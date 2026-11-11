@@ -107,9 +107,14 @@
     var editBtn = $('editProfileBtn');
     var editForm = $('editProfileForm');
     var modal = $('editProfileModal');
+    var profileRoot = document.querySelector('.pm');
+    if (profileRoot && modal && modal.parentNode !== profileRoot) profileRoot.appendChild(modal);
     var cancelBtn = $('cancelEditProfileBtn');
     var saveBtn = $('saveProfileBtn');
     var message = $('profileEditMessage');
+
+    if (modal) { modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); }
+    if (editForm) editForm.hidden = false;
 
     function say(text, bad) {
         if (!message) return;
@@ -124,23 +129,24 @@
             $('editLastName').value = current.lastName || '';
             $('editEmail').value = current.email || '';
             say('');
-            modal.hidden = false;
+            if (modal) { modal.hidden = false; modal.setAttribute('aria-hidden', 'false'); }
             $('editFirstName').focus();
         });
     }
 
     function closeEdit() {
-        if (editForm) editForm.reset();
-        if (modal) modal.hidden = true;
+        $('editFirstName').value = current.firstName || '';
+        $('editMiddleName').value = current.middleName || '';
+        $('editLastName').value = current.lastName || '';
+        $('editEmail').value = current.email || '';
+        if (modal) { modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); }
         say('');
     }
 
-    // close with Escape or by clicking the dark area outside the pop-up
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && modal && !modal.hidden) closeEdit();
     });
     if (modal) modal.addEventListener('mousedown', function (e) { if (e.target === modal) closeEdit(); });
-
     if (cancelBtn) cancelBtn.addEventListener('click', closeEdit);
 
     if (editForm) {
@@ -158,10 +164,12 @@
 
             if (!body.firstName || !body.lastName || !body.email) {
                 say('Please fill in your first name, last name and email.', true);
+                if (window.Notice) Notice.error('Profile not updated', 'Please fill in your first name, last name and email.');
                 return;
             }
             if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email)) {
                 say('Please enter a valid email address.', true);
+                if (window.Notice) Notice.error('Profile not updated', 'Please enter a valid email address.');
                 return;
             }
 
@@ -174,7 +182,9 @@
                 if (saveBtn) saveBtn.disabled = false;
 
                 if (!res || !res.success) {
-                    say((res && res.message) || 'Something went wrong. Please try again.', true);
+                    var errorMessage = (res && res.message) || 'Something went wrong. Please try again.';
+                    say(errorMessage, true);
+                    if (window.Notice) Notice.error('Profile not updated', errorMessage);
                     return;
                 }
 
@@ -190,11 +200,14 @@
                 if (window.refreshSidebarProfile) window.refreshSidebarProfile();
 
                 closeEdit();
-                alert('Profile updated successfully.');
+                if (window.Notice) Notice.success('Profile updated', 'Your profile changes have been saved.');
+                else alert('Profile updated successfully.');
             }, function () {
                 busyEdit = false;
                 if (saveBtn) saveBtn.disabled = false;
-                say('Could not reach the server. Please check your connection and try again.', true);
+                var errorMessage = 'Could not reach the server. Please check your connection and try again.';
+                say(errorMessage, true);
+                if (window.Notice) Notice.error('Profile not updated', errorMessage);
             });
         });
     }
