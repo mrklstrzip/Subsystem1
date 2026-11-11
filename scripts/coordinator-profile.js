@@ -241,22 +241,39 @@
             var next = $('new-password').value;
             var confirm = $('confirm-password').value;
 
-            if (next !== confirm) { alert('New password and confirmation do not match.'); return; }
-            if (next.length < 8) { alert('New password must be at least 8 characters long.'); return; }
-            if (next === currentPw) { alert('New password must be different from the current password.'); return; }
+            if (next !== confirm) {
+                if (window.Notice) Notice.error('Password not changed', 'New password and confirmation do not match.');
+                else alert('New password and confirmation do not match.');
+                return;
+            }
+            if (next.length < 8) {
+                if (window.Notice) Notice.error('Password not changed', 'New password must be at least 8 characters long.');
+                else alert('New password must be at least 8 characters long.');
+                return;
+            }
+            if (next === currentPw) {
+                if (window.Notice) Notice.error('Password not changed', 'New password must be different from the current password.');
+                else alert('New password must be different from the current password.');
+                return;
+            }
 
             busy = true;
             api('changePassword', { currentPassword: currentPw, newPassword: next }).then(function (res) {
                 busy = false;
                 if (!res || !res.success) {
-                    alert((res && res.message) || 'Something went wrong. Please try again.');
+                    var errorMessage = (res && res.message) || 'Something went wrong. Please try again.';
+                    if (window.Notice) Notice.error('Password not changed', errorMessage);
+                    else alert(errorMessage);
                     return;
                 }
-                alert('Password successfully updated!');
+                if (window.Notice) Notice.success('Password changed', 'Your password has been updated successfully.');
+                else alert('Password successfully updated!');
                 form.reset();
             }, function () {
                 busy = false;
-                alert('Could not reach the server. Please check your connection and try again.');
+                var errorMessage = 'Could not reach the server. Please check your connection and try again.';
+                if (window.Notice) Notice.error('Password not changed', errorMessage);
+                else alert(errorMessage);
             });
         });
     }
