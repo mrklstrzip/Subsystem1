@@ -278,30 +278,38 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
 
         private string StudentSignupEndpoint()
         {
-            string configured = Environment.GetEnvironmentVariable("SUBSYSTEM2_STUDENT_SIGNUP_URL");
-            if (!String.IsNullOrWhiteSpace(configured))
-                return ValidateStudentSignupEndpoint(configured);
-
+            string configured;
             Uri currentUrl = Request == null ? null : Request.Url;
             bool runningLocally = currentUrl != null &&
                 (currentUrl.IsLoopback || currentUrl.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase));
             if (runningLocally)
             {
+                string localSignupEndpoint = null;
                 configured = Environment.GetEnvironmentVariable("SUBSYSTEM2_LOCAL_STUDENT_SIGNUP_URL");
                 if (!String.IsNullOrWhiteSpace(configured))
                 {
                     configured = ValidateStudentSignupEndpoint(configured);
                     if (IsLocalStudentSignupRunning(configured)) return configured;
+                    localSignupEndpoint = configured;
                 }
 
                 string[] localEndpoints =
                 {
+                    "https://localhost:44346/Account/StudentSignup",
                     "http://localhost:5068/Account/StudentSignup",
                     "http://localhost:51978/Account/StudentSignup"
                 };
                 foreach (string localEndpoint in localEndpoints)
                     if (IsLocalStudentSignupRunning(localEndpoint)) return localEndpoint;
+
+                // Local invitations must stay in the local environment even if Subsystem 2
+                // is still starting. Otherwise a local invite token can be sent to Vercel.
+                return localSignupEndpoint ?? "https://localhost:44346/Account/StudentSignup";
             }
+
+            configured = Environment.GetEnvironmentVariable("SUBSYSTEM2_STUDENT_SIGNUP_URL");
+            if (!String.IsNullOrWhiteSpace(configured))
+                return ValidateStudentSignupEndpoint(configured);
 
             return "https://subsystem2.vercel.app/Account/StudentSignup";
         }
@@ -322,28 +330,19 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
             {
                 var request = (HttpWebRequest)WebRequest.Create(endpoint);
                 request.Method = "GET";
-                request.Timeout = 400;
-                request.ReadWriteTimeout = 400;
+                request.Timeout = 1500;
+                request.ReadWriteTimeout = 1500;
                 request.AllowAutoRedirect = false;
                 using (var response = (HttpWebResponse)request.GetResponse())
                 using (var reader = new StreamReader(response.GetResponseStream()))
                 {
+                    if ((int)response.StatusCode < 200 || (int)response.StatusCode >= 300)
+                        return false;
                     string body = reader.ReadToEnd();
-                    return body.IndexOf("Create student account", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                        body.IndexOf("Student signup is temporarily unavailable", StringComparison.OrdinalIgnoreCase) >= 0;
+                    return body.IndexOf("student-signup-card", StringComparison.OrdinalIgnoreCase) >= 0;
                 }
             }
-            catch (WebException ex)
-            {
-                var response = ex.Response as HttpWebResponse;
-                if (response == null) return false;
-                using (response)
-                using (var reader = new StreamReader(response.GetResponseStream()))
-                {
-                    string body = reader.ReadToEnd();
-                    return body.IndexOf("Student signup is temporarily unavailable", StringComparison.OrdinalIgnoreCase) >= 0;
-                }
-            }
+            catch (WebException) { return false; }
             catch (IOException) { return false; }
             catch (InvalidOperationException) { return false; }
         }
