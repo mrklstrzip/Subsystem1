@@ -82,7 +82,10 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
         private static bool EmailHasAccount(string email)
         {
-            return Users().Find(Builders<BsonDocument>.Filter.Regex("email", ExactCI(email))).Any();
+            var filter = Builders<BsonDocument>.Filter;
+            return Users().Find(filter.Or(
+                filter.Regex("email", ExactCI(email)),
+                filter.Regex("subsystem3.Email", ExactCI(email)))).Any();
         }
 
         private static DateTime? Utc(BsonDocument d, string name)
