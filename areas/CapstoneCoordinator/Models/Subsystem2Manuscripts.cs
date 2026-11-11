@@ -184,8 +184,17 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         {
             string requested = GuidText(subsystem2Id == null ? null : new BsonString(subsystem2Id));
             if (requested == "") return null;
-            Record record = ReadRecords(true).FirstOrDefault(r =>
+            Record record = ReadRecords().FirstOrDefault(r =>
                 String.Equals(r.Subsystem2Id, requested, StringComparison.OrdinalIgnoreCase));
+            return record == null ? null : ToCoordinatorTitle(record);
+        }
+
+        public static BsonDocument ForScheduleSubmission(string submissionId)
+        {
+            if (String.IsNullOrWhiteSpace(submissionId)) return null;
+            Record record = ReadRecords(true).FirstOrDefault(r =>
+                String.Equals(DocId(r.Submission), submissionId, StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(r.Subsystem2Id, submissionId, StringComparison.OrdinalIgnoreCase));
             return record == null ? null : ToCoordinatorTitle(record);
         }
 
@@ -362,7 +371,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 ? keywords.DeepClone()
                 : new BsonArray();
 
-            string privateUrl = PrivateDownloadUrl(publicId, resourceType);
+            string privateUrl = CreatePrivateDownloadUrl(publicId, resourceType);
             title["manuscriptUrl"] = privateUrl != "" ? privateUrl : cloudinaryUrl;
 
             if (title["manuscriptUrl"].AsString == "" &&
@@ -382,7 +391,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                    status.Equals("AdviserEndorsed", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static string PrivateDownloadUrl(string publicId, string resourceType)
+    public static string CreatePrivateDownloadUrl(string publicId, string resourceType)
         {
             if (string.IsNullOrWhiteSpace(publicId) ||
                 !string.Equals(resourceType, "raw", StringComparison.OrdinalIgnoreCase))
