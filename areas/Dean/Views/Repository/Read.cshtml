@@ -7,8 +7,50 @@
     <p>@Model.Item.Title</p>
     <i class="fa fa-file-pdf os-bg-icon"></i>
 </div>
-<div class="sa-card" style="padding:24px">
-    <p>The exact approved manuscript is identified as <code>@Model.Item.ApprovedManuscriptId</code>, but this portal cannot retrieve its private Cloudinary bytes yet.</p>
-    <p>Subsystem 3 needs to expose an authenticated, Dean-authorized download endpoint that accepts the submission ID and returns the exact approved file (or a short-lived signed URL). The endpoint should validate the current approved manuscript ID and hash before streaming it.</p>
-    <a class="sa-btn-filter" href="@Url.Action("Paper", "Repository", new { area = "Dean", id = Model.Item.Id })">Back to details</a>
+<div class="sa-card dean-repository-reader" style="padding:24px">
+    <div class="dean-repository-reader-toolbar">
+        <a class="sa-btn-filter" href="@Url.Action("Paper", "Repository", new { area = "Dean", id = Model.Item.Id })">Back to details</a>
+        <span id="repositoryPdfPages" aria-live="polite">Loading manuscript…</span>
+        <a class="sa-btn-filter" id="repositoryPdfOpen" href="@Url.Action("Manuscript", "Repository", new { area = "Dean", id = Model.Item.Id })" target="_blank" rel="noopener">Open PDF</a>
+    </div>
+    <div class="dean-repository-pdf-wrap" id="repositoryPdfPagesCanvas" aria-label="@Model.Item.Title">
+    </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    (function () {
+        var source = '@Url.Action("Manuscript", "Repository", new { area = "Dean", id = Model.Item.Id })';
+        var message = document.getElementById('repositoryPdfPages');
+        var pages = document.getElementById('repositoryPdfPagesCanvas');
+        if (!window.pdfjsLib) { message.textContent = 'PDF viewer unavailable. Use Open PDF to view the manuscript.'; return; }
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        window.pdfjsLib.getDocument({ url: source, withCredentials: true }).promise.then(function (doc) {
+            message.textContent = 'Rendering ' + doc.numPages + (doc.numPages === 1 ? ' page…' : ' pages…');
+            var chain = Promise.resolve();
+            for (var number = 1; number <= doc.numPages; number++) {
+                (function (pageNumber) {
+                    chain = chain.then(function () {
+                        return doc.getPage(pageNumber).then(function (page) {
+                            var canvas = document.createElement('canvas');
+                            canvas.className = 'dean-repository-pdf-page';
+                            pages.appendChild(canvas);
+                            var base = page.getViewport({ scale: 1 });
+                            var scale = Math.min((pages.clientWidth - 32) / base.width, 1.5);
+                            var viewport = page.getViewport({ scale: scale });
+                            var ratio = window.devicePixelRatio || 1;
+                            canvas.width = Math.floor(viewport.width * ratio);
+                            canvas.height = Math.floor(viewport.height * ratio);
+                            canvas.style.width = Math.floor(viewport.width) + 'px';
+                            canvas.style.height = Math.floor(viewport.height) + 'px';
+                            var context = canvas.getContext('2d');
+                            context.setTransform(ratio, 0, 0, ratio, 0, 0);
+                            message.textContent = 'Rendering page ' + pageNumber + ' of ' + doc.numPages + '…';
+                            return page.render({ canvasContext: context, viewport: viewport }).promise;
+                        });
+                    });
+                })(number);
+            }
+            return chain.then(function () { message.textContent = doc.numPages + (doc.numPages === 1 ? ' page' : ' pages'); });
+        }).catch(function () { message.textContent = 'Could not load the approved Subsystem 3 manuscript. Use Open PDF to retry.'; });
+    })();
+</script>

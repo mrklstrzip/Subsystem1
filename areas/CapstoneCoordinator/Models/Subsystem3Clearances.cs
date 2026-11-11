@@ -1,6 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Security.Cryptography;
+using System.Text;
+using System.Web;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Subsystem1.Data;
@@ -12,6 +18,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public string Id { get; set; }
         public string Title { get; set; }
         public string Authors { get; set; }
+        public string Abstract { get; set; }
+        public List<string> Keywords { get; set; }
         public string Adviser { get; set; }
         public string Program { get; set; }
         public string Section { get; set; }
@@ -160,6 +168,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
             BsonDocument sourceData = Document(source, "subsystem2Data");
             BsonDocument sourceManuscript = Document(sourceData, "manuscript");
+            if (sourceManuscript == null) sourceManuscript = Document(source, "manuscript");
+            if (sourceManuscript == null && sourceData != null && Value(sourceData, "title") != null) sourceManuscript = sourceData;
+            if (sourceManuscript == null && (Value(source, "Title") != null || Value(source, "title") != null)) sourceManuscript = source;
             string currentFileReference = First(
                 Str(sourceManuscript, "FinalManuscriptPublicId"),
                 Str(sourceManuscript, "CloudinaryPublicId"));
@@ -185,12 +196,15 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 Id = repositoryId,
                 Title = First(Str(record, "title"), Str(catalog, "Title")),
                 Authors = First(Str(sourceManuscript, "StudentName"), First(Str(sourceManuscript, "Authors"), Str(sourceManuscript, "ProjectManager"))),
+                Abstract = First(Str(sourceManuscript, "Abstract"), Str(source, "abstract")),
+                Keywords = StringValues(sourceManuscript, "Keywords", "keywords").Count > 0 ? StringValues(sourceManuscript, "Keywords", "keywords") : StringValues(source, "keywords"),
                 Adviser = First(Str(sourceManuscript, "AdviserName"), Str(approval, "AdviserId")),
                 Program = First(Str(record, "program"), Str(catalog, "Program")),
                 Section = First(Str(record, "section"), Str(catalog, "Section")),
                 Status = "Filed",
                 FiledAt = filedAt,
                 IsFiledImport = true,
+                ClearanceGroup = First(Str(sourceManuscript, "GroupName"), First(Str(sourceManuscript, "GroupId"), Str(source, "groupId"))),
                 ApprovedManuscriptId = approvedId,
                 ApprovedManuscriptName = First(Str(cloudFile, "filename"), Str(fileInfo, "fileName")),
                 ApprovedManuscriptHash = approvedHash,
@@ -223,6 +237,110 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return Db.Database.GetCollection<BsonDocument>("subsystem3_cloud_files")
                 .Find(Builders<BsonDocument>.Filter.Eq("_id", id))
                 .FirstOrDefault();
+        }
+
+        // Subsystem 3 stores private Cloudinary asset IDs in subsystem3_cloud_files.assets.
+        // Resolve only the exact approved file, then verify the complete bytes against the
+        // approved catalog hash before returning them to the authenticated Dean reader.
+        public static byte[] ReadApprovedManuscript(ClearedSubmission item)
+        {
+            if (item == null || String.IsNullOrWhiteSpace(item.ApprovedManuscriptId) ||
+                String.IsNullOrWhiteSpace(item.ApprovedManuscriptHash)) return null;
+
+            BsonDocument cloudFile = FindCloudFile(item.ApprovedManuscriptId);
+            if (cloudFile == null || !SameId(Str(cloudFile, "_id"), item.ApprovedManuscriptId) ||
+                !SameHash(Str(cloudFile, "sha256"), item.ApprovedManuscriptHash)) return null;
+
+            long length;
+            BsonValue lengthValue = Value(cloudFile, "length");
+            if (lengthValue == null || !lengthValue.IsNumeric ||
+                !long.TryParse(lengthValue.ToString(), out length) || length <= 0 || length > 100_000_000)
+                return null;
+
+            BsonValue assetsValue = Value(cloudFile, "assets");
+            if (assetsValue == null || !assetsValue.IsBsonArray || assetsValue.AsBsonArray.Count == 0) return null;
+
+            var settings = CloudinarySettings();
+            if (settings == null) return null;
+            byte[] bytes = new byte[(int)length];
+            const int partSize = 7_000_000;
+            int offset = 0;
+            foreach (BsonValue asset in assetsValue.AsBsonArray)
+            {
+                if (offset >= bytes.Length || !asset.IsString || String.IsNullOrWhiteSpace(asset.AsString)) return null;
+                int expectedPartLength = (int)Math.Min(partSize, length - offset);
+                int expectedEncodedLength = 4 * ((expectedPartLength + 2) / 3);
+                byte[] encoded = DownloadCloudinaryAsset(settings.Item1, settings.Item2,
+                    settings.Item3, asset.AsString, expectedEncodedLength);
+                if (encoded == null) return null;
+                byte[] part;
+                try { part = Convert.FromBase64String(Encoding.ASCII.GetString(encoded)); }
+                catch (FormatException) { return null; }
+                if (part.Length != expectedPartLength) return null;
+                Buffer.BlockCopy(part, 0, bytes, offset, part.Length);
+                offset += part.Length;
+            }
+
+            if (offset != bytes.Length || !SameHash(Hash(bytes), item.ApprovedManuscriptHash)) return null;
+            return bytes;
+        }
+
+        private static Tuple<string, string, string> CloudinarySettings()
+        {
+            string value = Environment.GetEnvironmentVariable("CLOUDINARY_URL");
+            if (String.IsNullOrWhiteSpace(value)) value = ConfigurationManager.AppSettings["CLOUDINARY_URL"];
+            if (String.IsNullOrWhiteSpace(value)) value = ConfigurationManager.AppSettings["Cloudinary:Url"];
+            Uri uri;
+            if (!Uri.TryCreate(value, UriKind.Absolute, out uri) ||
+                !String.Equals(uri.Scheme, "cloudinary", StringComparison.OrdinalIgnoreCase) ||
+                String.IsNullOrWhiteSpace(uri.Host)) return null;
+            string[] credentials = Uri.UnescapeDataString(uri.UserInfo ?? "").Split(new[] { ':' }, 2);
+            if (credentials.Length != 2 || String.IsNullOrWhiteSpace(credentials[0]) ||
+                String.IsNullOrWhiteSpace(credentials[1])) return null;
+            return Tuple.Create(uri.Host, credentials[0], credentials[1]);
+        }
+
+        private static byte[] DownloadCloudinaryAsset(string cloud, string key, string secret, string assetId, int expectedLength)
+        {
+            long timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var parameters = new SortedDictionary<string, string>(StringComparer.Ordinal)
+            {
+                { "asset_id", assetId }, { "timestamp", timestamp.ToString(System.Globalization.CultureInfo.InvariantCulture) }
+            };
+            string canonical = String.Join("&", parameters.Select(p => p.Key + "=" + p.Value)) + secret;
+            string signature;
+            using (var sha = SHA256.Create())
+                signature = BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(canonical))).Replace("-", "").ToLowerInvariant();
+            string body = "asset_id=" + HttpUtility.UrlEncode(assetId) + "&timestamp=" + timestamp +
+                "&api_key=" + HttpUtility.UrlEncode(key) + "&signature=" + signature;
+            byte[] bodyBytes = Encoding.UTF8.GetBytes(body);
+            var request = (HttpWebRequest)WebRequest.Create("https://api.cloudinary.com/v1_1/" + Uri.EscapeDataString(cloud) + "/asset/download");
+            request.Method = "POST";
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentLength = bodyBytes.Length;
+            request.Timeout = 30000;
+            request.ReadWriteTimeout = 30000;
+            request.UserAgent = "Subsystem1-Dean-Subsystem3-Reader";
+            using (Stream output = request.GetRequestStream()) output.Write(bodyBytes, 0, bodyBytes.Length);
+            using (var response = (HttpWebResponse)request.GetResponse())
+            using (Stream input = response.GetResponseStream())
+            using (var buffer = new MemoryStream())
+            {
+                byte[] chunk = new byte[32768];
+                int read;
+                while ((read = input.Read(chunk, 0, chunk.Length)) > 0)
+                {
+                    if (buffer.Length + read > expectedLength) return null;
+                    buffer.Write(chunk, 0, read);
+                }
+                return buffer.Length == expectedLength ? buffer.ToArray() : null;
+            }
+        }
+
+        private static string Hash(byte[] bytes)
+        {
+            using (var sha = SHA256.Create())
+                return BitConverter.ToString(sha.ComputeHash(bytes)).Replace("-", "");
         }
 
         private static BsonDocument FindCurrentManuscript(string manuscriptId)
@@ -286,6 +404,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 Id = Str(submission, "_id"),
                 Title = First(Str(submission, "title"), Str(state, "Title")),
                 Authors = First(Str(submission, "student"), First(Str(state, "StudentName"), Str(state, "Authors"))),
+                Abstract = First(Str(state, "Abstract"), First(Str(state, "abstract"), Str(submission, "abstract"))),
+                Keywords = StringValues(state, "Keywords", "keywords").Count > 0 ? StringValues(state, "Keywords", "keywords") : StringValues(submission, "keywords"),
                 Adviser = First(Str(submission, "adviser"), Str(state, "Adviser")),
                 Program = First(Str(state, "Program"), Str(clearance, "Program")),
                 Section = First(Str(state, "Section"), Str(clearance, "Section")),
@@ -329,6 +449,22 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return value != null && value.IsBsonArray
                 ? value.AsBsonArray.Where(v => v.IsBsonDocument).Select(v => v.AsBsonDocument).ToList()
                 : new List<BsonDocument>();
+        }
+
+        private static List<string> StringValues(BsonDocument document, params string[] keys)
+        {
+            foreach (string key in keys)
+            {
+                BsonValue value = Value(document, key);
+                if (value == null || value.IsBsonNull) continue;
+                if (value.IsBsonArray)
+                    return value.AsBsonArray.Where(item => item != null && !item.IsBsonNull)
+                        .Select(item => item.ToString()).Where(item => !String.IsNullOrWhiteSpace(item)).ToList();
+                if (value.IsString)
+                    return value.AsString.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(item => item.Trim()).Where(item => item.Length > 0).ToList();
+            }
+            return new List<string>();
         }
 
         private static BsonDocument Document(BsonDocument document, string key)

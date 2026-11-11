@@ -2,66 +2,52 @@
 @{
     Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
     var item = Model.Item;
+    var recordDate = item.FiledAt ?? item.DisseminatedAt;
+    var filingStatus = item.IsFiledImport || String.Equals(item.Status, "Filed", StringComparison.OrdinalIgnoreCase) ? "Filed" : "Disseminated";
 }
-<div class="os-header">
-    <h1>@item.Title</h1>
-    <p>@item.Program / @item.Section · @(item.IsFiledImport ? "Filed manuscript import" : item.Status)</p>
-    <i class="fa fa-file-pdf os-bg-icon"></i>
-</div>
-<div class="sa-card" style="padding:24px">
-    <dl class="manuscript-facts">
-        <dt>Submission ID</dt><dd>@item.Id</dd>
-        <dt>Approved manuscript ID</dt><dd>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptId) ? "Not recorded" : item.ApprovedManuscriptId)</dd>
-        <dt>File name</dt><dd>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptName) ? "Not recorded" : item.ApprovedManuscriptName)</dd>
-        <dt>SHA-256</dt><dd>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptHash) ? "Not recorded" : item.ApprovedManuscriptHash)</dd>
-        <dt>Disseminated</dt><dd>@(item.DisseminatedAt.HasValue ? item.DisseminatedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</dd>
-        <dt>Filed</dt><dd>@(item.FiledAt.HasValue ? item.FiledAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "Not filed")</dd>
-    </dl>
-    @if (item.IsFiledImport)
-    {
-        <h2>Staff review</h2>
-        <dl class="manuscript-facts">
-            <dt>Reviewer</dt><dd>@item.StaffReviewer (@item.StaffReviewRole)</dd>
-            <dt>Reviewer ID</dt><dd>@item.StaffReviewerId</dd>
-            <dt>Review action</dt><dd>@item.StaffReviewAction</dd>
-            <dt>Review recorded</dt><dd>@(item.StaffReviewAt.HasValue ? item.StaffReviewAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</dd>
-            <dt>Repository revalidated</dt><dd>@(item.RepositoryRevalidatedAt.HasValue ? item.RepositoryRevalidatedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</dd>
-            <dt>Metadata approved</dt><dd>@(item.MetadataApprovedAt.HasValue ? item.MetadataApprovedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</dd>
-        </dl>
-    }
-    else
-    {
-        <h2>Capstone clearance</h2>
-        <dl class="manuscript-facts">
-            <dt>Reference</dt><dd>@item.ClearanceReference</dd>
-            <dt>Group</dt><dd>@item.ClearanceGroup</dd>
-            <dt>Issued by</dt><dd>@item.ClearanceIssuedBy</dd>
-            <dt>Issued</dt><dd>@(item.ClearanceIssuedAt.HasValue ? item.ClearanceIssuedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</dd>
-        </dl>
-        <h2>Validation summaries</h2>
-        if (item.ValidationSummaries != null && item.ValidationSummaries.Count > 0)
-        {
-            foreach (var summary in item.ValidationSummaries)
+<section class="dean-paper-page">
+    <a class="dean-paper-back" href="@Url.Action("Index", "Repository", new { area = "Dean" })"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back to Results</a>
+    <article class="dean-paper-card">
+        <h1>@item.Title</h1>
+
+        <div class="dean-paper-meta">
+            <div><span>Authors</span><strong>@(String.IsNullOrWhiteSpace(item.Authors) ? "Not recorded" : item.Authors)</strong></div>
+            <div><span>Year</span><strong>@(recordDate.HasValue ? recordDate.Value.Year.ToString() : "Not recorded")</strong></div>
+            <div><span>Adviser</span><strong>@(String.IsNullOrWhiteSpace(item.Adviser) ? "Not recorded" : item.Adviser)</strong></div>
+            <div><span>Pages</span><strong>Not recorded</strong></div>
+            <div><span>Group</span><strong>@(String.IsNullOrWhiteSpace(item.ClearanceGroup) ? "Not recorded" : item.ClearanceGroup)</strong></div>
+        </div>
+
+        <div class="dean-paper-status-row">
+            <div><span>Cleared on</span><strong>@(recordDate.HasValue ? recordDate.Value.ToLocalTime().ToString("MMM d, yyyy") : "Not recorded")</strong></div>
+            <div><span>Filing status</span><strong class="dean-paper-status">@filingStatus</strong></div>
+            <div><span>Program / Section</span><strong>@item.Program / @item.Section</strong></div>
+        </div>
+
+        <section class="dean-paper-abstract">
+            <h2>Abstract</h2>
+            <p>@(String.IsNullOrWhiteSpace(item.Abstract) ? "No abstract was recorded for this manuscript." : item.Abstract)</p>
+        </section>
+
+        <section class="dean-paper-keywords">
+            <h2>Keywords &amp; Significant Terms</h2>
+            @if (item.Keywords != null && item.Keywords.Count > 0)
             {
-                <section class="validation-summary">
-                    <p><strong>@(String.IsNullOrWhiteSpace(summary.Staff) ? "Review" : summary.Staff)</strong>
-                       · @(summary.CompletedAt.HasValue ? summary.CompletedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "Completion time not recorded")</p>
-                    @if (!String.IsNullOrWhiteSpace(summary.Comments)) { <p>@summary.Comments</p> }
-                    <ul>
-                        @foreach (var check in summary.Items)
-                        {
-                            <li><b>@check.Requirement</b> — @check.Status@if (!String.IsNullOrWhiteSpace(check.Feedback)) { <span>: @check.Feedback</span> }</li>
-                        }
-                    </ul>
-                </section>
+                <div class="dean-paper-tags">
+                    @foreach (var keyword in item.Keywords)
+                    {
+                        <span>@keyword</span>
+                    }
+                </div>
             }
-        }
-        else
-        {
-            <p>No validation summary was recorded.</p>
-        }
-    }
-    <p class="manuscript-unavailable">The shared database identifies the approved file, but does not provide a Dean-authorized download URL. Subsystem 3 must provide an authenticated download endpoint or a file reference that Subsystem 1 can resolve securely before the PDF reader can open it.</p>
-    <a class="sa-btn-filter" href="@Url.Action("Read", "Repository", new { area = "Dean", id = item.Id })">Open manuscript reader</a>
-    <a class="sa-btn-filter" href="@Url.Action("Index", "Repository", new { area = "Dean" })">Back to repository</a>
-</div>
+            else
+            {
+                <p>No keywords were recorded.</p>
+            }
+        </section>
+
+        <div class="dean-paper-actions">
+            <a class="dean-page-btn" href="@Url.Action("Read", "Repository", new { area = "Dean", id = item.Id })">View Manuscript</a>
+        </div>
+    </article>
+</section>
