@@ -139,18 +139,21 @@
 }
 
 .tag-gray {
-    background: #d0d0d0;
-    color: #333;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
 }
 
-.tag-red {
-    background: #f5b5b5;
-    color: #7a1f1f;
+.tag-teal {
+    background: #CCFBF1;
+    color: #0F766E;
+    border: 1px solid #99F6E4;
 }
 
 .tag-purple {
-    background: #d9c5f2;
-    color: #4b2a7a;
+    background: #f5f3ff;
+    color: #5b21b6;
+    border: 1px solid #ddd6fe;
 }
 
 /* ---------- View button ---------- */
@@ -522,9 +525,9 @@
 }
 
 .chip-bscs {
-    background: #fff1f2;
-    color: #be123c;
-    border-color: #fecdd3;
+    background: #CCFBF1;
+    color: #0F766E;
+    border-color: #99F6E4;
 }
 
 .chip-bsis {
