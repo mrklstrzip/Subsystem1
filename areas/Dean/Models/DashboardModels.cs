@@ -40,6 +40,7 @@ namespace Subsystem1.Areas.Dean.Models
         public List<DashboardRow> ToApprove { get; set; } = new List<DashboardRow>();
         public List<DashboardRow> Upcoming { get; set; } = new List<DashboardRow>();
         public int TotalDefenses { get; set; }
+        public int ClearedManuscripts { get; set; }
         public List<ActivityRow> RecentActivities { get; set; } = new List<ActivityRow>();
     }
 }

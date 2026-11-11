@@ -365,3 +365,9 @@ FodyWeavers.xsd
 connectionStrings.config
 # SMTP credentials (contains an app password)
 smtp.secrets.config
+/Web.config
+/Web.Debug.config
+/Web.Release.config
+/smtp.secrets.config
+/packages.config
+/Subsystem1.csproj

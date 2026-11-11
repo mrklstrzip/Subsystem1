@@ -7,7 +7,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
     {
         public ActionResult schedulemanagement()
         {
-            return View(CoordinatorData.Load(true));
+            return View(CoordinatorData.Load(true, onlySubsystem2: true));
         }
     }
 }

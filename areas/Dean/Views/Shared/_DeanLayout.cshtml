@@ -12,6 +12,7 @@
     <link href="@Url.Content("~/Content/css/layout.css")?v=1.1" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/css/Dean.css")?v=1.1" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/css/oversight.css")?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/css/dean-repository.css")?v=1.0" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
     <link href="@Url.Content("~/Content/css/logout-confirm.css")?v=1.0" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/css/fonts.css")?v=1.0" rel="stylesheet" type="text/css" />
@@ -62,11 +63,9 @@
                 <a href="@Url.Action("DefenseScheduleView", "DefenseSchedule")" class="@(currentController == "DefenseSchedule" ? "active" : "")" title="Defense Schedule">
                     <i class="fa fa-calendar"></i><span class="nav-label">Defense Schedule</span>
                 </a>
-                <a href="@Url.Action("Index", "Oversight", new { area = "Dean" })" class="@(currentController == "Oversight" && currentAction == "Index" ? "active" : "")" title="Research Oversight"><i class="fa fa-eye"></i><span class="nav-label">Research Oversight</span></a>
-                <a href="@Url.Action("Repository", "Oversight", new { area = "Dean" })" class="@(currentController == "Oversight" && currentAction == "Repository" ? "active" : "")" title="Research Repository"><i class="fa fa-book-open"></i><span class="nav-label">Research Repository</span></a>
-                <a href="@Url.Action("Records", "Oversight", new { area = "Dean" })" class="@(currentController == "Oversight" && currentAction == "Records" ? "active" : "")" title="Submission Records"><i class="fa fa-folder-open"></i><span class="nav-label">Submission Records</span></a>
-                <a href="@Url.Action("Monitoring", "Oversight", new { area = "Dean" })" class="@(currentController == "Oversight" && currentAction == "Monitoring" ? "active" : "")" title="Research Monitoring"><i class="fa fa-chart-line"></i><span class="nav-label">Research Monitoring</span></a>
-                <a href="@Url.Action("Audit", "Oversight", new { area = "Dean" })" class="@(currentController == "Oversight" && currentAction == "Audit" ? "active" : "")" title="Audit History"><i class="fa fa-clock-rotate-left"></i><span class="nav-label">Audit History</span></a>
+                <a href="@Url.Action("Index", "Repository", new { area = "Dean" })" class="@((currentController == "Repository" || (currentController == "Oversight" && currentAction == "Records")) ? "active" : "")" title="Repository"><i class="fa fa-book-open"></i><span class="nav-label">Repository</span></a>
+                <a href="@Url.Action("Cohort", "Oversight", new { area = "Dean" })" class="@((currentController == "Oversight" && (currentAction == "Cohort" || currentAction == "Exceptions" || currentAction == "Performance")) ? "active" : "")" title="Monitoring"><i class="fa fa-chart-line"></i><span class="nav-label">Monitoring</span></a>
+                <a href="@Url.Action("Reports", "Oversight", new { area = "Dean" })" class="@((currentController == "Oversight" && (currentAction == "Reports" || currentAction == "Audit")) ? "active" : "")" title="Audit Reports"><i class="fa fa-clock-rotate-left"></i><span class="nav-label">Audit Reports</span></a>
             </nav>
 
             <div class="sb-footer">
