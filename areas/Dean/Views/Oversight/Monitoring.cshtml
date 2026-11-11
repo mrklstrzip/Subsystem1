@@ -22,27 +22,134 @@
     else if (exceptions)
     {
         var flagged = Model.Records.Where(x => String.Equals(x.Status, "Returned", StringComparison.OrdinalIgnoreCase) || String.Equals(x.Status, "Revision Required", StringComparison.OrdinalIgnoreCase) || String.Equals(x.Status, "Rejected", StringComparison.OrdinalIgnoreCase)).ToList();
-        <div class="dean-page-panel">
-            <h2>Compliance exceptions <span class="dean-result-meta">@flagged.Count items</span></h2>
-            @if (flagged.Count == 0) { <p>No unresolved compliance exceptions are recorded.</p> }
-            else
-            {
-                <table class="dean-record-table"><thead><tr><th>Manuscript</th><th>Program</th><th>Status</th><th>Last action</th></tr></thead><tbody>
-                @foreach (var r in flagged) { <tr><td><strong>@r.Title</strong><small>@r.Id</small></td><td>@r.Program</td><td>@r.Status</td><td>@(r.UpdatedAt.HasValue ? r.UpdatedAt.Value.ToString("MMM d, yyyy") : "—")</td></tr> }
+        var returnedCount = flagged.Count(x => String.Equals(x.Status, "Returned", StringComparison.OrdinalIgnoreCase));
+        var revisionCount = flagged.Count(x => String.Equals(x.Status, "Revision Required", StringComparison.OrdinalIgnoreCase));
+        var rejectedCount = flagged.Count(x => String.Equals(x.Status, "Rejected", StringComparison.OrdinalIgnoreCase));
+        <div class="dean-exception-stats">
+            <article class="dean-exception-stat"><span>Returned</span><i class="fa-regular fa-rectangle-list" aria-hidden="true"></i><strong>@returnedCount</strong></article>
+            <article class="dean-exception-stat"><span>Revision Required</span><i class="fa-regular fa-rectangle-list" aria-hidden="true"></i><strong>@revisionCount</strong></article>
+            <article class="dean-exception-stat"><span>Rejected</span><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><strong>@rejectedCount</strong></article>
+            <article class="dean-exception-stat"><span>Unresolved Cases</span><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><strong>@flagged.Count</strong></article>
+        </div>
+        <form method="get" action="@Url.Action("Exceptions", "Oversight", new { area = "Dean" })" class="dean-exception-filters">
+            <div class="dean-exception-search"><i class="fa fa-magnifying-glass" aria-hidden="true"></i><input type="search" name="q" value="@Model.Query" placeholder="Search by group, title, author or adviser" aria-label="Search exceptions" /><button type="submit" class="dean-page-btn light">Search</button></div>
+            <label>Type<select name="status" onchange="this.form.submit()"><option value="">All Types</option><option value="Returned" @(Model.Status == "Returned" ? "selected" : "")>Returned</option><option value="Revision Required" @(Model.Status == "Revision Required" ? "selected" : "")>Revision Required</option><option value="Rejected" @(Model.Status == "Rejected" ? "selected" : "")>Rejected</option></select></label>
+            <label>Batch (Academic Year)<select name="batch" onchange="this.form.submit()"><option value="">All Batches</option>@foreach (var batch in Model.Batches) { <option value="@batch" @(Model.Batch == batch ? "selected" : "")>@batch</option> }</select></label>
+            <a class="dean-exception-reset" href="@Url.Action("Exceptions", "Oversight", new { area = "Dean" })">Reset filters</a>
+        </form>
+        <div class="dean-page-panel dean-exception-panel">
+            <div class="dean-exception-panel-head"><h2>Unresolved Cases</h2><span>@flagged.Count cases</span></div>
+            <div class="dean-exception-table-wrap">
+                <table class="dean-record-table dean-exception-table"><thead><tr><th>Manuscript</th><th>Type</th><th>Batch</th><th>Last Action</th></tr></thead><tbody>
+                @if (flagged.Count == 0)
+                {
+                    <tr><td colspan="4" class="dean-exception-empty">No exceptions match these filters.</td></tr>
+                }
+                else
+                {
+                    foreach (var r in flagged)
+                    {
+                        var batchYear = (r.SubmittedAt ?? r.UpdatedAt)?.Year;
+                        <tr><td><strong>@r.Title</strong><small>@r.Id</small></td><td><span class="dean-exception-type">@r.Status</span></td><td>@(batchYear.HasValue ? batchYear.Value.ToString() : "—")</td><td>@(r.UpdatedAt.HasValue ? r.UpdatedAt.Value.ToString("MMM d, yyyy") : "Not recorded")</td></tr>
+                    }
+                }
                 </tbody></table>
-            }
+            </div>
         </div>
     }
     else
     {
-        <div class="dean-report-stats">
-            <div class="dean-report-stat">Records<strong>@Model.Total</strong></div>
-            <div class="dean-report-stat">Cleared<strong>@Model.Approved</strong></div>
-            <div class="dean-report-stat">Returned<strong>@Model.Returned</strong></div>
-            <div class="dean-report-stat">Average age (days)<strong>@Math.Round(Model.AverageAgeDays, 1)</strong></div>
+        var performanceSort = Convert.ToString(ViewBag.PerformanceSort);
+        var maxReview = Model.PerformanceBatches.Where(x => x.AverageReviewDays.HasValue).Select(x => x.AverageReviewDays.Value).DefaultIfEmpty(0).Max();
+        var maxWaiting = Model.PerformanceBatches.Where(x => x.AverageWaitingDays.HasValue).Select(x => x.AverageWaitingDays.Value).DefaultIfEmpty(0).Max();
+        var maxCycles = Model.RecheckingDistribution.Select(x => x.Count).DefaultIfEmpty(0).Max();
+        <form method="get" action="@Url.Action("Performance", "Oversight", new { area = "Dean" })" class="dean-performance-filters">
+            <label>Batch (Academic Year)<select name="batch" onchange="this.form.submit()"><option value="">All Batches</option>@foreach (var batch in Model.Batches) { <option value="@batch" @(Model.Batch == batch ? "selected" : "")>@batch</option> }</select></label>
+            <label>Submission Status<select name="status" onchange="this.form.submit()"><option value="">All Statuses</option><option value="Submitted" @(Model.Status == "Submitted" ? "selected" : "")>Submitted</option><option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Pending</option><option value="Validated" @(Model.Status == "Validated" ? "selected" : "")>Validated</option><option value="Returned" @(Model.Status == "Returned" ? "selected" : "")>Returned</option><option value="Revision Required" @(Model.Status == "Revision Required" ? "selected" : "")>Revision Required</option><option value="Rejected" @(Model.Status == "Rejected" ? "selected" : "")>Rejected</option><option value="Disseminated" @(Model.Status == "Disseminated" ? "selected" : "")>Disseminated</option><option value="Filed" @(Model.Status == "Filed" ? "selected" : "")>Filed</option></select></label>
+            <label>Rank Groups By<select name="sort" onchange="this.form.submit()"><option value="wait" @(performanceSort == "wait" ? "selected" : "")>Longest Waiting Period</option><option value="review" @(performanceSort == "review" ? "selected" : "")>Longest Review Time</option><option value="rechecks" @(performanceSort == "rechecks" ? "selected" : "")>Most Rechecking Cycles</option></select></label>
+            <details class="dean-performance-more"><summary>More Filters</summary>
+                <div class="dean-performance-extra"><label>Program<select name="program" onchange="this.form.submit()"><option value="">All Programs</option>@foreach (var program in Model.Programs) { <option value="@program.Key" @(Model.Program == program.Key ? "selected" : "")>@program.Key</option> }</select></label><label>Search<input type="search" name="q" value="@Model.Query" placeholder="Search groups, titles or advisers" /></label><button class="dean-page-btn light" type="submit">Apply Filters</button></div>
+            </details>
+            <a class="dean-performance-reset" href="@Url.Action("Performance", "Oversight", new { area = "Dean" })">Reset All Filters</a>
+        </form>
+        <div class="dean-performance-stats">
+            <article class="dean-performance-stat"><span>Avg. Review Time</span><i class="fa-regular fa-clock" aria-hidden="true"></i><strong>@(Model.AverageReviewDays.HasValue ? Model.AverageReviewDays.Value.ToString("0.0") + "d" : "—")</strong></article>
+            <article class="dean-performance-stat"><span>Avg. Waiting Period</span><i class="fa-regular fa-file-lines" aria-hidden="true"></i><strong>@(Model.AverageWaitingDays.HasValue ? Model.AverageWaitingDays.Value.ToString("0.0") + "d" : "—")</strong></article>
+            <article class="dean-performance-stat"><span>Avg. Rechecking Cycles</span><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><strong>@Model.AverageRecheckingCycles.ToString("0.0")</strong></article>
+            <article class="dean-performance-stat"><span>Longest Wait</span><i class="fa-regular fa-file-lines" aria-hidden="true"></i><strong>@(Model.LongestWaitDays.HasValue ? Model.LongestWaitDays.Value.ToString("0.0") + "d" : "0d")</strong><small title="@Model.LongestWaitTitle">@Model.LongestWaitTitle</small></article>
         </div>
-        <div class="dean-page-panel"><h2>Processing overview</h2><p>Current status totals from the shared submission collection.</p>
-            <div class="dean-chart"><div class="dean-chart-bar" style="height:@(Model.Total == 0 ? 2 : Math.Max(2, 100 * Model.Approved / Model.Total))%"><span>Cleared</span></div><div class="dean-chart-bar" style="height:@(Model.Total == 0 ? 2 : Math.Max(2, 100 * Model.Submitted / Model.Total))%"><span>Pending</span></div><div class="dean-chart-bar" style="height:@(Model.Total == 0 ? 2 : Math.Max(2, 100 * Model.Returned / Model.Total))%"><span>Returned</span></div></div>
-        </div>
+
+        <section class="dean-performance-section">
+            <div class="dean-performance-section-head"><h2>Review Time by Batch</h2><p>@(Model.Batch.HasValue ? "Batch " + Model.Batch.Value : "All batches are shown.")</p></div>
+            <div class="dean-page-panel dean-performance-chart-panel">
+                <div class="dean-performance-chart" role="img" aria-label="Average review time by batch, measured in days">
+                    <div class="dean-performance-y-axis"><span>@(maxReview.ToString("0.0"))</span><span>@( (maxReview * .75).ToString("0.0") )</span><span>@( (maxReview * .5).ToString("0.0") )</span><span>@( (maxReview * .25).ToString("0.0") )</span><span>0</span></div>
+                    <div class="dean-performance-bars">
+                        @if (Model.PerformanceBatches.Any(x => x.AverageReviewDays.HasValue))
+                        {
+                            foreach (var row in Model.PerformanceBatches.Where(x => x.AverageReviewDays.HasValue))
+                            {
+                                var height = maxReview <= 0 ? 2 : Math.Max(2, row.AverageReviewDays.Value * 100 / maxReview);
+                                <div class="dean-performance-bar-group"><div class="dean-performance-bar" style="height:@(height.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"><span>@row.AverageReviewDays.Value.ToString("0.0")d</span></div><small>@row.Batch</small></div>
+                            }
+                        }
+                        else { <div class="dean-performance-chart-empty">No completed validation review times are recorded for these filters.</div> }
+                    </div>
+                </div>
+                <div class="dean-performance-axis-caption">Days <span>Batch</span></div>
+            </div>
+        </section>
+
+        <section class="dean-performance-section">
+            <div class="dean-performance-section-head"><h2>Waiting Period by Batch</h2><p>Elapsed time for submissions with an open review.</p></div>
+            <div class="dean-page-panel dean-performance-chart-panel">
+                <div class="dean-performance-chart" role="img" aria-label="Average open waiting period by batch, measured in days">
+                    <div class="dean-performance-y-axis"><span>@(maxWaiting.ToString("0.0"))</span><span>@( (maxWaiting * .75).ToString("0.0") )</span><span>@( (maxWaiting * .5).ToString("0.0") )</span><span>@( (maxWaiting * .25).ToString("0.0") )</span><span>0</span></div>
+                    <div class="dean-performance-bars">
+                        @if (Model.PerformanceBatches.Any(x => x.AverageWaitingDays.HasValue))
+                        {
+                            foreach (var row in Model.PerformanceBatches.Where(x => x.AverageWaitingDays.HasValue))
+                            {
+                                var height = maxWaiting <= 0 ? 2 : Math.Max(2, row.AverageWaitingDays.Value * 100 / maxWaiting);
+                                <div class="dean-performance-bar-group"><div class="dean-performance-bar waiting" style="height:@(height.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"><span>@row.AverageWaitingDays.Value.ToString("0.0")d</span></div><small>@row.Batch</small></div>
+                            }
+                        }
+                        else { <div class="dean-performance-chart-empty">No open review waiting periods are recorded for these filters.</div> }
+                    </div>
+                </div>
+                <div class="dean-performance-axis-caption">Days <span>Batch</span></div>
+            </div>
+        </section>
+
+        <section class="dean-performance-section">
+            <div class="dean-performance-section-head"><h2>Rechecking Cycles Distribution</h2><p>@Model.Total submissions in the current view</p></div>
+            <div class="dean-page-panel dean-cycle-list">
+                @foreach (var cycle in Model.RecheckingDistribution)
+                {
+                    var width = maxCycles == 0 ? 0 : 100.0 * cycle.Count / maxCycles;
+                    <div class="dean-cycle-row"><span>@cycle.Label</span><div class="dean-cycle-track"><i style="width:@(width.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"></i></div><strong>@cycle.Count</strong></div>
+                }
+            </div>
+        </section>
+
+        <section class="dean-performance-section">
+            <div class="dean-performance-section-head"><h2>Slowest Groups</h2><p>Top 10 ranked by the selected measure</p></div>
+            <div class="dean-page-panel dean-performance-table-panel">
+                <div class="dean-exception-table-wrap"><table class="dean-record-table dean-performance-table"><thead><tr><th>Group / Student</th><th>Title</th><th>Batch</th><th>Status</th><th>Review</th><th>Waiting</th><th>Cycles</th></tr></thead><tbody>
+                    @if (Model.SlowestGroups.Count == 0)
+                    {
+                        <tr><td colspan="7" class="dean-exception-empty">No submissions match these filters.</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var record in Model.SlowestGroups)
+                        {
+                            var groupYear = (record.SubmittedAt ?? record.UpdatedAt)?.Year;
+                            <tr><td>@(String.IsNullOrWhiteSpace(record.Authors) ? "Not recorded" : record.Authors)</td><td><strong>@record.Title</strong></td><td>@(groupYear.HasValue ? groupYear.Value.ToString() : "—")</td><td><span class="dean-performance-status">@record.Status</span></td><td>@(record.ReviewTimeDays.HasValue ? record.ReviewTimeDays.Value.ToString("0.0") + "d" : "—")</td><td>@(record.WaitingPeriodDays.HasValue ? record.WaitingPeriodDays.Value.ToString("0.0") + "d" : "0d")</td><td>@record.RecheckingCycles</td></tr>
+                        }
+                    }
+                </tbody></table></div>
+            </div>
+        </section>
     }
 </section>

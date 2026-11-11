@@ -110,6 +110,73 @@ namespace Subsystem1.Areas.Dean.Models
             return CoDb.FmtCompact(s.Start.Value) + " - " + CoDb.FmtCompact(s.End.Value);
         }
 
+        private static string FirstField(BsonDocument document, params string[] names)
+        {
+            if (document == null) return "";
+            foreach (string name in names)
+            {
+                string value = Str(document, name);
+                if (!String.IsNullOrWhiteSpace(value)) return value;
+            }
+            return "";
+        }
+
+        private static DeanManuscriptFile ResolveManuscriptFile(BsonDocument schedule, BsonDocument legacyTitle)
+        {
+            if (schedule == null) return null;
+            string titleId = Str(schedule, "titleId");
+            BsonDocument source = Subsystem2Manuscripts.ForScheduleSubmission(titleId);
+            string fileName = FirstField(source, "fileName", "FileName");
+            string url = FirstField(source, "manuscriptUrl", "ManuscriptUrl");
+
+            if (String.IsNullOrWhiteSpace(url))
+            {
+                string publicId = FirstField(source, "cloudinaryPublicId", "CloudinaryPublicId");
+                if (String.IsNullOrWhiteSpace(publicId)) publicId = FirstField(source, "filePath", "filepath", "FilePath");
+                string resourceType = FirstField(source, "cloudinaryResourceType", "CloudinaryResourceType");
+                if (String.IsNullOrWhiteSpace(resourceType) && publicId.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)) resourceType = "raw";
+                if (!String.IsNullOrWhiteSpace(publicId)) url = Subsystem2Manuscripts.CreatePrivateDownloadUrl(publicId, resourceType);
+            }
+
+            if (String.IsNullOrWhiteSpace(url))
+            {
+                fileName = FirstField(legacyTitle, "fileName", "FileName", "filename", "name");
+                string publicId = FirstField(legacyTitle, "cloudinaryPublicId", "CloudinaryPublicId", "publicId", "PublicId");
+                string resourceType = FirstField(legacyTitle, "cloudinaryResourceType", "CloudinaryResourceType", "resourceType", "ResourceType");
+                string filePath = FirstField(legacyTitle, "filePath", "filepath", "FilePath");
+                if (String.IsNullOrWhiteSpace(publicId) && filePath.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) &&
+                    !filePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !filePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    publicId = filePath;
+                if (String.IsNullOrWhiteSpace(resourceType) && publicId.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)) resourceType = "raw";
+                if (!String.IsNullOrWhiteSpace(publicId)) url = Subsystem2Manuscripts.CreatePrivateDownloadUrl(publicId, resourceType);
+                if (String.IsNullOrWhiteSpace(url)) url = FirstField(legacyTitle, "manuscriptUrl", "ManuscriptUrl", "cloudinaryUrl", "CloudinaryUrl", "fileUrl", "FileUrl");
+                if (String.IsNullOrWhiteSpace(fileName) && !String.IsNullOrWhiteSpace(publicId)) fileName = publicId.Substring(publicId.LastIndexOf('/') + 1);
+                if (String.IsNullOrWhiteSpace(fileName) && !String.IsNullOrWhiteSpace(filePath) && Uri.IsWellFormedUriString(filePath, UriKind.Absolute))
+                {
+                    Uri fileUri;
+                    if (Uri.TryCreate(filePath, UriKind.Absolute, out fileUri)) fileName = fileUri.Segments.LastOrDefault() ?? "";
+                }
+            }
+
+            Uri parsed;
+            bool allowedHost = Uri.TryCreate(url, UriKind.Absolute, out parsed) && parsed.Scheme == Uri.UriSchemeHttps &&
+                (parsed.Host.Equals("api.cloudinary.com", StringComparison.OrdinalIgnoreCase) || parsed.Host.Equals("res.cloudinary.com", StringComparison.OrdinalIgnoreCase));
+            if (!allowedHost || !fileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)) return null;
+            return new DeanManuscriptFile { Url = url, FileName = fileName };
+        }
+
+        public static DeanManuscriptFile ManuscriptFile(string scheduleId)
+        {
+            ObjectId? oid = ParseId(scheduleId);
+            BsonDocument schedule = oid.HasValue ? Schedules().Find(Builders<BsonDocument>.Filter.Eq("_id", oid.Value)).FirstOrDefault() : null;
+            if (schedule == null) return null;
+            string status = CoDb.StatusOf(schedule);
+            if (status != "submitted" && status != "approved" && status != "completed" && status != "complete") return null;
+            ObjectId? titleId = ParseId(Str(schedule, "titleId"));
+            BsonDocument title = titleId.HasValue ? Titles().Find(Builders<BsonDocument>.Filter.Eq("_id", titleId.Value)).FirstOrDefault() : null;
+            return ResolveManuscriptFile(schedule, title);
+        }
+
         private static string Ago(DateTime at, DateTime now)
         {
             TimeSpan span = now - at;
@@ -168,7 +235,7 @@ namespace Subsystem1.Areas.Dean.Models
                 .ThenBy(s => s.Title, StringComparer.OrdinalIgnoreCase)
                 .Select(s => new ScheduleListItem
                 {
-                    Id = s.Id, Title = s.Title, Section = s.Badge, Program = s.Program, Author = s.Author, Adviser = s.Adviser,
+                    Id = s.Id, Title = s.Title, Section = s.Badge, Program = s.Program, ProjectManager = s.Author, Adviser = s.Adviser,
                     Date = s.Day ?? DateTime.MinValue, HasDate = s.Day.HasValue, Status = s.Approved ? "Approved" : "To Approve"
                 }).ToList();
         }
@@ -217,6 +284,7 @@ namespace Subsystem1.Areas.Dean.Models
             }
 
             bool approved = raw != "submitted";
+            DeanManuscriptFile manuscriptFile = ResolveManuscriptFile(d, t);
             return new ScheduleDetailsVM
             {
                 Id = DocId(d),
@@ -228,6 +296,7 @@ namespace Subsystem1.Areas.Dean.Models
                 Adviser = Pick(d, "adviser", t, "adviser"),
                 Abstract = t == null ? "" : Str(t, "abstract"),
                 Keywords = string.Join(", ", CoDb.Keywords(t)),
+                HasManuscriptPdf = manuscriptFile != null,
                 Panelists = panel,
                 Time = st.HasValue && en.HasValue ? CoDb.FmtCompact(st.Value) + " - " + CoDb.FmtCompact(en.Value) : "-",
                 DefenseDate = day.HasValue ? day.Value.ToString("MMMM d, yyyy", CultureInfo.InvariantCulture) : "-",
