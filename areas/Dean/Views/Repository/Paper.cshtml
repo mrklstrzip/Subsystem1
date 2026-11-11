@@ -1,0 +1,67 @@
+@model Subsystem1.Areas.Dean.Models.DeanManuscriptVm
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+    var item = Model.Item;
+}
+<div class="os-header">
+    <h1>@item.Title</h1>
+    <p>@item.Program / @item.Section · @(item.IsFiledImport ? "Filed manuscript import" : item.Status)</p>
+    <i class="fa fa-file-pdf os-bg-icon"></i>
+</div>
+<div class="sa-card" style="padding:24px">
+    <dl class="manuscript-facts">
+        <dt>Submission ID</dt><dd>@item.Id</dd>
+        <dt>Approved manuscript ID</dt><dd>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptId) ? "Not recorded" : item.ApprovedManuscriptId)</dd>
+        <dt>File name</dt><dd>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptName) ? "Not recorded" : item.ApprovedManuscriptName)</dd>
+        <dt>SHA-256</dt><dd>@(String.IsNullOrWhiteSpace(item.ApprovedManuscriptHash) ? "Not recorded" : item.ApprovedManuscriptHash)</dd>
+        <dt>Disseminated</dt><dd>@(item.DisseminatedAt.HasValue ? item.DisseminatedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</dd>
+        <dt>Filed</dt><dd>@(item.FiledAt.HasValue ? item.FiledAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "Not filed")</dd>
+    </dl>
+    @if (item.IsFiledImport)
+    {
+        <h2>Staff review</h2>
+        <dl class="manuscript-facts">
+            <dt>Reviewer</dt><dd>@item.StaffReviewer (@item.StaffReviewRole)</dd>
+            <dt>Reviewer ID</dt><dd>@item.StaffReviewerId</dd>
+            <dt>Review action</dt><dd>@item.StaffReviewAction</dd>
+            <dt>Review recorded</dt><dd>@(item.StaffReviewAt.HasValue ? item.StaffReviewAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</dd>
+            <dt>Repository revalidated</dt><dd>@(item.RepositoryRevalidatedAt.HasValue ? item.RepositoryRevalidatedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</dd>
+            <dt>Metadata approved</dt><dd>@(item.MetadataApprovedAt.HasValue ? item.MetadataApprovedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</dd>
+        </dl>
+    }
+    else
+    {
+        <h2>Capstone clearance</h2>
+        <dl class="manuscript-facts">
+            <dt>Reference</dt><dd>@item.ClearanceReference</dd>
+            <dt>Group</dt><dd>@item.ClearanceGroup</dd>
+            <dt>Issued by</dt><dd>@item.ClearanceIssuedBy</dd>
+            <dt>Issued</dt><dd>@(item.ClearanceIssuedAt.HasValue ? item.ClearanceIssuedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</dd>
+        </dl>
+        <h2>Validation summaries</h2>
+        if (item.ValidationSummaries != null && item.ValidationSummaries.Count > 0)
+        {
+            foreach (var summary in item.ValidationSummaries)
+            {
+                <section class="validation-summary">
+                    <p><strong>@(String.IsNullOrWhiteSpace(summary.Staff) ? "Review" : summary.Staff)</strong>
+                       · @(summary.CompletedAt.HasValue ? summary.CompletedAt.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "Completion time not recorded")</p>
+                    @if (!String.IsNullOrWhiteSpace(summary.Comments)) { <p>@summary.Comments</p> }
+                    <ul>
+                        @foreach (var check in summary.Items)
+                        {
+                            <li><b>@check.Requirement</b> — @check.Status@if (!String.IsNullOrWhiteSpace(check.Feedback)) { <span>: @check.Feedback</span> }</li>
+                        }
+                    </ul>
+                </section>
+            }
+        }
+        else
+        {
+            <p>No validation summary was recorded.</p>
+        }
+    }
+    <p class="manuscript-unavailable">The shared database identifies the approved file, but does not provide a Dean-authorized download URL. Subsystem 3 must provide an authenticated download endpoint or a file reference that Subsystem 1 can resolve securely before the PDF reader can open it.</p>
+    <a class="sa-btn-filter" href="@Url.Action("Read", "Repository", new { area = "Dean", id = item.Id })">Open manuscript reader</a>
+    <a class="sa-btn-filter" href="@Url.Action("Index", "Repository", new { area = "Dean" })">Back to repository</a>
+</div>

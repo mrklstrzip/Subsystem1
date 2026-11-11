@@ -20,14 +20,13 @@
     // Hierarchy order used for the users table
     var ROLE_ORDER = ['admin', 'dean', 'capstone-coordinator', 'campus-director', 'panelist', 'adviser', 'project-manager'];
 
+
     var DIST = [
         { role: 'dean', label: 'Dean', dotCls: 'dot-dean' },
         { role: 'capstone-coordinator', label: 'Capstone Coordinator', dotCls: 'dot-capstone-coordinator' },
-        { role: 'campus-director', label: 'Campus Director', dotCls: 'dot-campus-director' },
-        { role: 'panelist', label: 'Panelist', dotCls: 'dot-panelist' },
-        { role: 'adviser', label: 'Adviser', dotCls: 'dot-adviser' },
-        { role: 'project-manager', label: 'Student', dotCls: 'dot-project-manager' }
+        { role: 'campus-director', label: 'Campus Director', dotCls: 'dot-campus-director' }
     ];
+
 
     var SINGLE_ROLES = ['admin', 'campus-director', 'capstone-coordinator', 'dean'];
 
@@ -116,7 +115,7 @@
                 return;
             }
             // Saved. Reload the lists from the database, then redraw.
-            return refresh().then(onDone).catch(function () {
+            return refresh().then(function () { onDone(res); }).catch(function () {
                 alert('Saved, but the list could not be reloaded. Please refresh the page.');
             });
         }, function () {
@@ -321,6 +320,57 @@
        Dashboard
        --------------------------------------------------------------- */
 
+
+    function isAllowedSystemActivity(a) {
+        var text = String(a.text || '').trim().toLowerCase();
+        var action;
+
+        // ADMIN
+        if (text.startsWith('admin: ')) {
+            action = text.substring(7);
+
+            return (
+                /^new (campus director|capstone coordinator|dean) account created:/.test(action) ||
+                action.startsWith('account updated:') ||
+                action.startsWith('account activated:') ||
+                action.startsWith('account deactivated:') ||
+                action.startsWith('new expertise tag created:') ||
+                action.startsWith('expertise tag modified:') ||
+                action.startsWith('faculty profile updated:')
+            );
+        }
+
+        // CAMPUS DIRECTOR
+        if (text.startsWith('campus director: ')) {
+            action = text.substring('campus director: '.length);
+
+            return (
+                /^building .+ added$/.test(action) ||
+                /^building .+ details updated$/.test(action) ||
+                /^building .+ status changed to /.test(action) ||
+                /^room .+ added to /.test(action)
+            );
+        }
+
+        // CAPSTONE COORDINATOR
+        if (text.startsWith('capstone coordinator: ')) {
+            action = text.substring('capstone coordinator: '.length);
+
+            return (
+                action.startsWith('panel and schedule generated for') ||
+                action.startsWith('schedule submitted to the dean for') ||
+                action.startsWith('schedule edited for')
+            );
+        }
+
+        // DEAN
+        return (
+            text.startsWith('dean approved the defense schedule for') ||
+            text.startsWith('dean rejected the defense schedule for')
+        );
+    }
+
+
     function renderDashboard() {
         if (!$('dash-total')) return;
 
@@ -340,7 +390,11 @@
         if ($('dash-directors')) $('dash-directors').textContent = count('campus-director');
         if ($('dash-dean')) $('dash-dean').textContent = count('dean');
 
-        $('dash-activity').innerHTML = state.activity.slice(0, 6).map(function (a) {
+        $('dash-activity').innerHTML = state.activity
+            .filter(isAllowedSystemActivity)
+            .slice(0, 6)
+            .map(function (a) {
+
             return '<tr>' +
                 '<td class="actdate">' +
                 '<div class="activity-date-wrapper">' +
@@ -599,10 +653,26 @@
         var role = $('roleFilter').value;
         var st = $('statusFilter').value;
 
+
+        var allowedRoles = [
+            'admin',
+            'dean',
+            'campus-director',
+            'capstone-coordinator'
+        ];
+
         var list = state.users.filter(function (u) {
-            var matchesSearch = !q || norm(listName(u) + ' ' + u.email).indexOf(q) > -1;
-            return matchesSearch && (role === 'all' || u.role === role) && (st === 'all' || u.status === st);
+            var isAllowed = allowedRoles.indexOf(u.role) !== -1;
+
+            var matchesSearch = !q ||
+                norm(listName(u) + ' ' + u.email).indexOf(q) > -1;
+
+            return isAllowed &&
+                matchesSearch &&
+                (role === 'all' || u.role === role) &&
+                (st === 'all' || u.status === st);
         });
+
 
         // Sort by role hierarchy, then by name
         list.sort(function (a, b) {
@@ -669,6 +739,7 @@
     function handleRoleUIChange(role) {
         if ($('fieldProgram')) $('fieldProgram').style.display = 'none';
         if ($('fieldProfessor')) $('fieldProfessor').style.display = 'none';
+        if ($('fieldCoordProgram')) $('fieldCoordProgram').style.display = role === 'capstone-coordinator' ? 'flex' : 'none';
 
         if (role === 'project-manager') {
             if ($('fieldProgram')) $('fieldProgram').style.display = 'flex';
@@ -696,18 +767,17 @@
         }
     }
 
+
     function setRoleOptions() {
         var roleSel = $('modalRoleSelect');
-        if (roleSel) {
-            roleSel.innerHTML =
-                '<option value="project-manager">Student</option>' +
-                '<option value="panelist">Panelist</option>' +
-                '<option value="adviser">Adviser</option>' +
-                '<option value="campus-director">Campus Director</option>' +
-                '<option value="capstone-coordinator">Capstone Coordinator</option>' +
-                '<option value="dean">Dean</option>';
-        }
+        if (!roleSel) return;
+
+        roleSel.innerHTML =
+            '<option value="campus-director">Campus Director</option>' +
+            '<option value="capstone-coordinator">Capstone Coordinator</option>' +
+            '<option value="dean">Dean</option>';
     }
+
 
     // Advisers shown in the student form: panelists/advisers that are active
     // (plus the one already chosen, even if that person was deactivated later).
@@ -730,6 +800,46 @@
     // The account request (sent by an Adviser) this "Create" answers, or '' for a normal create.
     var requestId = '';
 
+    // Temporary password: 12 characters (upper, lower, number, symbol), made with the browser's secure random.
+    function newTempPassword() {
+        var sets = ['ABCDEFGHJKLMNPQRSTUVWXYZ', 'abcdefghijkmnpqrstuvwxyz', '23456789', '!@#$%^&*()-_=+[]'];
+        var all = sets.join('');
+        var rnd = function (n) {
+            var a = new Uint32Array(1), max = Math.floor(4294967296 / n) * n;
+            do { window.crypto.getRandomValues(a); } while (a[0] >= max);
+            return a[0] % n;
+        };
+        var out = sets.map(function (set) { return set.charAt(rnd(set.length)); });
+        while (out.length < 12) out.push(all.charAt(rnd(all.length)));
+        for (var i = out.length - 1; i > 0; i--) {
+            var k = rnd(i + 1), t = out[i]; out[i] = out[k]; out[k] = t;
+        }
+        var input = $('passwordInput');
+        if (input) { input.value = out.join(''); input.type = 'password'; }
+        setPwEye(false);
+    }
+
+    function setPwEye(visible) {
+        var btn = $('pwToggleBtn');
+        if (!btn) return;
+        btn.innerHTML = '<i class="fas ' + (visible ? 'fa-eye-slash' : 'fa-eye') + '"></i>';
+        btn.title = visible ? 'Hide password' : 'Show password';
+        btn.setAttribute('aria-label', btn.title);
+    }
+
+    function togglePw() {
+        var input = $('passwordInput');
+        if (!input) return;
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        setPwEye(show);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if ($('pwToggleBtn')) $('pwToggleBtn').addEventListener('click', togglePw);
+        if ($('pwRegenBtn')) $('pwRegenBtn').addEventListener('click', newTempPassword);
+    });
+
     function openCreateUser() {
         isEditMode = false;
         editUserId = null;
@@ -744,16 +854,21 @@
         if ($('suffixSelect')) $('suffixSelect').value = '';
         if ($('emailInput')) $('emailInput').value = '';
         if ($('programSelect')) $('programSelect').selectedIndex = 0;
+        if ($('coordProgramSelect')) $('coordProgramSelect').selectedIndex = 0;
         if ($('sectionInput')) $('sectionInput').value = '';
         fillAdviserSelect('');
-        if ($('passwordInput')) $('passwordInput').value = '';
+        newTempPassword();
         if ($('statusActive')) $('statusActive').checked = true;
         userSelected = [];
 
         setRoleOptions();
-        if ($('modalRoleSelect')) $('modalRoleSelect').value = 'project-manager';
-        updateIdPrefix('project-manager');
-        handleRoleUIChange('project-manager');
+
+        if ($('modalRoleSelect')) {
+            $('modalRoleSelect').value = 'campus-director';
+        }
+
+        updateIdPrefix('campus-director');
+        handleRoleUIChange('campus-director');
         openModal('userModal');
     }
 
@@ -809,11 +924,13 @@
         if ($('statusActive')) $('statusActive').checked = (u.status === 'active');
         if ($('statusInactive')) $('statusInactive').checked = (u.status !== 'active');
 
+       
         setRoleOptions();
         if ($('modalRoleSelect')) $('modalRoleSelect').value = u.role;
         updateIdPrefix(u.role, u.idNumber);
 
         if ($('programSelect')) $('programSelect').value = u.program || '';
+        if ($('coordProgramSelect')) $('coordProgramSelect').value = u.role === 'capstone-coordinator' ? (u.program || '') : '';
         if ($('sectionInput')) $('sectionInput').value = u.section || '';
         fillAdviserSelect(u.adviserId || '');
 
@@ -828,21 +945,23 @@
         var suffix = $('suffixSelect') ? $('suffixSelect').value : '';
         var email = $('emailInput') ? $('emailInput').value.trim() : '';
         var role = $('modalRoleSelect') ? $('modalRoleSelect').value : 'project-manager';
-        var password = $('passwordInput') ? $('passwordInput').value : '';
 
         if (!lastName || !firstName || !email) { alert('Please fill in all required fields (Name, Email).'); return; }
 
         var emailTaken = state.users.some(function (o) { return o.id !== editUserId && norm(o.email) === norm(email); });
         if (emailTaken) { alert('That email is already used by another account.'); return; }
 
-        if (SINGLE_ROLES.indexOf(role) > -1) {
-            var roleTaken = state.users.some(function (o) { return o.id !== editUserId && o.role === role; });
-            if (roleTaken) { alert('There is already a ' + roleLabel(role) + ' account. Only one is allowed, so edit or delete the existing one first.'); return; }
+        var isCoord = role === 'capstone-coordinator';
+        var coordProgram = isCoord && $('coordProgramSelect') ? $('coordProgramSelect').value || '' : '';
+        if (isCoord) {
+            if (!coordProgram) { alert('Please select the Capstone Coordinator\'s program (BSIT, BSCS or BSIS).'); return; }
+            var progTaken = state.users.some(function (o) { return o.id !== editUserId && o.role === role && o.program === coordProgram; });
+            if (progTaken) { alert('There is already a Capstone Coordinator for ' + coordProgram + '. Only one per program is allowed.'); return; }
         }
 
-        if (!isEditMode && password.length < 8) {
-            alert('Temporary password must be at least 8 characters.');
-            return;
+        if (SINGLE_ROLES.indexOf(role) > -1 && !isCoord) {
+            var roleTaken = state.users.some(function (o) { return o.id !== editUserId && o.role === role; });
+            if (roleTaken) { alert('There is already a ' + roleLabel(role) + ' account. Only one is allowed, so edit or delete the existing one first.'); return; }
         }
 
         var idValue = $('modalIdInput') ? $('modalIdInput').value.trim() : '';
@@ -865,11 +984,11 @@
             email: email,
             role: role,
             idNumber: idValue,
-            program: program,
+            program: isCoord ? coordProgram : program,
             section: section,
             adviserId: isPM && $('professorInput') ? $('professorInput').value || '' : '',
             status: isEditMode && $('statusInactive') && $('statusInactive').checked ? 'inactive' : 'active',
-            password: isEditMode ? '' : password,
+            password: isEditMode ? '' : ($('passwordInput') ? $('passwordInput').value : ''),   // the temporary password shown in the form
             requestId: isEditMode ? '' : requestId,
             expertise: (!isEditMode && (role === 'panelist' || role === 'adviser')) ? userSelected.slice() : []
         };
@@ -877,13 +996,39 @@
         var wasEdit = isEditMode;
         var shownName = (firstName + ' ' + lastName + (suffix ? ' ' + suffix : '')).trim();
 
-        send('saveUser', payload, function () {
+        send('saveUser', payload, function (res) {
             closeModal('userModal');
-            if ($('passwordInput')) $('passwordInput').value = '';
             renderUsers();
             notify(wasEdit ? 'User updated' : 'User created',
                 'Successfully ' + (wasEdit ? 'edited ' : 'created ') + shownName + '.');
+            if (!wasEdit && res && res.tempPassword) showTempPassword(shownName, email, res.tempPassword, res);
         });
+    }
+
+    // The generated password is shown once so the admin can hand it over.
+    function showTempPassword(name, email, pass, res) {
+        if ($('tempPassText')) $('tempPassText').textContent = 'Temporary password for ' + name + ' (' + email + '):';
+        if ($('tempPassValue')) $('tempPassValue').textContent = pass;
+        var mail = $('tempPassMail');
+        if (mail) {
+            if (res && res.emailSent) { mail.textContent = 'The login details were also emailed to ' + email + '.'; mail.style.color = '#1E7A3C'; }
+            else { mail.textContent = 'Email not sent: ' + ((res && res.emailError) || 'unknown reason') + ' Please give the password to the user yourself.'; mail.style.color = '#A33F53'; }
+        }
+        var copy = $('tempPassCopy');
+        if (copy) {
+            copy.textContent = 'Copy';
+            copy.onclick = function () {
+                var done = function () { copy.textContent = 'Copied!'; };
+                if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(pass).then(done, function () { });
+                else {
+                    var t = document.createElement('textarea');
+                    t.value = pass; document.body.appendChild(t); t.select();
+                    try { document.execCommand('copy'); done(); } catch (e) { }
+                    document.body.removeChild(t);
+                }
+            };
+        }
+        openModal('tempPassModal');
     }
 
     var delUserId = null;

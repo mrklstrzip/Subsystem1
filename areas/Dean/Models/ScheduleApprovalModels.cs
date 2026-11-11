@@ -20,6 +20,8 @@ namespace Subsystem1.Areas.Dean.Models
     {
         public string Name { get; set; }
         public string Expertise { get; set; } // High | Medium | Low
+        public double? Percent { get; set; }  // exact expertise match, e.g. 66.7
+        public string Role { get; set; }      // Chairman | Member
     }
 
     public class ScheduleDetailsVM

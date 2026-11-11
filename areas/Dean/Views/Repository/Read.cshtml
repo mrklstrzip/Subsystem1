@@ -1,0 +1,14 @@
+@model Subsystem1.Areas.Dean.Models.DeanManuscriptVm
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+}
+<div class="os-header">
+    <h1>Manuscript reader</h1>
+    <p>@Model.Item.Title</p>
+    <i class="fa fa-file-pdf os-bg-icon"></i>
+</div>
+<div class="sa-card" style="padding:24px">
+    <p>The exact approved manuscript is identified as <code>@Model.Item.ApprovedManuscriptId</code>, but this portal cannot retrieve its private Cloudinary bytes yet.</p>
+    <p>Subsystem 3 needs to expose an authenticated, Dean-authorized download endpoint that accepts the submission ID and returns the exact approved file (or a short-lived signed URL). The endpoint should validate the current approved manuscript ID and hash before streaming it.</p>
+    <a class="sa-btn-filter" href="@Url.Action("Paper", "Repository", new { area = "Dean", id = Model.Item.Id })">Back to details</a>
+</div>

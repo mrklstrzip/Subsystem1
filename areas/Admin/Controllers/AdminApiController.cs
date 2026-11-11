@@ -324,6 +324,74 @@ namespace Subsystem1.Areas.Admin.Controllers
             return Tags().Find(new BsonDocument()).ToList();
         }
 
+        // Random temporary password: 10 characters with upper case, lower case and a number
+        // (no look-alike characters such as 0/O or 1/l/I, so it is easy to read out loud).
+        private static string NewTempPassword()
+        {
+            const string upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+            const string lower = "abcdefghijkmnpqrstuvwxyz";
+            const string digits = "23456789";
+            string all = upper + lower + digits;
+
+            var chars = new List<char>();
+            using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
+            {
+                Func<string, char> pick = set =>
+                {
+                    var one = new byte[4];
+                    rng.GetBytes(one);
+                    return set[(int)(BitConverter.ToUInt32(one, 0) % (uint)set.Length)];
+                };
+
+                chars.Add(pick(upper));
+                chars.Add(pick(lower));
+                chars.Add(pick(digits));
+                while (chars.Count < 10) chars.Add(pick(all));
+
+                // shuffle (Fisher-Yates) so the first three characters are not always upper/lower/digit
+                for (int i = chars.Count - 1; i > 0; i--)
+                {
+                    var b = new byte[4];
+                    rng.GetBytes(b);
+                    int j = (int)(BitConverter.ToUInt32(b, 0) % (uint)(i + 1));
+                    char tmp = chars[i]; chars[i] = chars[j]; chars[j] = tmp;
+                }
+            }
+            return new string(chars.ToArray());
+        }
+
+        // Sends the new account's login details. Returns null on success, otherwise why it was not sent.
+        // The account is already saved, so a mail problem never fails the creation.
+        private static string SendAccountEmail(string to, string name, string roleLabel, string password, string loginPath)
+        {
+            try
+            {
+                string problem = Subsystem1.Services.Mailer.Problem();
+                if (problem != null) return problem;
+
+                // loginPath comes from the routing table (includes the app's virtual folder, if any).
+                string baseUrl = Subsystem1.Services.Mailer.BaseUrl;
+                if (baseUrl == "" && System.Web.HttpContext.Current != null)
+                {
+                    baseUrl = System.Web.HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
+                }
+                string loginUrl = baseUrl + loginPath;
+
+                string html, text;
+                Subsystem1.Services.Mailer.AccountBody(name, roleLabel, to, password, loginUrl, out html, out text);
+
+                using (var client = Subsystem1.Services.Mailer.Connect())
+                using (var msg = Subsystem1.Services.Mailer.Compose(to, "Your " + roleLabel + " account - QCU CCS Capstone", html, text))
+                {
+                    return Subsystem1.Services.Mailer.TrySend(client, msg);
+                }
+            }
+            catch (Exception ex)
+            {
+                return ErrorText(ex);
+            }
+        }
+
         private JsonResult Ok(string message)
         {
             return Json(new { success = true, message = message });
@@ -442,6 +510,82 @@ namespace Subsystem1.Areas.Admin.Controllers
             }
         }
 
+        private static DateTime ActivityDate(BsonDocument doc, string field)
+        {
+            BsonValue value;
+
+            if (doc.TryGetValue(field, out value) &&
+                value != null &&
+                value.IsBsonDateTime)
+            {
+                return value.ToUniversalTime();
+            }
+
+            return DateTime.MinValue;
+        }
+
+
+        private static bool IsTrackedSystemActivity(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+
+            string t = text.Trim();
+            var c = StringComparison.OrdinalIgnoreCase;
+
+            // ADMIN
+            if (t.StartsWith("Admin: ", c))
+            {
+                t = t.Substring("Admin: ".Length);
+
+                return
+                    t.StartsWith("New dean account created:", c) ||
+                    t.StartsWith("New campus director account created:", c) ||
+                    t.StartsWith("New capstone coordinator account created:", c) ||
+                    t.StartsWith("Account updated:", c) ||
+                    t.StartsWith("Account activated:", c) ||
+                    t.StartsWith("Account deactivated:", c) ||
+                    t.StartsWith("New Expertise Tag created:", c) ||
+                    t.StartsWith("Expertise Tag modified:", c) ||
+                    t.StartsWith("Faculty profile updated:", c);
+            }
+
+            // CAMPUS DIRECTOR
+            if (t.StartsWith("Campus Director: ", c))
+            {
+                t = t.Substring("Campus Director: ".Length);
+
+                bool buildingAction =
+                    t.StartsWith("Building ", c) &&
+                    (t.EndsWith(" added", c) ||
+                     t.EndsWith(" details updated", c) ||
+                     t.IndexOf(" status changed to ", c) >= 0);
+
+                bool roomAdded =
+                    t.StartsWith("Room ", c) &&
+                    t.IndexOf(" added to ", c) >= 0;
+
+                return buildingAction || roomAdded;
+            }
+
+            // CAPSTONE COORDINATOR
+            if (t.StartsWith("Capstone Coordinator: ", c))
+            {
+                t = t.Substring("Capstone Coordinator: ".Length);
+
+                return
+                    t.StartsWith("Panel and schedule generated for", c) ||
+                    t.StartsWith("Schedule submitted to the Dean for", c) ||
+                    t.StartsWith("Schedule edited for", c);
+            }
+
+            // DEAN
+            return
+                t.StartsWith("Dean approved the defense schedule for", c) ||
+                t.StartsWith("Dean rejected the defense schedule for", c);
+        }
+
+
         [HttpGet]
         public ActionResult state()
         {
@@ -456,26 +600,67 @@ namespace Subsystem1.Areas.Admin.Controllers
                     .Select(t => TagRow(t))
                     .ToList();
 
-                var activity = Activity()
+                var adminLogs = Activity()
+    .Find(new BsonDocument())
+    .Sort(Builders<BsonDocument>.Sort.Descending("ts"))
+    .Limit(50)
+    .ToList()
+    .Select(a => new
+    {
+        at = ActivityDate(a, "ts"),
+        text = "Admin: " + Str(a, "text"),
+        type = Str(a, "type"),
+        category = Str(a, "category")
+    });
+
+                var campusLogs = Db.Database
+                    .GetCollection<BsonDocument>("campus_activity")
                     .Find(new BsonDocument())
                     .Sort(Builders<BsonDocument>.Sort.Descending("ts"))
                     .Limit(50)
                     .ToList()
-                    .Select(a =>
+                    .Select(a => new
                     {
-                        BsonValue ts;
-                        DateTime when = DateTime.UtcNow;
-                        if (a.TryGetValue("ts", out ts) && ts.IsBsonDateTime)
-                        {
-                            when = ts.ToUniversalTime();
-                        }
-                        return new
-                        {
-                            at = when.ToString("o"),
-                            text = Str(a, "text"),
-                            type = Str(a, "type"),
-                            category = Str(a, "category")
-                        };
+                        at = ActivityDate(a, "ts"),
+                        text = "Campus Director: " + Str(a, "text"),
+                        type = Str(a, "type"),
+                        category = Str(a, "category")
+                    });
+
+                var coordinatorLogs = Db.Database
+                    .GetCollection<BsonDocument>("coordinator_activity")
+                    .Find(new BsonDocument())
+                    .Sort(Builders<BsonDocument>.Sort.Descending("at"))
+                    .Limit(50)
+                    .ToList()
+                    .Select(a => new
+                    {
+                        at = ActivityDate(a, "at"),
+                        text = Str(a, "text").StartsWith(
+                            "Dean approved",
+                            StringComparison.OrdinalIgnoreCase)
+                            ? Str(a, "text")
+                            : "Capstone Coordinator: " + Str(a, "text"),
+                        type = Str(a, "text").IndexOf(
+                            "generated", StringComparison.OrdinalIgnoreCase) >= 0
+                            ? "create" : "edit",
+                        category = "schedule"
+                    });
+
+                var activity = adminLogs
+                    .Concat(campusLogs)
+                    .Concat(coordinatorLogs)
+                    .Where(a => a.at != DateTime.MinValue &&
+                                !string.IsNullOrWhiteSpace(a.text) && 
+                                IsTrackedSystemActivity(a.text))
+                    .OrderByDescending(a => a.at)
+                    .Take(50)
+                    .Select(a => new
+                    {
+                        at = a.at.ToString("o"),
+                        text = a.text,
+                        type = a.type,
+                        category = a.category
                     })
                     .ToList();
 
@@ -489,6 +674,114 @@ namespace Subsystem1.Areas.Admin.Controllers
         }
 
         // ========================== USERS ===========================
+
+        // ========================== MY PROFILE ===========================
+
+        public class AdminPasswordDto
+        {
+            public string CurrentPassword { get; set; }
+            public string NewPassword { get; set; }
+        }
+
+        private BsonDocument CurrentAdmin()
+        {
+            ObjectId oid;
+            if (!ObjectId.TryParse(Convert.ToString(Session["AdminId"]), out oid)) return null;
+            return Users().Find(Builders<BsonDocument>.Filter.Eq("_id", oid)).FirstOrDefault();
+        }
+
+        [HttpGet]
+        public ActionResult me()
+        {
+            try
+            {
+                BsonDocument d = CurrentAdmin();
+                if (d == null) return Json(new { success = false, unauthorized = true }, JsonRequestBehavior.AllowGet);
+
+                string middle = Str(d, "middleName");
+                if (middle == "") middle = Str(d, "middlename");
+                string id = Str(d, "adminId");
+                if (id == "") id = IdOf(d);
+
+                return Json(new
+                {
+                    success = true,
+                    me = new
+                    {
+                        id = id,
+                        firstName = Str(d, "firstName"),
+                        lastName = Str(d, "lastName"),
+                        middleName = middle,
+                        email = Str(d, "email"),
+                        role = "Admin"
+                    }
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ErrorText(ex) }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult updateProfile(ProfileDto dto)
+        {
+            try
+            {
+                BsonDocument d = CurrentAdmin();
+                if (d == null) return Json(new { success = false, unauthorized = true });
+
+                string first, middle, last, email;
+                string error = ProfileUpdater.Update(d, dto, out first, out middle, out last, out email);
+                if (error != null) return Fail(error);
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Profile updated successfully.",
+                    me = new { firstName = first, middleName = middle, lastName = last, email = email }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Error(ex);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult changePassword(AdminPasswordDto dto)
+        {
+            try
+            {
+                BsonDocument d = CurrentAdmin();
+                if (d == null) return Json(new { success = false, unauthorized = true });
+                if (dto == null) return Fail("No data received.");
+
+                string current = dto.CurrentPassword ?? "";
+                string next = dto.NewPassword ?? "";
+
+                if (current == "" || next == "") return Fail("Please fill in all password fields.");
+                if (next.Length < 8) return Fail("New password must be at least 8 characters long.");
+                if (next.Length > 128) return Fail("New password is too long (128 characters max).");
+
+                bool currentOk;
+                try { currentOk = BCrypt.Net.BCrypt.Verify(current, Str(d, "password")); }
+                catch { currentOk = false; }
+                if (!currentOk) return Fail("Incorrect current password.");
+                if (current == next) return Fail("New password must be different from the current password.");
+
+                var u = Builders<BsonDocument>.Update;
+                Users().UpdateOne(
+                    Builders<BsonDocument>.Filter.Eq("_id", d["_id"]),
+                    u.Combine(u.Set("password", BCrypt.Net.BCrypt.HashPassword(next)), u.Set("updatedAt", DateTime.UtcNow)));
+
+                return Ok("Password successfully updated!");
+            }
+            catch (Exception ex)
+            {
+                return Error(ex);
+            }
+        }
 
         [HttpPost]
         public ActionResult saveUser(UserDto dto)
@@ -520,8 +813,20 @@ namespace Subsystem1.Areas.Admin.Controllers
 
                 bool isStudent = roleKey == "project-manager";
                 bool isFaculty = IsFacultyKey(roleKey);
+                bool isCoordinator = roleKey == "capstone-coordinator";
 
                 bool isEdit = Clean(dto.Id) != "";
+                
+                if (!isEdit &&
+    roleKey != "campus-director" &&
+    roleKey != "capstone-coordinator" &&
+    roleKey != "dean")
+                {
+                    return Fail(
+                        "Only Campus Director, Capstone Coordinator, and Dean accounts can be created."
+                    );
+                }
+
                 ObjectId oid = ObjectId.Empty;
                 BsonDocument existing = null;
 
@@ -551,7 +856,20 @@ namespace Subsystem1.Areas.Admin.Controllers
                 {
                     return Fail("That ID number is already used by another account.");
                 }
-                if (SingleRoles.Contains(roleKey) && all.Any(d => DocId(d) != selfId
+                if (isCoordinator)
+                {
+                    if (program != "BSIT" && program != "BSIS" && program != "BSCS")
+                    {
+                        return Fail("Please select the Capstone Coordinator's program (BSIT, BSCS or BSIS).");
+                    }
+                    if (all.Any(d => DocId(d) != selfId
+                        && RoleKey(Str(d, "role")) == roleKey
+                        && string.Equals(Str(d, "program"), program, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        return Fail("There is already a Capstone Coordinator for " + program + ". Only one per program is allowed.");
+                    }
+                }
+                else if (SingleRoles.Contains(roleKey) && all.Any(d => DocId(d) != selfId
                     && RoleKey(Str(d, "role")) == roleKey))
                 {
                     return Fail("There is already a " + RoleLabel(roleKey)
@@ -582,10 +900,9 @@ namespace Subsystem1.Areas.Admin.Controllers
                 // =============== CREATE ===============
                 if (!isEdit)
                 {
-                    if (password.Length < 8)
-                    {
-                        return Fail("Temporary password must be at least 8 characters.");
-                    }
+                    // The form shows a generated password (admin can reveal it). Use it when it is valid,
+                    // otherwise generate one here so an account is never created without a password.
+                    if (password.Length < 8 || password.Length > 128) password = NewTempPassword();
 
                     var doc = new BsonDocument
                     {
@@ -609,6 +926,8 @@ namespace Subsystem1.Areas.Admin.Controllers
                         doc["section"] = section;
                         doc["adviserId"] = adviserId;
                     }
+
+                    if (isCoordinator) doc["program"] = program;
 
                     if (isFaculty)
                     {
@@ -635,7 +954,18 @@ namespace Subsystem1.Areas.Admin.Controllers
 
                     Log("New " + RoleLabel(roleKey).ToLowerInvariant() + " account created: "
                         + PlainName(doc), "create", "user");
-                    return Ok("Account created.");
+
+                    // E-mail the login details (every role goes through the same SMTP settings).
+                    string mailError = SendAccountEmail(email, PlainName(doc), RoleLabel(roleKey) + (isCoordinator ? " (" + program + ")" : ""), password,
+                        Url.Content("~/Auth/Login/login"));
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Account created.",
+                        tempPassword = password,
+                        emailSent = mailError == null,
+                        emailError = mailError ?? ""
+                    });
                 }
 
                 // =============== EDIT ===============
@@ -668,7 +998,8 @@ namespace Subsystem1.Areas.Admin.Controllers
                 else
                 {
                     changes.Add(b.Unset("studentId"));
-                    changes.Add(b.Unset("program"));
+                    if (isCoordinator) changes.Add(b.Set("program", program));
+                    else changes.Add(b.Unset("program"));
                     changes.Add(b.Unset("section"));
                     changes.Add(b.Unset("adviserId"));
                 }

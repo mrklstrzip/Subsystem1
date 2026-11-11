@@ -116,15 +116,53 @@
     // Show the page after the access check.
     document.body.style.visibility = '';
 
+    // Latest saved user (Edit Profile updates localStorage, then calls refreshSidebarProfile).
+    function currentUser() {
+        try {
+            return JSON.parse(localStorage.getItem('loggedInUser') || 'null') || user;
+        } catch (error) {
+            return user;
+        }
+    }
+
+    // "Samantha Nicole Amor" -> initials "SA"
+    function initialsOf(u) {
+        const first = String(u.firstName || '').trim().charAt(0);
+        const last = String(u.lastName || '').trim().charAt(0);
+        return (first + last).toUpperCase() || '?';
+    }
+
     // Fill the sidebar profile.
     function fillProfile() {
+        const user = currentUser();
         const nameEl = document.getElementById('profileName');
 
         if (nameEl) {
-            nameEl.textContent =
-                [user.firstName, user.lastName]
-                    .filter(Boolean)
-                    .join(' ');
+            // Surname on top, given name + middle initial below:
+            //   AMOR,
+            //   Samantha Nicole O.
+            const surname = String(user.lastName || '').trim().toUpperCase();
+            const middle = String(user.middleName || '').trim();
+            const given = [
+                String(user.firstName || '').trim(),
+                middle ? middle.charAt(0).toUpperCase() + '.' : ''
+            ].filter(Boolean).join(' ');
+
+            nameEl.textContent = '';
+
+            const top = document.createElement('span');
+            top.className = 'sb-surname';
+            top.textContent = surname ? surname + ',' : '';
+
+            const bottom = document.createElement('span');
+            bottom.className = 'sb-given';
+            bottom.textContent = given;
+
+            nameEl.appendChild(top);
+            nameEl.appendChild(bottom);
+            nameEl.title = [surname ? surname + ',' : '', given].join(' ').trim();
+            nameEl.setAttribute('data-fullname',
+                [user.firstName, user.lastName].filter(Boolean).join(' '));
         }
 
         const roleEl = document.getElementById('profileRole');
@@ -134,22 +172,11 @@
         }
 
 
+        // No profile picture any more: show the user's initials.
         const photoEl = document.getElementById('profilePhoto');
 
         if (photoEl) {
-            const defaultPhoto = '/Content/images/student-avatar.png';
-            const photoName = user.profilePhoto
-                ? user.profilePhoto.trim()
-                : '';
-
-            photoEl.onerror = function () {
-                this.onerror = null;
-                this.src = defaultPhoto;
-            };
-
-            photoEl.src = photoName
-                ? '/Content/images/' + photoName
-                : defaultPhoto;
+            photoEl.textContent = initialsOf(user);
         }
 
 
@@ -193,6 +220,8 @@
             });
         }
     }
+
+    window.refreshSidebarProfile = fillProfile;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', fillProfile);

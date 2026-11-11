@@ -1,17 +1,15 @@
-﻿(function () {
-    const SHOW_DEMO_CODE = true;        // show the code on screen
-    const CODE_TTL_MS = 10 * 60 * 1000; // code is valid for 10 minutes
-    const MAX_ATTEMPTS = 5;             // wrong tries before the code is thrown away
-    const MIN_PASSWORD_LENGTH = 6;      // same rule as the profile Change Password form
-    const STORE_KEY = 'passwordResetRequest';
+(function () {
+    const MIN_PASSWORD_LENGTH = 8;      // same rule as the Admin Change Password form
     const LOGIN_URL = '/Auth/Login/login';
+    const API = '/Auth/ForgotPassword/';
 
     const stepEmail = document.getElementById('stepEmail');
     const stepCode = document.getElementById('stepCode');
     const stepReset = document.getElementById('stepReset');
 
     let currentEmail = '';
-    let verified = false;
+    let verifiedCode = '';   // the code the server accepted; sent again with the new password
+    let busy = false;
 
     function show(step) {
         [stepEmail, stepCode, stepReset].forEach(function (s) { s.hidden = (s !== step); });
@@ -23,55 +21,45 @@
         el.hidden = !msg;
     }
 
-    function findUser(email) {
-        return loginUsers.find(function (u) { return u.email.toLowerCase() === email.toLowerCase(); });
+    function post(action, data) {
+        return fetch(API + action, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: new URLSearchParams(data).toString()
+        }).then(function (r) { return r.json(); })
+          .catch(function () { return { success: false, message: 'Could not reach the server. Please try again.' }; });
     }
 
-    function readRequest() {
-        try { return JSON.parse(sessionStorage.getItem(STORE_KEY)); } catch (err) { return null; }
+    function setBusy(form, on, label) {
+        busy = on;
+        const btn = form.querySelector('.auth-btn');
+        if (!btn) return;
+        if (on) { btn.dataset.label = btn.textContent; btn.textContent = label; }
+        else if (btn.dataset.label) btn.textContent = btn.dataset.label;
+        btn.disabled = on;
     }
 
-    function clearRequest() {
-        sessionStorage.removeItem(STORE_KEY);
-    }
-
-    function newCode() {
-        const buf = new Uint32Array(1);
-        (window.crypto || window.msCrypto).getRandomValues(buf);
-        return String(100000 + (buf[0] % 900000));
-    }
-
-    function sendCode(email) {
-        currentEmail = email;
-        const user = findUser(email);
-        const demo = document.getElementById('demoCode');
-
-        if (!user) {
-            clearRequest();
-            demo.hidden = true;
-            show(stepEmail);
-            showError('emailError', 'No account found with that email address.');
-            return;
-        }
-
-        const code = newCode();
-        sessionStorage.setItem(STORE_KEY, JSON.stringify({
-            email: user.email,
-            code: code,
-            expires: Date.now() + CODE_TTL_MS,
-            attempts: 0
-        }));
-        if (SHOW_DEMO_CODE) {
-            document.getElementById('demoCodeValue').textContent = code;
-            demo.hidden = false;
-        }
-
-        document.getElementById('codeDesc').textContent =
-            'A 6-digit code has been sent to ' + email + '. The code expires in 10 minutes.';
-        document.getElementById('fpCode').value = '';
-        showError('codeError', '');
-        show(stepCode);
-        document.getElementById('fpCode').focus();
+    // Asks the server to e-mail a code. errorId = where to show a problem.
+    function sendCode(email, fromForm, errorId) {
+        if (busy) return;
+        setBusy(fromForm, true, 'Sending...');
+        showError(errorId, '');
+        post('requestCode', { email: email }).then(function (res) {
+            setBusy(fromForm, false);
+            if (!res.success) {
+                showError(errorId, res.message || 'Could not send the code.');
+                return;
+            }
+            currentEmail = email;
+            verifiedCode = '';
+            document.getElementById('codeDesc').textContent =
+                'A 6-digit code has been sent to ' + email + '. The code expires in 10 minutes.';
+            document.getElementById('fpCode').value = '';
+            showError('codeError', '');
+            show(stepCode);
+            document.getElementById('fpCode').focus();
+        });
     }
 
     stepEmail.addEventListener('submit', function (e) {
@@ -82,67 +70,49 @@
             showError('emailError', 'Please enter a valid email address.');
             return;
         }
-        showError('emailError', '');
-        sendCode(email);
+        sendCode(email, stepEmail, 'emailError');
     });
 
     stepCode.addEventListener('submit', function (e) {
         e.preventDefault();
+        if (busy) return;
         const entered = document.getElementById('fpCode').value.trim();
-        const req = readRequest();
+        if (!/^\d{6}$/.test(entered)) {
+            showError('codeError', 'Enter the 6-digit code.');
+            return;
+        }
 
-        if (!req) {
-            showError('codeError', 'That code is not valid. Request a new one.');
-            return;
-        }
-        if (Date.now() > req.expires) {
-            clearRequest();
-            showError('codeError', 'That code has expired. Request a new one.');
-            return;
-        }
-        if (entered !== req.code) {
-            req.attempts += 1;
-            if (req.attempts >= MAX_ATTEMPTS) {
-                clearRequest();
-                showError('codeError', 'Too many incorrect attempts. Request a new code.');
-            } else {
-                sessionStorage.setItem(STORE_KEY, JSON.stringify(req));
-                showError('codeError', 'Incorrect code. ' + (MAX_ATTEMPTS - req.attempts) + ' attempt(s) left.');
+        setBusy(stepCode, true, 'Checking...');
+        post('verifyCode', { email: currentEmail, code: entered }).then(function (res) {
+            setBusy(stepCode, false);
+            if (!res.success) {
+                showError('codeError', res.message || 'That code is not valid.');
+                return;
             }
-            return;
-        }
-
-        verified = true;
-        showError('codeError', '');
-        show(stepReset);
-        document.getElementById('fpNewPass').focus();
+            verifiedCode = entered;
+            showError('codeError', '');
+            show(stepReset);
+            document.getElementById('fpNewPass').focus();
+        });
     });
 
     document.getElementById('resendCode').addEventListener('click', function (e) {
         e.preventDefault();
-        sendCode(currentEmail);
+        sendCode(currentEmail, stepCode, 'codeError');
     });
 
     document.getElementById('changeEmail').addEventListener('click', function (e) {
         e.preventDefault();
-        clearRequest();
-        verified = false;
+        verifiedCode = '';
         show(stepEmail);
         document.getElementById('fpEmail').focus();
     });
 
-    function saveNewPassword(email, newPass) {
-        let overrides = {};
-        try { overrides = JSON.parse(localStorage.getItem('passwordOverrides') || '{}'); } catch (err) { overrides = {}; }
-        overrides[email] = newPass;
-        localStorage.setItem('passwordOverrides', JSON.stringify(overrides));
-    }
-
     stepReset.addEventListener('submit', function (e) {
         e.preventDefault();
+        if (busy) return;
 
-        const req = readRequest();
-        if (!verified || !req) {
+        if (!verifiedCode) {
             show(stepEmail);
             showError('emailError', 'Your session expired. Please start again.');
             return;
@@ -159,11 +129,18 @@
             showError('resetError', 'New password and confirmation do not match.');
             return;
         }
+        showError('resetError', '');
 
-        saveNewPassword(req.email, newPass);
-        clearRequest();
-        alert('Password successfully reset. You can now log in with your new password.');
-        window.location.href = LOGIN_URL;
+        setBusy(stepReset, true, 'Saving...');
+        post('resetPassword', { email: currentEmail, code: verifiedCode, newPassword: newPass }).then(function (res) {
+            setBusy(stepReset, false);
+            if (!res.success) {
+                showError('resetError', res.message || 'Could not reset the password.');
+                return;
+            }
+            alert('Password successfully reset. You can now log in with your new password.');
+            window.location.href = LOGIN_URL;
+        });
     });
 
     document.querySelectorAll('.toggle-password').forEach(function (icon) {

@@ -58,6 +58,9 @@
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Extensions.Logging.Abstractions.2.0.0\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
@@ -196,11 +199,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
-      <HintPath>packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Content\css\capstonecoordinator\audit.css" />
     <Content Include="Content\css\capstonecoordinator\cases.css" />
     <Content Include="Content\css\capstonecoordinator\privacy.css" />
@@ -277,6 +275,7 @@
     <Content Include="Scripts\layout-profile.js" />
     <Content Include="Scripts\login-check.js" />
     <Content Include="Scripts\profile.js" />
+    <Content Include="Scripts\admin-profile.js" />
     <Content Include="Scripts\sidebar.js" />
     <Content Include="Web.config" />
     <Content Include="Areas\CapstoneCoordinator\Views\Invitation\invitations.cshtml" />
@@ -297,7 +296,9 @@
     <Compile Include="Areas\Admin\Controllers\UserManagementController.cs" />
     <Compile Include="Areas\Dean\Controllers\DeanApiController.cs" />
     <Compile Include="Areas\Dean\Controllers\OversightController.cs" />
+    <Compile Include="Areas\Dean\Controllers\RepositoryController.cs" />
     <Compile Include="Areas\Dean\Models\OversightModels.cs" />
+    <Compile Include="Areas\Dean\Models\DeanRepositoryModels.cs" />
     <Compile Include="Areas\Dean\Controllers\DeanControllerBase.cs" />
     <Compile Include="Areas\Dean\Models\DeanData.cs" />
     <Compile Include="Areas\Auth\AuthAreaRegistration.cs" />
@@ -313,6 +314,7 @@
     <Compile Include="Areas\CapstoneCoordinator\Controllers\ConflictResultController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\DashboardController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\CoordinatorApiController.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Controllers\ClearedSubmissionsController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\TopicScreeningController.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Models\TopicScreeningModels.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\CoordinatorControllerBase.cs" />
@@ -335,6 +337,7 @@
     <Compile Include="Areas\Dean\Models\NotificationModels.cs" />
     <Compile Include="Areas\Dean\Models\ScheduleApprovalModels.cs" />
     <Compile Include="Data\Db.cs" />
+    <Compile Include="Data\ProfileUpdater.cs" />
     <Compile Include="Data\FacultyNames.cs" />
     <Compile Include="Data\SharedDb.cs" />
     <Compile Include="Data\DisplayFormat.cs" />
@@ -360,6 +363,8 @@
     <Compile Include="Areas\CapstoneCoordinator\Models\PmInvites.cs" />
     <Compile Include="Areas\CapstoneCoordinator\Controllers\InvitationController.cs" />
     <Compile Include="Areas\Auth\Controllers\SignupController.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Models\Subsystem2Manuscripts.cs" />
+    <Compile Include="Areas\CapstoneCoordinator\Models\Subsystem3Clearances.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Auth\Views\Login\login.cshtml" />
@@ -394,6 +399,12 @@
     <Content Include="Areas\Dean\Views\_ViewStart.cshtml" />
     <Content Include="Areas\Dean\Views\Dashboard\dashboard.cshtml" />
     <Content Include="Areas\Dean\Views\Oversight\Index.cshtml" />
+    <Content Include="Areas\Dean\Views\Oversight\Records.cshtml" />
+    <Content Include="Areas\Dean\Views\Oversight\Monitoring.cshtml" />
+    <Content Include="Areas\Dean\Views\Oversight\Reports.cshtml" />
+    <Content Include="Areas\Dean\Views\Repository\Index.cshtml" />
+    <Content Include="Areas\Dean\Views\Repository\Paper.cshtml" />
+    <Content Include="Areas\Dean\Views\Repository\Read.cshtml" />
     <Content Include="Areas\Dean\Views\Oversight\Audit.cshtml" />
     <Content Include="Areas\Dean\Views\Profile\profile.cshtml" />
     <Content Include="Areas\Dean\Views\Shared\_DeanLayout.cshtml" />
@@ -405,6 +416,8 @@
     <Content Include="Areas\CapstoneCoordinator\Views\ConflictResult\conflictresult.cshtml" />
     <Content Include="Areas\Auth\Views\ForgotPassword\forgotpassword.cshtml" />
     <Content Include="Areas\CapstoneCoordinator\Views\ScheduleManagement\schedulemanagement.cshtml" />
+    <Content Include="Areas\CapstoneCoordinator\Views\ClearedSubmissions\Index.cshtml" />
+    <Content Include="Content\css\capstonecoordinator\clearedsubmissions.css" />
     <Content Include="Areas\CapstoneCoordinator\Views\Shared\_NotificationItems.cshtml" />
     <Content Include="Areas\Dean\Views\Shared\_NotificationItems.cshtml" />
     <Content Include="connectionStrings.config" />
@@ -418,6 +431,7 @@
     <Content Include="Views\Shared\_AuthLayout.cshtml" />
     <Content Include="Content\css\student-pm.css" />
     <Content Include="Content\css\oversight.css" />
+    <Content Include="Content\css\dean-repository.css" />
     <Content Include="Content\css\student-profile.css" />
     <Content Include="Content\images\student-avatar.png" />
     <Content Include="Scripts\student-notifications.js" />
@@ -432,6 +446,7 @@
     <Content Include="Areas\Student\Views\Submission\submission.cshtml" />
     <Content Include="Areas\Student\Views\Submission\_TitleDetails.cshtml" />
     <Content Include="Areas\Auth\Views\Request\request.cshtml" />
+    <Content Include="smtp.secrets.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -477,13 +492,13 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <ItemGroup>
+    <Compile Include="Services\Mailer.cs" />
+  </ItemGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
-  <ItemGroup>
-    <Compile Include="Services\Mailer.cs" />
-  </ItemGroup>
 </Project>

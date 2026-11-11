@@ -58,6 +58,9 @@
                 <a href="@Url.Action("defenseschedule", "DefenseSchedule")" class="@(currentController == "DefenseSchedule" ? "active" : "")" title="Defense Schedule">
                     <i class="fa fa-calendar-day"></i><span class="nav-label">Defense Schedule</span>
                 </a>
+                <a href="@Url.Action("Index", "ClearedSubmissions", new { area = "CapstoneCoordinator" })" class="@(currentController == "ClearedSubmissions" ? "active" : "")" title="Cleared Submissions">
+                    <i class="fa fa-circle-check"></i><span class="nav-label">Cleared Submissions</span>
+                </a>
                 <a href="@Url.Action("conflictresult", "ConflictResult")" class="@(currentController == "ConflictResult" ? "active" : "")" title="Under Review">
                     <i class="fa fa-clipboard-list"></i><span class="nav-label">Under Review</span>
                 </a>
@@ -68,7 +71,7 @@
             </nav>
             <div class="sb-footer">
                 <a href="@Url.Action("profile", "Profile")" class="sb-user" title="Profile">
-                    <img id="profilePhoto" src="" alt="Profile" class="sb-avatar" />
+                    <span id="profilePhoto" class="sb-avatar sb-initials" aria-hidden="true"></span>
                     <span class="sb-user-text">
                         <span id="profileName" class="sb-name"></span>
                         <span id="profileRole" class="sb-role"></span>

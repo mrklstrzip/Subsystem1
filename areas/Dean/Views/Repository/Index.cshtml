@@ -1,0 +1,88 @@
+@model Subsystem1.Areas.Dean.Models.DeanRepositoryVm
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+}
+<section class="dean-page">
+    <header class="dean-page-banner"><h1>Exclusive Repository</h1><p>A read-only archive of cleared capstone manuscripts.</p></header>
+    <nav class="dean-page-tabs" aria-label="Repository pages">
+        <a class="active" href="@Url.Action("Index", "Repository", new { area = "Dean" })">Exclusive Repository</a>
+        <a href="@Url.Action("Records", "Oversight", new { area = "Dean" })">Submission Records</a>
+    </nav>
+    <form method="get">
+        <div class="dean-repo-search">
+            <input type="search" name="q" value="@Model.Query" placeholder="⌕  Search by title, author, adviser or keyword" aria-label="Search manuscripts" />
+            <button type="submit" class="dean-page-btn light">Search</button>
+            <select name="sort" onchange="this.form.submit()" aria-label="Sort results">
+                <option value="recent" @(Model.Sort == "recent" ? "selected" : "")>Newest Cleared</option>
+                <option value="oldest" @(Model.Sort == "oldest" ? "selected" : "")>Oldest Cleared</option>
+                <option value="title" @(Model.Sort == "title" ? "selected" : "")>Title A-Z</option>
+            </select>
+        </div>
+        <div class="dean-repo-grid">
+            <aside>
+                <div class="dean-filter-head">☷ &nbsp;Filters</div>
+                <section class="dean-filter-card">
+                    <h3>Program</h3>
+                    <label><input type="radio" name="program" value="" @(String.IsNullOrEmpty(Model.Program) ? "checked" : "") onchange="this.form.submit()" /> All programs</label>
+                    @foreach (var p in Model.Programs)
+                    {
+                        <label><input type="radio" name="program" value="@p" @(String.Equals(Model.Program, p, StringComparison.OrdinalIgnoreCase) ? "checked" : "") onchange="this.form.submit()" /> @p <small>(@Model.Items.Count(x => String.Equals(x.Program, p, StringComparison.OrdinalIgnoreCase)))</small></label>
+                    }
+                </section>
+                <section class="dean-filter-card">
+                    <h3>Topic</h3>
+                    <input class="os-input" type="search" placeholder="Search topics" disabled="disabled" aria-label="Topic filtering unavailable" />
+                    <small>Topic metadata is not recorded for these submissions.</small>
+                </section>
+                <section class="dean-filter-card">
+                    <h3>Batch (Academic Year)</h3>
+                    <label><input type="radio" name="year" value="" @(Model.Year.HasValue ? "" : "checked") onchange="this.form.submit()" /> All years</label>
+                    @foreach (var year in Model.Years)
+                    {
+                        <label><input type="radio" name="year" value="@year" @(Model.Year == year ? "checked" : "") onchange="this.form.submit()" /> @year</label>
+                    }
+                </section>
+                <section class="dean-filter-card">
+                    <h3>Filing status</h3>
+                    <label><input type="radio" name="filing" value="" @(String.IsNullOrEmpty(Model.Filing) ? "checked" : "") onchange="this.form.submit()" /> All statuses</label>
+                    @foreach (var state in Model.Filings)
+                    {
+                        <label><input type="radio" name="filing" value="@state" @(String.Equals(Model.Filing, state, StringComparison.OrdinalIgnoreCase) ? "checked" : "") onchange="this.form.submit()" /> @state</label>
+                    }
+                </section>
+                <section class="dean-filter-card">
+                    <h3>Adviser</h3>
+                    <label><input type="radio" name="adviser" value="" @(String.IsNullOrEmpty(Model.Adviser) ? "checked" : "") onchange="this.form.submit()" /> All advisers</label>
+                    @foreach (var adviser in Model.Advisers)
+                    {
+                        <label><input type="radio" name="adviser" value="@adviser" @(String.Equals(Model.Adviser, adviser, StringComparison.OrdinalIgnoreCase) ? "checked" : "") onchange="this.form.submit()" /> @adviser</label>
+                    }
+                </section>
+            </aside>
+            <section>
+                <p class="dean-results-count">@Model.Items.Count @(Model.Items.Count == 1 ? "Manuscript" : "Manuscripts")</p>
+                @foreach (var item in Model.Items)
+                {
+                    <article class="dean-result-card">
+                        <div class="dean-book-cover @((item.Program ?? "").IndexOf("Computer Science", StringComparison.OrdinalIgnoreCase) >= 0 ? "alt" : "")">
+                            <span>CCS<br />QCU</span><strong>@item.Title</strong><small>@((item.FiledAt ?? item.DisseminatedAt)?.Year)</small>
+                        </div>
+                        <div class="dean-result-main">
+                            <h2>@item.Title</h2>
+                            <p class="dean-result-meta"><strong>@(String.IsNullOrWhiteSpace(item.Authors) ? "Author not recorded" : item.Authors)</strong></p>
+                            <p class="dean-result-meta">@item.Program — @((item.FiledAt ?? item.DisseminatedAt)?.Year) · @(String.IsNullOrWhiteSpace(item.Section) ? "Section not recorded" : item.Section)</p>
+                            <p class="dean-result-abstract">Adviser: @(String.IsNullOrWhiteSpace(item.Adviser) ? "Not recorded" : item.Adviser)</p>
+                            <p class="dean-result-abstract">Approved manuscript: @item.ApprovedManuscriptName. Reference: @item.ClearanceReference</p>
+                        </div>
+                        <div class="dean-result-foot">
+                            <strong>@(item.IsFiledImport ? "Filed manuscript import" : item.Status)</strong>
+                            <span class="dean-status-pill">@(item.IsFiledImport || item.Status == "Filed" ? "Filed" : "Disseminated")</span>
+                            <a class="dean-page-btn" style="margin-left:auto" href="@Url.Action("Paper", "Repository", new { area = "Dean", id = item.Id })">View Paper</a>
+                        </div>
+                    </article>
+                }
+                @if (Model.Items.Count == 0) { <div class="dean-empty">No manuscripts match. Try fewer filters or another keyword.</div> }
+            </section>
+        </div>
+    </form>
+</section>
