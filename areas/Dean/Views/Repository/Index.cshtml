@@ -76,7 +76,7 @@
                         </div>
                         <div class="dean-result-foot">
                             <strong>@(item.IsFiledImport ? "Filed manuscript import" : item.Status)</strong>
-                            <span class="dean-status-pill">@(item.IsFiledImport || item.Status == "Filed" ? "Filed" : "Disseminated")</span>
+                            <span class="dean-status-pill">@(item.IsHistorical || String.Equals(item.Status, "Historical", StringComparison.OrdinalIgnoreCase) ? "Historical" : item.IsFiledImport || String.Equals(item.Status, "Filed", StringComparison.OrdinalIgnoreCase) ? "Filed" : "Disseminated")</span>
                             <a class="dean-page-btn" style="margin-left:auto" href="@Url.Action("Paper", "Repository", new { area = "Dean", id = item.Id })">View Paper</a>
                         </div>
                     </article>

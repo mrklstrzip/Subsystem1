@@ -12,7 +12,15 @@ namespace Subsystem1.Areas.Dean.Controllers
     {
         public ActionResult Index(string q, string program, int? year, string filing, string adviser, string sort)
         {
-            var rows = Subsystem3Clearances.ReadCleared();
+            // The Dean's exclusive archive contains the published/filed repository
+            // catalog (including historical records) as well as cleared disseminations.
+            // ReadCleared alone sees only the live capstone_submissions documents and
+            // omits older manuscripts that Subsystem 3 keeps in repository_records.
+            var rows = Subsystem3Clearances.ReadCompleted()
+                .Concat(Subsystem3Clearances.ReadCleared())
+                .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
+                .ToList();
             var all = rows.ToList();
             if (!String.IsNullOrWhiteSpace(q))
             {
@@ -25,7 +33,7 @@ namespace Subsystem1.Areas.Dean.Controllers
             if (!String.IsNullOrWhiteSpace(program)) rows = rows.Where(x => String.Equals(x.Program, program, StringComparison.OrdinalIgnoreCase)).ToList();
             if (!String.IsNullOrWhiteSpace(adviser)) rows = rows.Where(x => String.Equals(x.Adviser, adviser, StringComparison.OrdinalIgnoreCase)).ToList();
             if (year.HasValue) rows = rows.Where(x => (x.FiledAt ?? x.DisseminatedAt)?.Year == year.Value).ToList();
-            if (!String.IsNullOrWhiteSpace(filing)) rows = rows.Where(x => String.Equals(x.IsFiledImport || x.Status == "Filed" ? "Filed" : "Disseminated", filing, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (!String.IsNullOrWhiteSpace(filing)) rows = rows.Where(x => String.Equals(FilingStatus(x), filing, StringComparison.OrdinalIgnoreCase)).ToList();
             if (sort == "oldest") rows = rows.OrderBy(x => x.FiledAt ?? x.DisseminatedAt).ToList();
             else if (sort == "title") rows = rows.OrderBy(x => x.Title).ToList();
             else rows = rows.OrderByDescending(x => x.FiledAt ?? x.DisseminatedAt).ToList();
@@ -36,7 +44,7 @@ namespace Subsystem1.Areas.Dean.Controllers
                 Sort = sort ?? "recent",
                 Programs = all.Select(x => x.Program).Where(x => !String.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList(),
                 Years = all.Select(x => (x.FiledAt ?? x.DisseminatedAt)?.Year).Where(x => x.HasValue).Select(x => x.Value).Distinct().OrderByDescending(x => x).ToList(),
-                Filings = new[] { "Filed", "Disseminated" },
+                Filings = new[] { "Filed", "Disseminated", "Historical" },
                 Advisers = all.Select(x => x.Adviser).Where(x => !String.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList()
             });
         }
@@ -92,6 +100,12 @@ namespace Subsystem1.Areas.Dean.Controllers
         private static bool Contains(string value, string term)
         {
             return !String.IsNullOrEmpty(value) && value.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static string FilingStatus(ClearedSubmission item)
+        {
+            if (item.IsHistorical || String.Equals(item.Status, "Historical", StringComparison.OrdinalIgnoreCase)) return "Historical";
+            return item.IsFiledImport || String.Equals(item.Status, "Filed", StringComparison.OrdinalIgnoreCase) ? "Filed" : "Disseminated";
         }
     }
 }

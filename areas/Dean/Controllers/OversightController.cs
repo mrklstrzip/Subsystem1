@@ -109,7 +109,7 @@ namespace Subsystem1.Areas.Dean.Controllers
         {
             return String.IsNullOrWhiteSpace(first) ? (second ?? "") : first;
         }
-        private ActionResult Page(string title, string q, string program, string status, string viewName = "Index", DateTime? from = null, DateTime? to = null, string reportType = null, int? batch = null, string ranking = null)
+        private ActionResult Page(string title, string q, string program, string status, string viewName = "Index", DateTime? from = null, DateTime? to = null, string reportType = null, int? batch = null, string ranking = null, string sortBy = null, int pageNumber = 1, int pageSize = 10, string adviser = null)
         {
             var all = Load();
             IEnumerable<OversightRecord> filtered = all;
@@ -119,14 +119,23 @@ namespace Subsystem1.Areas.Dean.Controllers
             if (!String.IsNullOrWhiteSpace(q)) filtered = filtered.Where(x => (x.Title+" "+x.Authors+" "+x.Keywords+" "+x.Adviser).IndexOf(q.Trim(), StringComparison.OrdinalIgnoreCase)>=0);
             if (!String.IsNullOrWhiteSpace(program)) filtered = filtered.Where(x => String.Equals(x.Program,program,StringComparison.OrdinalIgnoreCase));
             if (!String.IsNullOrWhiteSpace(status)) filtered = filtered.Where(x => String.Equals(x.Status,status,StringComparison.OrdinalIgnoreCase));
-            var rows = String.IsNullOrWhiteSpace(ranking)
+            if (!String.IsNullOrWhiteSpace(adviser)) filtered = filtered.Where(x => String.Equals(x.Adviser, adviser, StringComparison.OrdinalIgnoreCase));
+            var rows = !String.IsNullOrWhiteSpace(sortBy)
+                ? sortBy == "oldest"
+                    ? filtered.OrderBy(x => x.UpdatedAt ?? x.SubmittedAt ?? DateTime.MaxValue).ThenBy(x => x.Title).ToList()
+                    : sortBy == "title"
+                        ? filtered.OrderBy(x => x.Title).ToList()
+                        : filtered.OrderByDescending(x => x.UpdatedAt ?? x.SubmittedAt ?? DateTime.MinValue).ToList()
+                : String.IsNullOrWhiteSpace(ranking)
                 ? filtered.OrderByDescending(x => x.UpdatedAt ?? x.SubmittedAt ?? DateTime.MinValue).ToList()
                 : ranking == "review"
                     ? filtered.OrderByDescending(x => x.ReviewTimeDays ?? -1).ThenBy(x => x.Title).ToList()
                     : ranking == "rechecks"
                         ? filtered.OrderByDescending(x => x.RecheckingCycles).ThenBy(x => x.Title).ToList()
                         : filtered.OrderByDescending(x => x.WaitingPeriodDays ?? -1).ThenBy(x => x.Title).ToList();
-            var vm = new OversightVm { PageTitle=title, Query=q, Program=program, Status=status, Records=rows, From=from, To=to, ReportType=reportType, Batch=batch, Total=rows.Count,
+            int safePageSize = new[] { 10, 25, 50 }.Contains(pageSize) ? pageSize : 10;
+            int safePageNumber = Math.Max(1, pageNumber);
+            var vm = new OversightVm { PageTitle=title, Query=q, Program=program, Status=status, Adviser=adviser, Records=viewName == "Records" ? rows.Skip((safePageNumber - 1) * safePageSize).Take(safePageSize).ToList() : rows, From=from, To=to, ReportType=reportType, Batch=batch, Total=rows.Count, SortBy=sortBy ?? "recent", PageNumber=safePageNumber, PageSize=safePageSize,
                 Submitted=rows.Count(x=>String.Equals(x.Status,"submitted",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"pending",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"validated",StringComparison.OrdinalIgnoreCase)),
                 Approved=rows.Count(x=>String.Equals(x.Status,"approved",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"cleared",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"disseminated",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"filed",StringComparison.OrdinalIgnoreCase)),
                 Returned=rows.Count(x=>String.Equals(x.Status,"returned",StringComparison.OrdinalIgnoreCase)||String.Equals(x.Status,"revision required",StringComparison.OrdinalIgnoreCase)),
@@ -155,6 +164,7 @@ namespace Subsystem1.Areas.Dean.Controllers
             vm.SlowestGroups = rows.Take(10).ToList();
             ViewBag.PerformanceSort = ranking ?? "wait";
             vm.Programs = all.Where(x=>!String.IsNullOrWhiteSpace(x.Program)).GroupBy(x=>x.Program).OrderBy(x=>x.Key).Select(g=>new KeyValuePair<string,int>(g.Key,g.Count())).ToList();
+            vm.Advisers = all.Select(x => x.Adviser).Where(x => !String.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
             vm.Batches = all.Select(x => (x.SubmittedAt ?? x.UpdatedAt)?.Year).Where(x => x.HasValue).Select(x => x.Value).Distinct().OrderByDescending(x => x).ToList();
             vm.BatchSummaries = rows.Where(x => (x.SubmittedAt ?? x.UpdatedAt).HasValue)
                 .GroupBy(x => (x.SubmittedAt ?? x.UpdatedAt).Value.Year).OrderBy(g => g.Key)
@@ -171,7 +181,34 @@ namespace Subsystem1.Areas.Dean.Controllers
         private static bool IsIncomplete(string status) { return new[] { "returned", "revision required", "rejected", "draft" }.Contains(status ?? "", StringComparer.OrdinalIgnoreCase); }
         public ActionResult Index(string q, string program) { return Page("Research Oversight",q,program,null); }
         public ActionResult Repository(string q, string program) { return Page("Research Repository",q,program,null); }
-        public ActionResult Records(string q, string program, string status) { return Page("Submission & Clearance Records",q,program,status,"Records"); }
+        public ActionResult Records(string q, string program, string status, string adviser, int? batch, string sortBy, int page = 1, int pageSize = 10) { return Page("Submission & Clearance Records",q,program,status,"Records",batch:batch,sortBy:sortBy,pageNumber:page,pageSize:pageSize,adviser:adviser); }
+        public ActionResult ViewRecord(string id)
+        {
+            OversightRecord record = Load().FirstOrDefault(x => String.Equals(x.Id, id, StringComparison.OrdinalIgnoreCase));
+            if (record == null) return HttpNotFound();
+            ViewBag.Title = "Submission Record";
+            return View("Record", record);
+        }
+        public ActionResult ExportRecords(string q, string program, string status, int? batch, string adviser)
+        {
+            var rows = Load()
+                .Where(x => String.IsNullOrWhiteSpace(q) || (x.Id + " " + x.Title + " " + x.Authors + " " + x.Adviser).IndexOf(q.Trim(), StringComparison.OrdinalIgnoreCase) >= 0)
+                .Where(x => String.IsNullOrWhiteSpace(program) || String.Equals(x.Program, program, StringComparison.OrdinalIgnoreCase))
+                .Where(x => String.IsNullOrWhiteSpace(status) || String.Equals(x.Status, status, StringComparison.OrdinalIgnoreCase))
+                .Where(x => String.IsNullOrWhiteSpace(adviser) || String.Equals(x.Adviser, adviser, StringComparison.OrdinalIgnoreCase))
+                .Where(x => !batch.HasValue || (x.SubmittedAt ?? x.UpdatedAt)?.Year == batch.Value)
+                .OrderByDescending(x => x.UpdatedAt ?? x.SubmittedAt ?? DateTime.MinValue)
+                .ToList();
+            string Cell(string value) { return "\"" + (value ?? "").Replace("\"", "\"\"") + "\""; }
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Group,Title,Program,Batch,Submission Status,Clearance Outcome,Last Updated");
+            foreach (var row in rows)
+            {
+                string clearance = IsCleared(row.Status) ? "Cleared" : "Pending";
+                csv.AppendLine(String.Join(",", new[] { Cell(row.Id), Cell(row.Title), Cell(row.Program), Cell((row.SubmittedAt ?? row.UpdatedAt)?.Year.ToString()), Cell(row.Status), Cell(clearance), Cell(row.UpdatedAt.HasValue ? row.UpdatedAt.Value.ToString("yyyy-MM-dd") : "") }));
+            }
+            return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", "submission-clearance-records.csv");
+        }
         public ActionResult Monitoring(string q, string program) { return Page("Research Monitoring",q,program,null); }
         public ActionResult Cohort(string q, string program) { return Page("Cohort Comparison",q,program,null,"Monitoring"); }
         public ActionResult Exceptions(string q, string program, string status, int? batch) { return Page("Compliance Exceptions",q,program,status,"Monitoring", batch: batch); }
