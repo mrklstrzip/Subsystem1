@@ -139,6 +139,93 @@ namespace Subsystem1.Services
             return System.Net.WebUtility.HtmlEncode(s ?? "");
         }
 
+        // Login details for an account the Admin just created (HTML + plain text).
+        public static void AccountBody(string name, string role, string email, string password, string loginUrl, out string html, out string text)
+        {
+            string who = string.IsNullOrWhiteSpace(name) ? "there" : name.Trim();
+
+            text =
+                "Your " + role + " account is ready\r\n\r\n" +
+                "Hello " + who + ",\r\n" +
+                "The Administrator created a " + role + " account for you in the QCU CCS capstone defense scheduling system.\r\n\r\n" +
+                "Email: " + email + "\r\n" +
+                "Temporary password: " + password + "\r\n" +
+                (string.IsNullOrEmpty(loginUrl) ? "" : "Log in: " + loginUrl + "\r\n") +
+                "\r\nPlease log in and change your password in your Profile.\r\n" +
+                "If you did not expect this e-mail, you can ignore it.\r\n";
+
+            html =
+@"<!DOCTYPE html>
+<html><body style=""margin:0;padding:0;background:#E1E5F0;"">
+<table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""background:#E1E5F0;padding:32px 12px;"">
+<tr><td align=""center"">
+  <table role=""presentation"" width=""560"" cellpadding=""0"" cellspacing=""0"" style=""max-width:560px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;font-family:Segoe UI,Arial,sans-serif;color:#111;"">
+    <tr><td style=""height:6px;background:#A33F53;font-size:0;line-height:0;"">&nbsp;</td></tr>
+    <tr><td style=""padding:28px 32px 8px;"">
+      <div style=""font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#595C6E;"">Quezon City University &middot; College of Computer Studies</div>
+      <h1 style=""margin:10px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.25;color:#2C3F56;"">Your " + Html(role) + @" account is ready</h1>
+    </td></tr>
+    <tr><td style=""padding:12px 32px 4px;font-size:15px;line-height:1.65;color:#2A2D3C;"">
+      <p style=""margin:0 0 14px;"">Hello <strong>" + Html(who) + @"</strong>, the Administrator created a <strong>" + Html(role) + @"</strong> account for you in the capstone defense scheduling system.</p>
+      <table role=""presentation"" cellpadding=""0"" cellspacing=""0"" style=""margin:0 0 18px;background:#F4F5F9;border-radius:10px;width:100%;"">
+        <tr><td style=""padding:14px 18px;font-size:14px;"">
+          <div style=""color:#595C6E;font-size:12px;"">Email</div>
+          <div style=""margin-bottom:10px;"">" + Html(email) + @"</div>
+          <div style=""color:#595C6E;font-size:12px;"">Temporary password</div>
+          <div style=""font-family:Consolas,monospace;font-size:18px;letter-spacing:1px;font-weight:700;color:#2C3F56;"">" + Html(password) + @"</div>
+        </td></tr>
+      </table>
+    </td></tr>" + (string.IsNullOrEmpty(loginUrl) ? "" : @"
+    <tr><td align=""center"" style=""padding:0 32px 22px;"">
+      <a href=""" + Html(loginUrl) + @""" style=""display:inline-block;background:#2C3F56;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 28px;border-radius:10px;"">Log in</a>
+    </td></tr>") + @"
+    <tr><td style=""padding:0 32px 26px;font-size:13px;line-height:1.6;color:#595C6E;"">
+      <p style=""margin:0 0 8px;"">Please change your password in your Profile after logging in.</p>
+      <p style=""margin:0;"">If you did not expect this e-mail, you can ignore it.</p>
+    </td></tr>
+  </table>
+</td></tr>
+</table>
+</body></html>";
+        }
+
+        // Password reset code (HTML + plain text).
+        public static void ResetCodeBody(string name, string code, int minutes, out string html, out string text)
+        {
+            string who = string.IsNullOrWhiteSpace(name) ? "there" : name.Trim();
+
+            text =
+                "Reset your password\r\n\r\n" +
+                "Hello " + who + ",\r\n" +
+                "Use this code to reset your password: " + code + "\r\n\r\n" +
+                "The code expires in " + minutes + " minutes and can only be used for your account.\r\n" +
+                "If you did not ask for this, you can ignore this e-mail. Your password stays the same.\r\n";
+
+            html =
+@"<!DOCTYPE html>
+<html><body style=""margin:0;padding:0;background:#E1E5F0;"">
+<table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""background:#E1E5F0;padding:32px 12px;"">
+<tr><td align=""center"">
+  <table role=""presentation"" width=""560"" cellpadding=""0"" cellspacing=""0"" style=""max-width:560px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;font-family:Segoe UI,Arial,sans-serif;color:#111;"">
+    <tr><td style=""height:6px;background:#A33F53;font-size:0;line-height:0;"">&nbsp;</td></tr>
+    <tr><td style=""padding:28px 32px 8px;"">
+      <div style=""font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#595C6E;"">Quezon City University &middot; College of Computer Studies</div>
+      <h1 style=""margin:10px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.25;color:#2C3F56;"">Reset your password</h1>
+    </td></tr>
+    <tr><td style=""padding:12px 32px 4px;font-size:15px;line-height:1.65;color:#2A2D3C;"">
+      <p style=""margin:0 0 14px;"">Hello <strong>" + Html(who) + @"</strong>, use this code to reset your password:</p>
+      <p style=""margin:0 0 18px;text-align:center;font-family:Consolas,monospace;font-size:32px;letter-spacing:8px;font-weight:700;color:#2C3F56;background:#F4F5F9;border-radius:10px;padding:14px 0;"">" + Html(code) + @"</p>
+    </td></tr>
+    <tr><td style=""padding:0 32px 26px;font-size:13px;line-height:1.6;color:#595C6E;"">
+      <p style=""margin:0 0 8px;"">The code expires in <strong>" + minutes + @" minutes</strong>.</p>
+      <p style=""margin:0;"">If you did not ask for this, you can ignore this e-mail. Your password stays the same.</p>
+    </td></tr>
+  </table>
+</td></tr>
+</table>
+</body></html>";
+        }
+
         // The Project Manager invitation (HTML + plain text).
         public static void InviteBody(string coordinatorName, string link, DateTime expiresManila, out string html, out string text)
         {

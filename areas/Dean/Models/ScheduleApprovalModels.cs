@@ -9,7 +9,7 @@ namespace Subsystem1.Areas.Dean.Models
         public string Title { get; set; }
         public string Section { get; set; }   // e.g. "BSCS-4A"
         public string Program { get; set; }   // e.g. "BSCS"
-        public string Author { get; set; }
+        public string ProjectManager { get; set; }
         public string Adviser { get; set; }
         public DateTime Date { get; set; }
         public bool HasDate { get; set; }
@@ -35,9 +35,16 @@ namespace Subsystem1.Areas.Dean.Models
         public string Adviser { get; set; }
         public string Abstract { get; set; }
         public string Keywords { get; set; }
+        public bool HasManuscriptPdf { get; set; }
         public List<PanelistVM> Panelists { get; set; }
         public string Time { get; set; }
         public string DefenseDate { get; set; }
         public string Room { get; set; }
+    }
+
+    public sealed class DeanManuscriptFile
+    {
+        public string Url { get; set; }
+        public string FileName { get; set; }
     }
 }

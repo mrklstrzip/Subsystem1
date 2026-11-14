@@ -1,0 +1,53 @@
+@model Subsystem1.Areas.Dean.Models.DeanManuscriptVm
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+    var item = Model.Item;
+    var recordDate = item.FiledAt ?? item.DisseminatedAt;
+    var filingStatus = item.IsFiledImport || String.Equals(item.Status, "Filed", StringComparison.OrdinalIgnoreCase) ? "Filed" : "Disseminated";
+}
+<section class="dean-paper-page">
+    <a class="dean-paper-back" href="@Url.Action("Index", "Repository", new { area = "Dean" })"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back to Results</a>
+    <article class="dean-paper-card">
+        <h1>@item.Title</h1>
+
+        <div class="dean-paper-meta">
+            <div><span>Authors</span><strong>@(String.IsNullOrWhiteSpace(item.Authors) ? "Not recorded" : item.Authors)</strong></div>
+            <div><span>Year</span><strong>@(recordDate.HasValue ? recordDate.Value.Year.ToString() : "Not recorded")</strong></div>
+            <div><span>Adviser</span><strong>@(String.IsNullOrWhiteSpace(item.Adviser) ? "Not recorded" : item.Adviser)</strong></div>
+            <div><span>Pages</span><strong>Not recorded</strong></div>
+            <div><span>Group</span><strong>@(String.IsNullOrWhiteSpace(item.ClearanceGroup) ? "Not recorded" : item.ClearanceGroup)</strong></div>
+        </div>
+
+        <div class="dean-paper-status-row">
+            <div><span>Cleared on</span><strong>@(recordDate.HasValue ? recordDate.Value.ToLocalTime().ToString("MMM d, yyyy") : "Not recorded")</strong></div>
+            <div><span>Filing status</span><strong class="dean-paper-status">@filingStatus</strong></div>
+            <div><span>Program / Section</span><strong>@item.Program / @item.Section</strong></div>
+        </div>
+
+        <section class="dean-paper-abstract">
+            <h2>Abstract</h2>
+            <p>@(String.IsNullOrWhiteSpace(item.Abstract) ? "No abstract was recorded for this manuscript." : item.Abstract)</p>
+        </section>
+
+        <section class="dean-paper-keywords">
+            <h2>Keywords &amp; Significant Terms</h2>
+            @if (item.Keywords != null && item.Keywords.Count > 0)
+            {
+                <div class="dean-paper-tags">
+                    @foreach (var keyword in item.Keywords)
+                    {
+                        <span>@keyword</span>
+                    }
+                </div>
+            }
+            else
+            {
+                <p>No keywords were recorded.</p>
+            }
+        </section>
+
+        <div class="dean-paper-actions">
+            <a class="dean-page-btn" href="@Url.Action("Read", "Repository", new { area = "Dean", id = item.Id })">View Manuscript</a>
+        </div>
+    </article>
+</section>

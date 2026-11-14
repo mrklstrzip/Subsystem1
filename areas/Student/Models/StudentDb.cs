@@ -54,7 +54,7 @@ namespace Subsystem1.Areas.Student.Models
         public static string AnyStr(BsonDocument d, string name)
         {
             BsonValue v;
-            if (!d.TryGetValue(name, out v) || v == null || v.IsBsonNull) return "";
+            if (d == null || !d.TryGetValue(name, out v) || v == null || v.IsBsonNull) return "";
             if (v.IsString) return v.AsString;
             if (v.IsObjectId) return v.AsObjectId.ToString();
             if (v.IsInt32) return v.AsInt32.ToString(CultureInfo.InvariantCulture);

@@ -7,6 +7,7 @@
 <div id="saConfig"
      data-details-url="@Url.Action("Details", "ScheduleApproval")"
      data-approve-url="@Url.Action("Approve", "ScheduleApproval")"
+     data-manuscript-url="@Url.Action("Manuscript", "ScheduleApproval")"
      hidden></div>
 
 <!-- Pop-up -->
@@ -31,11 +32,24 @@
         </div>
 
         <div class="sa-body">
-            <div class="sa-panel">
-                <h3>Abstract</h3>
-                <p id="mAbstract"></p>
-                <h3>Keywords</h3>
-                <p id="mKeywords"></p>
+            <div class="sa-panel sa-manuscript-panel">
+                <div class="sa-manuscript-head">
+                    <h3>Manuscript</h3>
+                    <a id="mManuscriptOpen" class="sa-manuscript-open" target="_blank" rel="noopener" hidden>Open PDF</a>
+                </div>
+                <div class="sa-pdf-viewer" aria-label="Manuscript PDF viewer">
+                    <div class="sa-pdf-toolbar">
+                        <button type="button" id="saPdfPrev" aria-label="Previous page">‹</button>
+                        <span><span id="saPdfPage">—</span> / <span id="saPdfPages">—</span></span>
+                        <button type="button" id="saPdfNext" aria-label="Next page">›</button>
+                        <button type="button" id="saPdfZoomOut" aria-label="Zoom out">−</button>
+                        <button type="button" id="saPdfZoomIn" aria-label="Zoom in">+</button>
+                    </div>
+                    <div class="sa-pdf-canvas-wrap" id="saPdfCanvasWrap">
+                        <canvas id="saPdfCanvas" hidden></canvas>
+                        <p id="saPdfMessage" class="sa-pdf-message">No PDF manuscript is available for this submission.</p>
+                    </div>
+                </div>
                 <small class="sa-muted" id="mSubmittedSmall"></small>
             </div>
 
@@ -65,6 +79,8 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <!-- Reject reason pop-up (frontend only) -->
 <div class="sa-overlay" id="saRejectOverlay" aria-hidden="true">

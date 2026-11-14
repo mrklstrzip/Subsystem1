@@ -1,0 +1,63 @@
+@model Subsystem1.Areas.Dean.Models.OversightVm
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+    var reportTitle = String.IsNullOrWhiteSpace(Model.ReportType) ? "Compliance Summary" : Model.ReportType;
+    var completion = Model.Total == 0 ? 0 : (int)Math.Round(100.0 * Model.Approved / Model.Total);
+}
+<section class="dean-page dean-report-page">
+    <header class="dean-page-banner"><h1>Reports</h1><p>Build a report from the shared compliance data, then export it.</p></header>
+    <nav class="dean-page-tabs" aria-label="Audit and reports">
+        <a class="active" href="@Url.Action("Reports", "Oversight", new { area = "Dean" })">Reports</a>
+        <a href="@Url.Action("Audit", "Oversight", new { area = "Dean" })">Audit Trail</a>
+    </nav>
+    <form method="get" class="dean-report-filters">
+        <label>From<input type="date" name="from" value="@(Model.From.HasValue ? Model.From.Value.ToString("yyyy-MM-dd") : "")" /></label>
+        <label>To<input type="date" name="to" value="@(Model.To.HasValue ? Model.To.Value.ToString("yyyy-MM-dd") : "")" /></label>
+        <label>Batch (Academic Year)<select name="batch"><option value="">All Batches</option>@foreach (var batch in Model.Batches) { <option value="@batch" @(Model.Batch == batch ? "selected" : "")>@batch</option> }</select></label>
+        <label>Program<select name="program"><option value="">All Programs</option>@foreach (var p in Model.Programs) { <option value="@p.Key" @(Model.Program == p.Key ? "selected" : "")>@p.Key</option> }</select></label>
+        <label>Report Type<select name="type">
+            @foreach (var type in new[] { "Compliance Summary", "Submission Status", "Clearance Overview" })
+            { <option value="@type" @(reportTitle == type ? "selected" : "")>@type</option> }
+        </select></label>
+        <button type="submit" class="dean-page-btn">Update</button>
+    </form>
+    <div class="dean-page-panel dean-report-preview">
+        <div class="dean-report-preview-head">
+            <div><small class="dean-result-meta">LIVE PREVIEW</small><h2>@reportTitle</h2><p>@(Model.From.HasValue ? Model.From.Value.ToString("MMM d, yyyy") : "All dates") to @(Model.To.HasValue ? Model.To.Value.ToString("MMM d, yyyy") : "Today") · @(Model.Batch.HasValue ? Model.Batch.Value.ToString() : "All Batches")@(String.IsNullOrWhiteSpace(Model.Program) ? "" : " · " + Model.Program)</p></div>
+            <div class="dean-report-actions">
+                <button type="button" class="dean-page-btn light" onclick="window.print()">Export PDF</button>
+                <a class="dean-page-btn" href="@Url.Action("ExportReport", "Oversight", new { area = "Dean", from = Model.From, to = Model.To, batch = Model.Batch, program = Model.Program, type = reportTitle })">Export Excel</a>
+            </div>
+        </div>
+        <div class="dean-report-stats">
+            <div class="dean-report-stat">Records<strong>@Model.Total</strong></div>
+            <div class="dean-report-stat">Cleared<strong>@Model.Approved</strong></div>
+            <div class="dean-report-stat">Exceptions<strong>@Model.Returned</strong></div>
+            <div class="dean-report-stat">Completion Rate<strong>@completion%</strong></div>
+        </div>
+        <div class="dean-report-chart-wrap">
+            <div class="dean-chart-axis"><span>100</span><span>80</span><span>60</span><span>40</span><span>20</span><span>0</span></div>
+            <div class="dean-report-chart">
+                @foreach (var row in Model.BatchSummaries)
+                {
+                    <div class="dean-report-bar-group"><div class="dean-report-bar" style="height:@(Math.Max(2, row.CompletionRate))%"><span>@row.CompletionRate%</span></div><small>@row.Batch</small></div>
+                }
+                @if (Model.BatchSummaries.Count == 0) { <div class="dean-report-chart-empty">No batch data is available for this report range.</div> }
+            </div>
+        </div>
+        <div class="dean-report-axis-title">Completion Rate (%)<span>Batch</span></div>
+        <div class="dean-report-legend"><i></i> Completion Rate (%)</div>
+        <div style="overflow-x:auto">
+            <table class="dean-record-table dean-report-table">
+                <thead><tr><th>Batch</th><th>Total Submissions</th><th>Cleared</th><th>Pending</th><th>Incomplete</th><th>Completion Rate</th></tr></thead>
+                <tbody>
+                @foreach (var row in Model.BatchSummaries)
+                {
+                    <tr><td>@row.Batch</td><td>@row.Total</td><td>@row.Cleared</td><td>@row.Pending</td><td>@row.Incomplete</td><td>@row.CompletionRate%</td></tr>
+                }
+                @if (Model.BatchSummaries.Count == 0) { <tr><td colspan="6" class="dean-empty">No batches match the selected filters.</td></tr> }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

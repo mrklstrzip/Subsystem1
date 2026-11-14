@@ -18,6 +18,14 @@
 
         <div class="dash-card">
             <div class="dash-card-head">
+                <h2>Subsystem 3 Repository</h2>
+                <a href="@Url.Action("Index", "Repository", new { area = "Dean" })" class="view-all">Open Repository</a>
+            </div>
+            <p class="welcome-text">@Model.ClearedManuscripts cleared or filed manuscripts are available for Dean review.</p>
+        </div>
+
+        <div class="dash-card">
+            <div class="dash-card-head">
                 <h2>To Approve</h2>
                 <a href="@Url.Action("ScheduleApprovalView", "ScheduleApproval")" class="view-all">View All</a>
             </div>

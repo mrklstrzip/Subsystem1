@@ -360,6 +360,38 @@ namespace Subsystem1.Areas.Admin.Controllers
             return new string(chars.ToArray());
         }
 
+        // Sends the new account's login details. Returns null on success, otherwise why it was not sent.
+        // The account is already saved, so a mail problem never fails the creation.
+        private static string SendAccountEmail(string to, string name, string roleLabel, string password, string loginPath)
+        {
+            try
+            {
+                string problem = Subsystem1.Services.Mailer.Problem();
+                if (problem != null) return problem;
+
+                // loginPath comes from the routing table (includes the app's virtual folder, if any).
+                string baseUrl = Subsystem1.Services.Mailer.BaseUrl;
+                if (baseUrl == "" && System.Web.HttpContext.Current != null)
+                {
+                    baseUrl = System.Web.HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
+                }
+                string loginUrl = baseUrl + loginPath;
+
+                string html, text;
+                Subsystem1.Services.Mailer.AccountBody(name, roleLabel, to, password, loginUrl, out html, out text);
+
+                using (var client = Subsystem1.Services.Mailer.Connect())
+                using (var msg = Subsystem1.Services.Mailer.Compose(to, "Your " + roleLabel + " account - QCU CCS Capstone", html, text))
+                {
+                    return Subsystem1.Services.Mailer.TrySend(client, msg);
+                }
+            }
+            catch (Exception ex)
+            {
+                return ErrorText(ex);
+            }
+        }
+
         private JsonResult Ok(string message)
         {
             return Json(new { success = true, message = message });
@@ -781,6 +813,7 @@ namespace Subsystem1.Areas.Admin.Controllers
 
                 bool isStudent = roleKey == "project-manager";
                 bool isFaculty = IsFacultyKey(roleKey);
+                bool isCoordinator = roleKey == "capstone-coordinator";
 
                 bool isEdit = Clean(dto.Id) != "";
                 
@@ -823,7 +856,20 @@ namespace Subsystem1.Areas.Admin.Controllers
                 {
                     return Fail("That ID number is already used by another account.");
                 }
-                if (SingleRoles.Contains(roleKey) && all.Any(d => DocId(d) != selfId
+                if (isCoordinator)
+                {
+                    if (program != "BSIT" && program != "BSIS" && program != "BSCS")
+                    {
+                        return Fail("Please select the Capstone Coordinator's program (BSIT, BSCS or BSIS).");
+                    }
+                    if (all.Any(d => DocId(d) != selfId
+                        && RoleKey(Str(d, "role")) == roleKey
+                        && string.Equals(Str(d, "program"), program, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        return Fail("There is already a Capstone Coordinator for " + program + ". Only one per program is allowed.");
+                    }
+                }
+                else if (SingleRoles.Contains(roleKey) && all.Any(d => DocId(d) != selfId
                     && RoleKey(Str(d, "role")) == roleKey))
                 {
                     return Fail("There is already a " + RoleLabel(roleKey)
@@ -854,8 +900,9 @@ namespace Subsystem1.Areas.Admin.Controllers
                 // =============== CREATE ===============
                 if (!isEdit)
                 {
-                    // The admin no longer types a password: the system generates it.
-                    password = NewTempPassword();
+                    // The form shows a generated password (admin can reveal it). Use it when it is valid,
+                    // otherwise generate one here so an account is never created without a password.
+                    if (password.Length < 8 || password.Length > 128) password = NewTempPassword();
 
                     var doc = new BsonDocument
                     {
@@ -879,6 +926,8 @@ namespace Subsystem1.Areas.Admin.Controllers
                         doc["section"] = section;
                         doc["adviserId"] = adviserId;
                     }
+
+                    if (isCoordinator) doc["program"] = program;
 
                     if (isFaculty)
                     {
@@ -905,7 +954,18 @@ namespace Subsystem1.Areas.Admin.Controllers
 
                     Log("New " + RoleLabel(roleKey).ToLowerInvariant() + " account created: "
                         + PlainName(doc), "create", "user");
-                    return Json(new { success = true, message = "Account created.", tempPassword = password });
+
+                    // E-mail the login details (every role goes through the same SMTP settings).
+                    string mailError = SendAccountEmail(email, PlainName(doc), RoleLabel(roleKey) + (isCoordinator ? " (" + program + ")" : ""), password,
+                        Url.Content("~/Auth/Login/login"));
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Account created.",
+                        tempPassword = password,
+                        emailSent = mailError == null,
+                        emailError = mailError ?? ""
+                    });
                 }
 
                 // =============== EDIT ===============
@@ -938,7 +998,8 @@ namespace Subsystem1.Areas.Admin.Controllers
                 else
                 {
                     changes.Add(b.Unset("studentId"));
-                    changes.Add(b.Unset("program"));
+                    if (isCoordinator) changes.Add(b.Set("program", program));
+                    else changes.Add(b.Unset("program"));
                     changes.Add(b.Unset("section"));
                     changes.Add(b.Unset("adviserId"));
                 }

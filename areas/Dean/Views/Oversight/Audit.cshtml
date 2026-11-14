@@ -3,11 +3,12 @@
     var events = ViewBag.Events as System.Collections.Generic.List<MongoDB.Bson.BsonDocument>;
 }
 
-<div class="os-header">
-    <h1>Audit History</h1>
-    <p>Events recorded by Dean oversight and Capstone Coordinator screening and assessment actions.</p>
-    <i class="fa fa-clock-rotate-left os-bg-icon"></i>
-</div>
+<section class="dean-page">
+<header class="dean-page-banner"><h1>Audit Trail</h1><p>Events recorded by Dean oversight and Capstone Coordinator screening and assessment actions.</p></header>
+<nav class="dean-page-tabs" aria-label="Audit and reports">
+    <a href="@Url.Action("Reports", "Oversight", new { area = "Dean" })">Reports</a>
+    <a class="active" href="@Url.Action("Audit", "Oversight", new { area = "Dean" })">Audit Trail</a>
+</nav>
 
 <div class="sa-card">
     <table class="sa-table">
@@ -36,3 +37,4 @@
         </tbody>
     </table>
 </div>
+</section>

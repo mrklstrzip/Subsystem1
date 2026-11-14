@@ -1,0 +1,111 @@
+using System;
+using System.Linq;
+using System.Web.Mvc;
+using Subsystem1.Areas.CapstoneCoordinator.Models;
+using Subsystem1.Areas.Dean.Models;
+
+namespace Subsystem1.Areas.Dean.Controllers
+{
+    // Dean-facing, read-only view of Subsystem 3 clearances from the shared Mongo database.
+    // Schedule approvals remain in the existing Subsystem 1 controllers.
+    public sealed class RepositoryController : DeanControllerBase
+    {
+        public ActionResult Index(string q, string program, int? year, string filing, string adviser, string sort)
+        {
+            // The Dean's exclusive archive contains the published/filed repository
+            // catalog (including historical records) as well as cleared disseminations.
+            // ReadCleared alone sees only the live capstone_submissions documents and
+            // omits older manuscripts that Subsystem 3 keeps in repository_records.
+            var rows = Subsystem3Clearances.ReadCompleted()
+                .Concat(Subsystem3Clearances.ReadCleared())
+                .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
+                .ToList();
+            var all = rows.ToList();
+            if (!String.IsNullOrWhiteSpace(q))
+            {
+                string term = q.Trim();
+                rows = rows.Where(x => Contains(x.Title, term) || Contains(x.Program, term) ||
+                    Contains(x.Section, term) || Contains(x.Id, term) || Contains(x.ApprovedManuscriptName, term) ||
+                    Contains(x.Authors, term) || Contains(x.Adviser, term))
+                    .ToList();
+            }
+            if (!String.IsNullOrWhiteSpace(program)) rows = rows.Where(x => String.Equals(x.Program, program, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (!String.IsNullOrWhiteSpace(adviser)) rows = rows.Where(x => String.Equals(x.Adviser, adviser, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (year.HasValue) rows = rows.Where(x => (x.FiledAt ?? x.DisseminatedAt)?.Year == year.Value).ToList();
+            if (!String.IsNullOrWhiteSpace(filing)) rows = rows.Where(x => String.Equals(FilingStatus(x), filing, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (sort == "oldest") rows = rows.OrderBy(x => x.FiledAt ?? x.DisseminatedAt).ToList();
+            else if (sort == "title") rows = rows.OrderBy(x => x.Title).ToList();
+            else rows = rows.OrderByDescending(x => x.FiledAt ?? x.DisseminatedAt).ToList();
+            ViewBag.Title = "Cleared Manuscripts";
+            return View(new DeanRepositoryVm
+            {
+                Query = q ?? "", Items = rows, Program = program ?? "", Adviser = adviser ?? "", Year = year, Filing = filing ?? "",
+                Sort = sort ?? "recent",
+                Programs = all.Select(x => x.Program).Where(x => !String.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList(),
+                Years = all.Select(x => (x.FiledAt ?? x.DisseminatedAt)?.Year).Where(x => x.HasValue).Select(x => x.Value).Distinct().OrderByDescending(x => x).ToList(),
+                Filings = new[] { "Filed", "Disseminated", "Historical" },
+                Advisers = all.Select(x => x.Adviser).Where(x => !String.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList()
+            });
+        }
+
+        public ActionResult Paper(string id)
+        {
+            ClearedSubmission item = Find(id);
+            if (item == null) return HttpNotFound();
+            ViewBag.Title = item.Title;
+            return View(new DeanManuscriptVm { Item = item });
+        }
+
+        public ActionResult Read(string id)
+        {
+            ClearedSubmission item = Find(id);
+            if (item == null) return HttpNotFound();
+            ViewBag.Title = "Read Manuscript";
+            return View(new DeanManuscriptVm { Item = item });
+        }
+
+        [HttpGet]
+        public ActionResult Manuscript(string id)
+        {
+            ClearedSubmission item = Find(id);
+            if (item == null) return HttpNotFound();
+            if (String.IsNullOrWhiteSpace(item.ApprovedManuscriptName) ||
+                !item.ApprovedManuscriptName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                return new HttpStatusCodeResult(415, "The approved Subsystem 3 file is not a PDF.");
+
+            try
+            {
+                byte[] bytes = Subsystem3Clearances.ReadApprovedManuscript(item);
+                if (bytes == null) return new HttpStatusCodeResult(404, "The approved Subsystem 3 manuscript is unavailable or failed integrity verification.");
+                Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
+                Response.Cache.SetNoStore();
+                Response.ContentType = "application/pdf";
+                Response.AddHeader("Content-Disposition", "inline; filename=manuscript.pdf");
+                Response.AddHeader("X-Content-Type-Options", "nosniff");
+                return File(bytes, "application/pdf");
+            }
+            catch (Exception)
+            {
+                return new HttpStatusCodeResult(502, "Subsystem 3 Cloudinary storage could not provide this manuscript.");
+            }
+        }
+
+        private static ClearedSubmission Find(string id)
+        {
+            return Subsystem3Clearances.ReadCompleted().Concat(Subsystem3Clearances.ReadCleared()).FirstOrDefault(x =>
+                String.Equals(x.Id, id, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static bool Contains(string value, string term)
+        {
+            return !String.IsNullOrEmpty(value) && value.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static string FilingStatus(ClearedSubmission item)
+        {
+            if (item.IsHistorical || String.Equals(item.Status, "Historical", StringComparison.OrdinalIgnoreCase)) return "Historical";
+            return item.IsFiledImport || String.Equals(item.Status, "Filed", StringComparison.OrdinalIgnoreCase) ? "Filed" : "Disseminated";
+        }
+    }
+}

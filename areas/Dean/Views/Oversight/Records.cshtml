@@ -1,0 +1,84 @@
+@model Subsystem1.Areas.Dean.Models.OversightVm
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+    var firstRow = Model.Total == 0 ? 0 : ((Model.PageNumber - 1) * Model.PageSize) + 1;
+    var lastRow = Math.Min(Model.PageNumber * Model.PageSize, Model.Total);
+    var pageCount = Math.Max(1, (int)Math.Ceiling(Model.Total / (double)Model.PageSize));
+}
+<section class="dean-page dean-submission-records">
+    <header class="dean-page-banner">
+        <h1>Submission &amp; Clearance Records</h1>
+        <p>Every capstone group, its submission status and its clearance outcome (view only).</p>
+    </header>
+    <nav class="dean-page-tabs" aria-label="Repository pages">
+        <a href="@Url.Action("Index", "Repository", new { area = "Dean" })">Exclusive Repository</a>
+        <a class="active" href="@Url.Action("Records", "Oversight", new { area = "Dean" })">Submission Records</a>
+    </nav>
+
+    <form method="get" action="@Url.Action("Records", "Oversight", new { area = "Dean" })" class="sa-toolbar dean-submission-toolbar">
+        <div class="sa-search">
+            <i class="fa fa-magnifying-glass" aria-hidden="true"></i>
+            <input type="search" name="q" value="@Model.Query" placeholder="Search" aria-label="Search by group, title or author" autocomplete="off" />
+        </div>
+        <div class="sa-filter">
+            <label>Program</label><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+            <select name="program" onchange="this.form.submit()"><option value="">All</option>@foreach (var entry in Model.Programs) { <option value="@entry.Key" @(String.Equals(Model.Program, entry.Key, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@entry.Key</option> }</select>
+        </div>
+        <div class="sa-filter">
+            <label>Status</label><i class="fa-solid fa-sliders" aria-hidden="true"></i>
+            <select name="status" onchange="this.form.submit()"><option value="">All</option>@foreach (var state in new[] { "Submitted", "Validated", "Disseminated", "Filed", "Returned", "Revision Required" }) { <option value="@state" @(String.Equals(Model.Status, state, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@state</option> }</select>
+        </div>
+        <div class="sa-filter">
+            <label>Adviser</label><i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
+            <select name="adviser" onchange="this.form.submit()"><option value="">All</option>@foreach (var adviserName in Model.Advisers) { <option value="@adviserName" @(String.Equals(Model.Adviser, adviserName, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@adviserName</option> }</select>
+        </div>
+        <div class="sa-filter">
+            <label>Batch (Academic Year)</label><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+            <select name="batch" onchange="this.form.submit()"><option value="">All Batches</option>@foreach (var year in Model.Batches) { <option value="@year" @(Model.Batch == year ? "selected" : "")>@year</option> }</select>
+        </div>
+        <div class="sa-filter">
+            <label>Sort By</label><i class="fa-solid fa-arrow-down-wide-short" aria-hidden="true"></i>
+            <select name="sortBy" onchange="this.form.submit()"><option value="recent" @(Model.SortBy == "recent" ? "selected" : "")>Newest Update</option><option value="oldest" @(Model.SortBy == "oldest" ? "selected" : "")>Oldest Update</option><option value="title" @(Model.SortBy == "title" ? "selected" : "")>Title A-Z</option></select>
+        </div>
+        <a class="dean-submission-reset" href="@Url.Action("Records", "Oversight", new { area = "Dean" })">Reset</a>
+        <a class="dean-page-btn light dean-submission-export" href="@Url.Action("ExportRecords", "Oversight", new { area = "Dean", q = Model.Query, program = Model.Program, status = Model.Status, adviser = Model.Adviser, batch = Model.Batch })">Export CSV</a>
+        <input type="hidden" name="pageSize" value="@Model.PageSize" />
+    </form>
+
+    <section class="dean-submission-results">
+        <div class="dean-submission-results-heading"><h2>All Submissions</h2><span>@Model.Total groups</span></div>
+        <div class="dean-submission-table-wrap">
+            <table class="dean-submission-table">
+                <thead><tr><th>Group</th><th>Title</th><th>Batch</th><th>Submission Status</th><th>Clearance Outcome</th><th>Last Updated</th><th aria-label="Actions"></th></tr></thead>
+                <tbody>
+                    @foreach (var record in Model.Records)
+                    {
+                        var cleared = new[] { "Disseminated", "Filed", "Cleared", "Approved" }.Contains(record.Status, StringComparer.OrdinalIgnoreCase);
+                        var statusText = String.IsNullOrWhiteSpace(record.Status) ? "Not recorded" : record.Status;
+                        <tr>
+                            <td class="dean-submission-group">@record.Id</td>
+                            <td class="dean-submission-title"><strong>@record.Title</strong><small>@record.Program · Adviser: @(String.IsNullOrWhiteSpace(record.Adviser) ? "Not recorded" : record.Adviser)</small></td>
+                            <td>@((record.SubmittedAt ?? record.UpdatedAt)?.Year.ToString() ?? "Not recorded")</td>
+                            <td><span class="dean-submission-status">@statusText</span></td>
+                            <td><span class="dean-clearance-pill @(cleared ? "is-cleared" : "is-pending")">@(cleared ? "Cleared" : "Pending")</span></td>
+                            <td>@(record.UpdatedAt.HasValue ? record.UpdatedAt.Value.ToString("MMM d, yyyy") : "Not recorded")</td>
+                            <td><a class="dean-submission-view" href="@Url.Action("ViewRecord", "Oversight", new { area = "Dean", id = record.Id })">View</a></td>
+                        </tr>
+                    }
+                    @if (Model.Records.Count == 0) { <tr><td colspan="7" class="dean-submission-empty">No records match these filters.</td></tr> }
+                </tbody>
+            </table>
+        </div>
+        <footer class="dean-submission-pagination">
+            <span>Showing @firstRow-@lastRow of @Model.Total</span>
+            <div class="dean-submission-pages">
+                @if (Model.PageNumber > 1) { <a href="@Url.Action("Records", "Oversight", new { area = "Dean", q = Model.Query, program = Model.Program, status = Model.Status, adviser = Model.Adviser, batch = Model.Batch, sortBy = Model.SortBy, page = Model.PageNumber - 1, pageSize = Model.PageSize })">‹ Previous</a> } else { <span class="disabled">‹ Previous</span> }
+                <strong>@Model.PageNumber</strong>
+                @if (Model.PageNumber < pageCount) { <a href="@Url.Action("Records", "Oversight", new { area = "Dean", q = Model.Query, program = Model.Program, status = Model.Status, adviser = Model.Adviser, batch = Model.Batch, sortBy = Model.SortBy, page = Model.PageNumber + 1, pageSize = Model.PageSize })">Next ›</a> } else { <span class="disabled">Next ›</span> }
+            </div>
+            <label>Rows per Page
+                <select aria-label="Rows per page" onchange="var u=new URL(window.location.href);u.searchParams.set('pageSize',this.value);u.searchParams.set('page','1');window.location.href=u.toString();"><option value="10" @(Model.PageSize == 10 ? "selected" : "")>10</option><option value="25" @(Model.PageSize == 25 ? "selected" : "")>25</option><option value="50" @(Model.PageSize == 50 ? "selected" : "")>50</option></select>
+            </label>
+        </footer>
+    </section>
+</section>

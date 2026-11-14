@@ -225,10 +225,20 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     if (Str(s, "projectManagerId") != "") haveManagers.Add(Str(s, "projectManagerId"));
                 }
 
-                List<BsonDocument> todo = Titles().Find(new BsonDocument()).ToList()
-                    .Where(t => !have.Contains(DocId(t)) && !haveManagers.Contains(Str(t, "studentId")))
+                List<BsonDocument> subsystem2Todo = Subsystem2Manuscripts.SchedulingTitles()
+                    .Where(t => !have.Contains(DocId(t)))
                     .OrderBy(t => Stamp(t, "submittedAt") ?? DateTime.MinValue)
                     .ToList();
+                var subsystem2Managers = new HashSet<string>(
+                    subsystem2Todo.Select(t => Str(t, "studentId")).Where(id => id != ""),
+                    StringComparer.OrdinalIgnoreCase);
+
+                List<BsonDocument> legacyTodo = Titles().Find(new BsonDocument()).ToList()
+                    .Where(t => !have.Contains(DocId(t)) && !haveManagers.Contains(Str(t, "studentId")))
+                    .Where(t => !subsystem2Managers.Contains(Str(t, "studentId")))
+                    .OrderBy(t => Stamp(t, "submittedAt") ?? DateTime.MinValue)
+                    .ToList();
+                List<BsonDocument> todo = subsystem2Todo.Concat(legacyTodo).ToList();
                 if (todo.Count == 0) return 0;
 
                 EnsureIndex();

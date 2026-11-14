@@ -1,0 +1,57 @@
+@using System
+@using System.Globalization
+@using Subsystem1.Areas.CapstoneCoordinator.Models
+@model ClearedSubmission
+@{
+    ViewBag.Title = Model.Title;
+    var recordDate = Model.FiledAt ?? Model.DisseminatedAt;
+    var repositoryStatus = Model.IsHistorical ? "Historical" : "Filed";
+}
+<link href="@Url.Content("~/Content/css/capstonecoordinator/clearedsubmissions.css")?v=2.2" rel="stylesheet" type="text/css" />
+
+<section class="dean-paper-page completed-paper-page">
+    <a class="dean-paper-back" href="@Url.Action("Index", "ClearedSubmissions", new { area = "CapstoneCoordinator" })"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back to Completed Manuscripts</a>
+    <article class="dean-paper-card">
+        <h1>@Model.Title</h1>
+
+        <div class="dean-paper-meta">
+            <div><span>Authors</span><strong>@(String.IsNullOrWhiteSpace(Model.Authors) ? "Not recorded" : Model.Authors)</strong></div>
+            <div><span>Year</span><strong>@(recordDate.HasValue ? recordDate.Value.Year.ToString() : "Not recorded")</strong></div>
+            <div><span>Adviser</span><strong>@(String.IsNullOrWhiteSpace(Model.Adviser) ? "Not recorded" : Model.Adviser)</strong></div>
+            <div><span>Pages</span><strong>Not recorded</strong></div>
+            <div><span>Group</span><strong>@(String.IsNullOrWhiteSpace(Model.ClearanceGroup) ? "Not recorded" : Model.ClearanceGroup)</strong></div>
+        </div>
+
+        <div class="dean-paper-status-row">
+            <div><span>Filed on</span><strong>@(recordDate.HasValue ? recordDate.Value.ToLocalTime().ToString("MMM d, yyyy", CultureInfo.InvariantCulture) : "Not recorded")</strong></div>
+            <div><span>Repository status</span><strong class="dean-paper-status">@repositoryStatus</strong></div>
+            <div><span>Program / Section</span><strong>@Model.Program / @Model.Section</strong></div>
+        </div>
+
+        <section class="dean-paper-abstract">
+            <h2>Abstract</h2>
+            <p>@(String.IsNullOrWhiteSpace(Model.Abstract) ? "No abstract was recorded for this manuscript." : Model.Abstract)</p>
+        </section>
+
+        <section class="dean-paper-keywords">
+            <h2>Keywords &amp; Significant Terms</h2>
+            @if (Model.Keywords != null && Model.Keywords.Count > 0)
+            {
+                <div class="dean-paper-tags">
+                    @foreach (var keyword in Model.Keywords)
+                    {
+                        <span>@keyword</span>
+                    }
+                </div>
+            }
+            else
+            {
+                <p>No keywords were recorded.</p>
+            }
+        </section>
+
+        <div class="dean-paper-actions">
+            <a class="dean-page-btn" href="@Url.Action("Manuscript", "ClearedSubmissions", new { area = "CapstoneCoordinator", id = Model.Id })" target="_blank" rel="noopener">View Manuscript</a>
+        </div>
+    </article>
+</section>

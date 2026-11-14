@@ -1,4 +1,4 @@
-﻿html {
+html {
     scrollbar-gutter: stable;
 }
 
@@ -720,4 +720,26 @@ tr:last-child td {
     .tags-grid-box {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+.pw-btn {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: #938F8F;
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.2s ease-in-out, background 0.2s ease-in-out;
+}
+
+    .pw-btn:hover {
+        color: #2C3F56;
+        background: rgba(44, 63, 86, 0.08);
+    }
+
+#passwordInput {
+    letter-spacing: 1px;
 }
