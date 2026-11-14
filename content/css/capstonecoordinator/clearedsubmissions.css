@@ -55,6 +55,51 @@
 .validation-summary li { padding: 2px 0; }
 .manuscript-unavailable { padding: 9px 10px; border-radius: 7px; background: #fff6e9; color: #87521d; }
 
+.completed-manuscripts-card { border-radius: 14px; }
+.completed-manuscripts-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; border-bottom: 1px solid #e7ebf0; }
+.completed-manuscripts-card-heading h2 { margin: 0; color: #223249; font: 700 20px 'Newsreader', Georgia, serif; }
+.completed-manuscripts-card-heading > span { color: #71809a; font-size: 12px; font-weight: 600; }
+.completed-manuscripts-table-wrap { width: 100%; overflow-x: auto; }
+.completed-manuscripts-table { min-width: 680px; }
+.completed-manuscripts-table .completed-manuscript-col { width: 52%; }
+.completed-manuscripts-table .completed-program-col { width: 15%; }
+.completed-manuscripts-table .completed-repository-col { width: 17%; }
+.completed-manuscripts-table .completed-action-col { width: 16%; text-align: right; }
+.completed-manuscripts-table td { padding-top: 15px; padding-bottom: 15px; }
+.completed-manuscripts-table .manuscript-title-text { max-width: 680px; }
+.completed-repository-status { padding: 5px 11px; border: 0; border-radius: 999px; background: #edf1f6; color: #5c6e84; font-size: 10px; font-weight: 600; }
+.completed-manuscript-action { text-align: right; }
+.completed-manuscript-action a, .completed-manuscript-link { display: inline-flex; align-items: center; gap: 5px; padding: 9px 13px; border: 1px solid #ccd5e1; border-radius: 7px; background: #fff; color: #435b78; font-size: 11px; text-decoration: none; white-space: nowrap; transition: background .15s ease,border-color .15s ease; }
+.completed-manuscript-action a:hover, .completed-manuscript-link:hover { border-color: #9aadc4; background: #f5f8fb; color: #223249; }
+.completed-detail-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid #e8ecf2; }
+.completed-detail-abstract, .completed-detail-file { padding: 22px; }
+.completed-detail-abstract h2, .completed-detail-file h2 { margin: 0 0 8px; color: #263d5a; font: 700 13px 'Newsreader', Georgia, serif; }
+.completed-detail-abstract p, .completed-detail-file p { margin: 0; color: #405875; font-size: 13px; line-height: 1.7; white-space: pre-line; }
+.completed-detail-file { border-top: 1px solid #e8ecf2; }
+.completed-detail-file p { margin-bottom: 12px; }
+
+/* Match the Dean Repository manuscript detail sheet on the coordinator route. */
+.completed-paper-page { width: 100%; max-width: 960px; margin: 0 auto; color: #1d2d43; }
+.completed-paper-page .dean-paper-back { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 14px; color: #405875; font-size: 12px; text-decoration: none; }
+.completed-paper-page .dean-paper-back:hover { color: #223249; text-decoration: underline; }
+.completed-paper-page .dean-paper-card { padding: 26px 32px 28px; border: 1px solid #e0e4eb; border-top: 4px solid #684180; border-radius: 11px; background: #fff; box-shadow: 0 3px 12px rgba(20,37,58,.12); }
+.completed-paper-page .dean-paper-card > h1 { margin: 0 0 18px; color: #172b46; font: 700 26px/1.18 'Newsreader', Georgia, serif; }
+.completed-paper-page .dean-paper-meta { display: grid; grid-template-columns: 1.4fr .7fr 1.15fr .8fr 1.2fr; gap: 14px; margin-bottom: 15px; }
+.completed-paper-page .dean-paper-meta > div, .completed-paper-page .dean-paper-status-row > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.completed-paper-page .dean-paper-meta span, .completed-paper-page .dean-paper-status-row > div > span { color: #71809a; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+.completed-paper-page .dean-paper-meta strong, .completed-paper-page .dean-paper-status-row strong { color: #1d2d43; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.completed-paper-page .dean-paper-status-row { display: flex; flex-wrap: wrap; gap: 24px; margin: 0 0 24px; padding-top: 13px; border-top: 1px solid #e3e7ed; }
+.completed-paper-page .dean-paper-status { width: fit-content; padding: 3px 10px; border: 1px solid #b9e1ca; border-radius: 999px; background: #e8f6ee; color: #176047 !important; }
+.completed-paper-page .dean-paper-abstract h2, .completed-paper-page .dean-paper-keywords h2 { margin: 0 0 8px; color: #42536b; font: 700 11px 'Inter', sans-serif; letter-spacing: .07em; text-transform: uppercase; }
+.completed-paper-page .dean-paper-abstract p { margin: 0; color: #263f62; font: 16px/1.78 'Newsreader', Georgia, serif; text-align: justify; white-space: pre-line; }
+.completed-paper-page .dean-paper-keywords { margin-top: 22px; }
+.completed-paper-page .dean-paper-keywords > p { margin: 0; color: #71809a; font-size: 12px; }
+.completed-paper-page .dean-paper-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.completed-paper-page .dean-paper-tags span { padding: 5px 11px; border-radius: 999px; background: #eaf0f8; color: #345578; font-size: 11px; font-weight: 600; }
+.completed-paper-page .dean-paper-actions { display: flex; justify-content: flex-start; margin-top: 22px; }
+.completed-paper-page .dean-page-btn { display: inline-flex; align-items: center; justify-content: center; border: 1px solid #223249; border-radius: 9px; padding: 9px 15px; background: #223249; color: #fff; font: 600 12px 'Inter', sans-serif; text-decoration: none; transition: background .15s ease,border-color .15s ease; }
+.completed-paper-page .dean-page-btn:hover { border-color: #374a60; background: #374a60; color: #fff; }
+
 @media (max-width: 900px) {
     .cleared-table, .cleared-table tbody, .cleared-table tr, .cleared-table td { display: block; width: auto; }
     .cleared-table thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
@@ -69,6 +114,7 @@
     .cleared-table td:first-child::before { display: block; margin-bottom: 6px; }
     .cleared-detail-body { min-width: 0; max-width: 100%; grid-column: 1 / -1; }
     .cleared-details { min-width: 0; }
+    .completed-manuscripts-table-wrap { padding: 0 12px 12px; }
 }
 
 @media (max-width: 520px) {
@@ -77,4 +123,14 @@
     .cleared-count { font-size: 10px; }
     .cleared-table td { grid-template-columns: 92px minmax(0, 1fr); gap: 8px; padding: 10px 12px; }
     .cleared-detail-body dl { grid-template-columns: 92px minmax(0, 1fr); }
+    .completed-manuscripts-card-heading { align-items: flex-start; padding: 15px; }
+    .completed-manuscripts-card-heading h2 { font-size: 18px; }
+    .completed-manuscripts-card-heading > span { white-space: nowrap; }
+    .completed-detail-toolbar { align-items: flex-start; flex-wrap: wrap; padding: 15px; }
+    .completed-detail-abstract, .completed-detail-file { padding: 16px; }
+    .completed-paper-page .dean-paper-card { padding: 21px 20px; }
+    .completed-paper-page .dean-paper-card > h1 { font-size: 22px; }
+    .completed-paper-page .dean-paper-meta { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .completed-paper-page .dean-paper-status-row { gap: 14px 20px; }
+    .completed-paper-page .dean-paper-abstract p { font-size: 15px; text-align: left; }
 }

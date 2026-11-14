@@ -85,7 +85,7 @@ namespace Subsystem1.Areas.Dean.Controllers
 
         private static ClearedSubmission Find(string id)
         {
-            return Subsystem3Clearances.ReadCleared().FirstOrDefault(x =>
+            return Subsystem3Clearances.ReadCompleted().Concat(Subsystem3Clearances.ReadCleared()).FirstOrDefault(x =>
                 String.Equals(x.Id, id, StringComparison.OrdinalIgnoreCase));
         }
 
