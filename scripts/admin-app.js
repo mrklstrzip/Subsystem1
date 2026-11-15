@@ -186,6 +186,8 @@
 
     function getActivityIcon(a) {
         if (a.category === 'tag') return '<i class="fa fa-tag"></i>';
+        if (a.category === 'building') return '<i class="fa fa-building"></i>';
+        if (a.category === 'room') return '<i class="fa fa-door-open"></i>';
         if (a.type === 'delete') return '<i class="fa fa-ban"></i>';
         var t = (a.text || '').toLowerCase();
         if (t.indexOf('student') > -1) return '<i class="fa fa-graduation-cap"></i>';
@@ -348,7 +350,11 @@
                 /^building .+ added$/.test(action) ||
                 /^building .+ details updated$/.test(action) ||
                 /^building .+ status changed to /.test(action) ||
-                /^room .+ added to /.test(action)
+                /^building .+ deleted$/.test(action) ||
+                /^room .+ added to /.test(action) ||
+                /^room .+ details updated$/.test(action) ||
+                /^room .+ status changed to /.test(action) ||
+                /^room .+ deleted$/.test(action)
             );
         }
 
@@ -699,10 +705,14 @@
                 '<td class="email bold">' + esc(u.email) + '</td>' +
                 '<td class="role bold"><span class="' + r.cls + '" data-role="' + esc(u.role) + '">' + roleIcon + ' ' + esc(r.label) + '</span></td>' +
                 '<td class="status bold">' + statusBadge(u.status) + '</td>' +
-                '<td class="action bold">' +
-                '<i class="fa fa-edit" onclick="AD.editUser(\'' + esc(u.id) + '\')"></i>' +
-                '<i class="fa fa-trash" onclick="AD.deleteUser(\'' + esc(u.id) + '\')"></i>' +
-                '</td></tr>';
+                // Admin accounts have no actions (they cannot be edited or deleted).
+                (u.role === 'admin'
+                    ? '<td class="action bold"></td>'
+                    : '<td class="action bold">' +
+                    '<i class="fa fa-edit" onclick="AD.editUser(\'' + esc(u.id) + '\')"></i>' +
+                    '<i class="fa fa-trash" onclick="AD.deleteUser(\'' + esc(u.id) + '\')"></i>' +
+                    '</td>') +
+                '</tr>';
         }).join('') || '<tr><td colspan="5" style="text-align:center; color:#9092AD;">No users found</td></tr>';
     }
 

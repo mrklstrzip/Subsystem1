@@ -408,6 +408,21 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
             }
         }
 
+        // Tells the pop-up which addresses already have an account, so they cannot be invited.
+        [HttpPost]
+        public ActionResult checkEmails(CoInviteDto dto)
+        {
+            try
+            {
+                if (dto == null || dto.Emails == null) return Json(new { success = true, taken = new string[0] });
+                return Json(new { success = true, taken = PmInvites.ExistingAccounts(dto.Emails) });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ErrorText(ex) });
+            }
+        }
+
         [HttpPost]
         public ActionResult resendInvite(CoIdDto dto)
         {

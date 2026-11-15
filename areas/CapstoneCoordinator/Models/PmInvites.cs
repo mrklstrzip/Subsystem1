@@ -88,6 +88,17 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 filter.Regex("subsystem3.Email", ExactCI(email)))).Any();
         }
 
+        /// <summary>Which of these addresses already belong to a user account (lower case). Used to stop invitations to them.</summary>
+        public static List<string> ExistingAccounts(IEnumerable<string> rawEmails)
+        {
+            var taken = new List<string>();
+            foreach (string email in ParseEmails(rawEmails))
+            {
+                if (email.Length <= 120 && EmailPattern.IsMatch(email) && EmailHasAccount(email)) taken.Add(email);
+            }
+            return taken;
+        }
+
         private static DateTime? Utc(BsonDocument d, string name)
         {
             BsonValue v;

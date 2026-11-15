@@ -12,7 +12,7 @@
         <div class="dean-repo-search">
             <input type="search" name="q" value="@Model.Query" placeholder="⌕  Search by title, author, adviser or keyword" aria-label="Search manuscripts" />
             <button type="submit" class="dean-page-btn light">Search</button>
-            <select name="sort" onchange="this.form.submit()" aria-label="Sort results">
+            <select name="sort" data-autosubmit aria-label="Sort results">
                 <option value="recent" @(Model.Sort == "recent" ? "selected" : "")>Newest Cleared</option>
                 <option value="oldest" @(Model.Sort == "oldest" ? "selected" : "")>Oldest Cleared</option>
                 <option value="title" @(Model.Sort == "title" ? "selected" : "")>Title A-Z</option>
@@ -23,39 +23,39 @@
                 <div class="dean-filter-head">☷ &nbsp;Filters</div>
                 <section class="dean-filter-card">
                     <h3>Program</h3>
-                    <label><input type="radio" name="program" value="" @(String.IsNullOrEmpty(Model.Program) ? "checked" : "") onchange="this.form.submit()" /> All programs</label>
+                    <label><input type="radio" name="program" value="" @(String.IsNullOrEmpty(Model.Program) ? "checked" : "") data-autosubmit /> All programs</label>
                     @foreach (var p in Model.Programs)
                     {
-                        <label><input type="radio" name="program" value="@p" @(String.Equals(Model.Program, p, StringComparison.OrdinalIgnoreCase) ? "checked" : "") onchange="this.form.submit()" /> @p <small>(@Model.Items.Count(x => String.Equals(x.Program, p, StringComparison.OrdinalIgnoreCase)))</small></label>
+                        <label><input type="radio" name="program" value="@p" @(String.Equals(Model.Program, p, StringComparison.OrdinalIgnoreCase) ? "checked" : "") data-autosubmit /> @p <small>(@Model.Items.Count(x => String.Equals(x.Program, p, StringComparison.OrdinalIgnoreCase)))</small></label>
                     }
                 </section>
                 <section class="dean-filter-card">
-                    <h3>Topic</h3>
-                    <input class="os-input" type="search" placeholder="Search topics" disabled="disabled" aria-label="Topic filtering unavailable" />
-                    <small>Topic metadata is not recorded for these submissions.</small>
+                    <h3>Title</h3>
+                    <input class="os-input" type="search" placeholder="Search title" disabled="disabled" aria-label="Title filtering unavailable" />
+                    <small>Title metadata is not recorded for these submissions.</small>
                 </section>
                 <section class="dean-filter-card">
                     <h3>Batch (Academic Year)</h3>
-                    <label><input type="radio" name="year" value="" @(Model.Year.HasValue ? "" : "checked") onchange="this.form.submit()" /> All years</label>
+                    <label><input type="radio" name="year" value="" @(Model.Year.HasValue ? "" : "checked") data-autosubmit /> All years</label>
                     @foreach (var year in Model.Years)
                     {
-                        <label><input type="radio" name="year" value="@year" @(Model.Year == year ? "checked" : "") onchange="this.form.submit()" /> @year</label>
+                        <label><input type="radio" name="year" value="@year" @(Model.Year == year ? "checked" : "") data-autosubmit /> @year</label>
                     }
                 </section>
                 <section class="dean-filter-card">
                     <h3>Filing status</h3>
-                    <label><input type="radio" name="filing" value="" @(String.IsNullOrEmpty(Model.Filing) ? "checked" : "") onchange="this.form.submit()" /> All statuses</label>
+                    <label><input type="radio" name="filing" value="" @(String.IsNullOrEmpty(Model.Filing) ? "checked" : "") data-autosubmit /> All statuses</label>
                     @foreach (var state in Model.Filings)
                     {
-                        <label><input type="radio" name="filing" value="@state" @(String.Equals(Model.Filing, state, StringComparison.OrdinalIgnoreCase) ? "checked" : "") onchange="this.form.submit()" /> @state</label>
+                        <label><input type="radio" name="filing" value="@state" @(String.Equals(Model.Filing, state, StringComparison.OrdinalIgnoreCase) ? "checked" : "") data-autosubmit /> @state</label>
                     }
                 </section>
                 <section class="dean-filter-card">
                     <h3>Adviser</h3>
-                    <label><input type="radio" name="adviser" value="" @(String.IsNullOrEmpty(Model.Adviser) ? "checked" : "") onchange="this.form.submit()" /> All advisers</label>
+                    <label><input type="radio" name="adviser" value="" @(String.IsNullOrEmpty(Model.Adviser) ? "checked" : "") data-autosubmit /> All advisers</label>
                     @foreach (var adviser in Model.Advisers)
                     {
-                        <label><input type="radio" name="adviser" value="@adviser" @(String.Equals(Model.Adviser, adviser, StringComparison.OrdinalIgnoreCase) ? "checked" : "") onchange="this.form.submit()" /> @adviser</label>
+                        <label><input type="radio" name="adviser" value="@adviser" @(String.Equals(Model.Adviser, adviser, StringComparison.OrdinalIgnoreCase) ? "checked" : "") data-autosubmit /> @adviser</label>
                     }
                 </section>
             </aside>
@@ -86,3 +86,5 @@
         </div>
     </form>
 </section>
+
+<script src="@Url.Content("~/Scripts/dean-autosubmit.js")?v=1.0"></script>
