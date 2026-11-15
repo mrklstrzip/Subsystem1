@@ -220,6 +220,9 @@
     <Content Include="Content\css\layout.css" />
     <Content Include="Content\css\auth.css" />
     <Content Include="Content\css\admin\usermanagement.css" />
+    <Content Include="Content\css\admin\defenseschedule.css" />
+    <Content Include="Content\css\admin\scheduleapproval.css" />
+    <Content Include="Content\css\admin\roomschedule.css" />
     <Content Include="Content\fontawesome\css\all.css" />
     <Content Include="Content\fontawesome\css\all.min.css" />
     <Content Include="Content\fontawesome\css\brands.css" />
@@ -251,6 +254,8 @@
     <Content Include="Content\images\student-avatar.png" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\admin-app.js" />
+    <Content Include="Scripts\admin-roomschedule.js" />
+    <Content Include="Scripts\admin-scheduleapproval.js" />
     <Content Include="Scripts\auth.js" />
     <Content Include="Scripts\campusdirector-app.js" />
     <Content Include="Scripts\coordinator-privacy.js" />
@@ -294,6 +299,9 @@
     <Compile Include="Areas\Admin\Controllers\FacultyProfileController.cs" />
     <Compile Include="Areas\Admin\Controllers\ProfileController.cs" />
     <Compile Include="Areas\Admin\Controllers\UserManagementController.cs" />
+    <Compile Include="Areas\Admin\Controllers\DefenseScheduleController.cs" />
+    <Compile Include="Areas\Admin\Controllers\ScheduleApprovalController.cs" />
+    <Compile Include="Areas\Admin\Controllers\RoomScheduleController.cs" />
     <Compile Include="Areas\Dean\Controllers\DeanApiController.cs" />
     <Compile Include="Areas\Dean\Controllers\OversightController.cs" />
     <Compile Include="Areas\Dean\Controllers\RepositoryController.cs" />
@@ -381,6 +389,10 @@
     <Content Include="Areas\Admin\Views\FacultyProfile\facultyprofile.cshtml" />
     <Content Include="Areas\Admin\Views\Profile\profile.cshtml" />
     <Content Include="Areas\Admin\Views\UserManagement\usermanagement.cshtml" />
+    <Content Include="Areas\Admin\Views\DefenseSchedule\defenseschedule.cshtml" />
+    <Content Include="Areas\Admin\Views\ScheduleApproval\scheduleapproval.cshtml" />
+    <Content Include="Areas\Admin\Views\ScheduleApproval\_ScheduleDetailsModal.cshtml" />
+    <Content Include="Areas\Admin\Views\RoomSchedule\roomschedule.cshtml" />
     <Content Include="Areas\CampusDirector\Views\Shared\_CampusDirectorLayout.cshtml" />
     <Content Include="Areas\CampusDirector\Views\web.config" />
     <Content Include="Areas\CampusDirector\Views\_ViewStart.cshtml" />
@@ -458,9 +470,6 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\ViewModels\" />
-    <Folder Include="Areas\Admin\Views\DefenseSchedule\" />
-    <Folder Include="Areas\Admin\Views\RoomSchedule\" />
-    <Folder Include="Areas\Admin\Views\ScheduleApproval\" />
     <Folder Include="Areas\Auth\Models\" />
     <Folder Include="Areas\Auth\ViewModels\" />
     <Folder Include="Areas\CampusDirector\Models\" />

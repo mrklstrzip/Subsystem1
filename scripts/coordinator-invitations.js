@@ -19,6 +19,7 @@
 
     var rows = [];
     var emails = [];          // addresses typed so far (lowercase, no duplicates)
+    var taken = {};           // addresses that already have an account (cannot be invited)
     var sending = false;
     var toastTimer = null;
 
@@ -177,8 +178,10 @@
     function drawChips() {
         chips.textContent = '';
         emails.forEach(function (mail, i) {
-            var chip = el('span', 'inv-chip' + (EMAIL.test(mail) ? '' : ' is-bad'));
-            chip.title = EMAIL.test(mail) ? mail : 'This is not a valid email address.';
+            var hasAccount = !!taken[mail];
+            var chip = el('span', 'inv-chip' + (EMAIL.test(mail) && !hasAccount ? '' : ' is-bad'));
+            chip.title = !EMAIL.test(mail) ? 'This is not a valid email address.'
+                : (hasAccount ? 'This email already has an account, so it cannot be invited.' : mail);
             chip.appendChild(el('span', null, mail));
             var x = el('button', null, '×');
             x.type = 'button';
@@ -204,7 +207,19 @@
             if (mail && emails.indexOf(mail) === -1) { emails.push(mail); added = true; }
         });
         input.value = '';
-        if (added) { drawChips(); showError(''); }
+        if (added) { drawChips(); showError(''); checkTaken(); }
+    }
+
+    // Asks the server which of the new valid addresses already have an account and marks them.
+    function checkTaken() {
+        var ask = emails.filter(function (m) { return EMAIL.test(m) && taken[m] === undefined; });
+        if (!ask.length) return;
+        ask.forEach(function (m) { taken[m] = false; });   // avoid asking twice while waiting
+        call('checkEmails', { emails: ask }).then(function (res) {
+            if (!res || !res.success) { ask.forEach(function (m) { delete taken[m]; }); return; }
+            (res.taken || []).forEach(function (m) { taken[String(m).toLowerCase()] = true; });
+            drawChips();
+        }).catch(function () { ask.forEach(function (m) { delete taken[m]; }); });
     }
 
     input.addEventListener('keydown', function (e) {
@@ -223,6 +238,7 @@
     /* ---------- pop-up: open / close ---------- */
     function open() {
         emails = [];
+        taken = {};
         drawChips();
         input.value = '';
         showError('');
@@ -301,6 +317,13 @@
         if (!emails.length) { showError('Add at least one email address.'); input.focus(); return; }
         var bad = emails.filter(function (m) { return !EMAIL.test(m); });
         if (bad.length) { showError('Fix or remove the highlighted address' + (bad.length === 1 ? '' : 'es') + '.'); return; }
+        var existing = emails.filter(function (m) { return taken[m]; });
+        if (existing.length) {
+            showError(existing.length === 1
+                ? existing[0] + ' already has an account. Remove it to continue.'
+                : existing.length + ' highlighted addresses already have an account. Remove them to continue.');
+            return;
+        }
         if (emails.length > MAX) { showError('You can invite up to ' + MAX + ' students at a time.'); return; }
 
         sending = true;
