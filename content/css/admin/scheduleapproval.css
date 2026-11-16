@@ -1061,3 +1061,13 @@ body {
     .panelist-role.chairman {
         color: #A33F53;
     }
+
+.st-rejected {
+    background: #F89B9E;
+    color: #8C1C1E;
+    border-color: #F37B80;
+}
+
+.sa-reject-note { grid-column: 1 / -1; }
+    .sa-reject-note[hidden] { display: none; }
+    .sa-reject-note strong { display: block; white-space: normal; overflow-wrap: anywhere; color: #8C1C1E; }

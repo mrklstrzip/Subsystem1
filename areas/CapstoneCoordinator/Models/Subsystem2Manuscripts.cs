@@ -190,7 +190,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         // ------------------------------------------------------------------
         // Coordinator status, saved on the capstone_submissions document itself, so "Under Review" is
         // visible in the database next to the submission it belongs to:
-        //   coordinatorStatus: "to-submit" | "under-review" | "submitted"
+        //   coordinatorStatus: "to-submit" | "under-review" | "rejected" | "submitted"   (rejected = sent back by the Dean)
         //   underReview: true | false, underReviewReason, scheduleId, coordinatorStatusAt
         // ------------------------------------------------------------------
         public static void MarkSubmission(string submissionId, string scheduleId, string coStatus, string problem)
@@ -198,7 +198,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             ObjectId? oid = ParseId(submissionId);
             if (!oid.HasValue || String.IsNullOrEmpty(coStatus)) return;
 
-            bool review = coStatus == "under-review";
+            bool review = coStatus == "under-review" || coStatus == "rejected";   // a rejected schedule is also under review
             var u = Builders<BsonDocument>.Update;
             Collection().UpdateOne(
                 Builders<BsonDocument>.Filter.Eq("_id", oid.Value),
@@ -238,7 +238,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
                 if (Str(s, "coordinatorStatus") == status &&
                     Str(s, "scheduleId") == scheduleId &&
-                    current == (status == "under-review"))
+                    current == (status == "under-review" || status == "rejected"))
                     continue;
 
                 MarkSubmission(DocId(s), scheduleId, status, Str(sched, "problem"));

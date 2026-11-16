@@ -7,12 +7,13 @@
     var API = '/CapstoneCoordinator/CoordinatorApi/';
     var LOGIN_URL = '/Auth/Login/login';
     var PANEL_SIZE = 3;
-    var STATUS_LABELS = { 'to-submit': 'To Submit', 'under-review': 'Under Review', 'submitted': 'Submitted', 'upcoming': 'Upcoming', 'ongoing': 'Ongoing', 'completed': 'Completed' };
+    var STATUS_LABELS = { 'to-submit': 'To Submit', 'under-review': 'Under Review', 'rejected': 'Rejected', 'submitted': 'Submitted', 'upcoming': 'Upcoming', 'ongoing': 'Ongoing', 'completed': 'Completed' };
 
     var overlay = document.getElementById('scheduleModal');
     if (!overlay) return;
 
-    function $(id) { return document.getElementById(id); }
+    // a pop-up that lacks one of these elements must not stop the others from working
+    function $(id) { return document.getElementById(id) || document.createElement('span'); }
 
     var submitBtn = $('modalSubmitBtn');
     var panel = overlay.querySelector('.panelists-panel');
@@ -74,6 +75,19 @@
         var el = $('mEditError');
         el.textContent = msg || '';
         el.hidden = !msg;
+        if (msg && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });   // the popup scrolls; make sure the message is seen
+    }
+
+    // today as yyyy-MM-dd (the same format the server saves dates in)
+    function todayText() {
+        var n = new Date();
+        function two(v) { return (v < 10 ? '0' : '') + v; }
+        return n.getFullYear() + '-' + two(n.getMonth() + 1) + '-' + two(n.getDate());
+    }
+
+    // The saved defense date has already passed (e.g. a schedule the Dean rejected): the Coordinator must pick a new one.
+    function dateHasPassed() {
+        return !!(current && current.editable && current.date && current.date < todayText());
     }
     function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
     // exact percentage with one decimal (66.7%), never rounded to a level
@@ -242,7 +256,8 @@
 
         $('eTimeStart').value = current.start || '';
         $('eTimeEnd').value = current.end || '';
-        $('eDate').value = current.date || '';
+        $('eDate').min = todayText();                      // the picker cannot go to a past day
+        $('eDate').value = dateHasPassed() ? '' : (current.date || '');
         $('eRoom').value = current.room || '';
         $('eRoom').setAttribute('list', 'roomList');
         if (!$('eRoom').getAttribute('data-building-bound')) {
@@ -264,6 +279,7 @@
         renderPanelists();
         renderSchedule();
         if (on) {
+            if (dateHasPassed()) showError('The saved defense date has already passed. Please choose a new date, then save.');
             var first = panel.querySelector('.panelist-input');
             if (first) first.focus();
         }
@@ -291,7 +307,7 @@
     }
 
     /* ---------- actions ---------- */
-    function open(id, statusOverride) {
+    function open(id, statusOverride, startEditing) {
         if (busy) return;
         busy = true;
         call('schedule?id=' + encodeURIComponent(id)).then(function (res) {
@@ -301,6 +317,8 @@
             overlay.classList.add('open');
             overlay.setAttribute('aria-hidden', 'false');
             document.body.classList.add('modal-open');
+            // Resolve (Under Review): go straight to fixing it, and also when the saved date is already past
+            if (res.schedule.editable && (startEditing || dateHasPassed())) setEditing(true);
         }, function () {
             busy = false;
             alert('Could not reach the server. Please check your connection and try again.');
@@ -369,7 +387,13 @@
         call('submit', { id: current.id }).then(function (res) {
             busy = false;
             submitBtn.disabled = false;
-            if (!res || !res.success) { showError((res && res.message) || 'Something went wrong. Please try again.'); return; }
+            if (!res || !res.success) {
+                // Not allowed as it is (past date, room taken...): open the pencil so it can be fixed right here
+                var why = (res && res.message) || 'Something went wrong. Please try again.';
+                if (current && current.editable) { setEditing(true); }
+                showError(why);
+                return;
+            }
             if (window.Notice) Notice.after('success', 'Schedule submitted', 'The generated schedule for "' + title + '" was submitted successfully.');
             window.location.reload();     // the lists show the new status
         }, function () {

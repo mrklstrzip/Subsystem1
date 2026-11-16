@@ -20,7 +20,7 @@
         {
             tableId: 'scheduleTable',
             emptyText: 'No schedules found',
-            filters: { program: true, status: ['Pending Submission', 'To Submit', 'Under Review', 'Submitted', 'Not Yet Submitted'], adviser: true }
+            filters: { program: true, status: ['Pending Submission', 'To Submit', 'Under Review', 'Submitted', 'Not Yet Submitted', 'Rejected'], adviser: true }
         },
         {
             tableId: 'conflictTable',

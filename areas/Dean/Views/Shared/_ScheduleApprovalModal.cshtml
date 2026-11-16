@@ -7,6 +7,7 @@
 <div id="saConfig"
      data-details-url="@Url.Action("Details", "ScheduleApproval")"
      data-approve-url="@Url.Action("Approve", "ScheduleApproval")"
+     data-reject-url="@Url.Action("Reject", "ScheduleApproval")"
      data-manuscript-url="@Url.Action("Manuscript", "ScheduleApproval")"
      hidden></div>
 
@@ -25,6 +26,7 @@
             <div><label>PROJECT TITLE</label><strong id="mTitle"></strong></div>
             <div><label>DATE SUBMITTED</label><strong id="mSubmitted"></strong></div>
             <div><label>CURRENT STATUS</label><span class="sa-status" id="mStatus"></span></div>
+            <div class="sa-reject-note" id="mRejectNote" hidden><label>REASON FOR REJECTION</label><strong id="mRejectReason"></strong></div>
             <div class="sa-info-sep"></div>
             <div><label>PROJECT MANAGER</label><strong id="mStudent"></strong></div>
             <div><label>PROGRAM</label><strong id="mProgram"></strong></div>
@@ -82,7 +84,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-<!-- Reject reason pop-up (frontend only) -->
+<!-- Reject reason pop-up -->
 <div class="sa-overlay" id="saRejectOverlay" aria-hidden="true">
     <div class="sa-reject-modal" role="dialog" aria-modal="true" aria-labelledby="saRejectTitle">
         <h3 id="saRejectTitle">Reject Schedule</h3>
@@ -99,7 +101,7 @@
 
 
 <script>
-    //for testing lang ng frontend para makita itsura (pa remove nalang pag aayusin backend)
+    // Percentages are filled in by DeanSchedApproval.js; Reject is sent by DeanSchedApproval.js
     (function () {
         var panelists = document.getElementById("mPanelists");
         var defaultPercent = { high: 90, medium: 70, low: 40 };
@@ -148,22 +150,6 @@
         document.getElementById("saRejectCancel").addEventListener("click", closeReject);
         rejectOverlay.addEventListener("click", function (e) {
             if (e.target === rejectOverlay) closeReject();
-        });
-
-        document.getElementById("saRejectConfirm").addEventListener("click", function () {
-            if (!reason.value.trim()) {
-                error.hidden = false;
-                return;
-            }
-            // for testing lang ng frontend (pa-connect nalang sa backend pag aayusin)
-            var rejTitle = document.getElementById("mTitle").textContent;
-            closeReject();
-            overlay.classList.remove("open");
-            overlay.setAttribute("aria-hidden", "true");
-            document.body.style.overflow = "";
-            if (window.Notice) {
-                Notice.success("Schedule rejected", "\"" + rejTitle + "\" has been rejected.");
-            }
         });
 
         // "To Approve"-> Close, Reject, Approve

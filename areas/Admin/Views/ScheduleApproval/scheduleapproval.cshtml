@@ -7,7 +7,7 @@
     var advisers = items.Select(x => x.Adviser).Distinct().ToList();
 }
 
-<link href="@Url.Content("~/Content/css/admin/scheduleapproval.css")?v=1.1" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/admin/scheduleapproval.css")?v=1.2" rel="stylesheet" type="text/css" />
 
 <div class="dashboard-header">
     <div class="header-text">
@@ -44,6 +44,7 @@
             <option value="">All</option>
             <option value="To Approve">To Approve</option>
             <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
         </select>
         <i class="fa-solid fa-chevron-down sa-chev"></i>
     </div>
@@ -89,7 +90,7 @@
                     <td>@m.Adviser</td>
                     <td>@(m.HasDate ? m.Date.ToString("MM-dd-yy") : "-------")</td>
                     <td>
-                        <span class="sa-status @(m.Status == "Approved" ? "st-approved" : "st-toapprove")">@m.Status</span>
+                        <span class="sa-status @(m.Status == "Approved" ? "st-approved" : m.Status == "Rejected" ? "st-rejected" : "st-toapprove")">@m.Status</span>
                     </td>
                     <td class="sa-action"><button type="button" class="sa-btn-view" data-sa-open data-id="@m.Id">View</button></td>
                 </tr>
@@ -101,5 +102,5 @@
 
 
 @Html.Partial("_ScheduleDetailsModal")
-<script src="@Url.Content("~/Scripts/admin-scheduleapproval.js")?v=1.0"></script>
+<script src="@Url.Content("~/Scripts/admin-scheduleapproval.js")?v=1.1"></script>
 <script src="@Url.Content("~/Scripts/dean-select.js")?v=1.0"></script>

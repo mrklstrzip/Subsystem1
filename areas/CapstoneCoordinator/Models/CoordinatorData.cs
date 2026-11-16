@@ -38,6 +38,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 return Status == "under-review" ? "Under Review"
                     : Status == "submitted" ? "Submitted"
                     : Status == "not-submitted" ? "Not Yet Submitted"
+                    : Status == "rejected" ? "Rejected"
                     : "To Submit";
             }
         }
@@ -300,7 +301,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             if (includeNotSubmitted) AddNotYetSubmitted(data, docs);
 
             data.Schedules = data.Schedules
-                .OrderBy(s => s.Status == "under-review" ? 0 : s.Status == "to-submit" ? 1 : s.Status == "not-submitted" ? 3 : 2)
+                .OrderBy(s => s.Status == "under-review" || s.Status == "rejected" ? 0 : s.Status == "to-submit" ? 1 : s.Status == "not-submitted" ? 3 : 2)
                 .ThenBy(s => s.Title, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
@@ -472,7 +473,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         }
 
         // Building of a schedule's room: saved on the schedule when it was generated, otherwise looked up from the room.
-        private static string BuildingOf(BsonDocument d, Dictionary<string, string> buildingOfRoom)
+        internal static string BuildingOf(BsonDocument d, Dictionary<string, string> buildingOfRoom)
         {
             string saved = Str(d, "buildingName");
             if (saved != "") return saved;
@@ -511,8 +512,10 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             string raw = CoDb.StatusOf(d);
 
             string problem = Str(d, "problem");
-            if (raw == "declined" || raw == "rejected")
+            if (raw == "declined")
                 problem = "Declined by the Dean";
+            else if (raw == "rejected" && problem == "")
+                problem = "Rejected by the Dean";
 
             int? st = Minutes(d, "start");
             int? en = Minutes(d, "end");

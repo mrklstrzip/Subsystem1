@@ -57,7 +57,7 @@
     /* ---------- Modal ---------- */
     function setStatusBadge(el, status) {
         el.textContent = status;
-        el.className = 'sa-status ' + (status === 'Approved' ? 'st-approved' : 'st-toapprove');
+        el.className = 'sa-status ' + (status === 'Approved' ? 'st-approved' : status === 'Rejected' ? 'st-rejected' : 'st-toapprove');
     }
 
     function clearManuscript() {
@@ -156,6 +156,11 @@
                 $('mTime').textContent = d.Time;
                 $('mDate').textContent = d.DefenseDate;
                 $('mRoom').textContent = d.Room;
+                var note = $('mRejectNote');
+                if (note) {
+                    note.hidden = !(d.Status === 'Rejected' && d.RejectReason);
+                    $('mRejectReason').textContent = d.RejectReason || '';
+                }
 
                 $('mPanelists').innerHTML = d.Panelists.map(function (p) {
                     var pct = (p.Percent === null || p.Percent === undefined) ? '\u2014' : Number(p.Percent).toFixed(1) + '%';
