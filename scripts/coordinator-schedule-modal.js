@@ -7,8 +7,7 @@
     var API = '/CapstoneCoordinator/CoordinatorApi/';
     var LOGIN_URL = '/Auth/Login/login';
     var PANEL_SIZE = 3;
-    var STATUS_LABELS = { 'to-submit': 'To Submit', 'under-review': 'Under Review', 'submitted': 'Submitted' };
-    var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var STATUS_LABELS = { 'to-submit': 'To Submit', 'under-review': 'Under Review', 'submitted': 'Submitted', 'upcoming': 'Upcoming', 'ongoing': 'Ongoing', 'completed': 'Completed' };
 
     var overlay = document.getElementById('scheduleModal');
     if (!overlay) return;
@@ -69,7 +68,7 @@
     function fmtDate(iso) {
         if (!iso) return '';
         var p = iso.split('-');
-        return MONTHS[parseInt(p[1], 10) - 1] + ' ' + parseInt(p[2], 10) + ', ' + p[0];
+        return p[1] + '-' + p[2] + '-' + p[0].slice(-2);   // numeric: MM-DD-YY
     }
     function showError(msg) {
         var el = $('mEditError');
@@ -218,17 +217,40 @@
         }
     }
 
+    // The building follows the room: it is saved with the schedule, and updates while a room is typed in edit mode.
+    function showBuilding(name) {
+        var el = $('mBuilding');
+        if (el) el.textContent = String(name || '').trim() || '\u2014';
+    }
+
+    function buildingOfRoom(roomName) {
+        var typed = String(roomName || '').trim().toLowerCase();
+        if (!typed) return '';
+        var options = document.querySelectorAll('#roomList option');
+        for (var i = 0; i < options.length; i++) {
+            if (String(options[i].value).toLowerCase() === typed) return options[i].getAttribute('data-building') || '';
+        }
+        return '';
+    }
+
     function renderSchedule() {
         var has = current.start && current.end && current.date;
         $('mTime').textContent = has ? fmtTime(current.start) + ' - ' + fmtTime(current.end) : '—';
         $('mDate').textContent = current.date ? fmtDate(current.date) : '—';
         $('mRoom').textContent = String(current.room || '').trim() || 'TBA';
+        showBuilding(current.building);
 
         $('eTimeStart').value = current.start || '';
         $('eTimeEnd').value = current.end || '';
         $('eDate').value = current.date || '';
         $('eRoom').value = current.room || '';
         $('eRoom').setAttribute('list', 'roomList');
+        if (!$('eRoom').getAttribute('data-building-bound')) {
+            $('eRoom').setAttribute('data-building-bound', '1');
+            $('eRoom').addEventListener('input', function () {
+                if (editing) showBuilding(buildingOfRoom($('eRoom').value) || current.building);
+            });
+        }
     }
 
     function setEditing(on) {
@@ -247,8 +269,9 @@
         }
     }
 
-    function fill(d) {
+    function fill(d, statusOverride) {
         current = d;
+        if (statusOverride) d.status = statusOverride;   // Dashboard: an approved defense is shown as Upcoming / Ongoing / Completed
         $('mTitle').textContent = d.title;
         $('mDateSubmitted').textContent = d.dateSubmitted;
         $('mProblem').textContent = d.problem && d.problem.length ? d.problem : '—';
@@ -268,13 +291,13 @@
     }
 
     /* ---------- actions ---------- */
-    function open(id) {
+    function open(id, statusOverride) {
         if (busy) return;
         busy = true;
         call('schedule?id=' + encodeURIComponent(id)).then(function (res) {
             busy = false;
             if (!res || !res.success) { alert((res && res.message) || 'Could not open this schedule.'); return; }
-            fill(res.schedule);
+            fill(res.schedule, statusOverride);
             overlay.classList.add('open');
             overlay.setAttribute('aria-hidden', 'false');
             document.body.classList.add('modal-open');

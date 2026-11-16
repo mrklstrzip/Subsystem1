@@ -173,6 +173,78 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return SchedulableRecords(true).Select(ToCoordinatorTitle).ToList();
         }
 
+        /// <summary>User ids (and student numbers) of everybody who already has a capstone submission.</summary>
+        public static HashSet<string> SubmitterIds()
+        {
+            var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (Record r in ReadRecords(false))
+            {
+                if (!String.IsNullOrWhiteSpace(r.StudentUserId)) ids.Add(r.StudentUserId);
+                if (!String.IsNullOrWhiteSpace(r.SubmittedById)) ids.Add(r.SubmittedById);
+                BsonValue manager = Value(r.Submission, "projectManagerId");
+                if (manager != null && !manager.IsBsonNull) ids.Add(manager.ToString());
+            }
+            return ids;
+        }
+
+        // ------------------------------------------------------------------
+        // Coordinator status, saved on the capstone_submissions document itself, so "Under Review" is
+        // visible in the database next to the submission it belongs to:
+        //   coordinatorStatus: "to-submit" | "under-review" | "submitted"
+        //   underReview: true | false, underReviewReason, scheduleId, coordinatorStatusAt
+        // ------------------------------------------------------------------
+        public static void MarkSubmission(string submissionId, string scheduleId, string coStatus, string problem)
+        {
+            ObjectId? oid = ParseId(submissionId);
+            if (!oid.HasValue || String.IsNullOrEmpty(coStatus)) return;
+
+            bool review = coStatus == "under-review";
+            var u = Builders<BsonDocument>.Update;
+            Collection().UpdateOne(
+                Builders<BsonDocument>.Filter.Eq("_id", oid.Value),
+                u.Combine(
+                    u.Set("coordinatorStatus", coStatus),
+                    u.Set("underReview", review),
+                    u.Set("underReviewReason", review ? (problem ?? "") : ""),
+                    u.Set("scheduleId", scheduleId ?? ""),
+                    u.Set("coordinatorStatusAt", DateTime.UtcNow)));
+        }
+
+        /// <summary>Makes every capstone_submissions document show the status of its schedule (only writes what changed).</summary>
+        public static void SyncCoordinatorStatus(IEnumerable<BsonDocument> scheduleDocs)
+        {
+            var wanted = new Dictionary<ObjectId, BsonDocument>();
+            foreach (BsonDocument d in scheduleDocs)
+            {
+                ObjectId? oid = ParseId(Str(d, "titleId"));
+                if (oid.HasValue && CoDb.CoStatus(d) != null) wanted[oid.Value] = d;
+            }
+            if (wanted.Count == 0) return;
+
+            var filter = Builders<BsonDocument>.Filter;
+            List<BsonDocument> submissions = Collection()
+                .Find(filter.In("_id", wanted.Keys.ToList()))
+                .Project(Builders<BsonDocument>.Projection
+                    .Include("coordinatorStatus").Include("underReview").Include("scheduleId"))
+                .ToList();
+
+            foreach (BsonDocument s in submissions)
+            {
+                BsonDocument sched = wanted[s["_id"].AsObjectId];
+                string status = CoDb.CoStatus(sched);
+                string scheduleId = DocId(sched);
+                BsonValue flag;
+                bool current = s.TryGetValue("underReview", out flag) && flag.IsBoolean && flag.AsBoolean;
+
+                if (Str(s, "coordinatorStatus") == status &&
+                    Str(s, "scheduleId") == scheduleId &&
+                    current == (status == "under-review"))
+                    continue;
+
+                MarkSubmission(DocId(s), scheduleId, status, Str(sched, "problem"));
+            }
+        }
+
         public static HashSet<string> SubmissionIds()
         {
             return new HashSet<string>(

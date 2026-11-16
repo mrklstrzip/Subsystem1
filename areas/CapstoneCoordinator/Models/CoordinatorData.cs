@@ -18,8 +18,16 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public string Program { get; set; }
         public string Section { get; set; }
         public DateTime? Date { get; set; }
+        public DateTime? Created { get; set; }      // when the schedule (or, for a PM who has not submitted, the account) was made
+        public string PmId { get; set; }
         public string Status { get; set; }
         public bool Declined { get; set; }
+
+        // School year this row belongs to (the filter on the page)
+        public string SchoolYear
+        {
+            get { return Subsystem1.Data.SchoolYear.Of(Date ?? Created ?? DateTime.UtcNow.AddHours(8)); }
+        }
 
         public string Badge { get { return CoDb.SectionLabel(Section, Program); } }
         public string BadgeClass { get { return CoDb.BadgeClass(Program); } }
@@ -29,6 +37,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             {
                 return Status == "under-review" ? "Under Review"
                     : Status == "submitted" ? "Submitted"
+                    : Status == "not-submitted" ? "Not Yet Submitted"
                     : "To Submit";
             }
         }
@@ -38,7 +47,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             {
                 return Date.HasValue
                     ? Date.Value.ToString("MM-dd-yy", CultureInfo.InvariantCulture)
-                    : "-------";
+                    : (Status == "not-submitted" ? "\u2014" : "-------");
             }
         }
     }
@@ -55,8 +64,10 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public int Start { get; set; }
         public int End { get; set; }
         public string Room { get; set; }
+        public string Building { get; set; }
         public string Status { get; set; }
 
+        public string SchoolYear { get { return Subsystem1.Data.SchoolYear.Of(Date); } }
         public string Badge { get { return CoDb.SectionLabel(Section, Program); } }
         public string BadgeClass { get { return CoDb.BadgeClass(Program); } }
         public string StatusLabel
@@ -70,7 +81,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         }
         public string DateText { get { return Date.ToString("MM-dd-yy", CultureInfo.InvariantCulture); } }
         public string TimeText { get { return CoDb.FmtCompact(Start) + " - " + CoDb.FmtCompact(End); } }
-        public string ShortDate { get { return Date.ToString("MMM d", CultureInfo.InvariantCulture); } }
+        public string ShortDate { get { return Date.ToString("MM-dd-yy", CultureInfo.InvariantCulture); } }
         public string ShortTime
         {
             get
@@ -89,6 +100,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public string Program { get; set; }
         public string Section { get; set; }
         public string Room { get; set; }
+        public string Building { get; set; }
         public string Type { get; set; }
         public string Description { get; set; }
         public DateTime DetectedAt { get; set; }
@@ -101,18 +113,19 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             Steps = new List<KeyValuePair<string, string>>();
         }
 
+        public string SchoolYear { get { return Subsystem1.Data.SchoolYear.Of(DetectedAt); } }
         public string Badge { get { return CoDb.SectionLabel(Section, Program); } }
         public string BadgeClass { get { return CoDb.BadgeClass(Program); } }
         public string DetectedText
         {
-            get { return DetectedAt.ToString("M-d-yyyy", CultureInfo.InvariantCulture); }
+            get { return DetectedAt.ToString("MM-dd-yy", CultureInfo.InvariantCulture); }
         }
         public string ResolvedText
         {
             get
             {
                 return ResolvedAt.HasValue
-                    ? ResolvedAt.Value.ToString("M-d-yyyy", CultureInfo.InvariantCulture)
+                    ? ResolvedAt.Value.ToString("MM-dd-yy", CultureInfo.InvariantCulture)
                     : "-------";
             }
         }
@@ -134,6 +147,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public List<ActivityRow> Recent { get; private set; }
         public List<string> FacultyNames { get; private set; }
         public List<string> RoomNames { get; private set; }
+        public Dictionary<string, string> RoomBuildings { get; private set; }   // room name -> building name
 
         public CoordinatorData()
         {
@@ -143,6 +157,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             Recent = new List<ActivityRow>();
             FacultyNames = new List<string>();
             RoomNames = new List<string>();
+            RoomBuildings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
         public int ToSubmit { get { return Schedules.Count(s => s.Status == "to-submit"); } }
@@ -154,7 +169,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         }
 
         /// <param name="generate">Generate schedules for titles that have no schedule yet.</param>
-        public static CoordinatorData Load(bool generate, bool onlySubsystem2 = false)
+        public static CoordinatorData Load(bool generate, bool onlySubsystem2 = false, bool includeNotSubmitted = false)
         {
             if (generate)
             {
@@ -164,6 +179,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
             var data = new CoordinatorData();
             DateTime now = NowManila();
+            var buildingOfRoom = PlanContext.BuildingNamesByRoom();
 
             List<BsonDocument> docs = Schedules().Find(new BsonDocument()).ToList();
 
@@ -236,6 +252,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                         Program = program,
                         Section = section,
                         Date = day,
+                        Created = Stamp(d, "generatedAt") ?? Stamp(d, "createdAt"),
+                        PmId = Str(d, "projectManagerId"),
                         Status = status,
                         Declined = CoDb.StatusOf(d) == "declined" ||
                                    CoDb.StatusOf(d) == "rejected"
@@ -269,13 +287,20 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                         Start = st.Value,
                         End = en.Value,
                         Room = room != "" ? room : "TBA",
+                        Building = BuildingOf(d, buildingOfRoom),
                         Status = defenseStatus
                     });
                 }
             }
 
+            // Mirror the Under Review state onto the capstone_submissions documents (see Subsystem2Manuscripts).
+            try { Subsystem2Manuscripts.SyncCoordinatorStatus(docs); }
+            catch { /* the page still loads; the next visit tries again */ }
+
+            if (includeNotSubmitted) AddNotYetSubmitted(data, docs);
+
             data.Schedules = data.Schedules
-                .OrderBy(s => s.Status == "under-review" ? 0 : s.Status == "to-submit" ? 1 : 2)
+                .OrderBy(s => s.Status == "under-review" ? 0 : s.Status == "to-submit" ? 1 : s.Status == "not-submitted" ? 3 : 2)
                 .ThenBy(s => s.Title, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
@@ -285,8 +310,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 .ToList();
 
             // Conflicts
-            var byId = data.Schedules.ToDictionary(s => s.Id, s => s);
+            var byId = data.Schedules.Where(s => s.Id != "").ToDictionary(s => s.Id, s => s);   // PMs who have not submitted have no schedule id
             var roomOf = docs.ToDictionary(d => DocId(d), d => Str(d, "roomName"));
+            var buildingOf = docs.ToDictionary(d => DocId(d), d => BuildingOf(d, buildingOfRoom));
 
             foreach (BsonDocument c in CoDb.Conflicts().Find(new BsonDocument()).ToList())
             {
@@ -302,6 +328,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     Program = sr.Program,
                     Section = sr.Section,
                     Room = roomOf.ContainsKey(sid) && roomOf[sid] != "" ? roomOf[sid] : "-",
+                    Building = buildingOf.ContainsKey(sid) ? buildingOf[sid] : "",
                     Type = Str(c, "type"),
                     Description = Str(c, "description"),
                     DetectedAt = Stamp(c, "detectedAt") ?? now,
@@ -362,8 +389,95 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 .Select(r => r.Name)
                 .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
                 .ToList();
+            foreach (EngRoom r in ctx.Rooms) data.RoomBuildings[r.Name] = r.Building ?? "";
 
             return data;
+        }
+
+        // ------------------------------------------------------------------
+        // Project Managers who have not submitted a manuscript yet
+        // ------------------------------------------------------------------
+        public class PmWaiting
+        {
+            public string Id;
+            public string Name;
+            public string Email;
+            public string Program;
+            public string Section;
+            public string Adviser;
+            public DateTime? Created;
+        }
+
+        /// <summary>Active Project Manager accounts with no capstone submission and no schedule yet.</summary>
+        public static List<PmWaiting> PmsNotYetSubmitted(IEnumerable<BsonDocument> scheduleDocs = null)
+        {
+            var have = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (BsonDocument d in scheduleDocs ?? Schedules().Find(new BsonDocument()).ToList())
+            {
+                string m = Str(d, "projectManagerId");
+                if (m != "") have.Add(m);
+            }
+            foreach (string id in Subsystem2Manuscripts.SubmitterIds()) have.Add(id);
+
+            List<BsonDocument> users = Users().Find(new BsonDocument()).ToList();
+            var nameById = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (BsonDocument u in users) nameById[DocId(u)] = PlainName(u);
+
+            var list = new List<PmWaiting>();
+            foreach (BsonDocument u in users)
+            {
+                if (!IsActive(u) ||
+                    Subsystem1.Areas.Admin.Controllers.AdminApiController.RoleKey(Str(u, "role")) != "project-manager")
+                    continue;
+
+                string id = DocId(u);
+                if (have.Contains(id)) continue;
+
+                string adviserId = Str(u, "adviserId");
+                string adviser;
+                if (adviserId == "" || !nameById.TryGetValue(adviserId, out adviser)) adviser = Str(u, "adviser");
+
+                list.Add(new PmWaiting
+                {
+                    Id = id,
+                    Name = PlainName(u),
+                    Email = Str(u, "email"),
+                    Program = CoDb.ProgramCode(Str(u, "program")),
+                    Section = Str(u, "section"),
+                    Adviser = adviser,
+                    Created = Stamp(u, "createdAt")
+                });
+            }
+            return list;
+        }
+
+        private static void AddNotYetSubmitted(CoordinatorData data, List<BsonDocument> docs)
+        {
+            foreach (PmWaiting pm in PmsNotYetSubmitted(docs))
+            {
+                data.Schedules.Add(new SchedRow
+                {
+                    Id = "",
+                    PmId = pm.Id,
+                    Title = "",
+                    Author = pm.Name,
+                    Adviser = pm.Adviser,
+                    Program = pm.Program,
+                    Section = pm.Section,
+                    Date = null,
+                    Created = pm.Created,
+                    Status = "not-submitted"
+                });
+            }
+        }
+
+        // Building of a schedule's room: saved on the schedule when it was generated, otherwise looked up from the room.
+        private static string BuildingOf(BsonDocument d, Dictionary<string, string> buildingOfRoom)
+        {
+            string saved = Str(d, "buildingName");
+            if (saved != "") return saved;
+            string name;
+            return buildingOfRoom != null && buildingOfRoom.TryGetValue(Str(d, "roomId"), out name) ? name : "";
         }
 
         // ------------------------------------------------------------------
@@ -442,7 +556,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             }
 
             string submitted = t != null && Stamp(t, "submittedAt").HasValue
-                ? Stamp(t, "submittedAt").Value.ToString("MMM d, yyyy", CultureInfo.InvariantCulture)
+                ? Stamp(t, "submittedAt").Value.ToString("MM-dd-yy", CultureInfo.InvariantCulture)
                 : "-";
 
             return new
@@ -468,7 +582,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 date = Str(d, "date"),
                 start = st.HasValue ? CoDb.Hhmm(st.Value) : "",
                 end = en.HasValue ? CoDb.Hhmm(en.Value) : "",
-                room = Str(d, "roomName")
+                room = Str(d, "roomName"),
+                building = BuildingOf(d, PlanContext.BuildingNamesByRoom())
             };
         }
     }

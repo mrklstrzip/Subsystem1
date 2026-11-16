@@ -24,6 +24,13 @@
     </div>
 
     <div class="sa-filter">
+        <label>School Year</label>
+        <i class="fa-solid fa-calendar-days"></i>
+        <select id="fSY" data-sy-filter></select>
+        <i class="fa-solid fa-chevron-down sa-chev"></i>
+    </div>
+
+    <div class="sa-filter">
         <label>Program</label>
         <i class="fa-solid fa-graduation-cap"></i>
         <select id="fProgram">
@@ -75,6 +82,7 @@
             @foreach (var m in items)
             {
                 <tr data-id="@m.Id"
+                    data-sy="@(m.HasDate ? Subsystem1.Data.SchoolYear.Of(m.Date) : "")"
                     data-program="@m.Program"
                     data-status="@m.Status"
                     data-adviser="@m.Adviser"

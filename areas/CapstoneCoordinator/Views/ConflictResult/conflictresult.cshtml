@@ -56,7 +56,7 @@
         <tbody>
             @foreach (var c in Model.Conflicts)
             {
-                <tr class="clickable-row" tabindex="0" data-id="@c.ScheduleId"
+                <tr class="clickable-row" tabindex="0" data-id="@c.ScheduleId" data-sy="@c.SchoolYear"
                     data-status="@(c.Resolved ? "resolved" : "in-progress")" data-steps-done="@c.StepsDone"
                     data-type="@c.Type" data-description="@c.Description"
                     data-steps="@(string.Join("\n", c.Steps.Select(s => s.Key + "\t" + s.Value)))">
@@ -64,7 +64,7 @@
                         <div class="manuscript-title-text">@c.Title</div>
                         <span class="program-badge @c.BadgeClass">@c.Badge</span>
                     </td>
-                    <td class="room-cell">@c.Room</td>
+                    <td class="room-cell" data-building="@c.Building">@c.Room</td>
                     <td class="conflict-cell">@c.Type</td>
                     <td class="desc-cell">@c.Description</td>
                     <td class="date-cell">@c.DetectedText</td>
@@ -239,6 +239,12 @@
                         </dd>
                     </div>
                     <div>
+                        <dt>BUILDING</dt>
+                        <dd>
+                            <span id="mBuilding"></span>
+                        </dd>
+                    </div>
+                    <div>
                         <dt>ROOM</dt>
                         <dd>
                             <span class="view-val" id="mRoom"></span>
@@ -270,12 +276,12 @@
 <datalist id="roomList">
     @foreach (var n in Model.RoomNames)
     {
-        <option value="@n"></option>
+        <option value="@n" data-building="@(Model.RoomBuildings.ContainsKey(n) ? Model.RoomBuildings[n] : "")"></option>
     }
 </datalist>
 
 <script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.0"></script>
-<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.0"></script>
+<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.3"></script>
 <script>
     (function () {
         function $(id) { return document.getElementById(id); }

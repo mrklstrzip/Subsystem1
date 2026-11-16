@@ -29,14 +29,15 @@
 </div>
 
 <h3 style="margin:24px 0 12px;font-size:17px;font-weight:600">Recent screenings</h3>
+<div id="recentScreenings">
 @foreach (var s in Model)
 {
-    <div class="os-card">
+    <div class="os-card recent-item">
         <div class="os-screen-head">
             <strong>@s.Title</strong>
             <span class="os-score">Highest overlap: <b>@s.HighestScore.ToString("0.0")%</b></span>
         </div>
-        <div class="os-note">@s.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") · compared with @s.RepositoryCount records</div>
+        <div class="os-note">@s.CreatedAt.ToLocalTime().ToString("MM-dd-yy | h:mm tt") · compared with @s.RepositoryCount records</div>
         @if (s.Matches != null)
         {
             <div class="os-table-wrap" style="margin-top:12px">
@@ -66,7 +67,17 @@
         </form>
     </div>
 }
+</div>
 @if (Model.Count == 0)
 {
     <div class="os-card os-empty">No screenings yet. Submit a proposed title above to begin.</div>
+}
+else
+{
+    <div class="recent-pager" id="recentPager" hidden>
+        <button type="button" class="recent-pager-btn" id="recentPrev" aria-label="Newer screenings"><i class="fa fa-chevron-left"></i></button>
+        <span class="recent-pager-text" id="recentPagerText"></span>
+        <button type="button" class="recent-pager-btn" id="recentNext" aria-label="Older screenings"><i class="fa fa-chevron-right"></i></button>
+    </div>
+    <script src="@Url.Content("~/Scripts/recent-pager.js")?v=1.0"></script>
 }

@@ -896,3 +896,16 @@ body.modal-open {
     .panelist-role.chairman {
         color: #A33F53;
     }
+
+/* ---- Project managers who have not submitted a manuscript yet ---- */
+.status-badge.not-submitted {
+    background-color: #F3F4F6;
+    color: #4B5563;
+    border: 1px solid #D1D5DB;
+}
+
+.schedule-table .no-action {
+    color: #9092AD;
+    font-weight: 600;
+    padding-right: 14px;
+}

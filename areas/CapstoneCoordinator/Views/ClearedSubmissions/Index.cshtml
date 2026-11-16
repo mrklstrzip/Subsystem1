@@ -36,7 +36,7 @@
                     foreach (var item in Model)
                     {
                         var repositoryStatus = item.IsHistorical ? "Historical" : "Filed";
-                        <tr>
+                        <tr data-sy="@Subsystem1.Data.SchoolYear.Of(item.FiledAt ?? item.DisseminatedAt ?? item.ClearanceIssuedAt)">
                             <td data-label="Manuscript / group">
                                 <div class="manuscript-title-text">@item.Title</div>
                                 <span class="program-badge">@(String.IsNullOrWhiteSpace(item.ClearanceGroup) ? "Group not recorded" : item.ClearanceGroup)</span>

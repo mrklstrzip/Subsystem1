@@ -5,7 +5,7 @@
     ViewBag.Title = "Manuscript Management";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.6" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.7" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -82,9 +82,9 @@
         <tbody>
             @foreach (var s in Model.Schedules)
             {
-                <tr data-id="@s.Id">
+                <tr data-id="@s.Id" data-sy="@s.SchoolYear">
                     <td>
-                        <div class="manuscript-title-text">@s.Title</div>
+                        <div class="manuscript-title-text">@(s.Status == "not-submitted" ? "\u2014" : s.Title)</div>
                         <span class="program-badge @s.BadgeClass">@s.Badge</span>
                     </td>
                     <td class="author-cell">@s.Author</td>
@@ -94,7 +94,14 @@
                         <span class="status-badge @s.Status">@s.StatusLabel</span>
                     </td>
                     <td class="action-cell">
-                        <button class="btn-view" data-id="@s.Id">View</button>
+                        @if (s.Status == "not-submitted")
+                        {
+                            <span class="no-action">&mdash;</span>
+                        }
+                        else
+                        {
+                            <button class="btn-view" data-id="@s.Id">View</button>
+                        }
                     </td>
                 </tr>
             }
@@ -103,168 +110,11 @@
 </div>
 
 
-<div class="modal-overlay" id="scheduleModal" aria-hidden="true">
-    <div class="schedule-modal" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
-
-        <button type="button" class="modal-close-icon" id="modalCloseIcon" aria-label="Close">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        <h2 class="modal-heading" id="modalHeading">Generated Schedule</h2>
-        <p class="modal-subheading">College of Computer Studies - QCU &nbsp;·&nbsp; Defense Schedule</p>
-
-        <!-- Summary card -->
-        <div class="modal-summary">
-            <div class="summary-row summary-row-4">
-                <div class="summary-item">
-                    <span class="summary-label">Project Title</span>
-                    <span class="summary-value" id="mTitle"></span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Date Submitted</span>
-                    <span class="summary-value" id="mDateSubmitted"></span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Problem</span>
-                    <span class="summary-value" id="mProblem"></span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Current Status</span>
-                    <span class="status-badge" id="mStatus"></span>
-                </div>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-row summary-row-3">
-                <div class="summary-item">
-                    <span class="summary-label">Project Manager</span>
-                    <span class="summary-value" id="mStudent"></span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Program</span>
-                    <span class="summary-value" id="mProgram"></span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Adviser</span>
-                    <span class="summary-value" id="mAdviser"></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Body: Abstract + Panelists -->
-        <div class="modal-body-grid">
-            <div class="modal-panel abstract-panel">
-                <div class="manuscript-viewer-header">
-                    <h3 class="panel-title">Manuscript</h3>
-                    <a id="mManuscriptOpen" class="manuscript-open-link" target="_blank" rel="noopener" hidden>Open PDF</a>
-                </div>
-                <div class="pdf-viewer" id="mPdfViewer" aria-label="Manuscript PDF viewer">
-                    <div class="pdf-toolbar">
-                        <button type="button" id="pdfPrev" aria-label="Previous page">‹</button>
-                        <span><span id="pdfPage">—</span> / <span id="pdfPages">—</span></span>
-                        <button type="button" id="pdfNext" aria-label="Next page">›</button>
-                        <button type="button" id="pdfZoomOut" aria-label="Zoom out">−</button>
-                        <button type="button" id="pdfZoomIn" aria-label="Zoom in">+</button>
-                    </div>
-                    <div class="pdf-canvas-wrap" id="pdfCanvasWrap">
-                        <canvas id="pdfCanvas"></canvas>
-                        <p class="pdf-message" id="pdfMessage">No PDF manuscript is available for this submission.</p>
-                    </div>
-                </div>
-                <span class="panel-footnote" id="mSubmittedNote"></span>
-            </div>
-
-            <div class="modal-panel panelists-panel">
-                <div class="panel-header-row">
-                    <h3 class="panel-title no-margin">Assigned Panelists</h3>
-                    <div class="edit-actions">
-                        <button type="button" class="btn-edit-panelists" id="btnEditPanelists" title="Edit panelists and schedule">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button type="button" class="btn-edit-panelists btn-cancel-edit" id="btnCancelEdit" title="Cancel" hidden>
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                        <button type="button" class="btn-edit-panelists btn-save-edit" id="btnSaveEdit" title="Save changes" hidden>
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="panelist-head">
-                    <span>Panelists</span>
-                    <span>Expertise Match</span>
-                </div>
-                <div id="mPanelists"></div>
-
-                <h3 class="panel-title schedule-title">Proposed Defense Schedule</h3>
-                <dl class="defense-schedule">
-                    <div>
-                        <dt>TIME</dt>
-                        <dd>
-                            <span class="view-val" id="mTime"></span>
-                            <span class="edit-val">
-                                <input type="time" class="edit-input" id="eTimeStart" aria-label="Start time">
-                                <span class="time-sep">&ndash;</span>
-                                <input type="time" class="edit-input" id="eTimeEnd" aria-label="End time">
-                            </span>
-                        </dd>
-                    </div>
-                    <div>
-                        <dt>DATE</dt>
-                        <dd>
-                            <span class="view-val" id="mDate"></span>
-                            <span class="edit-val">
-                                <input type="date" class="edit-input" id="eDate" aria-label="Defense date">
-                            </span>
-                        </dd>
-                    </div>
-                    <div>
-                        <dt>BUILDING</dt>
-                        <dd>
-                            <span class="view-val" id="mBuilding"></span>
-                            <span class="edit-val">
-                                <input type="text" class="edit-input building-input" id="eBuilding" maxlength="30" aria-label="Building">
-                            </span>
-                        </dd>
-                    </div>
-                    <div>
-                        <dt>ROOM</dt>
-                        <dd>
-                            <span class="view-val" id="mRoom"></span>
-                            <span class="edit-val">
-                                <input type="text" class="edit-input room-input" id="eRoom" maxlength="20" aria-label="Room">
-                            </span>
-                        </dd>
-                    </div>
-                </dl>
-                <p class="edit-error" id="mEditError" hidden></p>
-            </div>
-        </div>
-
-        <!-- Footer buttons -->
-        <div class="modal-footer">
-            <button type="button" class="btn-modal btn-modal-close" id="modalCloseBtn">Close</button>
-            <button type="button" class="btn-modal btn-modal-submit" id="modalSubmitBtn">Submit</button>
-        </div>
-    </div>
-</div>
-
-
-<datalist id="facultyList">
-    @foreach (var n in Model.FacultyNames)
-    {
-        <option value="@n"></option>
-    }
-</datalist>
-<datalist id="roomList">
-    @foreach (var n in Model.RoomNames)
-    {
-        <option value="@n"></option>
-    }
-</datalist>
+@Html.Partial("_ScheduleModal", Model)
 
 <script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.2"></script>
+<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.3"></script>
 <script>
     (function () {
         // each "View" button opens the pop-up of its schedule (the data comes from the database)
@@ -274,49 +124,29 @@
         });
 
 
-        //for testing lang ng frontend para makita itsura (pa remove nalang pag aayusin backend)
+        // Notify PM: reminds every project manager who has not submitted a manuscript yet
         var notifyBtn = document.getElementById("btnNotifyPm");
         if (notifyBtn) notifyBtn.addEventListener("click", function () {
-            Notice.success("Notification sent", "All project managers who haven't submitted their manuscript have been notified.");
+            if (notifyBtn.disabled) return;
+            notifyBtn.disabled = true;
+            fetch("@Url.Action("notifyPms", "CoordinatorApi", new { area = "CapstoneCoordinator" })", {
+                method: "POST",
+                credentials: "same-origin",
+                cache: "no-store",
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.unauthorized) { window.location.href = "/Auth/Login/login"; return; }
+                    if (res && res.success) {
+                        if (res.total === 0) Notice.info("Nothing to send", res.message);
+                        else Notice.success("Notification sent", res.message);
+                    } else {
+                        Notice.error("Could not notify", (res && res.message) || "Please try again.");
+                    }
+                })
+                .catch(function () { Notice.error("Could not notify", "Please check your connection and try again."); })
+                .then(function () { notifyBtn.disabled = false; });
         });
-
-        var panelists = document.getElementById("mPanelists");
-        var defaultPercent = { high: 90, medium: 70, low: 40 };
-
-        function addPercents() {
-            var pills = panelists.querySelectorAll(".match-pill");
-            for (var i = 0; i < pills.length; i++) {
-                var pill = pills[i];
-                if (pill.parentNode.classList.contains("match-wrap")) continue;
-
-                var level = pill.classList.contains("high") ? "high"
-                    : pill.classList.contains("medium") ? "medium" : "low";
-
-                var pct = document.createElement("span");
-                pct.className = "match-percent";
-                pct.textContent = pill.getAttribute("data-percent") ? pill.getAttribute("data-percent") + "%" : "\u2014";
-
-                var wrap = document.createElement("span");
-                wrap.className = "match-wrap";
-                pill.parentNode.insertBefore(wrap, pill);
-                wrap.appendChild(pct);
-                wrap.appendChild(pill);
-            }
-        }
-        new MutationObserver(addPercents).observe(panelists, { childList: true, subtree: true });
-        addPercents();
-
-        var mBuilding = document.getElementById("mBuilding");
-        var eBuilding = document.getElementById("eBuilding");
-        mBuilding.textContent = "-";
-
-        document.getElementById("btnEditPanelists").addEventListener("click", function () {
-            eBuilding.value = mBuilding.textContent === "-" ? "" : mBuilding.textContent;
-        });
-        document.getElementById("btnSaveEdit").addEventListener("click", function () {
-            mBuilding.textContent = eBuilding.value.trim() || "-";
-        });
-        new MutationObserver(function () { mBuilding.textContent = "-"; })
-            .observe(document.getElementById("mTitle"), { childList: true, characterData: true, subtree: true });
     })();
 </script>

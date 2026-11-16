@@ -297,8 +297,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                         email = Str(d, "email"),
                         status = status,
                         error = status == "failed" ? Str(d, "emailError") : "",
-                        sentAt = (sent ?? created).HasValue ? (sent ?? created).Value.AddHours(8).ToString("MMM d, yyyy h:mm tt", System.Globalization.CultureInfo.InvariantCulture) : "-",
-                        expiresAt = exp.HasValue ? exp.Value.AddHours(8).ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture) : "-",
+                        sentAt = (sent ?? created).HasValue ? (sent ?? created).Value.AddHours(8).ToString("MM-dd-yy | h:mm tt", System.Globalization.CultureInfo.InvariantCulture) : "-",
+                        expiresAt = exp.HasValue ? exp.Value.AddHours(8).ToString("MM-dd-yy", System.Globalization.CultureInfo.InvariantCulture) : "-",
                         canAct = status == "pending" || status == "expired" || status == "failed"
                     };
                 }).ToList();
