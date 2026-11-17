@@ -395,6 +395,35 @@ namespace Subsystem1.Areas.CampusDirector.Controllers
                 BsonDocument user = Director();
                 if (user == null) return Expired();
 
+                return Json(StateData(user), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Error(ex, true);
+            }
+        }
+
+        // Defense schedules that hold a room on one day (read-only).
+        [HttpGet]
+        public ActionResult schedule(string date)
+        {
+            try
+            {
+                Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
+
+                if (Director() == null) return Expired();
+
+                return Json(ScheduleData(date), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Error(ex, true);
+            }
+        }
+
+        // Shared with the Admin read-only Room Schedule page (user may be null there).
+        internal static object StateData(BsonDocument user)
+        {
                 var emptyFilter = new BsonDocument();
                 List<BsonDocument> buildingDocs = Buildings()
     .Find(emptyFilter)
@@ -488,33 +517,20 @@ namespace Subsystem1.Areas.CampusDirector.Controllers
 
                 DateTime now = Manila();
 
-                return Json(new
+                return (object)new
                 {
                     success = true,
-                    me = MeRow(user),
+                    me = user == null ? null : MeRow(user),
                     buildings = buildings,
                     rooms = rooms,
                     activity = activity,
                     today = now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                     nowMinutes = now.Hour * 60 + now.Minute
-                }, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-                return Error(ex, true);
-            }
+                };
         }
 
-        // Defense schedules that hold a room on one day (read-only).
-        [HttpGet]
-        public ActionResult schedule(string date)
+        internal static object ScheduleData(string date)
         {
-            try
-            {
-                Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
-
-                if (Director() == null) return Expired();
-
                 DateTime now = Manila();
                 DateTime day;
                 if (!DateTime.TryParseExact(Clean(date), "yyyy-MM-dd", CultureInfo.InvariantCulture,
@@ -563,19 +579,14 @@ namespace Subsystem1.Areas.CampusDirector.Controllers
                     });
                 }
 
-                return Json(new
+                return (object)new
                 {
                     success = true,
                     date = dayText,
                     items = items,
                     today = now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                     nowMinutes = now.Hour * 60 + now.Minute
-                }, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-                return Error(ex, true);
-            }
+                };
         }
 
         // ========================= BUILDINGS =========================

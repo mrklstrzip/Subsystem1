@@ -331,3 +331,36 @@
         flex: 1;
         min-width: 180px;
     }
+
+/* Title Screening: "Recent screenings" pager (5 at a time) */
+.recent-item[hidden] { display: none; }
+
+.recent-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 6px 0 24px;
+}
+.recent-pager[hidden] { display: none; }
+
+.recent-pager-text {
+    min-width: 90px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374A60;
+}
+
+.recent-pager-btn {
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid #374A60;
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: #374A60;
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease;
+}
+.recent-pager-btn:hover:not(:disabled) { background: #223249; color: #FFFFFF; }
+.recent-pager-btn:disabled { opacity: .35; cursor: default; }

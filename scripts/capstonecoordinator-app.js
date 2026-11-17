@@ -13,9 +13,14 @@
      * ------------------------------------------------------------------ */
     var PAGES = [
         {
+            tableId: 'assessmentCasesTable',
+            emptyText: 'No assessment cases found',
+            filters: { status: ['Pending', 'In Progress', 'Completed', 'Resolved', 'Approved', 'Rejected'] }
+        },
+        {
             tableId: 'scheduleTable',
             emptyText: 'No schedules found',
-            filters: { program: true, status: ['Pending Submission', 'To Submit', 'Under Review', 'Submitted'], adviser: true }
+            filters: { program: true, status: ['Pending Submission', 'To Submit', 'Under Review', 'Submitted', 'Not Yet Submitted', 'Rejected'], adviser: true }
         },
         {
             tableId: 'conflictTable',

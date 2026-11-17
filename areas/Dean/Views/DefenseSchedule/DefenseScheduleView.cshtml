@@ -21,6 +21,13 @@
     </div>
 
     <div class="sa-filter">
+        <label>School Year</label>
+        <i class="fa-solid fa-calendar-days"></i>
+        <select id="fSY" data-sy-filter></select>
+        <i class="fa-solid fa-chevron-down sa-chev"></i>
+    </div>
+
+    <div class="sa-filter">
         <label>Program</label>
         <i class="fa-solid fa-graduation-cap"></i>
         <select name="program">
@@ -81,7 +88,7 @@
             }
             @foreach (var i in Model.Items)
             {
-                <tr class="sa-row-click" data-sa-open data-id="@i.Id">
+                <tr class="sa-row-click" data-sa-open data-id="@i.Id" data-sy="@Subsystem1.Data.SchoolYear.Of(i.Date)">
                     <td class="sa-title">
                         <strong>@i.Manuscript</strong>
                         <span class="sa-chip chip-@i.ProgramClass">@i.Section</span>
@@ -102,7 +109,7 @@
 @Html.Partial("_ScheduleApprovalModal")
 
 @section scripts {
-    <script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.3"></script>
+    <script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.4"></script>
     <script src="@Url.Content("~/Scripts/DeanDefenseSched.js")?v=1.0"></script>
     <script src="@Url.Content("~/Scripts/dean-select.js")?v=1.0"></script>
 }

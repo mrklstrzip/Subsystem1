@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin - @ViewBag.Title</title>
-    <link href="@Url.Content("~/Content/css/layout.css")?v=1.1" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/css/layout.css")?v=1.5" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/fontawesome/css/all.min.css")?v=1.0" rel="stylesheet" />
     <link href="@Url.Content("~/Content/css/logout-confirm.css")?v=1.0" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/css/fonts.css")?v=1.0" rel="stylesheet" type="text/css" />
@@ -58,6 +58,18 @@
                 <a href="@Url.Action("expertisetag", "ExpertiseTag")" class="@(currentController == "ExpertiseTag" ? "active" : "")" title="Expertise Tag">
                     <i class="fa fa-tags"></i>
                     <span class="nav-label">Expertise Tag</span>
+                </a>
+                <a href="@Url.Action("defenseschedule", "DefenseSchedule")" class="@(currentController == "DefenseSchedule" ? "active" : "")" title="Defense Schedule">
+                    <i class="fa fa-calendar-day"></i>
+                    <span class="nav-label">Defense Schedule</span>
+                </a>
+                <a href="@Url.Action("scheduleapproval", "ScheduleApproval")" class="@(currentController == "ScheduleApproval" ? "active" : "")" title="Schedule Approval">
+                    <i class="fa fa-calendar-check"></i>
+                    <span class="nav-label">Schedule Approval</span>
+                </a>
+                <a href="@Url.Action("roomschedule", "RoomSchedule")" class="@(currentController == "RoomSchedule" ? "active" : "")" title="Room Schedule">
+                    <i class="fa fa-calendar-alt"></i>
+                    <span class="nav-label">Room Schedule</span>
                 </a>
             </nav>
             <div class="sb-footer">

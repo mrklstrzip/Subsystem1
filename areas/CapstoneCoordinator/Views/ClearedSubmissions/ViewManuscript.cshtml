@@ -23,7 +23,7 @@
         </div>
 
         <div class="dean-paper-status-row">
-            <div><span>Filed on</span><strong>@(recordDate.HasValue ? recordDate.Value.ToLocalTime().ToString("MMM d, yyyy", CultureInfo.InvariantCulture) : "Not recorded")</strong></div>
+            <div><span>Filed on</span><strong>@(recordDate.HasValue ? recordDate.Value.ToLocalTime().ToString("MM-dd-yy", CultureInfo.InvariantCulture) : "Not recorded")</strong></div>
             <div><span>Repository status</span><strong class="dean-paper-status">@repositoryStatus</strong></div>
             <div><span>Program / Section</span><strong>@Model.Program / @Model.Section</strong></div>
         </div>

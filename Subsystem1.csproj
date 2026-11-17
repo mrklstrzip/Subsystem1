@@ -216,10 +216,14 @@
     <Content Include="Content\css\loading.css" />
     <Content Include="Content\css\logout-confirm.css" />
     <Content Include="Content\css\notice.css" />
+    <Content Include="Content\css\school-year-filter.css" />
     <Content Include="Content\css\profile.css" />
     <Content Include="Content\css\layout.css" />
     <Content Include="Content\css\auth.css" />
     <Content Include="Content\css\admin\usermanagement.css" />
+    <Content Include="Content\css\admin\defenseschedule.css" />
+    <Content Include="Content\css\admin\scheduleapproval.css" />
+    <Content Include="Content\css\admin\roomschedule.css" />
     <Content Include="Content\fontawesome\css\all.css" />
     <Content Include="Content\fontawesome\css\all.min.css" />
     <Content Include="Content\fontawesome\css\brands.css" />
@@ -251,6 +255,8 @@
     <Content Include="Content\images\student-avatar.png" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\admin-app.js" />
+    <Content Include="Scripts\admin-roomschedule.js" />
+    <Content Include="Scripts\admin-scheduleapproval.js" />
     <Content Include="Scripts\auth.js" />
     <Content Include="Scripts\campusdirector-app.js" />
     <Content Include="Scripts\coordinator-privacy.js" />
@@ -259,6 +265,8 @@
     <Content Include="Scripts\dean-select.js" />
     <Content Include="Scripts\loading.js" />
     <Content Include="Scripts\notice.js" />
+    <Content Include="Scripts\recent-pager.js" />
+    <Content Include="Scripts\school-year-filter.js" />
     <Content Include="Scripts\xlsx.full.min.js" />
     <Content Include="Scripts\campusdirector-modal.js" />
     <Content Include="Scripts\campusdirector-profile.js" />
@@ -294,6 +302,9 @@
     <Compile Include="Areas\Admin\Controllers\FacultyProfileController.cs" />
     <Compile Include="Areas\Admin\Controllers\ProfileController.cs" />
     <Compile Include="Areas\Admin\Controllers\UserManagementController.cs" />
+    <Compile Include="Areas\Admin\Controllers\DefenseScheduleController.cs" />
+    <Compile Include="Areas\Admin\Controllers\ScheduleApprovalController.cs" />
+    <Compile Include="Areas\Admin\Controllers\RoomScheduleController.cs" />
     <Compile Include="Areas\Dean\Controllers\DeanApiController.cs" />
     <Compile Include="Areas\Dean\Controllers\OversightController.cs" />
     <Compile Include="Areas\Dean\Controllers\RepositoryController.cs" />
@@ -341,6 +352,7 @@
     <Compile Include="Data\FacultyNames.cs" />
     <Compile Include="Data\SharedDb.cs" />
     <Compile Include="Data\DisplayFormat.cs" />
+    <Compile Include="Data\SchoolYear.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -381,6 +393,10 @@
     <Content Include="Areas\Admin\Views\FacultyProfile\facultyprofile.cshtml" />
     <Content Include="Areas\Admin\Views\Profile\profile.cshtml" />
     <Content Include="Areas\Admin\Views\UserManagement\usermanagement.cshtml" />
+    <Content Include="Areas\Admin\Views\DefenseSchedule\defenseschedule.cshtml" />
+    <Content Include="Areas\Admin\Views\ScheduleApproval\scheduleapproval.cshtml" />
+    <Content Include="Areas\Admin\Views\ScheduleApproval\_ScheduleDetailsModal.cshtml" />
+    <Content Include="Areas\Admin\Views\RoomSchedule\roomschedule.cshtml" />
     <Content Include="Areas\CampusDirector\Views\Shared\_CampusDirectorLayout.cshtml" />
     <Content Include="Areas\CampusDirector\Views\web.config" />
     <Content Include="Areas\CampusDirector\Views\_ViewStart.cshtml" />
@@ -420,6 +436,7 @@
     <Content Include="Areas\CapstoneCoordinator\Views\ClearedSubmissions\Index.cshtml" />
     <Content Include="Content\css\capstonecoordinator\clearedsubmissions.css" />
     <Content Include="Areas\CapstoneCoordinator\Views\Shared\_NotificationItems.cshtml" />
+    <Content Include="Areas\CapstoneCoordinator\Views\Shared\_ScheduleModal.cshtml" />
     <Content Include="Areas\Dean\Views\Shared\_NotificationItems.cshtml" />
     <Content Include="connectionStrings.config" />
     <Content Include="Content\fonts\Inter\InterVariable.ttf" />

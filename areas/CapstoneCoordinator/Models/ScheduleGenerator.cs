@@ -58,7 +58,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 string bid = AnyStr(r, "buildingId");
                 if (bid != "" && buildings.TryGetValue(bid, out b) && !CoDb.IsFree(b)) continue;
                 if (IsExcludedRoom(r, b)) continue;     // IE (Korphil) is never used for defenses
-                c.Rooms.Add(new EngRoom { Id = DocId(r), Name = Str(r, "name") });
+                c.Rooms.Add(new EngRoom { Id = DocId(r), Name = Str(r, "name"), Building = b == null ? "" : Str(b, "name") });
             }
 
             c.Classes = Db.Database.GetCollection<BsonDocument>("class_schedules").Find(new BsonDocument()).ToList();
@@ -113,10 +113,25 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 string v = (t ?? "").Trim();
                 if (v.IndexOf("korphil", StringComparison.OrdinalIgnoreCase) >= 0) return true;
                 if (string.Equals(v, "IE", StringComparison.OrdinalIgnoreCase)) return true;
+                if (Regex.IsMatch(v, @"^IE\d", RegexOptions.IgnoreCase)) return true;   // room names such as IE304
                 if (v.StartsWith("IE ", StringComparison.OrdinalIgnoreCase) || v.StartsWith("IE-", StringComparison.OrdinalIgnoreCase)
                     || v.StartsWith("IE(", StringComparison.OrdinalIgnoreCase)) return true;
             }
             return false;
+        }
+
+        /// <summary>roomId -> building name, for every room (including rooms that are not used for generation).</summary>
+        public static Dictionary<string, string> BuildingNamesByRoom()
+        {
+            var names = new Dictionary<string, string>();
+            var buildings = new Dictionary<string, string>();
+            foreach (BsonDocument b in Db.Database.GetCollection<BsonDocument>("buildings").Find(new BsonDocument()).ToList()) buildings[DocId(b)] = Str(b, "name");
+            foreach (BsonDocument r in Rooms_().Find(new BsonDocument()).ToList())
+            {
+                string name;
+                if (buildings.TryGetValue(AnyStr(r, "buildingId"), out name)) names[DocId(r)] = name;
+            }
+            return names;
         }
 
         public string IdByName(string name)
@@ -365,11 +380,13 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     doc["end"] = r.End;
                     doc["roomId"] = r.Room.Id;
                     doc["roomName"] = r.Room.Name;
+                    doc["buildingName"] = r.Room.Building ?? "";
                     doc["panelists"] = panel;
                     doc["status"] = "generated";
                     doc["problem"] = "";
                     doc["generatedAt"] = now;
                     Schedules().InsertOne(doc);
+                    SyncSubmission(doc);
 
                     var b = new Booking { ScheduleId = DocId(doc), RoomId = r.Room.Id, Day = r.Date, Start = r.Start, End = r.End };
                     foreach (string id in ids) { b.People.Add(id); b.Panel.Add(id); }
@@ -385,6 +402,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     doc["problem"] = r.ConflictType;
                     doc["generatedAt"] = now;
                     Schedules().InsertOne(doc);
+                    SyncSubmission(doc);
 
                     CoDb.Conflicts().InsertOne(new BsonDocument
                     {
@@ -408,6 +426,13 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 try { CoDb.Claims().DeleteOne(Builders<BsonDocument>.Filter.Eq("titleId", titleId)); } catch { }
                 throw;
             }
+        }
+
+        // Shows the schedule's status (To Submit / Under Review / Submitted) on the capstone_submissions document.
+        private static void SyncSubmission(BsonDocument sched)
+        {
+            try { Subsystem2Manuscripts.MarkSubmission(Str(sched, "titleId"), DocId(sched), CoDb.CoStatus(sched), Str(sched, "problem")); }
+            catch { /* the schedule is already saved; CoordinatorData.Load repeats this on the next visit */ }
         }
 
         private static string FirstNonEmpty(params string[] values)
@@ -562,6 +587,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                         u.Set("end", chk.End),
                         u.Set("roomId", chk.Room.Id),
                         u.Set("roomName", chk.Room.Name),
+                        u.Set("buildingName", chk.Room.Building ?? ""),
                         u.Set("panelists", PanelDocs(chk.Panel, title ?? new BsonDocument(), Str(sched, "adviserId"))),
                         u.Set("updatedAt", DateTime.UtcNow)));
 
@@ -614,6 +640,10 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     Builders<BsonDocument>.Update.Combine(
                         Builders<BsonDocument>.Update.Set("status", "resolved"),
                         Builders<BsonDocument>.Update.Set("resolvedAt", now)));
+
+                sched["status"] = "submitted";
+                sched["problem"] = "";
+                SyncSubmission(sched);
 
                 CoDb.Log("Schedule submitted to the Dean for \"" + Str(sched, "title") + "\"");
                 return null;

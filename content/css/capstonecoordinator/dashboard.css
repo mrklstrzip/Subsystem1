@@ -278,3 +278,22 @@ body {
 .total-defense-card .metric-icon {
     color: #3B82F6;
 }
+
+/* Status badges inside the schedule pop-up (Upcoming Defenses show Upcoming / Ongoing / Completed) */
+.status-badge.completed {
+    background-color: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.status-badge.ongoing {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.status-badge.upcoming {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}

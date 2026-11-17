@@ -283,7 +283,7 @@
         var list = [];
         scheduleItems.forEach(function (s) {
             if (s.roomId !== roomId) return;
-            var label = [s.section, s.group ? 'Group ' + s.group : ''].filter(Boolean).join(' \u00b7 ') || s.title || 'Defense';
+            var label = s.section || s.title || 'Defense';
             list.push({
                 id: s.id, label: label, start: s.start, end: s.end, ref: s,
                 status: statusOf(date, s.start, s.end, s.cancelled)
@@ -379,7 +379,6 @@
         var rows = detailRow('Title of the Manuscript', esc(s.title || '\u2014')) +
             detailRow('Authors', (s.authors || []).map(esc).join('<br>') || '\u2014') +
             detailRow('Section', esc(s.section || '\u2014')) +
-            detailRow('Group Number', s.group ? 'Group ' + esc(s.group) : '\u2014') +
             detailRow('Program', esc(s.program || '\u2014')) +
             detailRow('Day, Date', esc(fmtFull(d.date))) +
             detailRow('Time', esc(fmtTime(d.start) + ' \u2013 ' + fmtTime(d.end))) +

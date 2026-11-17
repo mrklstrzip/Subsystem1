@@ -7,13 +7,13 @@
     var API = '/CapstoneCoordinator/CoordinatorApi/';
     var LOGIN_URL = '/Auth/Login/login';
     var PANEL_SIZE = 3;
-    var STATUS_LABELS = { 'to-submit': 'To Submit', 'under-review': 'Under Review', 'submitted': 'Submitted' };
-    var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var STATUS_LABELS = { 'to-submit': 'To Submit', 'under-review': 'Under Review', 'rejected': 'Rejected', 'submitted': 'Submitted', 'upcoming': 'Upcoming', 'ongoing': 'Ongoing', 'completed': 'Completed' };
 
     var overlay = document.getElementById('scheduleModal');
     if (!overlay) return;
 
-    function $(id) { return document.getElementById(id); }
+    // a pop-up that lacks one of these elements must not stop the others from working
+    function $(id) { return document.getElementById(id) || document.createElement('span'); }
 
     var submitBtn = $('modalSubmitBtn');
     var panel = overlay.querySelector('.panelists-panel');
@@ -69,12 +69,25 @@
     function fmtDate(iso) {
         if (!iso) return '';
         var p = iso.split('-');
-        return MONTHS[parseInt(p[1], 10) - 1] + ' ' + parseInt(p[2], 10) + ', ' + p[0];
+        return p[1] + '-' + p[2] + '-' + p[0].slice(-2);   // numeric: MM-DD-YY
     }
     function showError(msg) {
         var el = $('mEditError');
         el.textContent = msg || '';
         el.hidden = !msg;
+        if (msg && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });   // the popup scrolls; make sure the message is seen
+    }
+
+    // today as yyyy-MM-dd (the same format the server saves dates in)
+    function todayText() {
+        var n = new Date();
+        function two(v) { return (v < 10 ? '0' : '') + v; }
+        return n.getFullYear() + '-' + two(n.getMonth() + 1) + '-' + two(n.getDate());
+    }
+
+    // The saved defense date has already passed (e.g. a schedule the Dean rejected): the Coordinator must pick a new one.
+    function dateHasPassed() {
+        return !!(current && current.editable && current.date && current.date < todayText());
     }
     function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
     // exact percentage with one decimal (66.7%), never rounded to a level
@@ -101,6 +114,62 @@
             $('pdfPages').textContent = pdfDocument.numPages;
             $('pdfPrev').disabled = pdfPageNumber <= 1;
             $('pdfNext').disabled = pdfPageNumber >= pdfDocument.numPages;
+        });
+    }
+
+    function loadManuscript(url) {
+        var id = ++pdfLoadId;
+        var link = $('mManuscriptOpen');
+        var message = $('pdfMessage');
+        var canvas = $('pdfCanvas');
+        if (pdfRenderTask) { pdfRenderTask.cancel(); pdfRenderTask = null; }
+        if (pdfDocument) { pdfDocument.destroy(); pdfDocument = null; }
+        canvas.hidden = true;
+        $('pdfPage').textContent = $('pdfPages').textContent = '\u2014';
+        var parsed;
+        try { parsed = new URL(url || '', window.location.href); } catch (e) { parsed = null; }
+        var valid = parsed && parsed.origin === window.location.origin &&
+            /\/CapstoneCoordinator\/CoordinatorApi\/manuscript$/i.test(parsed.pathname);
+        link.hidden = !valid;
+        if (valid) link.href = parsed.href;
+        if (!valid) { message.textContent = 'No PDF manuscript is available for this submission.'; return; }
+        message.hidden = false;
+        message.textContent = 'Loading manuscript…';
+        if (!window.pdfjsLib) { message.textContent = 'The PDF viewer could not be loaded. Use Open PDF to view the manuscript.'; return; }
+        fetch(parsed.href, { method: 'GET', credentials: 'same-origin', cache: 'no-store' }).then(function (response) {
+            if (!response.ok) {
+                var error = new Error('The manuscript could not be loaded.');
+                error.status = response.status;
+                throw error;
+            }
+            return response.arrayBuffer();
+        }).then(function (buffer) {
+            if (id !== pdfLoadId) return null;
+            var bytes = new Uint8Array(buffer);
+            if (new TextDecoder('ascii').decode(bytes.subarray(0, 1024)).indexOf('%PDF-') < 0)
+                throw new Error('The manuscript response is not a readable PDF.');
+            return window.pdfjsLib.getDocument({
+                data: bytes,
+                isEvalSupported: false,
+                enableXfa: false
+            }).promise;
+        }).then(function (doc) {
+            if (!doc) return;
+            if (id !== pdfLoadId) { doc.destroy(); return; }
+            pdfDocument = doc;
+            pdfPageNumber = 1;
+            pdfZoom = 1;
+            canvas.hidden = false;
+            message.hidden = true;
+            renderPdfPage();
+        }).catch(function (error) {
+            if (id !== pdfLoadId) return;
+            if (error && error.status === 415) {
+                link.hidden = true;
+                message.textContent = 'No PDF manuscript is attached to this submission.';
+                return;
+            }
+            message.textContent = 'Could not load this read-only PDF preview. Check that the manuscript file is accessible, then use Open PDF.';
         });
     }
 
@@ -218,17 +287,41 @@
         }
     }
 
+    // The building follows the room: it is saved with the schedule, and updates while a room is typed in edit mode.
+    function showBuilding(name) {
+        var el = $('mBuilding');
+        if (el) el.textContent = String(name || '').trim() || '\u2014';
+    }
+
+    function buildingOfRoom(roomName) {
+        var typed = String(roomName || '').trim().toLowerCase();
+        if (!typed) return '';
+        var options = document.querySelectorAll('#roomList option');
+        for (var i = 0; i < options.length; i++) {
+            if (String(options[i].value).toLowerCase() === typed) return options[i].getAttribute('data-building') || '';
+        }
+        return '';
+    }
+
     function renderSchedule() {
         var has = current.start && current.end && current.date;
         $('mTime').textContent = has ? fmtTime(current.start) + ' - ' + fmtTime(current.end) : '—';
         $('mDate').textContent = current.date ? fmtDate(current.date) : '—';
         $('mRoom').textContent = String(current.room || '').trim() || 'TBA';
+        showBuilding(current.building);
 
         $('eTimeStart').value = current.start || '';
         $('eTimeEnd').value = current.end || '';
-        $('eDate').value = current.date || '';
+        $('eDate').min = todayText();                      // the picker cannot go to a past day
+        $('eDate').value = dateHasPassed() ? '' : (current.date || '');
         $('eRoom').value = current.room || '';
         $('eRoom').setAttribute('list', 'roomList');
+        if (!$('eRoom').getAttribute('data-building-bound')) {
+            $('eRoom').setAttribute('data-building-bound', '1');
+            $('eRoom').addEventListener('input', function () {
+                if (editing) showBuilding(buildingOfRoom($('eRoom').value) || current.building);
+            });
+        }
     }
 
     function setEditing(on) {
@@ -242,13 +335,15 @@
         renderPanelists();
         renderSchedule();
         if (on) {
+            if (dateHasPassed()) showError('The saved defense date has already passed. Please choose a new date, then save.');
             var first = panel.querySelector('.panelist-input');
             if (first) first.focus();
         }
     }
 
-    function fill(d) {
+    function fill(d, statusOverride) {
         current = d;
+        if (statusOverride) d.status = statusOverride;   // Dashboard: an approved defense is shown as Upcoming / Ongoing / Completed
         $('mTitle').textContent = d.title;
         $('mDateSubmitted').textContent = d.dateSubmitted;
         $('mProblem').textContent = d.problem && d.problem.length ? d.problem : '—';
@@ -268,16 +363,18 @@
     }
 
     /* ---------- actions ---------- */
-    function open(id) {
+    function open(id, statusOverride, startEditing) {
         if (busy) return;
         busy = true;
         call('schedule?id=' + encodeURIComponent(id)).then(function (res) {
             busy = false;
             if (!res || !res.success) { alert((res && res.message) || 'Could not open this schedule.'); return; }
-            fill(res.schedule);
+            fill(res.schedule, statusOverride);
             overlay.classList.add('open');
             overlay.setAttribute('aria-hidden', 'false');
             document.body.classList.add('modal-open');
+            // Resolve (Under Review): go straight to fixing it, and also when the saved date is already past
+            if (res.schedule.editable && (startEditing || dateHasPassed())) setEditing(true);
         }, function () {
             busy = false;
             alert('Could not reach the server. Please check your connection and try again.');
@@ -346,7 +443,13 @@
         call('submit', { id: current.id }).then(function (res) {
             busy = false;
             submitBtn.disabled = false;
-            if (!res || !res.success) { showError((res && res.message) || 'Something went wrong. Please try again.'); return; }
+            if (!res || !res.success) {
+                // Not allowed as it is (past date, room taken...): open the pencil so it can be fixed right here
+                var why = (res && res.message) || 'Something went wrong. Please try again.';
+                if (current && current.editable) { setEditing(true); }
+                showError(why);
+                return;
+            }
             if (window.Notice) Notice.after('success', 'Schedule submitted', 'The generated schedule for "' + title + '" was submitted successfully.');
             window.location.reload();     // the lists show the new status
         }, function () {

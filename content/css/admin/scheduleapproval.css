@@ -1,0 +1,1073 @@
+﻿/* Admin view-only copy of Dean.css without the module-specific page rules; the page background and header banner match the other Admin pages. */
+
+html {
+    scrollbar-gutter: stable;
+}
+
+body {
+    background-color: #EAECEF;
+    font-family: 'Inter', sans-serif;
+    color: #22252A;
+    margin: 0;
+}
+
+/* Same page background and header banner as the other Admin pages (Expertise Tag, Dashboard...) */
+.dashboard-header {
+    background: linear-gradient(to left, #2C3F56 0%, #263B53 25%, #20344D 60%, #172A43 100%);
+    border-radius: 14px;
+    padding: 27px 40px;
+    color: #FFFFFF;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.page-title {
+    font-family: 'Newsreader', serif;
+    font-size: 40px;
+    font-weight: 700;
+    margin: 6px 0 10px 0;
+    padding-bottom: 0;
+    letter-spacing: -0.5px;
+}
+
+.welcome-text {
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.header-bg-icon {
+    position: absolute;
+    right: -50px;
+    bottom: -50px;
+    font-size: 140px;
+    color: #172A43;
+    pointer-events: none;
+}
+
+
+
+
+/* ---------- Dashboard layout ---------- */
+.dash-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: 24px;
+    align-items: start;
+}
+
+.dash-main, .dash-side {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ---------- Cards ---------- */
+.dash-card {
+    background: #fff;
+    border: 1px solid #b9c2d4;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .12);
+}
+
+.dash-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+    .dash-card-head h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+        color: #1a1a1a;
+    }
+
+        .dash-card-head h2.muted-h {
+            font-size: 16px;
+            font-weight: 700;
+            color: #7a7f9a;
+            letter-spacing: .03em;
+        }
+
+.view-all {
+    font-size: 13px;
+    color: #7a4fa0;
+    text-decoration: none;
+}
+
+/* ---------- Tables ---------- */
+.dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+    .dash-table th {
+        font-size: 11px;
+        font-weight: 500;
+        color: #6b7280;
+        text-align: center;
+        padding: 0 4px 12px;
+    }
+
+    .dash-table td {
+        text-align: center;
+        padding: 14px 4px;
+        font-size: 13px;
+        border-top: 1px solid #e3e6ec;
+    }
+
+    .dash-table .left {
+        text-align: left;
+    }
+
+.ms-title {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+/* ---------- Section tags ---------- */
+.tag {
+    display: inline-block;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 0;
+}
+
+.tag-gray {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+}
+
+.tag-teal {
+    background: #CCFBF1;
+    color: #0F766E;
+    border: 1px solid #99F6E4;
+}
+
+.tag-purple {
+    background: #f5f3ff;
+    color: #5b21b6;
+    border: 1px solid #ddd6fe;
+}
+
+/* ---------- View button ---------- */
+.btn-view {
+    display: inline-block;
+    border: 1.5px solid #7a4fa0;
+    color: #7a4fa0;
+    border-radius: 8px;
+    padding: 4px 16px;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+    .btn-view:hover {
+        background: #7a4fa0;
+        color: #fff;
+    }
+
+/* ---------- Total Defenses card ---------- */
+.stat-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 20px;
+}
+
+.stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #7a7f9a;
+    margin-bottom: 8px;
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.stat-sub {
+    font-size: 11px;
+    color: #9aa0b0;
+}
+
+.stat-icon {
+    font-size: 36px;
+    color: #8b8fb5;
+}
+
+/* ---------- Recent Activities ---------- */
+.activity-table th:first-child, .activity-table td:first-child {
+    width: 30%;
+    white-space: nowrap;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1000px) {
+    .dash-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
+   Schedule Approval page + pop-up
+   ========================================================= */
+
+.sa-banner {
+    position: relative;
+    overflow: hidden;
+    background: #2c3e5a;
+    color: #fff;
+    border-radius: 14px;
+    padding: 14px 28px 18px;
+    margin-bottom: 28px;
+}
+
+    .sa-banner small {
+        font-family: 'Inter', sans-serif;
+        font-size: 9px;
+        font-weight: 600;
+    }
+
+    .sa-banner h1 {
+        font-family: 'Newsreader', serif;
+        font-size: 44px;
+        font-weight: 700;
+        margin: 4px 0 0;
+    }
+
+.sa-banner-icon {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 70px;
+    opacity: .12;
+}
+
+/* Toolbar: same as Manuscript Management .controls-card */
+.sa-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.sa-search {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+    .sa-search i {
+        position: absolute;
+        left: 16px;
+        color: #9092AD;
+        font-size: 15px;
+        pointer-events: none;
+    }
+
+    .sa-search input {
+        width: 100%;
+        height: 48px;
+        padding: 0 16px 0 44px;
+        background: #fff;
+        border-radius: 12px;
+        border: 1.5px solid #374A60;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #2D3748;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+        .sa-search input::placeholder {
+            color: #A0AEC0;
+        }
+
+.sa-filter {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1.5px solid #374A60;
+    border-radius: 12px;
+    width: 160px;
+    height: 48px;
+    padding: 0 14px;
+    box-sizing: border-box;
+}
+
+    .sa-filter + .sa-filter, .sa-filter + .sa-btn-filter {
+        margin-left: -2px; /* 14px gap between filters, like Manuscript Management */
+    }
+
+    .sa-filter label {
+        position: absolute;
+        top: -7px;
+        left: 12px;
+        background: #fff;
+        padding: 0 4px;
+        font-family: 'Inter', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+        color: #374A60;
+    }
+
+    .sa-filter > i {
+        color: #374A60;
+        font-size: 15px;
+        pointer-events: none;
+    }
+
+    .sa-filter .sa-chev {
+        position: absolute;
+        right: 14px;
+        font-size: 12px;
+        transition: transform 0.2s ease;
+    }
+
+    .sa-filter.open .sa-chev {
+        transform: rotate(180deg);
+    }
+
+    .sa-filter select {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        padding-right: 22px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1A202C;
+        cursor: pointer;
+        text-overflow: ellipsis;
+    }
+
+    .sa-filter .custom-select-dropdown {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: -1.5px;
+        right: -1.5px;
+        min-width: 160px;
+        max-height: 240px;
+        overflow-y: auto;
+        padding: 6px;
+        background: #FFFFFF;
+        border: 1.5px solid #374A60;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        box-sizing: border-box;
+        z-index: 50;
+    }
+
+        .sa-filter .custom-select-dropdown.open {
+            display: block;
+        }
+
+    .sa-filter .select-option {
+        padding: 9px 12px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1A202C;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+        .sa-filter .select-option:hover {
+            background: #EFF1F7;
+        }
+
+        .sa-filter .select-option.selected {
+            background: #223249;
+            color: #FFFFFF;
+        }
+
+/* Filter button (same look as the Notify PM button) */
+.sa-btn-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 18px;
+    background: #223249;
+    color: #fff;
+    border: 1.5px solid #223249;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s ease;
+}
+
+    .sa-btn-filter:hover {
+        background: #374A60;
+    }
+
+/* Table card: same as .schedule-management-card */
+.sa-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.sa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+}
+
+    .sa-table thead tr {
+        background: #223249;
+    }
+
+    .sa-table th {
+        color: #fff;
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: .8px;
+        padding: 16px 20px;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    .sa-table td {
+        padding: 18px 20px;
+        font-size: 13px;
+        text-align: left;
+        color: #475569;
+        font-weight: 500;
+        border-bottom: 1px solid #F4F5F7;
+        vertical-align: middle;
+    }
+
+    .sa-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .sa-table th.sa-action, .sa-table td.sa-action {
+        text-align: right;
+    }
+
+    /* Defense Schedule rows open the pop-up when clicked */
+    .sa-table tbody tr.sa-row-click {
+        cursor: pointer;
+    }
+
+        .sa-table tbody tr.sa-row-click:hover td {
+            background: #F8FAFC;
+        }
+
+.sa-title strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a202c;
+    margin-bottom: 4px;
+}
+
+.sa-sub {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Program badges (same as .program-badge) */
+.sa-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 700;
+    border: 1px solid;
+}
+
+.chip-bsit {
+    background: #f1f5f9;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+
+.chip-bscs {
+    background: #CCFBF1;
+    color: #0F766E;
+    border-color: #99F6E4;
+}
+
+.chip-bsis {
+    background: #f5f3ff;
+    color: #5b21b6;
+    border-color: #ddd6fe;
+}
+
+/* Status badges (same shape as .status-badge) */
+.sa-status {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    border: 1px solid;
+}
+
+.st-toapprove {
+    background: #A4B2D6;
+    color: #203158;
+    border-color: #8B9CC3;
+}
+
+.st-approved {
+    background: #C3C8D0;
+    color: #2D333C;
+    border-color: #B0B6C0;
+}
+
+/* Oversight statuses */
+.os-st-submitted {
+    background: #C3C8D0;
+    color: #2D333C;
+    border-color: #B0B6C0;
+}
+
+.os-st-approved {
+    background: #c9f5c9;
+    color: #1d6b24;
+    border-color: #4caf50;
+}
+
+.os-st-returned {
+    background: #F89B9E;
+    color: #8C1C1E;
+    border-color: #F37B80;
+}
+
+.os-st-pending {
+    background: #FDE68A;
+    color: #854D0E;
+    border-color: #FACC15;
+}
+
+/* View button (same as .btn-view in Manuscript Management) */
+.sa-btn-view {
+    padding: 5px 18px;
+    background: #fff;
+    color: #374A60;
+    border: 1.5px solid #374A60;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+    .sa-btn-view:hover {
+        background: #374A60;
+        color: #fff;
+    }
+
+.sa-empty {
+    padding: 36px 20px;
+    text-align: center;
+    color: #9092AD;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Modal (same size as the Coordinator's schedule modal) */
+.sa-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.55);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+    .sa-overlay.open {
+        display: flex;
+    }
+
+.sa-modal {
+    position: relative;
+    background: #fff;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 94vh;
+    overflow-y: auto;
+    padding: 28px 32px;
+    box-sizing: border-box;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    font-family: 'Inter', sans-serif;
+    color: #1A202C;
+    animation: saPop .18s ease-out;
+}
+
+@keyframes saPop {
+    from {
+        transform: translateY(10px) scale(.98);
+        opacity: 0;
+    }
+
+    to {
+        transform: none;
+        opacity: 1;
+    }
+}
+
+.sa-modal-head {
+    display: block;
+    margin-bottom: 18px;
+}
+
+    .sa-modal-head h2 {
+        font-family: 'Newsreader', serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: #2B5C8A;
+        margin: 0 0 2px;
+    }
+
+    .sa-modal-head p {
+        margin: 0;
+        font-size: 11px;
+        color: #6B7280;
+    }
+
+.sa-x {
+    position: absolute;
+    top: 22px;
+    right: 26px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0;
+    background: #ECEBF5;
+    color: #4B3F8F;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .sa-x:hover {
+        background: #DCDAEC;
+    }
+
+.sa-info {
+    background: #EFF1F7;
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px 16px;
+}
+
+    .sa-info label {
+        display: block;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+        color: #6B6F8A;
+        margin-bottom: 6px;
+    }
+
+    .sa-info strong {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1A202C;
+    }
+
+    .sa-info .sa-status {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 12px;
+        border-radius: 6px;
+    }
+
+.sa-info-sep {
+    grid-column: 1 / -1;
+    height: 1px;
+    background: #D5D9E4;
+    margin: 0;
+}
+
+.sa-body {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.sa-panel {
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 18px;
+    box-sizing: border-box;
+    min-height: 0;
+}
+
+    .sa-panel h3 {
+        font-size: 13px;
+        font-weight: 700;
+        margin: 0 0 8px;
+    }
+
+        .sa-panel h3.sa-mt {
+            margin-top: 20px;
+        }
+
+    .sa-panel p {
+        font-size: 11.5px;
+        line-height: 1.55;
+        color: #1F2937;
+        margin: 0 0 16px;
+    }
+
+.sa-muted {
+    color: #9CA3AF;
+    font-size: 10px;
+}
+
+.sa-panel-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    margin-bottom: 14px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.sa-panel-row-head {
+    font-size: 12.5px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.sa-manuscript-panel { display: flex; flex-direction: column; }
+.sa-manuscript-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.sa-manuscript-head h3 { margin: 0; }
+.sa-manuscript-open { color: #526f96; font-size: 11px; font-weight: 600; text-decoration: underline; }
+.sa-pdf-viewer { overflow: hidden; border: 1px solid #dce2eb; border-radius: 9px; background: #f3f5f8; }
+.sa-pdf-toolbar { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 34px; border-bottom: 1px solid #dce2eb; background: #f8fafc; color: #526071; font-size: 10px; }
+.sa-pdf-toolbar button { min-width: 25px; height: 24px; border: 1px solid #d5dce7; border-radius: 5px; background: #fff; color: #344156; cursor: pointer; font-size: 14px; line-height: 1; }
+.sa-pdf-toolbar button:disabled { cursor: default; opacity: .45; }
+.sa-pdf-canvas-wrap { box-sizing: border-box; height: 230px; overflow: auto; padding: 12px; text-align: center; }
+.sa-pdf-canvas-wrap canvas { display: block; max-width: 100%; height: auto; margin: 0 auto; box-shadow: 0 2px 8px rgba(20,35,55,.18); }
+.sa-pdf-message { margin: 70px auto; color: #758196; font-size: 11px; line-height: 1.5; }
+.sa-manuscript-panel > .sa-muted { margin-top: 6px; }
+
+/* Privacy shield for the schedule approval / defense schedule detail modal. */
+.sa-modal, .sa-modal * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.sa-modal > * { transition: filter .12s ease; }
+.sa-modal.sa-shield > *:not(.sa-modal-head):not(.sa-modal-foot) { filter: blur(14px); pointer-events: none; }
+.sa-modal.sa-shield::after { content: "Details hidden for protection"; position: absolute; top: 45%; right: 0; left: 0; z-index: 2; color: #1b293b; font-weight: 700; text-align: center; pointer-events: none; }
+@media print { .sa-overlay { display: none !important; } }
+
+/* percentage on the left of the High / Medium / Low tag */
+.sa-match-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sa-match-pct {
+    font-size: 10px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.sa-match {
+    width: 70px;
+    text-align: center;
+    font-size: 8.5px;
+    font-weight: 500;
+    padding: 1px 0;
+    border-radius: 10px;
+    border: 1.5px solid;
+}
+
+.match-high {
+    background: #D9F7BE;
+    color: #237804;
+    border-color: #52C41A;
+}
+
+.match-medium {
+    background: #F4F9B9;
+    color: #5F6A06;
+    border-color: #C5D22B;
+}
+
+.match-low {
+    background: #E5E7EB;
+    color: #374151;
+    border-color: #6B7280;
+}
+
+.sa-sched {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 20px;
+    margin: 0;
+    font-size: 10px;
+}
+
+    .sa-sched dt {
+        font-weight: 600;
+        color: #374151;
+        letter-spacing: .3px;
+    }
+
+    .sa-sched dd {
+        margin: 0;
+        text-align: right;
+        font-weight: 500;
+        color: #1A202C;
+    }
+
+.sa-modal-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.sa-btn-close, .sa-btn-approve, .sa-btn-reject {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 26px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.sa-btn-close {
+    background: #fff;
+    border: 1.5px solid #D1D5DB;
+    color: #1A202C;
+}
+
+    .sa-btn-close:hover {
+        background: #F3F4F6;
+    }
+
+.sa-btn-reject {
+    background: #fff;
+    border: 1.5px solid #B91C1C;
+    color: #B91C1C;
+}
+
+    .sa-btn-reject:hover {
+        background: #B91C1C;
+        color: #fff;
+    }
+
+.sa-btn-reject-solid {
+    background: #B91C1C;
+    color: #fff;
+}
+
+    .sa-btn-reject-solid:hover {
+        background: #991B1B;
+        border-color: #991B1B;
+    }
+
+.sa-btn-approve {
+    background: #4A6283;
+    border: 1.5px solid #374A60;
+    color: #fff;
+}
+
+    .sa-btn-approve:hover {
+        background: #374A60;
+    }
+
+    .sa-btn-approve:disabled, .sa-btn-reject:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    .sa-btn-reject.sa-hide, .sa-btn-approve.sa-hide {
+        display: none !important;
+    }
+
+/* Reject-reason popup (small) */
+.sa-reject-modal {
+    position: relative;
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 440px;
+    padding: 26px 28px;
+    box-sizing: border-box;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    font-family: 'Inter', sans-serif;
+    animation: saPop .18s ease-out;
+}
+
+    .sa-reject-modal h3 {
+        font-family: 'Newsreader', serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #991B1B;
+        margin: 0 0 4px;
+    }
+
+    .sa-reject-modal > p {
+        font-size: 11px;
+        color: #6B7280;
+        margin: 0 0 14px;
+    }
+
+    .sa-reject-modal textarea {
+        width: 100%;
+        min-height: 110px;
+        resize: vertical;
+        padding: 10px 12px;
+        border: 1.5px solid #CBD5E1;
+        border-radius: 10px;
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        color: #1A202C;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+        .sa-reject-modal textarea:focus {
+            border-color: #537B9D;
+            box-shadow: 0 0 0 3px rgba(83, 123, 157, .18);
+        }
+
+    .sa-reject-modal > p.sa-reject-error {
+        margin: 6px 0 0;
+        font-size: 10.5px;
+        font-weight: 600;
+        color: #B91C1C;
+    }
+
+.sa-reject-error[hidden] {
+    display: none;
+}
+
+.sa-reject-modal .sa-modal-foot {
+    margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+    .sa-body {
+        grid-template-columns: 1fr;
+    }
+
+    .sa-info {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* =========================================================
+   Defense Schedule page
+   ========================================================= */
+.sa-banner p {
+    margin: 6px 0 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.st-completed {
+    background: #c9f5c9;
+    color: #1d6b24;
+    border-color: #4caf50;
+}
+
+.st-ongoing {
+    background: #d6e2ff;
+    color: #2c4fa8;
+    border-color: #6b8ee0;
+}
+
+.st-upcoming {
+    background: #f3c9c9;
+    color: #7a1f1f;
+    border-color: #b34a4a;
+}
+
+.ds-panelists {
+    max-width: 160px;
+    margin: 0 auto;
+}
+
+
+/* Panel role: highest percentage = Chairman, others = Members */
+.panelist-role {
+    display: block;
+    margin-top: 2px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    color: #595C6E;
+}
+
+    .panelist-role.chairman {
+        color: #A33F53;
+    }
+
+.st-rejected {
+    background: #F89B9E;
+    color: #8C1C1E;
+    border-color: #F37B80;
+}
+
+.sa-reject-note { grid-column: 1 / -1; }
+    .sa-reject-note[hidden] { display: none; }
+    .sa-reject-note strong { display: block; white-space: normal; overflow-wrap: anywhere; color: #8C1C1E; }

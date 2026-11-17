@@ -21,9 +21,9 @@ namespace Subsystem1.Areas.Dean.Models
         {
             get
             {
-                var program = (Section ?? "").Split('-')[0].ToUpper();
-                if (program == "BSCS") return "tag-red";
-                if (program == "BSIS") return "tag-purple";
+                var program = (Section ?? "").Split('-')[0].Trim().ToUpperInvariant();
+                if (program == "BSCS" || program == "SBCS" || program == "CS") return "tag-teal";
+                if (program == "BSIS" || program == "SBIS" || program == "IS") return "tag-purple";
                 return "tag-gray";
             }
         }

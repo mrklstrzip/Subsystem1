@@ -12,7 +12,10 @@ namespace Subsystem1.Areas.Dean.Models
     // ------------------------------------------------------------------
     // What the Dean reads / writes in Sia_set1_db:
     //   defense_schedules   (shared)  the Coordinator sets status "submitted"; the Dean sets
-    //                       status "approved" + approvedAt + approvedBy + approvedById.
+    //                       status "approved" + approvedAt + approvedBy + approvedById, or sends it back with
+//                       status "rejected" + rejectedAt + rejectedBy + rejectedById + rejectReason (+ problem).
+//                       A rejected schedule goes back to the Coordinator (Manuscript Management as "Rejected",
+//                       and Under Review through a schedule_conflicts record with the reason).
     //                       Once approved, the Student / Adviser / Panelist / Campus Director see it.
     //   dean_notifications  (new)     { deanId, key, scheduleId, title, text, read, createdAt }
     // Activity and counts are worked out from defense_schedules itself.
@@ -21,11 +24,13 @@ namespace Subsystem1.Areas.Dean.Models
     {
         public BsonDocument Doc;
         public string Id, Title, Program, Section, Author, Adviser, Room, Raw, SubmittedBy;
-        public DateTime? Day, SubmittedAt, ApprovedAt;
+        public DateTime? Day, SubmittedAt, ApprovedAt, RejectedAt;
+        public string RejectReason = "";
         public int? Start, End;
         public List<string> Panel = new List<string>();
 
         public bool Submitted { get { return Raw == "submitted"; } }
+        public bool Rejected { get { return Raw == "rejected"; } }
         public bool Approved { get { return Raw == "approved" || Raw == "completed" || Raw == "complete"; } }
         public string Badge { get { return CoDb.SectionLabel(Section, Program); } }
 
@@ -53,7 +58,7 @@ namespace Subsystem1.Areas.Dean.Models
         private static List<DeanSched> LoadAll()
         {
             var result = new List<DeanSched>();
-            var wanted = new BsonArray { "submitted", "approved", "completed", "complete" };
+            var wanted = new BsonArray { "submitted", "approved", "completed", "complete", "rejected" };
             List<BsonDocument> docs = Schedules().Find(Builders<BsonDocument>.Filter.In("status", wanted)).ToList();
 
             var titleOids = docs.Select(d => ParseId(Str(d, "titleId"))).Where(o => o.HasValue).Select(o => o.Value).Distinct().ToList();
@@ -83,7 +88,8 @@ namespace Subsystem1.Areas.Dean.Models
                     SubmittedBy = Str(d, "submittedBy"),
                     Day = CoDb.ParseDay(Str(d, "date")),
                     Start = Minutes(d, "start"), End = Minutes(d, "end"),
-                    SubmittedAt = Stamp(d, "submittedAt"), ApprovedAt = Stamp(d, "approvedAt")
+                    SubmittedAt = Stamp(d, "submittedAt"), ApprovedAt = Stamp(d, "approvedAt"),
+                    RejectedAt = Stamp(d, "rejectedAt"), RejectReason = Str(d, "rejectReason")
                 };
 
                 BsonValue pv;
@@ -171,7 +177,7 @@ namespace Subsystem1.Areas.Dean.Models
             BsonDocument schedule = oid.HasValue ? Schedules().Find(Builders<BsonDocument>.Filter.Eq("_id", oid.Value)).FirstOrDefault() : null;
             if (schedule == null) return null;
             string status = CoDb.StatusOf(schedule);
-            if (status != "submitted" && status != "approved" && status != "completed" && status != "complete") return null;
+            if (status != "submitted" && status != "approved" && status != "completed" && status != "complete" && status != "rejected") return null;
             ObjectId? titleId = ParseId(Str(schedule, "titleId"));
             BsonDocument title = titleId.HasValue ? Titles().Find(Builders<BsonDocument>.Filter.Eq("_id", titleId.Value)).FirstOrDefault() : null;
             return ResolveManuscriptFile(schedule, title);
@@ -220,6 +226,8 @@ namespace Subsystem1.Areas.Dean.Models
                     events.Add(new KeyValuePair<DateTime, string>(s.SubmittedAt.Value, "Defense schedule submitted for \"" + s.Title + "\""));
                 if (s.ApprovedAt.HasValue)
                     events.Add(new KeyValuePair<DateTime, string>(s.ApprovedAt.Value, "You approved the defense of \"" + s.Title + "\""));
+                if (s.Rejected && s.RejectedAt.HasValue)
+                    events.Add(new KeyValuePair<DateTime, string>(s.RejectedAt.Value, "You rejected the defense schedule of \"" + s.Title + "\""));
             }
             vm.RecentActivities = events.OrderByDescending(e => e.Key).Take(6)
                 .Select(e => new ActivityRow { Time = Ago(e.Key, now), Text = e.Value }).ToList();
@@ -230,13 +238,13 @@ namespace Subsystem1.Areas.Dean.Models
         public static List<ScheduleListItem> Approvals()
         {
             return LoadAll()
-                .OrderBy(s => s.Submitted ? 0 : 1)
+                .OrderBy(s => s.Submitted ? 0 : s.Rejected ? 1 : 2)
                 .ThenBy(s => s.Day ?? DateTime.MaxValue)
                 .ThenBy(s => s.Title, StringComparer.OrdinalIgnoreCase)
                 .Select(s => new ScheduleListItem
                 {
                     Id = s.Id, Title = s.Title, Section = s.Badge, Program = s.Program, ProjectManager = s.Author, Adviser = s.Adviser,
-                    Date = s.Day ?? DateTime.MinValue, HasDate = s.Day.HasValue, Status = s.Approved ? "Approved" : "To Approve"
+                    Date = s.Day ?? DateTime.MinValue, HasDate = s.Day.HasValue, Status = s.Approved ? "Approved" : s.Rejected ? "Rejected" : "To Approve"
                 }).ToList();
         }
 
@@ -247,7 +255,7 @@ namespace Subsystem1.Areas.Dean.Models
             BsonDocument d = oid.HasValue ? Schedules().Find(Builders<BsonDocument>.Filter.Eq("_id", oid.Value)).FirstOrDefault() : null;
             if (d == null) return null;
             string raw = CoDb.StatusOf(d);
-            if (raw != "submitted" && raw != "approved" && raw != "completed" && raw != "complete") return null;
+            if (raw != "submitted" && raw != "approved" && raw != "completed" && raw != "complete" && raw != "rejected") return null;
 
             ObjectId? toid = ParseId(Str(d, "titleId"));
             BsonDocument t = toid.HasValue ? Titles().Find(Builders<BsonDocument>.Filter.Eq("_id", toid.Value)).FirstOrDefault() : null;
@@ -270,27 +278,34 @@ namespace Subsystem1.Areas.Dean.Models
                     BsonDocument pd = p.AsBsonDocument;
                     string m = Str(pd, "match").ToLowerInvariant();
                     BsonValue pc;
+                    double? percent = pd.TryGetValue("percent", out pc) && pc != null && pc.IsNumeric ? (double?)pc.ToDouble() : null;
+                    if (!percent.HasValue) percent = ExpertisePercent(Str(pd, "userId"), t);   // older schedules did not save it
                     string role = Str(pd, "role");
                     if (role != "Chairman" && role != "Member") role = idx == 0 ? "Chairman" : "Member";   // older records
                     panel.Add(new PanelistVM
                     {
                         Name = Str(pd, "name"),
                         Expertise = m == "high" ? "High" : m == "medium" ? "Medium" : "Low",
-                        Percent = pd.TryGetValue("percent", out pc) && pc.IsNumeric ? (double?)pc.ToDouble() : null,
+                        Percent = percent,
                         Role = role
                     });
                     idx++;
                 }
             }
 
-            bool approved = raw != "submitted";
+            // saved on newer schedules; older ones are looked up from the room
+            string building = CoordinatorData.BuildingOf(d, PlanContext.BuildingNamesByRoom());
+
+            bool rejected = raw == "rejected";
+            bool approved = raw != "submitted" && !rejected;
             DeanManuscriptFile manuscriptFile = ResolveManuscriptFile(d, t);
             return new ScheduleDetailsVM
             {
                 Id = DocId(d),
                 ProjectTitle = Pick(d, "title", t, "title"),
                 DateSubmitted = submitted.HasValue ? submitted.Value.ToString("MMM d, yyyy", CultureInfo.InvariantCulture) : "-",
-                Status = approved ? "Approved" : "For Approval",
+                Status = approved ? "Approved" : rejected ? "Rejected" : "For Approval",
+                RejectReason = rejected ? Str(d, "rejectReason") : "",
                 Student = Pick(d, "manager", t, "projectManager"),
                 ProgramSection = CoDb.SectionLabel(section, program),
                 Adviser = Pick(d, "adviser", t, "adviser"),
@@ -300,8 +315,88 @@ namespace Subsystem1.Areas.Dean.Models
                 Panelists = panel,
                 Time = st.HasValue && en.HasValue ? CoDb.FmtCompact(st.Value) + " - " + CoDb.FmtCompact(en.Value) : "-",
                 DefenseDate = day.HasValue ? day.Value.ToString("MMMM d, yyyy", CultureInfo.InvariantCulture) : "-",
+                Building = building != "" ? building : "-",
                 Room = Str(d, "roomName") != "" ? Str(d, "roomName") : "-"
             };
+        }
+
+        // Exact expertise match of one panelist for a title (the same rule the Coordinator's generator uses).
+        private static double? ExpertisePercent(string userId, BsonDocument title)
+        {
+            try
+            {
+                ObjectId? uid = ParseId(userId);
+                if (!uid.HasValue || title == null) return null;
+                BsonDocument user = Users().Find(Builders<BsonDocument>.Filter.Eq("_id", uid.Value)).FirstOrDefault();
+                if (user == null) return null;
+
+                var faculty = new EngFaculty { Id = userId, Name = PlainName(user), Tags = CoDb.Expertise(user) };
+                var problem = new EngProblem { Title = Str(title, "title"), Abstract = Str(title, "abstract"), Keywords = CoDb.Keywords(title) };
+                return ScheduleEngine.Percent(faculty, problem);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// The Dean sends a submitted schedule back. It becomes "rejected" and returns to the Capstone Coordinator:
+        /// it shows as Rejected in Manuscript Management and, with the reason, in Under Review, where the
+        /// Coordinator fixes it and submits it again. Returns an error message, or null when it was rejected.
+        /// </summary>
+        public static string Reject(string id, string reason, BsonDocument dean)
+        {
+            reason = (reason ?? "").Trim();
+            if (reason == "") return "Please enter the reason for rejecting this schedule.";
+            if (reason.Length > 500) reason = reason.Substring(0, 500);
+
+            lock (Gate)
+            {
+                ObjectId? oid = ParseId(id);
+                BsonDocument sched = oid.HasValue ? Schedules().Find(Builders<BsonDocument>.Filter.Eq("_id", oid.Value)).FirstOrDefault() : null;
+                if (sched == null) return "Schedule not found.";
+
+                string raw = CoDb.StatusOf(sched);
+                if (raw == "approved" || raw == "completed" || raw == "complete") return "This schedule is already approved.";
+                if (raw == "rejected") return "This schedule was already rejected.";
+                if (raw != "submitted") return "This schedule is not waiting for approval.";
+
+                DateTime now = DateTime.UtcNow;
+                string who = PlainName(dean);
+                string problem = "Rejected by the Dean: " + reason;
+                var f = Builders<BsonDocument>.Filter;
+                var u = Builders<BsonDocument>.Update;
+                UpdateResult res = Schedules().UpdateOne(
+                    f.And(f.Eq("_id", oid.Value), f.Eq("status", "submitted")),
+                    u.Combine(u.Set("status", "rejected"), u.Set("rejectedAt", now), u.Set("rejectedBy", who),
+                              u.Set("rejectedById", DocId(dean)), u.Set("rejectReason", reason),
+                              u.Set("problem", problem), u.Set("updatedAt", now)));
+                if (res.ModifiedCount == 0) return "This schedule was already handled.";
+
+                // Under Review (Coordinator): one open record that carries the Dean's reason
+                CoDb.Conflicts().InsertOne(new BsonDocument
+                {
+                    { "scheduleId", DocId(sched) },
+                    { "titleId", Str(sched, "titleId") },
+                    { "type", "Rejected by the Dean" },
+                    { "description", reason },
+                    { "steps", new BsonArray
+                        {
+                            new BsonDocument { { "title", "Reason from the Dean" }, { "text", reason } },
+                            new BsonDocument { { "title", "What to do" }, { "text", "Fix the schedule (panelists, date, time or room), then submit it to the Dean again." } }
+                        } },
+                    { "status", "in-progress" },
+                    { "detectedAt", now },
+                    { "resolvedAt", BsonNull.Value }
+                });
+
+                try { Subsystem2Manuscripts.MarkSubmission(Str(sched, "titleId"), DocId(sched), "rejected", problem); }
+                catch { /* CoordinatorData.Load repeats this on the Coordinator's next visit */ }
+
+                CoDb.Log("Dean rejected the defense schedule for \"" + Str(sched, "title") + "\": " + reason);
+                return null;
+            }
         }
 
         /// <summary>Final approval. Returns an error message, or null when it was approved.</summary>
@@ -444,13 +539,17 @@ namespace Subsystem1.Areas.Dean.Models
                 string by = Str(d, "submittedBy");
                 if (by == "") by = "The Capstone Coordinator";
                 string label = CoDb.SectionLabel(Str(d, "section"), CoDb.ProgramCode(Str(d, "program")));
+
+                // a schedule the Dean rejected and the Coordinator submitted again is a new notification
+                bool again = d.Contains("rejectedAt");
+                string key = again ? "sub:" + DocId(d) + ":" + at.Value.Ticks : "sub:" + DocId(d);
                 try
                 {
                     Notes().UpdateOne(
-                        f.And(f.Eq("deanId", myId), f.Eq("key", "sub:" + DocId(d))),
+                        f.And(f.Eq("deanId", myId), f.Eq("key", key)),
                         u.Combine(
                             u.SetOnInsert("scheduleId", DocId(d)),
-                            u.SetOnInsert("title", by + " submitted a defense schedule"),
+                            u.SetOnInsert("title", by + (again ? " submitted a defense schedule again" : " submitted a defense schedule")),
                             u.SetOnInsert("text", "Defense schedule for " + label + ", with a title \"" + title + "\""),
                             u.SetOnInsert("read", false),
                             u.SetOnInsert("createdAt", at.Value.AddHours(-8))),
