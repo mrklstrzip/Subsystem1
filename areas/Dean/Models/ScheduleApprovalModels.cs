@@ -49,10 +49,4 @@ namespace Subsystem1.Areas.Dean.Models
         public string Url { get; set; }
         public string FileName { get; set; }
     }
-
-    public sealed class DeanManuscriptFile
-    {
-        public string Url { get; set; }
-        public string FileName { get; set; }
-    }
 }

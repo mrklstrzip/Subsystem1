@@ -475,9 +475,6 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\ViewModels\" />
-    <Folder Include="Areas\Admin\Views\DefenseSchedule\" />
-    <Folder Include="Areas\Admin\Views\RoomSchedule\" />
-    <Folder Include="Areas\Admin\Views\ScheduleApproval\" />
     <Folder Include="Areas\Auth\Models\" />
     <Folder Include="Areas\Auth\ViewModels\" />
     <Folder Include="Areas\CampusDirector\Models\" />

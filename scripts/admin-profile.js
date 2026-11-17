@@ -143,12 +143,10 @@
         say('');
     }
 
-    // close with Escape or by clicking the dark area outside the pop-up
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && modal && !modal.hidden) closeEdit();
     });
     if (modal) modal.addEventListener('mousedown', function (e) { if (e.target === modal) closeEdit(); });
-
     if (cancelBtn) cancelBtn.addEventListener('click', closeEdit);
 
     if (editForm) {
