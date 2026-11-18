@@ -6,7 +6,7 @@
 }
 
 <link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.8" rel="stylesheet" type="text/css" />
-<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=2.3" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=2.7" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -30,30 +30,34 @@
                 <h3 class="section-title">To Submit</h3>
                 <a href="@Url.Action("schedulemanagement", "ScheduleManagement")" class="view-all-link">View All</a>
             </div>
-            <table class="dashboard-table">
+            <table class="dashboard-table to-submit-table">
                 <thead>
                     <tr>
                         <th class="column-title manuscript-col">MANUSCRIPT</th>
+                        <th class="column-title">PROJECT MANAGER</th>
+                        <th class="column-title">ADVISER</th>
+                        <th class="column-title">ROOM</th>
                         <th class="column-title date-col">DATE</th>
-                        <th class="column-title action-col">ACTION</th>
+                        <th class="column-title time-col">TIME</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (!Model.Schedules.Any(s => s.Status == "to-submit"))
                     {
-                        <tr class="empty-row"><td colspan="3">Nothing to submit right now.</td></tr>
+                        <tr class="empty-row"><td colspan="6">Nothing to submit right now.</td></tr>
                     }
                     @foreach (var s in Model.Schedules.Where(x => x.Status == "to-submit").Take(3))
                     {
-                        <tr>
+                        <tr class="dashboard-clickable-row" data-schedule-id="@s.Id" tabindex="0" role="button" aria-label="Open schedule for @s.Title">
                             <td>
                                 <div class="manuscript-title-text">@s.Title</div>
                                 <span class="program-badge @s.BadgeClass">@s.Badge</span>
                             </td>
+                            <td>@s.Author</td>
+                            <td>@s.Adviser</td>
+                            <td>-</td>
                             <td class="date-cell">@(s.Date.HasValue ? s.Date.Value.ToString("MM-dd-yy", System.Globalization.CultureInfo.InvariantCulture) : "-")</td>
-                            <td class="action-cell">
-                                <button type="button" class="btn-view" data-id="@s.Id">View</button>
-                            </td>
+                            <td class="time-cell">-</td>
                         </tr>
                     }
                 </tbody>
@@ -66,32 +70,34 @@
                 <h3 class="section-title">Upcoming Defenses</h3>
                 <a href="@Url.Action("defenseschedule", "DefenseSchedule")" class="view-all-link">View All</a>
             </div>
-            <table class="dashboard-table">
+            <table class="dashboard-table upcoming-defenses-table">
                 <thead>
                     <tr>
                         <th class="column-title manuscript-col">MANUSCRIPT</th>
+                        <th class="column-title">PROJECT MANAGER</th>
+                        <th class="column-title">ADVISER</th>
+                        <th class="column-title">ROOM</th>
                         <th class="column-title date-col">DATE</th>
                         <th class="column-title time-col">TIME</th>
-                        <th class="column-title action-col">ACTION</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (!Model.Upcoming.Any())
                     {
-                        <tr class="empty-row"><td colspan="4">No upcoming defenses yet.</td></tr>
+                        <tr class="empty-row"><td colspan="6">No upcoming defenses yet.</td></tr>
                     }
                     @foreach (var d in Model.Upcoming.Take(3))
                     {
-                        <tr>
+                        <tr class="dashboard-clickable-row" data-schedule-id="@d.Id" data-schedule-status="@d.Status" tabindex="0" role="button" aria-label="Open defense schedule for @d.Title">
                             <td>
                                 <div class="manuscript-title-text">@d.Title</div>
                                 <span class="program-badge @d.BadgeClass">@d.Badge</span>
                             </td>
+                            <td>@d.Author</td>
+                            <td>@d.Adviser</td>
+                            <td><strong>@(String.IsNullOrWhiteSpace(d.Room) ? "-" : d.Room)</strong></td>
                             <td class="date-cell">@d.ShortDate</td>
                             <td class="time-cell">@d.ShortTime</td>
-                            <td class="action-cell">
-                                <button type="button" class="btn-view" data-id="@d.Id" data-status="@d.Status">View</button>
-                            </td>
                         </tr>
                     }
                 </tbody>
@@ -156,8 +162,20 @@
 <script>
     (function () {
         document.addEventListener("click", function (e) {
+            var row = e.target.closest ? e.target.closest(".dashboard-clickable-row") : null;
+            if (row && window.CCSchedule) {
+                CCSchedule.open(row.getAttribute("data-schedule-id"), row.getAttribute("data-schedule-status") || "");
+                return;
+            }
             var btn = e.target.closest ? e.target.closest(".btn-view") : null;
             if (btn && window.CCSchedule) CCSchedule.open(btn.getAttribute("data-id"), btn.getAttribute("data-status") || "");
+        });
+        document.addEventListener("keydown", function (e) {
+            var row = e.target.closest ? e.target.closest(".dashboard-clickable-row") : null;
+            if (row && (e.key === "Enter" || e.key === " ")) {
+                e.preventDefault();
+                row.click();
+            }
         });
     })();
 </script>

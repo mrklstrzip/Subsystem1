@@ -29,26 +29,27 @@
                 <h2>To Approve</h2>
                 <a href="@Url.Action("ScheduleApprovalView", "ScheduleApproval")" class="view-all">View All</a>
             </div>
-            <table class="dash-table">
+            <table class="dash-table to-approve-table">
                 <thead>
-                    <tr><th class="left">MANUSCRIPT</th><th>AUTHOR</th><th>ADVISER</th><th>DATE</th><th>ACTION</th></tr>
+                    <tr><th class="left">MANUSCRIPT</th><th>PROJECT MANAGER</th><th>ADVISER</th><th>ROOM</th><th>DATE</th><th>TIME</th></tr>
                 </thead>
                 <tbody>
                     @if (!Model.ToApprove.Any())
                     {
-                        <tr><td colspan="5">Nothing is waiting for your approval.</td></tr>
+                        <tr><td colspan="6">Nothing is waiting for your approval.</td></tr>
                     }
                     @foreach (var r in Model.ToApprove)
                     {
-                        <tr data-id="@r.Id">
+                        <tr class="dashboard-clickable-row" data-sa-open data-id="@r.Id" tabindex="0" role="button" aria-label="Open schedule for @r.Title">
                             <td class="left">
                                 <div class="ms-title">@r.Title</div>
                                 <span class="tag @r.TagClass">@r.Section</span>
                             </td>
                             <td>@r.Author</td>
                             <td>@r.Adviser</td>
+                            <td><strong>@(String.IsNullOrWhiteSpace(r.Room) ? "-" : r.Room)</strong></td>
                             <td>@r.Date</td>
-                            <td><a href="@Url.Action("ScheduleApprovalView", "ScheduleApproval")" class="btn-view" data-sa-open data-id="@r.Id">View</a></td>
+                            <td>@r.Time</td>
                         </tr>
                     }
                 </tbody>
@@ -60,7 +61,7 @@
                 <h2>Upcoming Defenses</h2>
                 <a href="@Url.Action("DefenseScheduleView", "DefenseSchedule")" class="view-all">View All</a>
             </div>
-            <table class="dash-table">
+            <table class="dash-table upcoming-defenses-table">
                 <thead>
                     <tr><th class="left">MANUSCRIPT</th><th>PROJECT MANAGER</th><th>ADVISER</th><th>ROOM</th><th>DATE</th><th>TIME</th></tr>
                 </thead>
@@ -119,3 +120,12 @@
 
 @Html.Partial("_ScheduleApprovalModal")
 <script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.4"></script>
+<script>
+    document.addEventListener("keydown", function (event) {
+        var row = event.target.closest ? event.target.closest("tr.dashboard-clickable-row[data-sa-open]") : null;
+        if (row && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            row.click();
+        }
+    });
+</script>

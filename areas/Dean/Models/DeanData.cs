@@ -13,9 +13,9 @@ namespace Subsystem1.Areas.Dean.Models
     // What the Dean reads / writes in Sia_set1_db:
     //   defense_schedules   (shared)  the Coordinator sets status "submitted"; the Dean sets
     //                       status "approved" + approvedAt + approvedBy + approvedById, or sends it back with
-//                       status "rejected" + rejectedAt + rejectedBy + rejectedById + rejectReason (+ problem).
-//                       A rejected schedule goes back to the Coordinator (Manuscript Management as "Rejected",
-//                       and Under Review through a schedule_conflicts record with the reason).
+    //                       status "rejected" + rejectedAt + rejectedBy + rejectedById + rejectReason (+ problem).
+    //                       A rejected schedule goes back to the Coordinator (Manuscript Management as "Rejected",
+    //                       and Under Review through a schedule_conflicts record with the reason).
     //                       Once approved, the Student / Adviser / Panelist / Campus Director see it.
     //   dean_notifications  (new)     { deanId, key, scheduleId, title, text, read, createdAt }
     // Activity and counts are worked out from defense_schedules itself.
@@ -78,7 +78,9 @@ namespace Subsystem1.Areas.Dean.Models
 
                 var s = new DeanSched
                 {
-                    Doc = d, Id = DocId(d), Title = title,
+                    Doc = d,
+                    Id = DocId(d),
+                    Title = title,
                     Program = CoDb.ProgramCode(Pick(d, "program", t, "program")),
                     Section = Pick(d, "section", t, "section"),
                     Author = Pick(d, "manager", t, "projectManager"),
@@ -87,9 +89,12 @@ namespace Subsystem1.Areas.Dean.Models
                     Raw = CoDb.StatusOf(d),
                     SubmittedBy = Str(d, "submittedBy"),
                     Day = CoDb.ParseDay(Str(d, "date")),
-                    Start = Minutes(d, "start"), End = Minutes(d, "end"),
-                    SubmittedAt = Stamp(d, "submittedAt"), ApprovedAt = Stamp(d, "approvedAt"),
-                    RejectedAt = Stamp(d, "rejectedAt"), RejectReason = Str(d, "rejectReason")
+                    Start = Minutes(d, "start"),
+                    End = Minutes(d, "end"),
+                    SubmittedAt = Stamp(d, "submittedAt"),
+                    ApprovedAt = Stamp(d, "approvedAt"),
+                    RejectedAt = Stamp(d, "rejectedAt"),
+                    RejectReason = Str(d, "rejectReason")
                 };
 
                 BsonValue pv;
@@ -205,7 +210,14 @@ namespace Subsystem1.Areas.Dean.Models
                 .Take(3)
                 .Select(s => new DashboardRow
                 {
-                    Id = s.Id, Title = s.Title, Section = s.Badge, Author = s.Author, Adviser = s.Adviser, Date = DateText(s.Day)
+                    Id = s.Id,
+                    Title = s.Title,
+                    Section = s.Badge,
+                    Author = s.Author,
+                    Adviser = s.Adviser,
+                    Room = s.Room != "" ? s.Room : "-",
+                    Date = DateText(s.Day),
+                    Time = s.Start.HasValue && s.End.HasValue ? TimeText(s).Replace(":00", "") : "-"
                 }).ToList();
 
             vm.Upcoming = all.Where(s => s.Approved && s.Day.HasValue && s.Start.HasValue && s.End.HasValue && s.DefenseStatus(now) != "completed")
@@ -213,8 +225,14 @@ namespace Subsystem1.Areas.Dean.Models
                 .Take(3)
                 .Select(s => new DashboardRow
                 {
-                    Id = s.Id, Title = s.Title, Section = s.Badge, Author = s.Author, Adviser = s.Adviser,
-                    Room = s.Room != "" ? s.Room : "-", Date = DateText(s.Day), Time = TimeText(s).Replace(":00", "")
+                    Id = s.Id,
+                    Title = s.Title,
+                    Section = s.Badge,
+                    Author = s.Author,
+                    Adviser = s.Adviser,
+                    Room = s.Room != "" ? s.Room : "-",
+                    Date = DateText(s.Day),
+                    Time = TimeText(s).Replace(":00", "")
                 }).ToList();
 
             vm.TotalDefenses = all.Count(s => s.Approved);
@@ -243,8 +261,15 @@ namespace Subsystem1.Areas.Dean.Models
                 .ThenBy(s => s.Title, StringComparer.OrdinalIgnoreCase)
                 .Select(s => new ScheduleListItem
                 {
-                    Id = s.Id, Title = s.Title, Section = s.Badge, Program = s.Program, ProjectManager = s.Author, Adviser = s.Adviser,
-                    Date = s.Day ?? DateTime.MinValue, HasDate = s.Day.HasValue, Status = s.Approved ? "Approved" : s.Rejected ? "Rejected" : "To Approve"
+                    Id = s.Id,
+                    Title = s.Title,
+                    Section = s.Badge,
+                    Program = s.Program,
+                    ProjectManager = s.Author,
+                    Adviser = s.Adviser,
+                    Date = s.Day ?? DateTime.MinValue,
+                    HasDate = s.Day.HasValue,
+                    Status = s.Approved ? "Approved" : s.Rejected ? "Rejected" : "To Approve"
                 }).ToList();
         }
 
@@ -453,9 +478,16 @@ namespace Subsystem1.Areas.Dean.Models
                 .OrderBy(s => s.Day.Value).ThenBy(s => s.Start.Value)
                 .Select(s => new DefenseScheduleItem
                 {
-                    Id = s.Id, Manuscript = s.Title, Section = s.Badge, Author = s.Author, Adviser = s.Adviser,
-                    Date = s.Day.Value, StartTime = TimeSpan.FromMinutes(s.Start.Value), EndTime = TimeSpan.FromMinutes(s.End.Value),
-                    Room = s.Room != "" ? s.Room : "-", Panelists = s.Panel,
+                    Id = s.Id,
+                    Manuscript = s.Title,
+                    Section = s.Badge,
+                    Author = s.Author,
+                    Adviser = s.Adviser,
+                    Date = s.Day.Value,
+                    StartTime = TimeSpan.FromMinutes(s.Start.Value),
+                    EndTime = TimeSpan.FromMinutes(s.End.Value),
+                    Room = s.Room != "" ? s.Room : "-",
+                    Panelists = s.Panel,
                     Status = s.DefenseStatus(now) == "completed" ? "Completed" : s.DefenseStatus(now) == "ongoing" ? "Ongoing" : "Upcoming"
                 }).ToList();
 
@@ -472,7 +504,11 @@ namespace Subsystem1.Areas.Dean.Models
 
             return new DefenseScheduleViewModel
             {
-                Items = q.ToList(), Search = search, Program = program ?? "All", Status = status ?? "All", Adviser = adviser ?? "All",
+                Items = q.ToList(),
+                Search = search,
+                Program = program ?? "All",
+                Status = status ?? "All",
+                Adviser = adviser ?? "All",
                 Programs = all.Select(x => x.Program).Where(x => x != "").Distinct().OrderBy(x => x).ToList(),
                 Advisers = all.Select(x => x.Adviser).Where(x => x != "").Distinct().OrderBy(x => x).ToList()
             };
@@ -568,8 +604,12 @@ namespace Subsystem1.Areas.Dean.Models
                     bool read = n.TryGetValue("read", out rv) && rv != null && rv.IsBoolean && rv.AsBoolean;
                     return new DeanNotification
                     {
-                        Id = DocId(n), ScheduleId = Str(n, "scheduleId"), Title = Str(n, "title"), Text = Str(n, "text"),
-                        CreatedAt = Stamp(n, "createdAt") ?? now, Read = read
+                        Id = DocId(n),
+                        ScheduleId = Str(n, "scheduleId"),
+                        Title = Str(n, "title"),
+                        Text = Str(n, "text"),
+                        CreatedAt = Stamp(n, "createdAt") ?? now,
+                        Read = read
                     };
                 }).ToList();
         }
