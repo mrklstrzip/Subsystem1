@@ -3,7 +3,7 @@
     ViewBag.ActiveMenu = "Dashboard";
 }
 
-<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.7" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.8" rel="stylesheet" type="text/css" />
 
 <div class="dashboard-header">
     <div class="header-text">
@@ -47,10 +47,14 @@
     <div class="dsh-card">
         <h3 class="dsh-card-title">Room Status</h3>
         <div class="dsh-donut-wrap">
-            <svg class="dsh-donut" id="dash-donut" viewBox="0 0 200 200" role="img" aria-label="Room status chart"></svg>
-            <div class="dsh-legend">
-                <span><i style="background:#246a86"></i>Active Rooms</span>
-                <span><i style="background:#6b97d6"></i>Disabled Rooms</span>
+            <div class="dsh-donut-chart">
+                <svg class="dsh-donut" id="dash-donut" viewBox="0 0 200 200" role="img" aria-label="Room status chart"></svg>
+                <div class="dsh-donut-center"><strong>0</strong><span>rooms</span></div>
+                <div class="dsh-donut-tooltip" role="status" aria-hidden="true"></div>
+            </div>
+            <div class="dsh-legend" id="dash-donut-legend">
+                <button type="button" data-room-status="active" aria-pressed="true" title="Click to hide or show Active Rooms"><i style="background:#246a86"></i><span>Active Rooms</span><strong>0</strong></button>
+                <button type="button" data-room-status="disabled" aria-pressed="true" title="Click to hide or show Disabled Rooms"><i style="background:#6b97d6"></i><span>Disabled Rooms</span><strong>0</strong></button>
             </div>
         </div>
     </div>

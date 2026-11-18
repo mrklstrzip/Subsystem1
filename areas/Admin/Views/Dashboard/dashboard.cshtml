@@ -1,7 +1,7 @@
 ﻿@{
     ViewBag.Title = "Dashboard";
 }
-<link href="@Url.Content("~/Content/css/admin/dashboard.css")?v=5.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/admin/dashboard.css")?v=5.6" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -78,29 +78,38 @@
 
     <!-- Role Distribution Section -->
     <div class="distribution">
-        <h4 class="table-title">ROLE DISTRIBUTION</h4>
-        <div class="distribution-content">
-            <!-- Donut Chart -->
-            <div class="donut-chart-container">
-                <div class="donut-chart"></div>
+        <div class="distribution-header">
+            <h4 class="table-title">ROLE DISTRIBUTION</h4>
+            <div class="custom-select-box distribution-filter-box" id="roleStatusDropdownToggle">
+                <span class="filter-legend">Status</span>
+                <div class="select-selected" tabindex="0" role="combobox" aria-expanded="false" aria-controls="roleStatusDropdownMenu">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>All</span>
+                    <i class="fa-solid fa-chevron-down chevron"></i>
+                </div>
+                <div class="custom-select-dropdown" id="roleStatusDropdownMenu">
+                    <div class="select-option active" data-value="all"><i class="fa-solid fa-sliders"></i> All</div>
+                    <div class="select-option" data-value="active"><i class="fa-solid fa-toggle-on"></i> Active</div>
+                    <div class="select-option" data-value="inactive"><i class="fa-solid fa-toggle-off"></i> Inactive</div>
+                </div>
+                <select id="role-status-filter" aria-label="Filter role distribution by account status" style="display:none;">
+                    <option value="all">All</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
             </div>
-
-            <!-- Distribution Table -->
-            <table class="distribution-table">
-                <thead>
-                    <tr>
-                        <th class="column-title role-col">ROLE</th>
-                        <th class="column-title num-col">TOTAL</th>
-                        <th class="column-title num-col">ACTIVE</th>
-                        <th class="column-title num-col">INACTIVE</th>
-                    </tr>
-                </thead>
-                <tbody id="dash-roles">
-                    <!-- Dynamically populated by admin-app.js -->
-                </tbody>
-            </table>
+        </div>
+        <div class="distribution-content">
+            <div class="donut-chart-container">
+                <svg class="donut-chart" viewBox="0 0 200 200" role="img" aria-label="Role distribution chart"></svg>
+                <div class="donut-center-total" aria-live="polite"></div>
+                <div class="donut-tooltip" role="status" aria-hidden="true"></div>
+            </div>
+            <div class="distribution-legend" id="dash-roles" aria-label="Role distribution legend">
+                <!-- Dynamically populated by admin-app.js -->
+            </div>
         </div>
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=7.3"></script>
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=7.9"></script>

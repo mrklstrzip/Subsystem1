@@ -218,21 +218,110 @@
                 '<div class="dsh-track"><div class="dsh-fill" style="width:' + pct + '%"></div></div></div>';
         }).join('') || '<div class="dsh-empty">No buildings yet</div>';
 
-        // Room status donut (Active vs Disabled)
-        var R = 72, SW = 44, C = 2 * Math.PI * R;
-        var svg = '<g transform="rotate(-90 100 100)" fill="none" stroke-width="' + SW + '">';
-        if (!total) {
-            svg += '<circle cx="100" cy="100" r="' + R + '" stroke="#e2e8f0"><title>No rooms yet</title></circle>';
-        } else {
-            var aLen = C * active / total;
-            svg += '<circle cx="100" cy="100" r="' + R + '" stroke="#6b97d6"><title>Disabled Rooms: ' + disabled +
-                ' (' + Math.round(disabled / total * 100) + '%)</title></circle>';
-            if (active > 0) {
-                svg += '<circle cx="100" cy="100" r="' + R + '" stroke="#246a86" stroke-dasharray="' + aLen.toFixed(2) + ' ' + C.toFixed(2) +
-                    '"><title>Active Rooms: ' + active + ' (' + Math.round(active / total * 100) + '%)</title></circle>';
+        // Interactive Room Status donut. Legend buttons control visibility; SVG slices only show hover details.
+        var donut = $('dash-donut');
+        var donutWrap = donut && donut.closest('.dsh-donut-chart');
+        var roomLegend = $('dash-donut-legend');
+        if (donut && donutWrap && roomLegend) {
+            var hidden = donut._hiddenRoomStatuses || {};
+            var center = donutWrap.querySelector('.dsh-donut-center');
+            var tooltip = donutWrap.querySelector('.dsh-donut-tooltip');
+            var segments = [
+                { key: 'active', label: 'Active Rooms', color: '#246a86', value: active },
+                { key: 'disabled', label: 'Disabled Rooms', color: '#6b97d6', value: disabled }
+            ];
+            var point = function (radius, angle) {
+                var radians = (angle - 90) * Math.PI / 180;
+                return { x: 100 + radius * Math.cos(radians), y: 100 + radius * Math.sin(radians) };
+            };
+            var ringPath = function (start, end) {
+                var outerStart = point(92, start), outerEnd = point(92, end);
+                var innerEnd = point(58, end), innerStart = point(58, start);
+                var large = end - start > 180 ? 1 : 0;
+                if (end - start >= 359.99) {
+                    var mid = start + 180, outerMid = point(92, mid), innerMid = point(58, mid);
+                    return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 1 1 ' + outerMid.x + ' ' + outerMid.y + ' A 92 92 0 1 1 ' + outerStart.x + ' ' + outerStart.y + ' L ' + innerStart.x + ' ' + innerStart.y + ' A 58 58 0 1 0 ' + innerMid.x + ' ' + innerMid.y + ' A 58 58 0 1 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
+                }
+                return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 ' + large + ' 1 ' + outerEnd.x + ' ' + outerEnd.y + ' L ' + innerEnd.x + ' ' + innerEnd.y + ' A 58 58 0 ' + large + ' 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
+            };
+            var drawRoomDonut = function (values) {
+                var shownTotal = values[0] + values[1], angle = 0;
+                var markup = segments.map(function (segment, index) {
+                    var value = values[index];
+                    if (!value || !shownTotal) return '';
+                    var sweep = value / shownTotal * 360;
+                    var start = angle, end = angle + sweep;
+                    angle = end;
+                    var percent = Math.round(value / shownTotal * 100);
+                    return '<path class="dsh-donut-segment" data-status="' + segment.key + '" data-label="' + segment.label + '" data-value="' + Math.round(value) + '" data-percent="' + percent + '" d="' + ringPath(start, end) + '" fill="' + segment.color + '" aria-hidden="true" />';
+                }).join('');
+                donut.innerHTML = markup || '<circle cx="100" cy="100" r="75" fill="none" stroke="#e2e8f0" stroke-width="34" />';
+                center.innerHTML = '<strong>' + Math.round(shownTotal) + '</strong><span>rooms</span>';
+                donut.setAttribute('aria-label', 'Room status chart, ' + Math.round(shownTotal) + ' rooms shown.');
+                donut._roomValues = values.slice();
+                roomLegend.querySelectorAll('[data-room-status]').forEach(function (button, index) {
+                    button.setAttribute('aria-pressed', String(!hidden[button.getAttribute('data-room-status')]));
+                    button.querySelector('strong').textContent = Math.round(segments[index].value);
+                });
+            };
+            if (donut._animFrame) window.cancelAnimationFrame(donut._animFrame);
+            donut._hiddenRoomStatuses = hidden;
+            drawRoomDonut([hidden.active ? 0 : active, hidden.disabled ? 0 : disabled]);
+            var hideRoomTooltip = function () { tooltip.setAttribute('aria-hidden', 'true'); tooltip.innerHTML = ''; };
+            var showRoomTooltip = function (segment, event) {
+                if (!segment) return hideRoomTooltip();
+                tooltip.innerHTML = '<strong>' + segment.getAttribute('data-label') + '</strong><span>' + segment.getAttribute('data-value') + ' rooms (' + segment.getAttribute('data-percent') + '%)</span>';
+                if (event) {
+                    var bounds = donutWrap.getBoundingClientRect();
+                    tooltip.style.left = (event.clientX - bounds.left) + 'px';
+                    tooltip.style.top = (event.clientY - bounds.top) + 'px';
+                }
+                tooltip.setAttribute('aria-hidden', 'false');
+            };
+            if (!donut._eventsBound) {
+                donut._eventsBound = true;
+                donut.addEventListener('pointerover', function (event) {
+                    var segment = event.target.closest('.dsh-donut-segment');
+                    if (segment) { segment.classList.add('is-hovered'); showRoomTooltip(segment, event); }
+                });
+                donut.addEventListener('pointerout', function (event) {
+                    var segment = event.target.closest('.dsh-donut-segment');
+                    if (segment && !segment.contains(event.relatedTarget)) { segment.classList.remove('is-hovered'); hideRoomTooltip(); }
+                });
+            }
+            if (!roomLegend._eventsBound) {
+                roomLegend._eventsBound = true;
+                roomLegend.addEventListener('click', function (event) {
+                    var button = event.target.closest('[data-room-status]');
+                    if (!button) return;
+                    var key = button.getAttribute('data-room-status');
+                    hidden[key] = !hidden[key];
+                    button.setAttribute('aria-pressed', String(!hidden[key]));
+                    var from = donut._roomValues.slice();
+                    var to = [hidden.active ? 0 : active, hidden.disabled ? 0 : disabled];
+                    if (donut._animFrame) window.cancelAnimationFrame(donut._animFrame);
+                    var started = null, duration = 220;
+                    function animate(timestamp) {
+                        if (started === null) started = timestamp;
+                        var progress = Math.min(1, (timestamp - started) / duration);
+                        var eased = 1 - Math.pow(1 - progress, 3);
+                        drawRoomDonut(from.map(function (value, index) { return value + (to[index] - value) * eased; }));
+                        if (progress < 1) donut._animFrame = window.requestAnimationFrame(animate);
+                        else donut._animFrame = 0;
+                    }
+                    donut._animFrame = window.requestAnimationFrame(animate);
+                });
+                roomLegend.addEventListener('mouseover', function (event) {
+                    var button = event.target.closest('[data-room-status]');
+                    if (!button) return;
+                    var segment = donut.querySelector('[data-status="' + button.getAttribute('data-room-status') + '"]');
+                    if (segment) segment.classList.add('is-hovered');
+                });
+                roomLegend.addEventListener('mouseout', function (event) {
+                    if (!event.relatedTarget || !event.relatedTarget.closest('[data-room-status]')) donut.querySelectorAll('.is-hovered').forEach(function (segment) { segment.classList.remove('is-hovered'); });
+                });
             }
         }
-        $('dash-donut').innerHTML = svg + '</g>';
 
         // Recent activity
         $('dash-activity').innerHTML = state.activity.slice(0, 6).map(function (a) {

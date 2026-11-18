@@ -260,10 +260,25 @@
                     document.querySelectorAll('.custom-select-dropdown').forEach(function (m) {
                         if (m !== menu) m.classList.remove('open');
                     });
+                    document.querySelectorAll('.custom-select-box .select-selected[aria-expanded="true"]').forEach(function (item) {
+                        if (item !== toggle) item.setAttribute('aria-expanded', 'false');
+                    });
 
                     menu.classList.toggle('open');
+                    if (toggle.hasAttribute('aria-expanded')) toggle.setAttribute('aria-expanded', String(menu.classList.contains('open')));
                     e.stopPropagation();
                 });
+                if (toggle.hasAttribute('aria-expanded')) {
+                    toggle.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            if (!menu.classList.contains('open')) toggle.click();
+                        } else if (e.key === 'Escape') {
+                            menu.classList.remove('open');
+                            toggle.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                }
             }
 
             if (menu && hiddenSelect) {
@@ -301,6 +316,7 @@
 
                         // Close dropdown
                         menu.classList.remove('open');
+                        if (toggle && toggle.hasAttribute('aria-expanded')) toggle.setAttribute('aria-expanded', 'false');
 
                         // Trigger filter
                         hiddenSelect.dispatchEvent(new Event('change', {
@@ -314,6 +330,9 @@
         document.addEventListener('click', function () {
             document.querySelectorAll('.custom-select-dropdown').forEach(function (m) {
                 m.classList.remove('open');
+            });
+            document.querySelectorAll('.custom-select-box .select-selected[aria-expanded="true"]').forEach(function (item) {
+                item.setAttribute('aria-expanded', 'false');
             });
         });
     }
@@ -380,11 +399,17 @@
     function renderDashboard() {
         if (!$('dash-total')) return;
 
+        var chartEl = document.querySelector('.donut-chart');
+        var statusFilterEl = $('role-status-filter');
+        var chartStatus = chartEl && chartEl._statusFilter || (statusFilterEl ? statusFilterEl.value : 'all');
         var known = DIST.map(function (d) { return d.role; });
         var people = state.users.filter(function (u) { return known.indexOf(u.role) > -1; });
         function count(role, status) {
-            return people.filter(function (u) { return u.role === role && (!status || u.status === status); }).length;
+            return people.filter(function (u) {
+                return u.role === role && (!status || (status === 'inactive' ? u.status !== 'active' : u.status === status));
+            }).length;
         }
+        function chartCount(role) { return count(role, chartStatus === 'all' ? null : chartStatus); }
 
         var totalPeople = people.length;
 
@@ -401,58 +426,147 @@
             .slice(0, 6)
             .map(function (a) {
 
-            return '<tr>' +
-                '<td class="actdate">' +
-                '<div class="activity-date-wrapper">' +
-                '<span class="activity-badge ' + getActivityBadgeClass(a.type) + '">' + getActivityIcon(a) + '</span>' +
-                '<div>' +
-                '<span class="date-main">' + esc(fmtDate(a.at)) + '</span>' +
-                '<span class="time-sub">' + esc(fmtTime(a.at)) + '</span>' +
-                '</div>' +
-                '</div>' +
-                '</td>' +
-                '<td class="actname bold">' + esc(a.text) + '</td>' +
-                '</tr>';
-        }).join('') || '<tr><td colspan="2" class="actdate">No recent activity</td></tr>';
+                return '<tr>' +
+                    '<td class="actdate">' +
+                    '<div class="activity-date-wrapper">' +
+                    '<span class="activity-badge ' + getActivityBadgeClass(a.type) + '">' + getActivityIcon(a) + '</span>' +
+                    '<div>' +
+                    '<span class="date-main">' + esc(fmtDate(a.at)) + '</span>' +
+                    '<span class="time-sub">' + esc(fmtTime(a.at)) + '</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '</td>' +
+                    '<td class="actname bold">' + esc(a.text) + '</td>' +
+                    '</tr>';
+            }).join('') || '<tr><td colspan="2" class="actdate">No recent activity</td></tr>';
 
+        var chartWrap = chartEl && chartEl.closest('.donut-chart-container');
+        var hiddenRoles = chartEl && chartEl._hiddenRoles || {};
+        if (chartEl) chartEl._statusFilter = chartStatus;
+        if (statusFilterEl && !statusFilterEl._bound) {
+            statusFilterEl._bound = true;
+            statusFilterEl.addEventListener('change', function () {
+                if (chartEl) chartEl._statusFilter = statusFilterEl.value;
+                renderDashboard();
+            });
+        }
         $('dash-roles').innerHTML = DIST.map(function (d) {
-            return '<tr>' +
-                '<td class="role-name bold"><span class="legend-dot ' + d.dotCls + '"></span>' + esc(d.label) + '</td>' +
-                '<td class="total-num bold">' + count(d.role) + '</td>' +
-                '<td class="active-num bold">' + count(d.role, 'active') + '</td>' +
-                '<td class="inactive-num bold">' + count(d.role, 'inactive') + '</td>' +
-                '</tr>';
+            return '<button type="button" class="donut-legend-toggle" data-role="' + esc(d.role) + '" aria-pressed="' + String(!hiddenRoles[d.role]) + '" title="' + esc(d.label) + ': ' + chartCount(d.role) + ' users. Click to toggle this segment.">' +
+                '<span class="legend-dot ' + d.dotCls + '"></span><span class="legend-label">' + esc(d.label) + '</span><strong>' + chartCount(d.role) + '</strong></button>';
         }).join('');
 
         // Donut chart based on the role distribution
-        var chartEl = document.querySelector('.donut-chart');
         if (chartEl) {
-            if (totalPeople === 0) {
-                chartEl.style.background = '#E2E8F0'; // fallback if there are no users yet
-            } else {
-                var accumulated = 0;
-                var cssVarMap = {
-                    'project-manager': 'var(--projectmanager)',
-                    'panelist': 'var(--panelist)',
-                    'adviser': 'var(--adviser)',
-                    'campus-director': 'var(--campusdirector)',
-                    'capstone-coordinator': 'var(--capstonecoordinator)',
-                    'dean': 'var(--dean)'
-                };
-                var gradientStops = DIST.map(function (d) {
-                    var percentage = (count(d.role) / totalPeople) * 100;
-                    var start = accumulated;
-                    accumulated += percentage;
-                    return (cssVarMap[d.role] || '#ccc') + ' ' + start + '% ' + accumulated + '%';
+            var cssVarMap = {
+                'project-manager': '--projectmanager', 'panelist': '--panelist', 'adviser': '--adviser',
+                'campus-director': '--campusdirector', 'capstone-coordinator': '--capstonecoordinator', 'dean': '--dean'
+            };
+            function point(radius, angle) {
+                var radians = (angle - 90) * Math.PI / 180;
+                return { x: 100 + radius * Math.cos(radians), y: 100 + radius * Math.sin(radians) };
+            }
+            function ringPath(start, end) {
+                var outerStart = point(92, start), outerEnd = point(92, end);
+                var innerEnd = point(58, end), innerStart = point(58, start);
+                var large = end - start > 180 ? 1 : 0;
+                if (end - start >= 359.99) {
+                    var mid = start + 180, outerMid = point(92, mid), innerMid = point(58, mid);
+                    return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 1 1 ' + outerMid.x + ' ' + outerMid.y + ' A 92 92 0 1 1 ' + outerStart.x + ' ' + outerStart.y + ' L ' + innerStart.x + ' ' + innerStart.y + ' A 58 58 0 1 0 ' + innerMid.x + ' ' + innerMid.y + ' A 58 58 0 1 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
+                }
+                return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 ' + large + ' 1 ' + outerEnd.x + ' ' + outerEnd.y + ' L ' + innerEnd.x + ' ' + innerEnd.y + ' A 58 58 0 ' + large + ' 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
+            }
+            var center = chartWrap.querySelector('.donut-center-total');
+            function drawDonut(values) {
+                var total = values.reduce(function (sum, value) { return sum + value; }, 0);
+                var angle = 0;
+                var svgMarkup = DIST.map(function (d, index) {
+                    var value = values[index];
+                    if (!value || !total) return '';
+                    var sweep = value / total * 360;
+                    var start = angle, end = angle + sweep;
+                    angle = end;
+                    var color = getComputedStyle(document.documentElement).getPropertyValue(cssVarMap[d.role]).trim() || '#ccc';
+                    var visibleValue = Math.round(value), percent = Math.round(value / total * 100);
+                    return '<path class="donut-segment" data-role="' + esc(d.role) + '" data-label="' + esc(d.label) + '" data-value="' + visibleValue + '" data-percent="' + percent + '" d="' + ringPath(start, end) + '" fill="' + esc(color) + '" aria-hidden="true" />';
+                }).join('');
+                chartEl.innerHTML = svgMarkup || '<circle cx="100" cy="100" r="75" fill="none" stroke="#E2E8F0" stroke-width="34" />';
+                center.innerHTML = '<strong>' + Math.round(total) + '</strong><small>users</small>';
+                chartEl.setAttribute('aria-label', 'Role distribution, ' + Math.round(total) + ' users shown.');
+                chartEl._donutValues = values.slice();
+            }
+            if (chartEl._animFrame) window.cancelAnimationFrame(chartEl._animFrame);
+            drawDonut(DIST.map(function (d) { return hiddenRoles[d.role] ? 0 : chartCount(d.role); }));
+            chartEl._hiddenRoles = hiddenRoles;
+            var tooltip = chartWrap.querySelector('.donut-tooltip');
+            function hideTooltip() { tooltip.setAttribute('aria-hidden', 'true'); tooltip.innerHTML = ''; }
+            function showTooltip(segment, event) {
+                if (!segment) return hideTooltip();
+                tooltip.innerHTML = '<strong>' + esc(segment.getAttribute('data-label')) + '</strong><span>' + segment.getAttribute('data-value') + ' users (' + segment.getAttribute('data-percent') + '%)</span>';
+                if (event && typeof event.clientX === 'number') {
+                    var bounds = chartWrap.getBoundingClientRect();
+                    tooltip.style.left = (event.clientX - bounds.left) + 'px';
+                    tooltip.style.top = (event.clientY - bounds.top) + 'px';
+                }
+                tooltip.setAttribute('aria-hidden', 'false');
+            }
+            function toggleRole(role) {
+                hiddenRoles[role] = !hiddenRoles[role];
+                var from = chartEl._donutValues.slice();
+                var to = DIST.map(function (d) { return hiddenRoles[d.role] ? 0 : chartCount(d.role); });
+                var started = null, duration = 220;
+                if (chartEl._animFrame) window.cancelAnimationFrame(chartEl._animFrame);
+                function frame(timestamp) {
+                    if (started === null) started = timestamp;
+                    var progress = Math.min(1, (timestamp - started) / duration);
+                    var eased = 1 - Math.pow(1 - progress, 3);
+                    drawDonut(from.map(function (value, index) { return value + (to[index] - value) * eased; }));
+                    if (progress < 1) chartEl._animFrame = window.requestAnimationFrame(frame);
+                    else chartEl._animFrame = 0;
+                }
+                chartEl._animFrame = window.requestAnimationFrame(frame);
+            }
+            if (!chartEl._eventsBound) {
+                chartEl._eventsBound = true;
+                chartEl.addEventListener('pointerover', function (event) {
+                    var segment = event.target.closest('.donut-segment');
+                    if (!segment) return;
+                    segment.classList.add('is-hovered'); showTooltip(segment, event);
                 });
-
-                chartEl.style.background = 'conic-gradient(' + gradientStops.join(', ') + ')';
+                chartEl.addEventListener('pointerout', function (event) {
+                    var segment = event.target.closest('.donut-segment');
+                    if (!segment || segment.contains(event.relatedTarget)) return;
+                    segment.classList.remove('is-hovered'); hideTooltip();
+                });
+            }
+            var legend = document.getElementById('dash-roles');
+            if (!chartEl._legendBound && legend) {
+                chartEl._legendBound = true;
+                legend.addEventListener('click', function (event) {
+                    var button = event.target.closest('.donut-legend-toggle');
+                    if (!button) return;
+                    var role = button.getAttribute('data-role');
+                    toggleRole(role);
+                    button.setAttribute('aria-pressed', String(!hiddenRoles[role]));
+                });
+                legend.addEventListener('mouseover', function (event) {
+                    var button = event.target.closest('.donut-legend-toggle');
+                    if (button) {
+                        chartEl.querySelectorAll('.is-hovered').forEach(function (item) { item.classList.remove('is-hovered'); });
+                        var hovered = chartEl.querySelector('[data-role="' + button.getAttribute('data-role') + '"]');
+                        if (hovered) { hovered.classList.add('is-hovered'); showTooltip(hovered, event); }
+                    }
+                });
+                legend.addEventListener('mouseout', function (event) {
+                    if (!event.relatedTarget || !event.relatedTarget.closest('.donut-legend-toggle')) { chartEl.querySelectorAll('.is-hovered').forEach(function (item) { item.classList.remove('is-hovered'); }); hideTooltip(); }
+                });
             }
         }
     }
 
     function initDashboard() {
         if (!$('dash-total')) return;
+
+        bindCustomDropdowns();
 
         var welcome = $('dash-welcome');
         if (welcome) {
@@ -934,7 +1048,7 @@
         if ($('statusActive')) $('statusActive').checked = (u.status === 'active');
         if ($('statusInactive')) $('statusInactive').checked = (u.status !== 'active');
 
-       
+
         setRoleOptions();
         if ($('modalRoleSelect')) $('modalRoleSelect').value = u.role;
         updateIdPrefix(u.role, u.idNumber);

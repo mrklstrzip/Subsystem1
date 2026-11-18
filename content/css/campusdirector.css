@@ -2183,10 +2183,87 @@ table.cdp2-info {
     padding-top: 4px;
 }
 
-.dsh-donut {
+.dsh-donut-chart {
+    position: relative;
     width: 200px;
     height: 200px;
 }
+
+.dsh-donut {
+    width: 200px;
+    height: 200px;
+    overflow: visible;
+}
+
+.dsh-donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #1B293B;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+}
+
+    .dsh-donut-center strong {
+        font-size: 28px;
+        line-height: 1.1;
+    }
+
+    .dsh-donut-center span {
+        color: #65758b;
+        font-size: 12px;
+    }
+
+.dsh-donut-segment {
+    cursor: default;
+    stroke: #fff;
+    stroke-width: 3px;
+    stroke-linejoin: round;
+    transform-box: view-box;
+    transform-origin: center;
+    transition: transform .18s ease, filter .18s ease;
+}
+
+    .dsh-donut-segment:hover, .dsh-donut-segment.is-hovered {
+        transform: scale(1.055);
+        filter: drop-shadow(0 3px 4px rgba(27, 41, 59, .24));
+    }
+
+.dsh-donut-tooltip {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 118px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(27,41,59,.16);
+    color: #1B293B;
+    font-size: 11px;
+    text-align: center;
+    pointer-events: none;
+    transform: translate(-50%, calc(-100% - 9px));
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .12s ease;
+}
+
+    .dsh-donut-tooltip[aria-hidden="false"] {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .dsh-donut-tooltip strong {
+        font-size: 12px;
+    }
 
 .dsh-legend {
     display: flex;
@@ -2195,6 +2272,39 @@ table.cdp2-info {
     font-weight: 600;
     color: #1B293B;
 }
+
+    .dsh-legend button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 4px 6px;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        color: #1B293B;
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+        transition: opacity .18s ease, background .18s ease;
+    }
+
+        .dsh-legend button:hover {
+            background: #f3f6fa;
+        }
+
+        .dsh-legend button[aria-pressed="false"] {
+            opacity: .45;
+            text-decoration: line-through;
+        }
+
+        .dsh-legend button:focus-visible {
+            outline: 2px solid #246a86;
+            outline-offset: 2px;
+        }
+
+        .dsh-legend button strong {
+            font-size: 12px;
+        }
 
     .dsh-legend span {
         display: inline-flex;
