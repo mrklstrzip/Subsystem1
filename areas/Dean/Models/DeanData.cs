@@ -280,7 +280,8 @@ namespace Subsystem1.Areas.Dean.Models
             BsonDocument d = oid.HasValue ? Schedules().Find(Builders<BsonDocument>.Filter.Eq("_id", oid.Value)).FirstOrDefault() : null;
             if (d == null) return null;
             string raw = CoDb.StatusOf(d);
-            if (raw != "submitted" && raw != "approved" && raw != "completed" && raw != "complete" && raw != "rejected") return null;
+            if (raw != "generated" && raw != "declined" && raw != "under-review" && raw != "submitted" &&
+                raw != "approved" && raw != "completed" && raw != "complete" && raw != "rejected") return null;
 
             ObjectId? toid = ParseId(Str(d, "titleId"));
             BsonDocument t = toid.HasValue ? Titles().Find(Builders<BsonDocument>.Filter.Eq("_id", toid.Value)).FirstOrDefault() : null;
@@ -322,14 +323,14 @@ namespace Subsystem1.Areas.Dean.Models
             string building = CoordinatorData.BuildingOf(d, PlanContext.BuildingNamesByRoom());
 
             bool rejected = raw == "rejected";
-            bool approved = raw != "submitted" && !rejected;
+            bool approved = raw == "approved" || raw == "completed" || raw == "complete";
             DeanManuscriptFile manuscriptFile = ResolveManuscriptFile(d, t);
             return new ScheduleDetailsVM
             {
                 Id = DocId(d),
                 ProjectTitle = Pick(d, "title", t, "title"),
                 DateSubmitted = submitted.HasValue ? submitted.Value.ToString("MMM d, yyyy", CultureInfo.InvariantCulture) : "-",
-                Status = approved ? "Approved" : rejected ? "Rejected" : "For Approval",
+                Status = approved ? "Approved" : rejected ? "Rejected" : raw == "generated" || raw == "declined" ? "To Submit" : raw == "under-review" ? "Under Review" : "For Approval",
                 RejectReason = rejected ? Str(d, "rejectReason") : "",
                 Student = Pick(d, "manager", t, "projectManager"),
                 ProgramSection = CoDb.SectionLabel(section, program),

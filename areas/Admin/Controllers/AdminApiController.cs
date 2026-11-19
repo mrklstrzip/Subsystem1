@@ -662,7 +662,7 @@ namespace Subsystem1.Areas.Admin.Controllers
                     .Concat(campusLogs)
                     .Concat(coordinatorLogs)
                     .Where(a => a.at != DateTime.MinValue &&
-                                !string.IsNullOrWhiteSpace(a.text) && 
+                                !string.IsNullOrWhiteSpace(a.text) &&
                                 IsTrackedSystemActivity(a.text))
                     .OrderByDescending(a => a.at)
                     .Take(50)
@@ -677,6 +677,72 @@ namespace Subsystem1.Areas.Admin.Controllers
 
                 return Json(new { success = true, users = users, tags = tags, activity = activity },
                     JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ErrorText(ex) }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult dashboardState()
+        {
+            try
+            {
+                Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
+                var coordinator = Subsystem1.Areas.CapstoneCoordinator.Models.CoordinatorData.Load(false, false, false, false);
+                var dean = Subsystem1.Areas.Dean.Models.DeanData.Dashboard();
+                var dashboard = new
+                {
+                    totalUsers = RealUsers().Count,
+                    totalDefenses = dean.TotalDefenses,
+                    underReview = coordinator.UnderReview,
+                    toSubmit = coordinator.Schedules.Where(s => s.Status == "to-submit").Take(3).Select(s => new
+                    {
+                        id = s.Id,
+                        title = s.Title,
+                        section = s.Badge,
+                        projectManager = s.Author,
+                        adviser = s.Adviser,
+                        room = "-",
+                        date = s.DateText,
+                        time = "-"
+                    }).ToList(),
+                    toApprove = dean.ToApprove.Select(s => new
+                    {
+                        id = s.Id,
+                        title = s.Title,
+                        section = s.Section,
+                        projectManager = s.Author,
+                        adviser = s.Adviser,
+                        room = s.Room,
+                        date = s.Date,
+                        time = s.Time
+                    }).ToList(),
+                    upcoming = coordinator.Upcoming.Select(s => new
+                    {
+                        id = s.Id,
+                        title = s.Title,
+                        section = s.Badge,
+                        projectManager = s.Author,
+                        adviser = s.Adviser,
+                        room = s.Room,
+                        date = s.ShortDate,
+                        time = s.ShortTime
+                    }).Concat(dean.Upcoming.Select(s => new
+                    {
+                        id = s.Id,
+                        title = s.Title,
+                        section = s.Section,
+                        projectManager = s.Author,
+                        adviser = s.Adviser,
+                        room = s.Room,
+                        date = s.Date,
+                        time = s.Time
+                    })).GroupBy(s => s.id).Select(g => g.First()).Take(3).ToList(),
+                    roomSummary = Subsystem1.Areas.CampusDirector.Controllers.CampusDirectorApiController.DashboardSummaryData()
+                };
+                return Json(new { success = true, dashboard = dashboard }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
@@ -1008,7 +1074,7 @@ namespace Subsystem1.Areas.Admin.Controllers
                 bool isCoordinator = roleKey == "capstone-coordinator";
 
                 bool isEdit = Clean(dto.Id) != "";
-                
+
                 if (!isEdit &&
     roleKey != "campus-director" &&
     roleKey != "capstone-coordinator" &&

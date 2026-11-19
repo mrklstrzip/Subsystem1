@@ -90,14 +90,14 @@
     </div>
 
     <aside class="dash-side">
-        <div class="dash-card stat-card">
+        <a class="dash-card stat-card dashboard-stat-link" href="@Url.Action("DefenseScheduleView", "DefenseSchedule")" aria-label="View defense schedules">
             <div>
                 <div class="stat-label">TOTAL DEFENSES</div>
                 <div class="stat-number">@Model.TotalDefenses</div>
                 <div class="stat-sub">Approved defense schedules</div>
             </div>
             <i class="fa fa-door-open stat-icon"></i>
-        </div>
+        </a>
 
         <div class="dash-card">
             <div class="dash-card-head"><h2 class="muted-h">RECENT ACTIVITIES</h2></div>

@@ -265,10 +265,28 @@
 
 /* ---------- Total Defenses card ---------- */
 .stat-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    position: relative;
+    display: block;
     padding: 22px 20px;
+    min-height: 132px;
+    box-sizing: border-box;
+    transition: background-color .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+
+.dashboard-stat-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+    .dashboard-stat-link:focus-visible {
+        outline: 3px solid #436cf2;
+        outline-offset: 3px;
+    }
+
+.stat-card > div {
+    position: relative;
+    z-index: 1;
+    padding-right: 58px;
 }
 
 .stat-label {
@@ -291,9 +309,31 @@
 }
 
 .stat-icon {
-    font-size: 36px;
-    color: #8b8fb5;
+    position: absolute;
+    right: 18px;
+    bottom: 15px;
+    font-size: 52px;
+    line-height: 1;
+    color: #f0f1f3;
+    transition: color .22s ease, transform .22s ease;
 }
+
+.stat-card:hover {
+    background: linear-gradient(to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100%);
+    border-color: #17263c;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .16);
+}
+
+    .stat-card:hover .stat-label,
+    .stat-card:hover .stat-number,
+    .stat-card:hover .stat-sub,
+    .stat-card:hover .stat-icon {
+        color: #fff;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.04);
+    }
 
 /* ---------- Recent Activities ---------- */
 .activity-table th:first-child,

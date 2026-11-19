@@ -3,7 +3,7 @@
     ViewBag.ActiveMenu = "Dashboard";
 }
 
-<link href="@Url.Content("~/Content/css/campusdirector.css")?v=1.8" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/campusdirector.css")?v=2.1" rel="stylesheet" type="text/css" />
 
 <div class="dashboard-header">
     <div class="header-text">
@@ -16,26 +16,26 @@
 </div>
 
 <div class="dsh-grid dsh-row-1">
-    <div class="dsh-card dsh-stat">
+    <a class="dsh-card dsh-stat dashboard-room-stat-link" href="@Url.Action("roommanagement", "RoomManagement")" aria-label="View all rooms">
         <div class="dsh-label">Total Rooms</div>
         <div class="dsh-value" id="dash-total-rooms">0</div>
         <div class="dsh-desc">Across all buildings</div>
         <i class="fa fa-door-closed dsh-icon" aria-hidden="true"></i>
-    </div>
+    </a>
 
-    <div class="dsh-card dsh-stat">
+    <a class="dsh-card dsh-stat dashboard-room-stat-link" href="@Url.Action("roommanagement", "RoomManagement")" aria-label="View active rooms">
         <div class="dsh-label">Active Rooms</div>
         <div class="dsh-value" id="dash-active-rooms">0</div>
         <div class="dsh-desc">Currently available for use</div>
         <i class="fa-regular fa-circle-check dsh-icon" aria-hidden="true"></i>
-    </div>
+    </a>
 
-    <div class="dsh-card dsh-stat">
+    <a class="dsh-card dsh-stat dashboard-room-stat-link" href="@Url.Action("roommanagement", "RoomManagement")" aria-label="View disabled rooms">
         <div class="dsh-label">Disabled Rooms</div>
         <div class="dsh-value" id="dash-disabled-rooms">0</div>
         <div class="dsh-desc">Under maintenance or closed</div>
         <i class="fa fa-building-circle-xmark dsh-icon" aria-hidden="true"></i>
-    </div>
+    </a>
 
     <div class="dsh-card">
         <h3 class="dsh-card-title">Room per Building</h3>

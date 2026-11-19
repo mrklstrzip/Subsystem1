@@ -6,7 +6,7 @@
 }
 
 <link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.8" rel="stylesheet" type="text/css" />
-<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=2.7" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=3.0" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -111,18 +111,18 @@
 
         <!-- Metric Cards Row -->
         <div class="metrics-row">
-            <div class="metric-card total-defense-card">
+            <a class="metric-card total-defense-card dashboard-metric-link" href="@Url.Action("defenseschedule", "DefenseSchedule")" aria-label="View defense schedules">
                 <div class="metric-title">TOTAL DEFENSES</div>
                 <div class="metric-value">@Model.TotalDefenses</div>
                 <div class="metric-subtitle">Across all buildings</div>
                 <div class="metric-icon"><i class="fa-solid fa-door-open"></i></div>
-            </div>
-            <div class="metric-card under-review-card">
+            </a>
+            <a class="metric-card under-review-card dashboard-metric-link" href="@Url.Action("conflictresult", "ConflictResult")" aria-label="View schedules under review">
                 <div class="metric-title">UNDER REVIEW</div>
                 <div class="metric-value">@Model.UnderReview</div>
                 <div class="metric-subtitle">Across all buildings</div>
                 <div class="metric-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            </div>
+            </a>
         </div>
 
         <!-- Recent Activities Section -->

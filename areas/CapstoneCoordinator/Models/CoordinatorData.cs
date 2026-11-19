@@ -170,7 +170,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         }
 
         /// <param name="generate">Generate schedules for titles that have no schedule yet.</param>
-        public static CoordinatorData Load(bool generate, bool onlySubsystem2 = false, bool includeNotSubmitted = false)
+        public static CoordinatorData Load(bool generate, bool onlySubsystem2 = false, bool includeNotSubmitted = false, bool syncSubmissionStatus = true)
         {
             if (generate)
             {
@@ -294,9 +294,12 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 }
             }
 
-            // Mirror the Under Review state onto the capstone_submissions documents (see Subsystem2Manuscripts).
-            try { Subsystem2Manuscripts.SyncCoordinatorStatus(docs); }
-            catch { /* the page still loads; the next visit tries again */ }
+            // Mirror status changes for role pages. Read-only callers such as Admin's dashboard can skip this write.
+            if (syncSubmissionStatus)
+            {
+                try { Subsystem2Manuscripts.SyncCoordinatorStatus(docs); }
+                catch { /* the page still loads; the next visit tries again */ }
+            }
 
             if (includeNotSubmitted) AddNotYetSubmitted(data, docs);
 

@@ -196,6 +196,15 @@
         e.preventDefault();
         openModal(trigger.dataset.id);
     });
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        var t = e.target;
+        if (!(t instanceof Element)) return;
+        var trigger = t.closest('[data-sa-open]');
+        if (!trigger || t.closest('button, a, input, select, textarea')) return;
+        e.preventDefault();
+        openModal(trigger.dataset.id);
+    });
 
     try {
         var wanted = new URLSearchParams(window.location.search).get('open');

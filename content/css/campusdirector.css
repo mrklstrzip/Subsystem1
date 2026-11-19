@@ -2070,59 +2070,87 @@ table.cdp2-info {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    transition: background-color .22s ease, box-shadow .22s ease;
 }
 
-    .dsh-stat .dsh-label {
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-        color: #59607a;
-        padding-right: 84px;
+.dashboard-room-stat-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+    .dashboard-room-stat-link:focus-visible {
+        outline: 3px solid #246a86;
+        outline-offset: 3px;
     }
 
-    .dsh-stat .dsh-value {
-        font-size: 46px;
-        font-weight: 800;
-        color: #17263c;
-        margin: 6px 0 2px;
-        line-height: 1;
-    }
+.dsh-stat .dsh-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: #59607a;
+    padding-right: 84px;
+}
 
-    .dsh-stat .dsh-desc {
-        font-size: 12px;
-        font-weight: 500;
-        color: #6b7280;
-        line-height: 1.3;
-        padding-right: 84px;
-    }
+.dsh-stat .dsh-value {
+    font-size: 46px;
+    font-weight: 800;
+    color: #17263c;
+    margin: 6px 0 2px;
+    line-height: 1;
+}
 
-    /* big icon badge, vertically centered on the right side of the card */
-    .dsh-stat .dsh-icon {
-        position: absolute;
-        top: 50%;
-        right: 22px;
-        transform: translateY(-50%);
-        width: 60px;
-        height: 60px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        background: #eef0f6;
-        color: #2C3F56;
-    }
+.dsh-stat .dsh-desc {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    line-height: 1.3;
+    padding-right: 84px;
+}
+
+/* big icon badge, vertically centered on the right side of the card */
+.dsh-stat .dsh-icon {
+    position: absolute;
+    top: auto;
+    right: 16px;
+    bottom: 14px;
+    transform: none;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    background: transparent;
+    color: #f0f1f3;
+}
 
 /* same colors as the Room Status pie chart: Active #246a86, Disabled #6b97d6 */
 .dsh-row-1 .dsh-stat:nth-child(2) .dsh-icon {
-    background: #dbeaf0;
-    color: #246a86;
+    background: transparent;
+    color: #f0f1f3;
 }
 
 .dsh-row-1 .dsh-stat:nth-child(3) .dsh-icon {
-    background: #e4edf9;
-    color: #6b97d6;
+    background: transparent;
+    color: #f0f1f3;
+}
+
+.dsh-stat:hover {
+    background: linear-gradient(to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100%);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .16);
+}
+
+    .dsh-stat:hover .dsh-label,
+    .dsh-stat:hover .dsh-value,
+    .dsh-stat:hover .dsh-desc {
+        color: #fff;
+    }
+
+.dsh-row-1 .dsh-stat:hover .dsh-icon {
+    background: transparent;
+    color: #fff;
 }
 
 /* room per building (fills the card height, scrolls when there are many buildings) */
@@ -2379,11 +2407,14 @@ table.dsh-table {
     }
 
     .dsh-stat .dsh-icon {
-        right: 16px;
-        width: 50px;
-        height: 50px;
-        border-radius: 14px;
-        font-size: 24px;
+        right: 14px;
+        bottom: 12px;
+        top: auto;
+        transform: none;
+        width: auto;
+        height: auto;
+        border-radius: 0;
+        font-size: 30px;
     }
 }
 

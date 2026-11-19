@@ -31,7 +31,7 @@
     var SINGLE_ROLES = ['admin', 'campus-director', 'capstone-coordinator', 'dean'];
 
     // Data loaded from the database (replaced on every refresh)
-    var state = { users: [], tags: [], activity: [] };
+    var state = { users: [], tags: [], activity: [], dashboard: null };
 
     /* ---------------------------------------------------------------
        Server calls
@@ -80,8 +80,14 @@
             state = {
                 users: res.users || [],
                 tags: res.tags || [],
-                activity: res.activity || []
+                activity: res.activity || [],
+                dashboard: res.dashboard || null
             };
+            if (!$('dash-total')) return;
+            return api('dashboardState').then(function (dashboardRes) {
+                if (!dashboardRes || !dashboardRes.success) throw new Error((dashboardRes && dashboardRes.message) || 'Could not load dashboard data.');
+                state.dashboard = dashboardRes.dashboard || {};
+            });
         });
     }
 
@@ -411,7 +417,7 @@
         }
         function chartCount(role) { return count(role, chartStatus === 'all' ? null : chartStatus); }
 
-        var totalPeople = people.length;
+        var totalPeople = state.dashboard && typeof state.dashboard.totalUsers === 'number' ? state.dashboard.totalUsers : state.users.length;
 
         $('dash-total').textContent = totalPeople;
         if ($('dash-students')) $('dash-students').textContent = count('project-manager');
@@ -439,6 +445,36 @@
                     '<td class="actname bold">' + esc(a.text) + '</td>' +
                     '</tr>';
             }).join('') || '<tr><td colspan="2" class="actdate">No recent activity</td></tr>';
+
+        var dashboard = state.dashboard || {};
+        $('dash-total-rooms').textContent = dashboard.roomSummary ? dashboard.roomSummary.totalRooms : 0;
+        $('dash-total-defenses').textContent = dashboard.totalDefenses || 0;
+        $('dash-under-review').textContent = dashboard.underReview || 0;
+        renderRoomStatusChart(dashboard.roomSummary || {});
+        function renderScheduleRows(targetId, rows) {
+            var target = $(targetId);
+            if (!target) return;
+            target.innerHTML = (rows || []).map(function (row) {
+                return '<tr' + (row.id ? ' data-sa-open data-id="' + esc(row.id) + '" tabindex="0" role="button" aria-label="View schedule for ' + esc(row.title || 'manuscript') + '"' : '') + '><td class="dashboard-manuscript"><strong>' + esc(row.title || 'Untitled') + '</strong>' +
+                    (row.section ? '<small>' + esc(row.section) + '</small>' : '') + '</td>' +
+                    '<td>' + esc(row.projectManager || '-') + '</td><td>' + esc(row.adviser || '-') + '</td>' +
+                    '<td>' + esc(row.room || '-') + '</td><td>' + esc(row.date || '-') + '</td><td>' + esc(row.time || '-') + '</td></tr>';
+            }).join('') || '<tr><td colspan="6" class="dashboard-empty">No records to show.</td></tr>';
+        }
+        renderScheduleRows('dash-to-submit', dashboard.toSubmit);
+        renderScheduleRows('dash-to-approve', dashboard.toApprove);
+        renderScheduleRows('dash-upcoming', dashboard.upcoming);
+        var buildingTarget = $('dash-buildings');
+        if (buildingTarget) {
+            var buildings = dashboard.roomSummary && dashboard.roomSummary.buildings || [];
+            var maxRooms = Math.max.apply(null, buildings.map(function (b) { return Number(b.roomCount) || 0; }).concat([1]));
+            buildingTarget.innerHTML = buildings.map(function (b) {
+                var count = Number(b.roomCount) || 0;
+                var label = (b.name || '') + (b.code ? ' | ' + b.code : '');
+                var width = Math.round(count / (maxRooms * 1.25) * 100);
+                return '<div class="admin-building-row"><span class="admin-building-name" title="' + esc(label) + '">' + esc(label) + '</span><div class="admin-building-track" role="img" aria-label="' + esc(label) + ': ' + count + (count === 1 ? ' room' : ' rooms') + '"><i style="width:' + width + '%"></i></div><strong>' + count + (count === 1 ? ' room' : ' rooms') + '</strong></div>';
+            }).join('') || '<div class="dashboard-empty">No building data available.</div>';
+        }
 
         var chartWrap = chartEl && chartEl.closest('.donut-chart-container');
         var hiddenRoles = chartEl && chartEl._hiddenRoles || {};
@@ -561,6 +597,124 @@
                 });
             }
         }
+    }
+
+    function renderRoomStatusChart(summary) {
+        var svg = $('dash-room-status-chart');
+        var legend = $('dash-room-status-legend');
+        var wrap = svg && svg.parentElement;
+        if (!svg || !legend || !wrap) return;
+
+        var values = { active: Number(summary.activeRooms) || 0, disabled: Number(summary.disabledRooms) || 0 };
+        var colors = { active: '#246a86', disabled: '#6b97d6' };
+        var hidden = svg._hiddenStatuses || {};
+        $('dash-room-active').textContent = values.active;
+        $('dash-room-disabled').textContent = values.disabled;
+
+        function point(radius, angle) {
+            var radians = (angle - 90) * Math.PI / 180;
+            return { x: 100 + radius * Math.cos(radians), y: 100 + radius * Math.sin(radians) };
+        }
+        function ringPath(start, end) {
+            var outerStart = point(92, start), outerEnd = point(92, end);
+            var innerEnd = point(58, end), innerStart = point(58, start);
+            var large = end - start > 180 ? 1 : 0;
+            if (end - start >= 359.99) {
+                var mid = start + 180, outerMid = point(92, mid), innerMid = point(58, mid);
+                return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 1 1 ' + outerMid.x + ' ' + outerMid.y + ' A 92 92 0 1 1 ' + outerStart.x + ' ' + outerStart.y + ' L ' + innerStart.x + ' ' + innerStart.y + ' A 58 58 0 1 0 ' + innerMid.x + ' ' + innerMid.y + ' A 58 58 0 1 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
+            }
+            return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 ' + large + ' 1 ' + outerEnd.x + ' ' + outerEnd.y + ' L ' + innerEnd.x + ' ' + innerEnd.y + ' A 58 58 0 ' + large + ' 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
+        }
+        function draw(renderValues) {
+            var total = renderValues.active + renderValues.disabled;
+            var angle = 0;
+            var segments = [
+                { key: 'active', label: 'Active Rooms', color: colors.active, value: renderValues.active },
+                { key: 'disabled', label: 'Disabled Rooms', color: colors.disabled, value: renderValues.disabled }
+            ];
+            var markup = segments.map(function (segment) {
+                if (!segment.value || !total) return '';
+                var sweep = segment.value / total * 360;
+                var start = angle, end = angle + sweep;
+                angle = end;
+                var percent = Math.round(segment.value / total * 100);
+                return '<path class="room-status-segment" data-status="' + segment.key + '" data-label="' + segment.label + '" data-value="' + Math.round(segment.value) + '" data-percent="' + percent + '" d="' + ringPath(start, end) + '" fill="' + segment.color + '" aria-hidden="true" />';
+            }).join('');
+            svg.innerHTML = markup || '<circle cx="100" cy="100" r="75" fill="none" stroke="#e2e8f0" stroke-width="34" />';
+            $('dash-room-status-total').textContent = String(parseInt(Math.round(total), 10));
+            svg.setAttribute('aria-label', 'Room status, ' + total + ' rooms shown.');
+        }
+
+        var initialValues = { active: hidden.active ? 0 : values.active, disabled: hidden.disabled ? 0 : values.disabled };
+        draw(initialValues);
+        svg._currentStatusValues = initialValues;
+        svg._hiddenStatuses = hidden;
+        function hideTooltip() {
+            var tooltip = $('dash-room-status-tooltip');
+            tooltip.setAttribute('aria-hidden', 'true');
+            tooltip.textContent = '';
+        }
+        function showTooltip(segment, event) {
+            if (!segment) return hideTooltip();
+            var tooltip = $('dash-room-status-tooltip');
+            tooltip.innerHTML = '<strong>' + segment.getAttribute('data-label') + '</strong><span>' + segment.getAttribute('data-value') + ' rooms (' + segment.getAttribute('data-percent') + '%)</span>';
+            var bounds = wrap.getBoundingClientRect();
+            tooltip.style.left = (event.clientX - bounds.left) + 'px';
+            tooltip.style.top = (event.clientY - bounds.top) + 'px';
+            tooltip.setAttribute('aria-hidden', 'false');
+        }
+        if (!svg._eventsBound) {
+            svg._eventsBound = true;
+            svg.addEventListener('pointerover', function (event) {
+                var segment = event.target.closest('.room-status-segment');
+                if (segment) { segment.classList.add('is-hovered'); showTooltip(segment, event); }
+            });
+            svg.addEventListener('pointerout', function (event) {
+                var segment = event.target.closest('.room-status-segment');
+                if (segment) { segment.classList.remove('is-hovered'); hideTooltip(); }
+            });
+            legend.addEventListener('click', function (event) {
+                var button = event.target.closest('[data-room-status]');
+                if (!button) return;
+                var key = button.getAttribute('data-room-status');
+                hidden[key] = !hidden[key];
+                button.setAttribute('aria-pressed', String(!hidden[key]));
+                var from = svg._currentStatusValues || initialValues;
+                var to = { active: hidden.active ? 0 : values.active, disabled: hidden.disabled ? 0 : values.disabled };
+                var started = null;
+                if (svg._statusAnimFrame) window.cancelAnimationFrame(svg._statusAnimFrame);
+                function frame(timestamp) {
+                    if (started === null) started = timestamp;
+                    var progress = Math.min(1, (timestamp - started) / 220);
+                    var eased = 1 - Math.pow(1 - progress, 3);
+                    var current = {
+                        active: from.active + (to.active - from.active) * eased,
+                        disabled: from.disabled + (to.disabled - from.disabled) * eased
+                    };
+                    draw(current);
+                    svg._currentStatusValues = current;
+                    if (progress < 1) svg._statusAnimFrame = window.requestAnimationFrame(frame);
+                    else svg._statusAnimFrame = 0;
+                }
+                svg._statusAnimFrame = window.requestAnimationFrame(frame);
+            });
+            legend.addEventListener('pointerover', function (event) {
+                var button = event.target.closest('[data-room-status]');
+                if (!button) return;
+                var segment = svg.querySelector('[data-status="' + button.getAttribute('data-room-status') + '"]');
+                if (segment) segment.classList.add('is-hovered');
+            });
+            legend.addEventListener('pointerout', function (event) {
+                if (!event.relatedTarget || !event.relatedTarget.closest('[data-room-status]')) {
+                    svg.querySelectorAll('.is-hovered').forEach(function (segment) { segment.classList.remove('is-hovered'); });
+                    hideTooltip();
+                }
+            });
+        }
+        legend.querySelectorAll('[data-room-status]').forEach(function (button) {
+            var key = button.getAttribute('data-room-status');
+            button.setAttribute('aria-pressed', String(!hidden[key]));
+        });
     }
 
     function initDashboard() {

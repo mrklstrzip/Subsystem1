@@ -1,7 +1,8 @@
 ﻿@{
     ViewBag.Title = "Dashboard";
 }
-<link href="@Url.Content("~/Content/css/admin/dashboard.css")?v=5.6" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/admin/dashboard.css")?v=6.8" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/admin/scheduleapproval.css")?v=1.3" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -16,7 +17,7 @@
 
 <!-- Admin Stat Cards Grid -->
 <div class="admin-cards">
-    <div class="card card-total">
+    <a class="card card-total dashboard-stat-link" href="@Url.Action("usermanagement", "UserManagement")" aria-label="Go to User Management">
         <div class="card-info">
             <h4 class="card-title">TOTAL USER</h4>
             <p class="number" id="dash-total">0</p>
@@ -25,91 +26,121 @@
         <div class="card-icon">
             <i class="fa fa-users"></i>
         </div>
-    </div>
+    </a>
 
-    <div class="card card-campusdirector">
+    <a class="card card-campusdirector dashboard-stat-link" href="@Url.Action("roomschedule", "RoomSchedule")" aria-label="Go to Room Schedule">
         <div class="card-info">
-            <h4 class="card-title">CAMPUS DIRECTOR</h4>
-            <p class="number" id="dash-directors">0</p>
-            <span class="card-description">Registered campus director</span>
+            <h4 class="card-title">TOTAL ROOMS</h4>
+            <p class="number" id="dash-total-rooms">0</p>
+            <span class="card-description">Across all buildings</span>
         </div>
         <div class="card-icon">
             <i class="fa fa-building"></i>
         </div>
-    </div>
+    </a>
 
-    <div class="card card-capstonecoordinator">
+    <a class="card card-capstonecoordinator dashboard-stat-link" href="@Url.Action("defenseschedule", "DefenseSchedule")" aria-label="Go to Defense Schedule">
         <div class="card-info">
-            <h4 class="card-title">CAPSTONE COORDINATOR</h4>
-            <p class="number" id="dash-coordinators">0</p>
-            <span class="card-description">Registered capstone coordinator accounts</span>
+            <h4 class="card-title">TOTAL DEFENSES</h4>
+            <p class="number" id="dash-total-defenses">0</p>
+            <span class="card-description">Approved defense schedules</span>
         </div>
         <div class="card-icon">
-            <i class="fa-solid fa-folder-open"></i>
+            <i class="fa-solid fa-calendar-check"></i>
         </div>
-    </div>
+    </a>
 
-    <div class="card card-dean">
+    <a class="card card-dean dashboard-stat-link" href="@Url.Action("scheduleapproval", "ScheduleApproval")" aria-label="Go to Schedule Approval">
         <div class="card-info">
-            <h4 class="card-title">DEAN</h4>
-            <p class="number" id="dash-dean">0</p>
-            <span class="card-description">Registered dean accounts</span>
+            <h4 class="card-title">UNDER REVIEW</h4>
+            <p class="number" id="dash-under-review">0</p>
+            <span class="card-description">Schedules needing review</span>
         </div>
         <div class="card-icon">
-            <i class="fa-solid fa-user-tie"></i>
+            <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
-    </div>
+    </a>
 </div>
 
-<div class="tables">
-    <div class="activity">
-        <h4 class="table-title">RECENT SYSTEM ACTIVITY</h4>
-        <table class="activity-table">
-            <thead>
-                <tr>
-                    <th class="column-title actdate-col">DATE</th>
-                    <th class="column-title">ACTIVITY</th>
-                </tr>
-            </thead>
-            <tbody id="dash-activity">
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Role Distribution Section -->
-    <div class="distribution">
-        <div class="distribution-header">
-            <h4 class="table-title">ROLE DISTRIBUTION</h4>
-            <div class="custom-select-box distribution-filter-box" id="roleStatusDropdownToggle">
-                <span class="filter-legend">Status</span>
-                <div class="select-selected" tabindex="0" role="combobox" aria-expanded="false" aria-controls="roleStatusDropdownMenu">
-                    <i class="fa-solid fa-sliders"></i>
-                    <span>All</span>
-                    <i class="fa-solid fa-chevron-down chevron"></i>
-                </div>
-                <div class="custom-select-dropdown" id="roleStatusDropdownMenu">
-                    <div class="select-option active" data-value="all">All</div>
-                    <div class="select-option" data-value="active">Active</div>
-                    <div class="select-option" data-value="inactive">Inactive</div>
-                </div>
-                <select id="role-status-filter" aria-label="Filter role distribution by account status" style="display:none;">
-                    <option value="all">All</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
+<div class="dashboard-columns">
+    <div class="dashboard-tables">
+        <div class="activity dashboard-panel">
+            <div class="dashboard-panel-header"><h4 class="table-title">TO SUBMIT</h4><a class="dashboard-view-all" href="@Url.Action("defenseschedule", "DefenseSchedule")">View All</a></div>
+            <table class="dashboard-data-table"><thead><tr><th>MANUSCRIPT</th><th>PROJECT MANAGER</th><th>ADVISER</th><th>ROOM</th><th>DATE</th><th>TIME</th></tr></thead><tbody id="dash-to-submit"></tbody></table>
         </div>
-        <div class="distribution-content">
-            <div class="donut-chart-container">
-                <svg class="donut-chart" viewBox="0 0 200 200" role="img" aria-label="Role distribution chart"></svg>
-                <div class="donut-center-total" aria-live="polite"></div>
-                <div class="donut-tooltip" role="status" aria-hidden="true"></div>
-            </div>
-            <div class="distribution-legend" id="dash-roles" aria-label="Role distribution legend">
-                <!-- Dynamically populated by admin-app.js -->
-            </div>
+        <div class="activity dashboard-panel">
+            <div class="dashboard-panel-header"><h4 class="table-title">TO APPROVE</h4><a class="dashboard-view-all" href="@Url.Action("scheduleapproval", "ScheduleApproval")">View All</a></div>
+            <table class="dashboard-data-table"><thead><tr><th>MANUSCRIPT</th><th>PROJECT MANAGER</th><th>ADVISER</th><th>ROOM</th><th>DATE</th><th>TIME</th></tr></thead><tbody id="dash-to-approve"></tbody></table>
+        </div>
+        <div class="activity dashboard-panel">
+            <div class="dashboard-panel-header"><h4 class="table-title">UPCOMING DEFENSES</h4><a class="dashboard-view-all" href="@Url.Action("defenseschedule", "DefenseSchedule")">View All</a></div>
+            <table class="dashboard-data-table"><thead><tr><th>MANUSCRIPT</th><th>PROJECT MANAGER</th><th>ADVISER</th><th>ROOM</th><th>DATE</th><th>TIME</th></tr></thead><tbody id="dash-upcoming"></tbody></table>
+        </div>
+        <div class="activity dashboard-panel">
+            <h4 class="table-title">RECENT SYSTEM ACTIVITY</h4>
+            <table class="activity-table">
+                <colgroup><col class="activity-date-column" style="width:180px" /><col /></colgroup>
+                <thead><tr><th class="column-title">DATE</th><th class="column-title">ACTIVITY</th></tr></thead>
+                <tbody id="dash-activity"></tbody>
+            </table>
         </div>
     </div>
+    <aside class="dashboard-charts" aria-label="Dashboard charts">
+        <!-- Role Distribution Section -->
+        <div class="distribution dashboard-panel chart-panel">
+            <div class="distribution-header">
+                <h4 class="table-title">ROLE DISTRIBUTION</h4>
+                <div class="custom-select-box distribution-filter-box" id="roleStatusDropdownToggle">
+                    <span class="filter-legend">Status</span>
+                    <div class="select-selected" tabindex="0" role="combobox" aria-expanded="false" aria-controls="roleStatusDropdownMenu">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>All</span>
+                        <i class="fa-solid fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="custom-select-dropdown" id="roleStatusDropdownMenu">
+                        <div class="select-option active" data-value="all">All</div>
+                        <div class="select-option" data-value="active">Active</div>
+                        <div class="select-option" data-value="inactive">Inactive</div>
+                    </div>
+                    <select id="role-status-filter" aria-label="Filter role distribution by account status" style="display:none;">
+                        <option value="all">All</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="distribution-content">
+                <div class="donut-chart-container">
+                    <svg class="donut-chart" viewBox="0 0 200 200" role="img" aria-label="Role distribution chart"></svg>
+                    <div class="donut-center-total" aria-live="polite"></div>
+                    <div class="donut-tooltip" role="status" aria-hidden="true"></div>
+                </div>
+                <div class="distribution-legend" id="dash-roles" aria-label="Role distribution legend">
+                    <!-- Dynamically populated by admin-app.js -->
+                </div>
+            </div>
+        </div>
+        <div class="activity dashboard-panel chart-panel">
+            <h4 class="table-title">ROOM PER BUILDING</h4>
+            <div class="admin-building-bars" id="dash-buildings"></div>
+        </div>
+        <div class="activity dashboard-panel chart-panel room-status-panel">
+            <h4 class="table-title">ROOM STATUS</h4>
+            <div class="room-status-content">
+                <div class="room-status-chart-wrap">
+                    <svg id="dash-room-status-chart" class="room-status-chart" viewBox="0 0 200 200" role="img" aria-label="Room status chart"></svg>
+                    <div class="room-status-center"><strong id="dash-room-status-total">0</strong><small>rooms</small></div>
+                    <div class="room-status-tooltip" id="dash-room-status-tooltip" aria-hidden="true"></div>
+                </div>
+                <div class="room-status-legend" id="dash-room-status-legend">
+                    <button type="button" data-room-status="active" aria-pressed="true"><i class="room-active-dot"></i><span>Active</span><strong id="dash-room-active">0</strong></button>
+                    <button type="button" data-room-status="disabled" aria-pressed="true"><i class="room-disabled-dot"></i><span>Disabled</span><strong id="dash-room-disabled">0</strong></button>
+                </div>
+            </div>
+        </div>
+    </aside>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=7.9"></script>
+@Html.Partial("~/Areas/Admin/Views/ScheduleApproval/_ScheduleDetailsModal.cshtml")
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=8.8"></script>
+<script src="@Url.Content("~/Scripts/admin-scheduleapproval.js")?v=1.4"></script>
