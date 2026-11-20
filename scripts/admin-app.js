@@ -468,11 +468,13 @@
         if (buildingTarget) {
             var buildings = dashboard.roomSummary && dashboard.roomSummary.buildings || [];
             var maxRooms = Math.max.apply(null, buildings.map(function (b) { return Number(b.roomCount) || 0; }).concat([1]));
-            buildingTarget.innerHTML = buildings.map(function (b) {
+            var buildingShades = ['#17324F', '#2B4E70', '#416B91', '#5D86AA', '#7DA2C1', '#A2BCD1', '#C5D5E2'];
+            buildingTarget.innerHTML = buildings.map(function (b, index) {
                 var count = Number(b.roomCount) || 0;
                 var label = (b.name || '') + (b.code ? ' | ' + b.code : '');
                 var width = Math.round(count / (maxRooms * 1.25) * 100);
-                return '<div class="admin-building-row"><span class="admin-building-name" title="' + esc(label) + '">' + esc(label) + '</span><div class="admin-building-track" role="img" aria-label="' + esc(label) + ': ' + count + (count === 1 ? ' room' : ' rooms') + '"><i style="width:' + width + '%"></i></div><strong>' + count + (count === 1 ? ' room' : ' rooms') + '</strong></div>';
+                var shade = buildingShades[index % buildingShades.length];
+                return '<div class="admin-building-row"><span class="admin-building-name" title="' + esc(label) + '">' + esc(label) + '</span><div class="admin-building-track" role="img" aria-label="' + esc(label) + ': ' + count + (count === 1 ? ' room' : ' rooms') + '"><i style="width:' + width + '%;background:' + shade + '"></i></div><strong>' + count + (count === 1 ? ' room' : ' rooms') + '</strong></div>';
             }).join('') || '<div class="dashboard-empty">No building data available.</div>';
         }
 

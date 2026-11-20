@@ -210,12 +210,14 @@
         // Room per building (bars are relative to the biggest building)
         var counts = state.buildings.map(function (b) { return { b: b, n: roomsOf(b.id).length }; });
         var max = Math.max.apply(null, counts.map(function (c) { return c.n; }).concat([1]));
-        $('dash-buildings').innerHTML = counts.map(function (c) {
+        var buildingShades = ['#17324F', '#2B4E70', '#416B91', '#5D86AA', '#7DA2C1', '#A2BCD1', '#C5D5E2'];
+        $('dash-buildings').innerHTML = counts.map(function (c, index) {
             var pct = Math.round(c.n / (max * 1.25) * 100);
+            var shade = buildingShades[index % buildingShades.length];
             return '<div class="dsh-bar-row">' +
                 '<div class="dsh-bar-head"><span>' + esc(c.b.name) + ' | ' + esc(c.b.code) + '</span>' +
                 '<b>' + c.n + (c.n === 1 ? ' room' : ' rooms') + '</b></div>' +
-                '<div class="dsh-track"><div class="dsh-fill" style="width:' + pct + '%"></div></div></div>';
+                '<div class="dsh-track"><div class="dsh-fill" style="width:' + pct + '%;background:' + shade + '"></div></div></div>';
         }).join('') || '<div class="dsh-empty">No buildings yet</div>';
 
         // Interactive Room Status donut. Legend buttons control visibility; SVG slices only show hover details.
@@ -325,7 +327,12 @@
 
         // Recent activity
         $('dash-activity').innerHTML = state.activity.slice(0, 6).map(function (a) {
-            return '<tr><td>' + esc(fmtStamp(a.at)) + '</td><td>' + esc(a.text) + '</td></tr>';
+            var stamp = fmtStamp(a.at), splitAt = stamp.indexOf(' ');
+            var date = splitAt > -1 ? stamp.slice(0, splitAt) : stamp;
+            var time = splitAt > -1 ? stamp.slice(splitAt + 1) : '';
+            return '<tr><td class="recent-date-cell"><span class="recent-date-main">' + esc(date) + '</span>' +
+                (time ? '<span class="recent-date-time">' + esc(time) + '</span>' : '') +
+                '</td><td class="recent-activity-text">' + esc(a.text) + '</td></tr>';
         }).join('') || '<tr><td colspan="2" class="dsh-empty">No recent activity</td></tr>';
     }
 

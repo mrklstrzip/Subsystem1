@@ -2029,11 +2029,12 @@ table.cdp2-info {
 }
 
 .dsh-row-1 {
-    grid-template-columns: 1fr 1fr 1fr 1.5fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .dsh-row-2 {
     grid-template-columns: 2fr 3fr;
+    align-items: stretch;
 }
 
 .dsh-card {
@@ -2048,11 +2049,16 @@ table.cdp2-info {
     padding: 16px 22px;
 }
 
-    /* Room per Building card: the list fills whatever height the stat cards give it */
-    .dsh-row-1 .dsh-card:last-child {
-        position: relative;
-        min-height: 140px;
-    }
+.dsh-chart-stack {
+    display: grid;
+    align-content: start;
+    gap: 18px;
+    min-width: 0;
+}
+
+.dsh-building-card {
+    align-self: start;
+}
 
 .dsh-card-title {
     font-size: 13px;
@@ -2067,10 +2073,12 @@ table.cdp2-info {
 .dsh-stat {
     position: relative;
     min-height: 118px;
+    box-sizing: border-box;
+    border: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    transition: background-color .22s ease, box-shadow .22s ease;
+    transition: background .22s ease, border-color .22s ease, color .22s ease, box-shadow .22s ease;
 }
 
 .dashboard-room-stat-link {
@@ -2139,6 +2147,7 @@ table.cdp2-info {
 
 .dsh-stat:hover {
     background: linear-gradient(to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100%);
+    border-color: #17263c;
     box-shadow: 0 8px 20px rgba(15, 23, 42, .16);
 }
 
@@ -2155,11 +2164,8 @@ table.cdp2-info {
 
 /* room per building (fills the card height, scrolls when there are many buildings) */
 .dsh-bars {
-    position: absolute;
-    top: 46px;
-    left: 22px;
-    right: 14px;
-    bottom: 14px;
+    position: static;
+    max-height: 260px;
     overflow-y: auto;
     padding-right: 8px;
     scrollbar-width: thin;
@@ -2189,7 +2195,7 @@ table.cdp2-info {
     }
 
 .dsh-track {
-    height: 8px;
+    height: 12px;
     border-radius: 8px;
     background: #e3e7f0;
     overflow: hidden;
@@ -2198,7 +2204,7 @@ table.cdp2-info {
 .dsh-fill {
     height: 100%;
     border-radius: 8px;
-    background: #17263c;
+    background: #172A43;
     transition: width .4s ease;
 }
 
@@ -2349,7 +2355,9 @@ table.cdp2-info {
 
 /* recent activity */
 .dsh-activity {
-    max-height: 270px;
+    display: flex;
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     scrollbar-width: thin;
 }
@@ -2360,34 +2368,112 @@ table.dsh-table {
     font-size: .88rem;
 }
 
-    table.dsh-table th {
+.dsh-card .dashboard-recent-activity {
+    table-layout: fixed;
+}
+
+.dsh-row-2 > .dsh-card:last-child {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.dsh-card .dashboard-recent-activity .recent-date-column {
+    width: 180px !important;
+}
+
+.dsh-card .dashboard-recent-activity th {
+    padding: 0 0 12px;
+    border-bottom: 1px solid #EDEDED;
+    color: #2C3F56;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-align: left;
+    vertical-align: bottom;
+}
+
+    .dsh-card .dashboard-recent-activity th:first-child {
+        width: 180px;
+        padding-left: 0;
+    }
+
+    .dsh-card .dashboard-recent-activity th:nth-child(2) {
+        padding-left: 10px;
+    }
+
+.dsh-card .dashboard-recent-activity td {
+    padding: 10px 0;
+    border-bottom: 1px solid #F4F5F7;
+    color: #2D3748;
+    font-size: 13px;
+    font-weight: 400;
+    vertical-align: middle;
+}
+
+    .dsh-card .dashboard-recent-activity td:first-child {
+        width: 180px;
+        padding-left: 0;
+        white-space: nowrap;
+    }
+
+    .dsh-card .dashboard-recent-activity td:nth-child(2) {
+        padding-left: 10px;
         text-align: left;
-        font-size: .7rem;
-        font-weight: 700;
-        letter-spacing: .04em;
-        text-transform: uppercase;
+    }
+
+.dsh-card .dashboard-recent-activity tr:last-child td {
+    border-bottom: 0;
+}
+
+.dsh-card .recent-date-main {
+    display: block;
+    color: #2D3748;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.dsh-card .recent-date-time {
+    display: block;
+    color: #8C98A6;
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.dsh-card .recent-activity-text {
+    color: #2D3748;
+    font-size: 13px;
+}
+
+table.dsh-table th {
+    text-align: left;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: #59607a;
+    background: #FFFFFF;
+    border: 0;
+    padding: 10px 16px 10px 0;
+    position: sticky;
+    top: 0;
+}
+
+table.dsh-table td {
+    border: 0;
+    padding: 10px 16px 10px 0;
+    font-size: .85rem;
+    font-weight: 600;
+    color: #1B293B;
+}
+
+    table.dsh-table td:first-child {
+        font-weight: 500;
         color: #59607a;
-        background: #FFFFFF;
-        border: 0;
-        padding: 10px 16px 10px 0;
-        position: sticky;
-        top: 0;
+        width: 200px;
+        white-space: nowrap;
     }
-
-    table.dsh-table td {
-        border: 0;
-        padding: 10px 16px 10px 0;
-        font-size: .85rem;
-        font-weight: 600;
-        color: #1B293B;
-    }
-
-        table.dsh-table td:first-child {
-            font-weight: 500;
-            color: #59607a;
-            width: 200px;
-            white-space: nowrap;
-        }
 
 .dsh-empty {
     color: #8a8aa8;
@@ -2420,12 +2506,8 @@ table.dsh-table {
 
 @media (max-width: 1200px) {
     .dsh-row-1 {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
-
-        .dsh-row-1 .dsh-card:last-child {
-            grid-column: 1 / -1;
-        }
 
     .dsh-row-2 {
         grid-template-columns: 1fr;

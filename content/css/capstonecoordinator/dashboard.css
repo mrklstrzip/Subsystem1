@@ -328,6 +328,80 @@ body {
     white-space: nowrap;
 }
 
+/* Recent activity table follows the Admin dashboard's two-column layout (without icons). */
+.recent-activities-card .dashboard-recent-activity {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+    .recent-activities-card .dashboard-recent-activity .recent-date-column {
+        width: 120px !important;
+    }
+
+    .recent-activities-card .dashboard-recent-activity th {
+        padding: 0 0 12px;
+        border-bottom: 1px solid #EDEDED;
+        color: #2C3F56;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-align: left;
+        vertical-align: bottom;
+    }
+
+        .recent-activities-card .dashboard-recent-activity th:first-child {
+            width: 120px;
+            padding-left: 0;
+        }
+
+        .recent-activities-card .dashboard-recent-activity th:nth-child(2) {
+            padding-left: 10px;
+        }
+
+    .recent-activities-card .dashboard-recent-activity td {
+        padding: 10px 0;
+        border-bottom: 1px solid #F4F5F7;
+        color: #2D3748;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+        .recent-activities-card .dashboard-recent-activity td:first-child {
+            width: 120px;
+            padding-left: 0;
+            white-space: nowrap;
+        }
+
+        .recent-activities-card .dashboard-recent-activity td:nth-child(2) {
+            padding-left: 10px;
+            text-align: left;
+        }
+
+    .recent-activities-card .dashboard-recent-activity tr:last-child td {
+        border-bottom: 0;
+    }
+
+.recent-date-main {
+    display: block;
+    color: #2D3748;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.recent-date-time {
+    display: block;
+    color: #8C98A6;
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.recent-activity-text {
+    color: #2D3748;
+    font-size: 13px;
+}
+
 .under-review-card .metric-icon {
     color: #f0f1f3;
 }

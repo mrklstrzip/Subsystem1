@@ -6,7 +6,7 @@
 }
 
 <link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.8" rel="stylesheet" type="text/css" />
-<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=3.0" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=3.4" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -128,19 +128,17 @@
         <!-- Recent Activities Section -->
         <div class="dashboard-card recent-activities-card">
             <h3 class="section-title">RECENT ACTIVITIES</h3>
-            <table class="dashboard-table">
+            <table class="dashboard-table dashboard-recent-activity">
+                <colgroup><col class="recent-date-column" style="width:120px" /><col /></colgroup>
                 <thead>
-                    <tr>
-                        <th class="column-title time-col">TIME</th>
-                        <th class="column-title activity-col">ACTIVITY</th>
-                    </tr>
+                    <tr><th class="column-title">DATE</th><th class="column-title">ACTIVITY</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var a in Model.Recent)
                     {
                         <tr>
-                            <td class="time-col">@a.At.ToString("MM-dd-yy | h:mm tt", System.Globalization.CultureInfo.InvariantCulture)</td>
-                            <td class="activity-col">@a.Text</td>
+                            <td class="recent-date-cell"><span class="recent-date-main">@a.At.ToString("MM-dd-yyyy", System.Globalization.CultureInfo.InvariantCulture)</span><span class="recent-date-time">@a.At.ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture)</span></td>
+                            <td class="recent-activity-text">@a.Text</td>
                         </tr>
                     }
                     @for (int k = Model.Recent.Count; k < 3; k++)

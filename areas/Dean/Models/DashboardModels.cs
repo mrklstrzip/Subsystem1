@@ -31,6 +31,7 @@ namespace Subsystem1.Areas.Dean.Models
 
     public class ActivityRow
     {
+        public DateTime At { get; set; }
         public string Time { get; set; }
         public string Text { get; set; }
     }

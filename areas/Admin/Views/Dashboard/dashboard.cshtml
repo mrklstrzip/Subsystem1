@@ -1,7 +1,7 @@
 ﻿@{
     ViewBag.Title = "Dashboard";
 }
-<link href="@Url.Content("~/Content/css/admin/dashboard.css")?v=6.8" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/admin/dashboard.css")?v=7.2" rel="stylesheet" type="text/css" />
 <link href="@Url.Content("~/Content/css/admin/scheduleapproval.css")?v=1.3" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
@@ -120,7 +120,7 @@
                 </div>
             </div>
         </div>
-        <div class="activity dashboard-panel chart-panel">
+        <div class="activity dashboard-panel chart-panel admin-room-building-panel">
             <h4 class="table-title">ROOM PER BUILDING</h4>
             <div class="admin-building-bars" id="dash-buildings"></div>
         </div>
@@ -142,5 +142,5 @@
 </div>
 
 @Html.Partial("~/Areas/Admin/Views/ScheduleApproval/_ScheduleDetailsModal.cshtml")
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=8.8"></script>
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=8.9"></script>
 <script src="@Url.Content("~/Scripts/admin-scheduleapproval.js")?v=1.4"></script>

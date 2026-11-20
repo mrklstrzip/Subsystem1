@@ -248,7 +248,7 @@ namespace Subsystem1.Areas.Dean.Models
                     events.Add(new KeyValuePair<DateTime, string>(s.RejectedAt.Value, "You rejected the defense schedule of \"" + s.Title + "\""));
             }
             vm.RecentActivities = events.OrderByDescending(e => e.Key).Take(6)
-                .Select(e => new ActivityRow { Time = Ago(e.Key, now), Text = e.Value }).ToList();
+                .Select(e => new ActivityRow { At = e.Key, Time = Ago(e.Key, now), Text = e.Value }).ToList();
             return vm;
         }
 

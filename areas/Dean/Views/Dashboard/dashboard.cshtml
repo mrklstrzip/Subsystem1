@@ -16,7 +16,7 @@
 <div class="dash-grid">
     <div class="dash-main">
 
-        <div class="dash-card">
+        <div class="dash-card recent-activities-card">
             <div class="dash-card-head">
                 <h2>Subsystem 3 Repository</h2>
                 <a href="@Url.Action("Index", "Repository", new { area = "Dean" })" class="view-all">Open Repository</a>
@@ -101,12 +101,13 @@
 
         <div class="dash-card">
             <div class="dash-card-head"><h2 class="muted-h">RECENT ACTIVITIES</h2></div>
-            <table class="dash-table activity-table">
-                <thead><tr><th class="left">TIME</th><th class="left">ACTIVITY</th></tr></thead>
+            <table id="deanRecentActivitiesTable" class="dash-table activity-table dashboard-recent-activity">
+                <colgroup><col class="recent-date-column" style="width:120px" /><col /></colgroup>
+                <thead><tr><th>DATE</th><th>ACTIVITY</th></tr></thead>
                 <tbody>
                     @foreach (var a in Model.RecentActivities)
                     {
-                        <tr><td class="left">@a.Time</td><td class="left">@a.Text</td></tr>
+                        <tr><td class="recent-date-cell"><span class="recent-date-main">@a.At.ToString("MM-dd-yyyy", System.Globalization.CultureInfo.InvariantCulture)</span><span class="recent-date-time">@a.At.ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture)</span></td><td class="recent-activity-text">@a.Text</td></tr>
                     }
                     @for (var i = Model.RecentActivities.Count; i < 4; i++)
                     {
