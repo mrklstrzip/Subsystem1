@@ -530,34 +530,11 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 panelValue != null &&
                 panelValue.IsBsonArray)
             {
-                int idx = 0;
-
-                foreach (BsonValue p in panelValue.AsBsonArray)
+                foreach (BsonValue p in pv.AsBsonArray)
                 {
                     if (!p.IsBsonDocument) continue;
-
-                    BsonDocument panelist = p.AsBsonDocument;
-                    string match = Str(panelist, "match").ToLowerInvariant();
-
-                    BsonValue percentValue;
-                    double? percent = panelist.TryGetValue("percent", out percentValue) &&
-                                      percentValue.IsNumeric
-                        ? (double?)percentValue.ToDouble()
-                        : null;
-
-                    string role = Str(panelist, "role");
-                    if (role != "Chairman" && role != "Member")
-                        role = idx == 0 ? "Chairman" : "Member";
-
-                    panel.Add(new
-                    {
-                        name = Str(panelist, "name"),
-                        match = (match == "high" || match == "medium") ? match : "low",
-                        percent = percent,
-                        role = role
-                    });
-
-                    idx++;
+                    string m = Str(p.AsBsonDocument, "match").ToLowerInvariant();
+                    panel.Add(new { name = Str(p.AsBsonDocument, "name"), match = (m == "high" || m == "medium") ? m : "low" });
                 }
             }
 
