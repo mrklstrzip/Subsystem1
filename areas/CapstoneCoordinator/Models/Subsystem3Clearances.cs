@@ -9,6 +9,7 @@ using System.Text;
 using System.Web;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
 using Subsystem1.Data;
 
 namespace Subsystem1.Areas.CapstoneCoordinator.Models
@@ -36,6 +37,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public bool IsFiledImport { get; set; }
         public string RepositoryReference { get; set; }
         public string RepositoryState { get; set; }
+        public bool IsHistorical { get; set; }
         public string RepositoryGridFsId { get; set; }
         public string RepositoryFileHash { get; set; }
         public string CloudFileId { get; set; }
@@ -96,6 +98,105 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return submissions
                 .OrderByDescending(x => x.FiledAt ?? x.DisseminatedAt ?? DateTime.MinValue)
                 .ToList();
+        }
+
+        // Mirrors Subsystem 3's coordinator RepositoryGroups(): filed, staff-approved
+        // manuscripts that are published to the exclusive repository, plus eligible
+        // historical repository records. The coordinator reads these shared collections
+        // directly; no handoff copy or local cache is involved.
+        public static List<ClearedSubmission> ReadCompleted()
+        {
+            var completed = new List<ClearedSubmission>();
+            var filedFilter = Builders<BsonDocument>.Filter.And(
+                Builders<BsonDocument>.Filter.Eq("subsystem3.Status", "Filed"),
+                Builders<BsonDocument>.Filter.Exists("subsystem3.FiledAt", true),
+                Builders<BsonDocument>.Filter.Ne("subsystem3.FiledAt", BsonNull.Value));
+
+            foreach (BsonDocument submission in Collection().Find(filedFilter).ToList())
+            {
+                ClearedSubmission item = Map(submission);
+                BsonDocument state = Document(submission, "subsystem3");
+                BsonDocument repository = FindRepositoryRecord(item.Id);
+                BsonDocument info = Document(repository, "fileInfo");
+                if (!Bool(state, "PublishToExclusive") || repository == null ||
+                    !SameId(item.ApprovedManuscriptId, Str(info, "gridFsId")) ||
+                    !SameHash(item.ApprovedManuscriptHash, Str(info, "sha256Hash"))) continue;
+
+                item.RepositoryState = "Filed";
+                completed.Add(item);
+            }
+
+            completed.AddRange(ReadFiledImports());
+            completed.AddRange(ReadHistoricalCompleted());
+            return completed
+                .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First())
+                .OrderByDescending(x => x.FiledAt ?? DateTime.MinValue)
+                .ToList();
+        }
+
+        private static List<ClearedSubmission> ReadHistoricalCompleted()
+        {
+            var records = Db.Database.GetCollection<BsonDocument>("repository_records");
+            var filter = Builders<BsonDocument>.Filter.Exists("subsystem3Historical", true);
+            var result = new List<ClearedSubmission>();
+            foreach (BsonDocument record in records.Find(filter).ToList())
+            {
+                BsonDocument historical = Document(record, "subsystem3Historical");
+                string reference = Str(historical, "Reference");
+                if (reference.StartsWith("Subsystem 2 final approval ", StringComparison.Ordinal)) continue;
+
+                BsonDocument catalog = Document(record, "subsystem3Catalog");
+                BsonDocument fileInfo = Document(record, "fileInfo");
+                string approvedId = Str(catalog, "ApprovedManuscriptId");
+                string approvedHash = Str(catalog, "ApprovedManuscriptHash");
+                DateTime? filedAt = Date(catalog, "FiledAt");
+                DateTime? approvedAt = Date(catalog, "MetadataApprovedAt");
+                if (catalog == null || !Bool(catalog, "PublishToExclusive") ||
+                    !String.Equals(Str(catalog, "RepositoryState"), "Filed", StringComparison.Ordinal) ||
+                    !filedAt.HasValue || !approvedAt.HasValue ||
+                    String.IsNullOrWhiteSpace(Str(catalog, "MetadataApprovedBy")) ||
+                    !SameId(approvedId, Str(fileInfo, "gridFsId")) ||
+                    !SameHash(approvedHash, Str(fileInfo, "sha256Hash"))) continue;
+
+                BsonDocument cloudFile = FindCloudFile(approvedId);
+                if (cloudFile != null && (!SameId(Str(cloudFile, "_id"), approvedId) ||
+                    !SameHash(Str(cloudFile, "sha256"), approvedHash))) continue;
+
+                result.Add(new ClearedSubmission
+                {
+                    Id = Str(record, "_id"),
+                    Title = First(Str(record, "title"), Str(catalog, "Title")),
+                    Authors = String.Join("; ", StringValues(record, "authors", "Authors")),
+                    Adviser = First(Str(record, "adviserName"), Str(catalog, "Adviser")),
+                    Program = First(Str(record, "program"), Str(catalog, "Program")),
+                    Section = First(Str(record, "section"), Str(catalog, "Section")),
+                    Status = "Historical",
+                    RepositoryState = "Historical",
+                    IsHistorical = true,
+                    FiledAt = filedAt,
+                    ClearanceGroup = First(Str(catalog, "Name"), reference),
+                    ApprovedManuscriptId = approvedId,
+                    ApprovedManuscriptHash = approvedHash,
+                    ApprovedManuscriptName = First(Str(cloudFile, "filename"), Str(fileInfo, "fileName")),
+                    RepositoryReference = reference,
+                    CloudFileId = Str(cloudFile, "_id"),
+                    CloudFileHash = Str(cloudFile, "sha256"),
+                    CloudFileLength = Str(cloudFile, "length")
+                });
+            }
+            return result;
+        }
+
+        private static BsonDocument FindRepositoryRecord(string submissionId)
+        {
+            var records = Db.Database.GetCollection<BsonDocument>("repository_records");
+            BsonDocument record = records.Find(Builders<BsonDocument>.Filter.Eq("subsystem3GroupId", submissionId)).FirstOrDefault();
+            if (record != null) return record;
+            ObjectId id;
+            return ObjectId.TryParse(submissionId, out id)
+                ? records.Find(Builders<BsonDocument>.Filter.Eq("submissionId", id)).FirstOrDefault()
+                : null;
         }
 
         private static List<ClearedSubmission> ReadFiledImports()
@@ -248,7 +349,18 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 String.IsNullOrWhiteSpace(item.ApprovedManuscriptHash)) return null;
 
             BsonDocument cloudFile = FindCloudFile(item.ApprovedManuscriptId);
-            if (cloudFile == null || !SameId(Str(cloudFile, "_id"), item.ApprovedManuscriptId) ||
+            if (cloudFile == null)
+            {
+                ObjectId legacyId;
+                if (!ObjectId.TryParse(item.ApprovedManuscriptId, out legacyId)) return null;
+                BsonDocument legacy = Db.Database.GetCollection<BsonDocument>("subsystem3_files.files")
+                    .Find(Builders<BsonDocument>.Filter.Eq("_id", legacyId)).FirstOrDefault();
+                if (legacy == null) return null;
+                byte[] legacyBytes = new GridFSBucket(Db.Database, new GridFSBucketOptions { BucketName = "subsystem3_files" })
+                    .DownloadAsBytes(legacyId);
+                return SameHash(Hash(legacyBytes), item.ApprovedManuscriptHash) ? legacyBytes : null;
+            }
+            if (!SameId(Str(cloudFile, "_id"), item.ApprovedManuscriptId) ||
                 !SameHash(Str(cloudFile, "sha256"), item.ApprovedManuscriptHash)) return null;
 
             long length;
@@ -410,6 +522,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 Program = First(Str(state, "Program"), Str(clearance, "Program")),
                 Section = First(Str(state, "Section"), Str(clearance, "Section")),
                 Status = Str(state, "Status"),
+                RepositoryState = First(Str(state, "RepositoryState"), Str(state, "Status")),
                 DisseminatedAt = Date(state, "DisseminatedAt"),
                 FiledAt = Date(state, "FiledAt"),
                 ClearanceReference = Str(clearance, "Reference"),
@@ -483,6 +596,12 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         {
             BsonValue value = Value(document, key);
             return value == null || value.IsBsonNull ? "" : value.ToString();
+        }
+
+        private static bool Bool(BsonDocument document, string key)
+        {
+            BsonValue value = Value(document, key);
+            return value != null && value.IsBoolean && value.AsBoolean;
         }
 
         private static DateTime? Date(BsonDocument document, string key)

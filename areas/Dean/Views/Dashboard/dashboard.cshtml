@@ -16,7 +16,7 @@
 <div class="dash-grid">
     <div class="dash-main">
 
-        <div class="dash-card">
+        <div class="dash-card recent-activities-card">
             <div class="dash-card-head">
                 <h2>Subsystem 3 Repository</h2>
                 <a href="@Url.Action("Index", "Repository", new { area = "Dean" })" class="view-all">Open Repository</a>
@@ -29,26 +29,27 @@
                 <h2>To Approve</h2>
                 <a href="@Url.Action("ScheduleApprovalView", "ScheduleApproval")" class="view-all">View All</a>
             </div>
-            <table class="dash-table">
+            <table class="dash-table to-approve-table">
                 <thead>
-                    <tr><th class="left">MANUSCRIPT</th><th>AUTHOR</th><th>ADVISER</th><th>DATE</th><th>ACTION</th></tr>
+                    <tr><th class="left">MANUSCRIPT</th><th>PROJECT MANAGER</th><th>ADVISER</th><th>ROOM</th><th>DATE</th><th>TIME</th></tr>
                 </thead>
                 <tbody>
                     @if (!Model.ToApprove.Any())
                     {
-                        <tr><td colspan="5">Nothing is waiting for your approval.</td></tr>
+                        <tr><td colspan="6">Nothing is waiting for your approval.</td></tr>
                     }
                     @foreach (var r in Model.ToApprove)
                     {
-                        <tr data-id="@r.Id">
+                        <tr class="dashboard-clickable-row" data-sa-open data-id="@r.Id" tabindex="0" role="button" aria-label="Open schedule for @r.Title">
                             <td class="left">
                                 <div class="ms-title">@r.Title</div>
                                 <span class="tag @r.TagClass">@r.Section</span>
                             </td>
                             <td>@r.Author</td>
                             <td>@r.Adviser</td>
+                            <td><strong>@(String.IsNullOrWhiteSpace(r.Room) ? "-" : r.Room)</strong></td>
                             <td>@r.Date</td>
-                            <td><a href="@Url.Action("ScheduleApprovalView", "ScheduleApproval")" class="btn-view" data-sa-open data-id="@r.Id">View</a></td>
+                            <td>@r.Time</td>
                         </tr>
                     }
                 </tbody>
@@ -60,7 +61,7 @@
                 <h2>Upcoming Defenses</h2>
                 <a href="@Url.Action("DefenseScheduleView", "DefenseSchedule")" class="view-all">View All</a>
             </div>
-            <table class="dash-table">
+            <table class="dash-table upcoming-defenses-table">
                 <thead>
                     <tr><th class="left">MANUSCRIPT</th><th>PROJECT MANAGER</th><th>ADVISER</th><th>ROOM</th><th>DATE</th><th>TIME</th></tr>
                 </thead>
@@ -89,23 +90,24 @@
     </div>
 
     <aside class="dash-side">
-        <div class="dash-card stat-card">
+        <a class="dash-card stat-card dashboard-stat-link" href="@Url.Action("DefenseScheduleView", "DefenseSchedule")" aria-label="View defense schedules">
             <div>
                 <div class="stat-label">TOTAL DEFENSES</div>
                 <div class="stat-number">@Model.TotalDefenses</div>
                 <div class="stat-sub">Approved defense schedules</div>
             </div>
             <i class="fa fa-door-open stat-icon"></i>
-        </div>
+        </a>
 
         <div class="dash-card">
             <div class="dash-card-head"><h2 class="muted-h">RECENT ACTIVITIES</h2></div>
-            <table class="dash-table activity-table">
-                <thead><tr><th class="left">TIME</th><th class="left">ACTIVITY</th></tr></thead>
+            <table id="deanRecentActivitiesTable" class="dash-table activity-table dashboard-recent-activity">
+                <colgroup><col class="recent-date-column" style="width:120px" /><col /></colgroup>
+                <thead><tr><th>DATE</th><th>ACTIVITY</th></tr></thead>
                 <tbody>
                     @foreach (var a in Model.RecentActivities)
                     {
-                        <tr><td class="left">@a.Time</td><td class="left">@a.Text</td></tr>
+                        <tr><td class="recent-date-cell"><span class="recent-date-main">@a.At.ToString("MM-dd-yyyy", System.Globalization.CultureInfo.InvariantCulture)</span><span class="recent-date-time">@a.At.ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture)</span></td><td class="recent-activity-text">@a.Text</td></tr>
                     }
                     @for (var i = Model.RecentActivities.Count; i < 4; i++)
                     {
@@ -118,4 +120,13 @@
 </div>
 
 @Html.Partial("_ScheduleApprovalModal")
-<script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.2"></script>
+<script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.4"></script>
+<script>
+    document.addEventListener("keydown", function (event) {
+        var row = event.target.closest ? event.target.closest("tr.dashboard-clickable-row[data-sa-open]") : null;
+        if (row && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            row.click();
+        }
+    });
+</script>

@@ -1,0 +1,28 @@
+@using System
+@using System.Linq
+@model Subsystem1.Areas.Dean.Models.OversightRecord
+@{
+    Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
+    ViewBag.Title = "Submission Record";
+    var cleared = new[] { "Disseminated", "Filed", "Cleared", "Approved" }.Contains(Model.Status, StringComparer.OrdinalIgnoreCase);
+}
+<section class="dean-page">
+    <header class="dean-page-banner"><h1>Submission Record</h1><p>Submission status and clearance details (view only).</p></header>
+    <a class="dean-paper-back" href="@Url.Action("Records", "Oversight", new { area = "Dean" })"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back to Submission Records</a>
+    <article class="dean-record-table dean-submission-record-detail">
+        <h2>@Model.Title</h2>
+        <dl>
+            <dt>Group</dt><dd>@Model.Id</dd>
+            <dt>Authors / Project Manager</dt><dd>@(String.IsNullOrWhiteSpace(Model.Authors) ? "Not recorded" : Model.Authors)</dd>
+            <dt>Program</dt><dd>@(String.IsNullOrWhiteSpace(Model.Program) ? "Not recorded" : Model.Program)</dd>
+            <dt>Adviser</dt><dd>@(String.IsNullOrWhiteSpace(Model.Adviser) ? "Not recorded" : Model.Adviser)</dd>
+            <dt>Batch</dt><dd>@((Model.SubmittedAt ?? Model.UpdatedAt)?.Year.ToString() ?? "Not recorded")</dd>
+            <dt>Submission status</dt><dd>@Model.Status</dd>
+            <dt>Clearance outcome</dt><dd>@(cleared ? "Cleared" : "Pending")</dd>
+            <dt>Submitted</dt><dd>@(Model.SubmittedAt.HasValue ? Model.SubmittedAt.Value.ToString("MMM d, yyyy") : "Not recorded")</dd>
+            <dt>Last updated</dt><dd>@(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToString("MMM d, yyyy") : "Not recorded")</dd>
+            <dt>Abstract</dt><dd>@(String.IsNullOrWhiteSpace(Model.Abstract) ? "Not recorded" : Model.Abstract)</dd>
+            <dt>Keywords</dt><dd>@(String.IsNullOrWhiteSpace(Model.Keywords) ? "Not recorded" : Model.Keywords)</dd>
+        </dl>
+    </article>
+</section>

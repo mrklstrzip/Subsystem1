@@ -274,34 +274,107 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
             }
         }
 
+        // Manuscript Management > Notify PM: reminds every Project Manager who has not submitted a manuscript yet.
+        // Each one gets a notification in their drawer (once per day) and, when e-mail is set up, an e-mail too.
+        [HttpPost]
+        public ActionResult notifyPms()
+        {
+            try
+            {
+                List<CoordinatorData.PmWaiting> waiting = CoordinatorData.PmsNotYetSubmitted();
+                if (waiting.Count == 0)
+                    return Json(new { success = true, total = 0, notified = 0, already = 0, emailed = 0,
+                        message = "Every project manager has already submitted a manuscript." });
+
+                string day = NowManila().ToString("yyyy-MM-dd");
+                string coordinator = PlainName(Me);
+                const string text = "Reminder from the Capstone Coordinator: you have not submitted your manuscript yet. Please submit it as soon as you can.";
+
+                int notified = 0, already = 0;
+                foreach (CoordinatorData.PmWaiting pm in waiting)
+                {
+                    if (Subsystem1.Areas.Student.Models.StudentNotifications.Push(
+                            pm.Id, "submit-reminder:" + day, "reminder", "Manuscript Not Yet Submitted", text)) notified++;
+                    else already++;
+                }
+
+                // E-mail is a bonus: if it is not set up, the in-app notification above is still delivered.
+                int emailed = 0;
+                if (Subsystem1.Services.Mailer.Problem() == null)
+                {
+                    try
+                    {
+                        using (var client = Subsystem1.Services.Mailer.Connect())
+                        {
+                            foreach (CoordinatorData.PmWaiting pm in waiting)
+                            {
+                                if (pm.Email.Trim() == "") continue;
+                                string html = "<p>Hello " + Subsystem1.Services.Mailer.Html(pm.Name) + ",</p><p>" +
+                                    Subsystem1.Services.Mailer.Html(text) + "</p><p>- " + Subsystem1.Services.Mailer.Html(coordinator) + ", Capstone Coordinator</p>";
+                                string plain = "Hello " + pm.Name + ",\n\n" + text + "\n\n- " + coordinator + ", Capstone Coordinator";
+                                try
+                                {
+                                    using (var msg = Subsystem1.Services.Mailer.Compose(pm.Email.Trim(), "Reminder: submit your capstone manuscript", html, plain))
+                                    {
+                                        if (Subsystem1.Services.Mailer.TrySend(client, msg) == null) emailed++;
+                                    }
+                                }
+                                catch (FormatException) { }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
+                CoDb.Log("Reminded " + waiting.Count + " project manager" + (waiting.Count == 1 ? "" : "s") + " to submit their manuscript.");
+
+                return Json(new { success = true, total = waiting.Count, notified = notified, already = already, emailed = emailed,
+                    message = notified > 0
+                        ? "Reminder sent to " + notified + " project manager" + (notified == 1 ? "" : "s") + " who haven't submitted their manuscript."
+                        : "All " + waiting.Count + " project manager" + (waiting.Count == 1 ? " was" : "s were") + " already reminded today." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ErrorText(ex) });
+            }
+        }
+
         // ---------------- Project Manager invitations ----------------
 
         private string StudentSignupEndpoint()
         {
-            string configured = Environment.GetEnvironmentVariable("SUBSYSTEM2_STUDENT_SIGNUP_URL");
-            if (!String.IsNullOrWhiteSpace(configured))
-                return ValidateStudentSignupEndpoint(configured);
-
+            string configured;
             Uri currentUrl = Request == null ? null : Request.Url;
             bool runningLocally = currentUrl != null &&
                 (currentUrl.IsLoopback || currentUrl.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase));
             if (runningLocally)
             {
+                string localSignupEndpoint = null;
                 configured = Environment.GetEnvironmentVariable("SUBSYSTEM2_LOCAL_STUDENT_SIGNUP_URL");
                 if (!String.IsNullOrWhiteSpace(configured))
                 {
                     configured = ValidateStudentSignupEndpoint(configured);
                     if (IsLocalStudentSignupRunning(configured)) return configured;
+                    localSignupEndpoint = configured;
                 }
 
                 string[] localEndpoints =
                 {
+                    "https://localhost:44346/Account/StudentSignup",
                     "http://localhost:5068/Account/StudentSignup",
                     "http://localhost:51978/Account/StudentSignup"
                 };
                 foreach (string localEndpoint in localEndpoints)
                     if (IsLocalStudentSignupRunning(localEndpoint)) return localEndpoint;
+
+                // Local invitations must stay in the local environment even if Subsystem 2
+                // is still starting. Otherwise a local invite token can be sent to Vercel.
+                return localSignupEndpoint ?? "https://localhost:44346/Account/StudentSignup";
             }
+
+            configured = Environment.GetEnvironmentVariable("SUBSYSTEM2_STUDENT_SIGNUP_URL");
+            if (!String.IsNullOrWhiteSpace(configured))
+                return ValidateStudentSignupEndpoint(configured);
 
             return "https://subsystem2.vercel.app/Account/StudentSignup";
         }
@@ -322,28 +395,19 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
             {
                 var request = (HttpWebRequest)WebRequest.Create(endpoint);
                 request.Method = "GET";
-                request.Timeout = 400;
-                request.ReadWriteTimeout = 400;
+                request.Timeout = 1500;
+                request.ReadWriteTimeout = 1500;
                 request.AllowAutoRedirect = false;
                 using (var response = (HttpWebResponse)request.GetResponse())
                 using (var reader = new StreamReader(response.GetResponseStream()))
                 {
+                    if ((int)response.StatusCode < 200 || (int)response.StatusCode >= 300)
+                        return false;
                     string body = reader.ReadToEnd();
-                    return body.IndexOf("Create student account", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                        body.IndexOf("Student signup is temporarily unavailable", StringComparison.OrdinalIgnoreCase) >= 0;
+                    return body.IndexOf("student-signup-card", StringComparison.OrdinalIgnoreCase) >= 0;
                 }
             }
-            catch (WebException ex)
-            {
-                var response = ex.Response as HttpWebResponse;
-                if (response == null) return false;
-                using (response)
-                using (var reader = new StreamReader(response.GetResponseStream()))
-                {
-                    string body = reader.ReadToEnd();
-                    return body.IndexOf("Student signup is temporarily unavailable", StringComparison.OrdinalIgnoreCase) >= 0;
-                }
-            }
+            catch (WebException) { return false; }
             catch (IOException) { return false; }
             catch (InvalidOperationException) { return false; }
         }
@@ -402,6 +466,21 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
                     failed = failed,
                     results = results
                 });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ErrorText(ex) });
+            }
+        }
+
+        // Tells the pop-up which addresses already have an account, so they cannot be invited.
+        [HttpPost]
+        public ActionResult checkEmails(CoInviteDto dto)
+        {
+            try
+            {
+                if (dto == null || dto.Emails == null) return Json(new { success = true, taken = new string[0] });
+                return Json(new { success = true, taken = PmInvites.ExistingAccounts(dto.Emails) });
             }
             catch (Exception ex)
             {

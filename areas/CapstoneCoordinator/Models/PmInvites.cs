@@ -82,7 +82,21 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
         private static bool EmailHasAccount(string email)
         {
-            return Users().Find(Builders<BsonDocument>.Filter.Regex("email", ExactCI(email))).Any();
+            var filter = Builders<BsonDocument>.Filter;
+            return Users().Find(filter.Or(
+                filter.Regex("email", ExactCI(email)),
+                filter.Regex("subsystem3.Email", ExactCI(email)))).Any();
+        }
+
+        /// <summary>Which of these addresses already belong to a user account (lower case). Used to stop invitations to them.</summary>
+        public static List<string> ExistingAccounts(IEnumerable<string> rawEmails)
+        {
+            var taken = new List<string>();
+            foreach (string email in ParseEmails(rawEmails))
+            {
+                if (email.Length <= 120 && EmailPattern.IsMatch(email) && EmailHasAccount(email)) taken.Add(email);
+            }
+            return taken;
         }
 
         private static DateTime? Utc(BsonDocument d, string name)
@@ -283,8 +297,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                         email = Str(d, "email"),
                         status = status,
                         error = status == "failed" ? Str(d, "emailError") : "",
-                        sentAt = (sent ?? created).HasValue ? (sent ?? created).Value.AddHours(8).ToString("MMM d, yyyy h:mm tt", System.Globalization.CultureInfo.InvariantCulture) : "-",
-                        expiresAt = exp.HasValue ? exp.Value.AddHours(8).ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture) : "-",
+                        sentAt = (sent ?? created).HasValue ? (sent ?? created).Value.AddHours(8).ToString("MM-dd-yy | h:mm tt", System.Globalization.CultureInfo.InvariantCulture) : "-",
+                        expiresAt = exp.HasValue ? exp.Value.AddHours(8).ToString("MM-dd-yy", System.Globalization.CultureInfo.InvariantCulture) : "-",
                         canAct = status == "pending" || status == "expired" || status == "failed"
                     };
                 }).ToList();

@@ -395,109 +395,7 @@ namespace Subsystem1.Areas.CampusDirector.Controllers
                 BsonDocument user = Director();
                 if (user == null) return Expired();
 
-                var emptyFilter = new BsonDocument();
-                List<BsonDocument> buildingDocs = Buildings()
-    .Find(emptyFilter)
-    .ToList()
-    .Where(b =>
-        !string.Equals(Str(b, "name").Trim(), "TBA",
-            StringComparison.OrdinalIgnoreCase) &&
-        !string.Equals(Str(b, "name").Trim(), "To Be Announced",
-            StringComparison.OrdinalIgnoreCase) &&
-        !string.Equals(Str(b, "code").Trim(), "TBA",
-            StringComparison.OrdinalIgnoreCase)
-    )
-    .ToList();
-                List<BsonDocument> roomDocs = Rooms().Find(emptyFilter).ToList();
-
-                var buildingById = new Dictionary<string, BsonDocument>();
-                foreach (BsonDocument b in buildingDocs) buildingById[DocId(b)] = b;
-
-                var roomCounts = new Dictionary<string, int>();
-                foreach (BsonDocument r in roomDocs)
-                {
-                    string bid = Str(r, "buildingId");
-                    int n;
-                    roomCounts.TryGetValue(bid, out n);
-                    roomCounts[bid] = n + 1;
-                }
-
-                var buildings = buildingDocs
-                    .OrderBy(b => Str(b, "name"), StringComparer.OrdinalIgnoreCase)
-                    .Select(b =>
-                    {
-                        int n;
-                        roomCounts.TryGetValue(DocId(b), out n);
-                        return new
-                        {
-                            id = DocId(b),
-                            name = Str(b, "name"),
-                            code = Str(b, "code"),
-                            status = StatusOf(b),
-                            roomCount = n
-                        };
-                    })
-                    .ToList();
-
-                var rooms = roomDocs
-                    .Select(r =>
-                    {
-                        string bid = Str(r, "buildingId");
-                        BsonDocument b;
-                        bool buildingOk = buildingById.TryGetValue(bid, out b) && StatusOf(b) == "Active";
-                        string status = StatusOf(r);
-                        return new
-                        {
-                            sortKey = (b != null ? Str(b, "name") : "~") + "|" + Str(r, "name"),
-                            row = new
-                            {
-                                id = DocId(r),
-                                buildingId = bid,
-                                name = Str(r, "name"),
-                                status = status,
-                                available = status == "Active" && buildingOk
-                            }
-                        };
-                    })
-                    .OrderBy(x => x.sortKey, StringComparer.OrdinalIgnoreCase)
-                    .Select(x => x.row)
-                    .ToList();
-
-                var activity = Activity()
-                    .Find(new BsonDocument())
-                    .Sort(Builders<BsonDocument>.Sort.Descending("ts"))
-                    .Limit(50)
-                    .ToList()
-                    .Select(a =>
-                    {
-                        BsonValue ts;
-                        DateTime when = DateTime.UtcNow;
-                        if (a.TryGetValue("ts", out ts) && ts.IsBsonDateTime)
-                        {
-                            when = ts.ToUniversalTime();
-                        }
-                        return new
-                        {
-                            at = when.ToString("o"),
-                            text = Str(a, "text"),
-                            type = Str(a, "type"),
-                            category = Str(a, "category")
-                        };
-                    })
-                    .ToList();
-
-                DateTime now = Manila();
-
-                return Json(new
-                {
-                    success = true,
-                    me = MeRow(user),
-                    buildings = buildings,
-                    rooms = rooms,
-                    activity = activity,
-                    today = now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-                    nowMinutes = now.Hour * 60 + now.Minute
-                }, JsonRequestBehavior.AllowGet);
+                return Json(StateData(user), JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
@@ -515,67 +413,204 @@ namespace Subsystem1.Areas.CampusDirector.Controllers
 
                 if (Director() == null) return Expired();
 
-                DateTime now = Manila();
-                DateTime day;
-                if (!DateTime.TryParseExact(Clean(date), "yyyy-MM-dd", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out day))
-                {
-                    day = now.Date;
-                }
-                string dayText = day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-                var items = new List<object>();
-                List<BsonDocument> docs = Schedules()
-                    .Find(Builders<BsonDocument>.Filter.Eq("date", dayText))
-                    .ToList();
-
-                foreach (BsonDocument d in docs)
-                {
-                    if (!HoldsRoom(d)) continue;
-
-                    int? start = Minutes(d, "start");
-                    int? end = Minutes(d, "end");
-                    string roomId = AnyStr(d, "roomId");
-                    if (start == null || end == null || end.Value <= start.Value || roomId == "") continue;
-
-                    var authors = new List<string>();
-                    BsonValue av;
-                    if (d.TryGetValue("authors", out av) && av != null && av.IsBsonArray)
-                    {
-                        foreach (BsonValue a in av.AsBsonArray)
-                        {
-                            if (a.IsString && a.AsString.Trim() != "") authors.Add(a.AsString.Trim());
-                        }
-                    }
-
-                    items.Add(new
-                    {
-                        id = DocId(d),
-                        roomId = roomId,
-                        start = start.Value,
-                        end = end.Value,
-                        section = AnyStr(d, "section"),
-                        group = AnyStr(d, "group"),
-                        program = AnyStr(d, "program"),
-                        title = AnyStr(d, "title"),
-                        authors = authors,
-                        cancelled = IsCancelled(d)
-                    });
-                }
-
-                return Json(new
-                {
-                    success = true,
-                    date = dayText,
-                    items = items,
-                    today = now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-                    nowMinutes = now.Hour * 60 + now.Minute
-                }, JsonRequestBehavior.AllowGet);
+                return Json(ScheduleData(date), JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
                 return Error(ex, true);
             }
+        }
+
+        // Shared with the Admin read-only Room Schedule page (user may be null there).
+        internal static object StateData(BsonDocument user)
+        {
+            var emptyFilter = new BsonDocument();
+            List<BsonDocument> buildingDocs = Buildings()
+.Find(emptyFilter)
+.ToList()
+.Where(b =>
+    !string.Equals(Str(b, "name").Trim(), "TBA",
+        StringComparison.OrdinalIgnoreCase) &&
+    !string.Equals(Str(b, "name").Trim(), "To Be Announced",
+        StringComparison.OrdinalIgnoreCase) &&
+    !string.Equals(Str(b, "code").Trim(), "TBA",
+        StringComparison.OrdinalIgnoreCase)
+)
+.ToList();
+            List<BsonDocument> roomDocs = Rooms().Find(emptyFilter).ToList();
+
+            var buildingById = new Dictionary<string, BsonDocument>();
+            foreach (BsonDocument b in buildingDocs) buildingById[DocId(b)] = b;
+
+            var roomCounts = new Dictionary<string, int>();
+            foreach (BsonDocument r in roomDocs)
+            {
+                string bid = Str(r, "buildingId");
+                int n;
+                roomCounts.TryGetValue(bid, out n);
+                roomCounts[bid] = n + 1;
+            }
+
+            var buildings = buildingDocs
+                .OrderBy(b => Str(b, "name"), StringComparer.OrdinalIgnoreCase)
+                .Select(b =>
+                {
+                    int n;
+                    roomCounts.TryGetValue(DocId(b), out n);
+                    return new
+                    {
+                        id = DocId(b),
+                        name = Str(b, "name"),
+                        code = Str(b, "code"),
+                        status = StatusOf(b),
+                        roomCount = n
+                    };
+                })
+                .ToList();
+
+            var rooms = roomDocs
+                .Select(r =>
+                {
+                    string bid = Str(r, "buildingId");
+                    BsonDocument b;
+                    bool buildingOk = buildingById.TryGetValue(bid, out b) && StatusOf(b) == "Active";
+                    string status = StatusOf(r);
+                    return new
+                    {
+                        sortKey = (b != null ? Str(b, "name") : "~") + "|" + Str(r, "name"),
+                        row = new
+                        {
+                            id = DocId(r),
+                            buildingId = bid,
+                            name = Str(r, "name"),
+                            status = status,
+                            available = status == "Active" && buildingOk
+                        }
+                    };
+                })
+                .OrderBy(x => x.sortKey, StringComparer.OrdinalIgnoreCase)
+                .Select(x => x.row)
+                .ToList();
+
+            var activity = Activity()
+                .Find(new BsonDocument())
+                .Sort(Builders<BsonDocument>.Sort.Descending("ts"))
+                .Limit(50)
+                .ToList()
+                .Select(a =>
+                {
+                    BsonValue ts;
+                    DateTime when = DateTime.UtcNow;
+                    if (a.TryGetValue("ts", out ts) && ts.IsBsonDateTime)
+                    {
+                        when = ts.ToUniversalTime();
+                    }
+                    return new
+                    {
+                        at = when.ToString("o"),
+                        text = Str(a, "text"),
+                        type = Str(a, "type"),
+                        category = Str(a, "category")
+                    };
+                })
+                .ToList();
+
+            DateTime now = Manila();
+
+            return (object)new
+            {
+                success = true,
+                me = user == null ? null : MeRow(user),
+                buildings = buildings,
+                rooms = rooms,
+                activity = activity,
+                today = now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                nowMinutes = now.Hour * 60 + now.Minute
+            };
+        }
+
+        internal static object DashboardSummaryData()
+        {
+            List<BsonDocument> buildings = Buildings().Find(new BsonDocument()).ToList()
+                .Where(b => !string.Equals(Str(b, "name").Trim(), "TBA", StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(Str(b, "name").Trim(), "To Be Announced", StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(Str(b, "code").Trim(), "TBA", StringComparison.OrdinalIgnoreCase)).ToList();
+            List<BsonDocument> rooms = Rooms().Find(new BsonDocument()).ToList();
+            var counts = rooms.GroupBy(r => Str(r, "buildingId")).ToDictionary(g => g.Key, g => g.Count());
+            var activeBuildings = new HashSet<string>(buildings.Where(b => StatusOf(b) == "Active").Select(DocId), StringComparer.OrdinalIgnoreCase);
+            int activeRooms = rooms.Count(r => StatusOf(r) == "Active" && activeBuildings.Contains(Str(r, "buildingId")));
+            return new
+            {
+                totalRooms = rooms.Count,
+                activeRooms = activeRooms,
+                disabledRooms = rooms.Count - activeRooms,
+                buildings = buildings.OrderBy(b => Str(b, "name"), StringComparer.OrdinalIgnoreCase).Select(b =>
+                {
+                    int count;
+                    counts.TryGetValue(DocId(b), out count);
+                    return new { name = Str(b, "name"), code = Str(b, "code"), roomCount = count };
+                }).ToList()
+            };
+        }
+
+        internal static object ScheduleData(string date)
+        {
+            DateTime now = Manila();
+            DateTime day;
+            if (!DateTime.TryParseExact(Clean(date), "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out day))
+            {
+                day = now.Date;
+            }
+            string dayText = day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+            var items = new List<object>();
+            List<BsonDocument> docs = Schedules()
+                .Find(Builders<BsonDocument>.Filter.Eq("date", dayText))
+                .ToList();
+
+            foreach (BsonDocument d in docs)
+            {
+                if (!HoldsRoom(d)) continue;
+
+                int? start = Minutes(d, "start");
+                int? end = Minutes(d, "end");
+                string roomId = AnyStr(d, "roomId");
+                if (start == null || end == null || end.Value <= start.Value || roomId == "") continue;
+
+                var authors = new List<string>();
+                BsonValue av;
+                if (d.TryGetValue("authors", out av) && av != null && av.IsBsonArray)
+                {
+                    foreach (BsonValue a in av.AsBsonArray)
+                    {
+                        if (a.IsString && a.AsString.Trim() != "") authors.Add(a.AsString.Trim());
+                    }
+                }
+
+                items.Add(new
+                {
+                    id = DocId(d),
+                    roomId = roomId,
+                    start = start.Value,
+                    end = end.Value,
+                    section = AnyStr(d, "section"),
+                    group = AnyStr(d, "group"),
+                    program = AnyStr(d, "program"),
+                    title = AnyStr(d, "title"),
+                    authors = authors,
+                    cancelled = IsCancelled(d)
+                });
+            }
+
+            return (object)new
+            {
+                success = true,
+                date = dayText,
+                items = items,
+                today = now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                nowMinutes = now.Hour * 60 + now.Minute
+            };
         }
 
         // ========================= BUILDINGS =========================
@@ -590,7 +625,7 @@ namespace Subsystem1.Areas.CampusDirector.Controllers
 
                 string name = Regex.Replace(Clean(dto.Name), @"\s+", " ");
                 string code = Clean(dto.Code).ToUpperInvariant();
-                
+
                 if (string.Equals(name, "TBA", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(name, "To Be Announced", StringComparison.OrdinalIgnoreCase) ||
                 code == "TBA")
@@ -735,7 +770,7 @@ namespace Subsystem1.Areas.CampusDirector.Controllers
                 BsonDocument building = Buildings()
                     .Find(Builders<BsonDocument>.Filter.Eq("_id", buildingOid)).FirstOrDefault();
                 if (building == null) return Fail("Please choose a building.");
-                 
+
                 if (string.Equals(Str(building, "name").Trim(), "TBA",
         StringComparison.OrdinalIgnoreCase) ||
     string.Equals(Str(building, "code").Trim(), "TBA",

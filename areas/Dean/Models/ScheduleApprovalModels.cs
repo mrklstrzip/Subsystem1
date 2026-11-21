@@ -13,7 +13,7 @@ namespace Subsystem1.Areas.Dean.Models
         public string Adviser { get; set; }
         public DateTime Date { get; set; }
         public bool HasDate { get; set; }
-        public string Status { get; set; }    // "To Approve" | "Approved"
+        public string Status { get; set; }    // "To Approve" | "Approved" | "Rejected"
     }
 
     public class PanelistVM
@@ -39,7 +39,9 @@ namespace Subsystem1.Areas.Dean.Models
         public List<PanelistVM> Panelists { get; set; }
         public string Time { get; set; }
         public string DefenseDate { get; set; }
+        public string Building { get; set; }
         public string Room { get; set; }
+        public string RejectReason { get; set; }   // only when the Dean rejected it
     }
 
     public sealed class DeanManuscriptFile

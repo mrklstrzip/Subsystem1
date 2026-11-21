@@ -15,7 +15,7 @@
         <div class="notif-content">
             <div class="notif-item-title">@n.Title @if (!n.Read) {<span class="unread-dot"></span>}</div>
             <p>@n.Text</p>
-            <div class="notif-actions"><span class="notif-time">@DisplayFormat.TimeAgo(n.CreatedAt)</span></div>
+            <div class="notif-actions"><span class="notif-time">@DisplayFormat.TimeAgoNumeric(n.CreatedAt)</span></div>
         </div>
     </div>
 }

@@ -26,6 +26,10 @@ namespace Subsystem1.Areas.Dean.Models
         public string Query { get; set; }
         public string Program { get; set; }
         public string Status { get; set; }
+        public string Adviser { get; set; }
+        public string SortBy { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
         public int Total { get; set; }
         public int Submitted { get; set; }
         public int Approved { get; set; }
@@ -47,6 +51,7 @@ namespace Subsystem1.Areas.Dean.Models
         public List<OversightRecord> SlowestGroups { get; set; } = new List<OversightRecord>();
         public List<OversightRecord> Records { get; set; } = new List<OversightRecord>();
         public List<KeyValuePair<string, int>> Programs { get; set; } = new List<KeyValuePair<string, int>>();
+        public List<string> Advisers { get; set; } = new List<string>();
     }
 
     public class ReportBatchSummary

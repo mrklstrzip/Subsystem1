@@ -31,6 +31,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
     {
         public string Id;
         public string Name;
+        public string Building;   // building name, shown next to the room
     }
 
     public class EngPick
@@ -288,7 +289,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             r.ConflictDescription = desc;
 
             string window = p.Days.Count == 0 ? "no days"
-                : p.Days.First().ToString("MMM d", CultureInfo.InvariantCulture) + " to " + p.Days.Last().ToString("MMM d", CultureInfo.InvariantCulture);
+                : p.Days.First().ToString("MM-dd-yy", CultureInfo.InvariantCulture) + " to " + p.Days.Last().ToString("MM-dd-yy", CultureInfo.InvariantCulture);
             r.Steps.Add(new EngStep
             {
                 Title = "Check availability",

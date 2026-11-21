@@ -78,7 +78,7 @@
         <tbody>
             @foreach (var d in Model.Defenses)
             {
-                <tr class="clickable-row" tabindex="0" data-id="@d.Id" data-status="@d.Status">
+                <tr class="clickable-row" tabindex="0" data-id="@d.Id" data-status="@d.Status" data-sy="@d.SchoolYear">
                     <td>
                         <div class="manuscript-title-text">@d.Title</div>
                         <span class="program-badge @d.BadgeClass">@d.Badge</span>
@@ -206,7 +206,6 @@
     (function () {
         var API = "/CapstoneCoordinator/CoordinatorApi/";
         var STATUS_LABELS = { "upcoming": "Upcoming", "ongoing": "Ongoing", "completed": "Completed" };
-        var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         var DEFAULT_PERCENT = { high: 90, medium: 70, low: 40 };
 
         var overlay = document.getElementById("defenseModal");
@@ -228,7 +227,7 @@
         function fmtDate(iso) {
             if (!iso) return "\u2014";
             var p = iso.split("-");
-            return MONTHS[parseInt(p[1], 10) - 1] + " " + parseInt(p[2], 10) + ", " + p[0];
+            return p[1] + "-" + p[2] + "-" + p[0].slice(-2);   // numeric: MM-DD-YY
         }
 
         function fmtTime(t) {
