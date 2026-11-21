@@ -38,6 +38,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public string RepositoryReference { get; set; }
         public string RepositoryState { get; set; }
         public bool IsHistorical { get; set; }
+        public bool IsArchived { get; set; }
         public string RepositoryGridFsId { get; set; }
         public string RepositoryFileHash { get; set; }
         public string CloudFileId { get; set; }
@@ -84,7 +85,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public static List<ClearedSubmission> ReadCleared()
         {
             var filter = Builders<BsonDocument>.Filter.And(
-                Builders<BsonDocument>.Filter.In("subsystem3.Status", new[] { "Disseminated", "Filed" }),
+                Builders<BsonDocument>.Filter.In("subsystem3.Status", new[] { "Disseminated", "Filed", "Archived" }),
                 Builders<BsonDocument>.Filter.Exists("subsystem3.DisseminatedAt", true),
                 Builders<BsonDocument>.Filter.Ne("subsystem3.DisseminatedAt", BsonNull.Value));
 
@@ -108,7 +109,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         {
             var completed = new List<ClearedSubmission>();
             var filedFilter = Builders<BsonDocument>.Filter.And(
-                Builders<BsonDocument>.Filter.Eq("subsystem3.Status", "Filed"),
+                Builders<BsonDocument>.Filter.In("subsystem3.Status", new[] { "Filed", "Archived" }),
                 Builders<BsonDocument>.Filter.Exists("subsystem3.FiledAt", true),
                 Builders<BsonDocument>.Filter.Ne("subsystem3.FiledAt", BsonNull.Value));
 
@@ -118,14 +119,18 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 BsonDocument state = Document(submission, "subsystem3");
                 BsonDocument repository = FindRepositoryRecord(item.Id);
                 BsonDocument info = Document(repository, "fileInfo");
-                if (!Bool(state, "PublishToExclusive") || repository == null ||
+                BsonDocument catalog = Document(repository, "subsystem3Catalog");
+                if (repository == null ||
                     !SameId(item.ApprovedManuscriptId, Str(info, "gridFsId")) ||
                     !SameHash(item.ApprovedManuscriptHash, Str(info, "sha256Hash"))) continue;
 
-                item.RepositoryState = "Filed";
+                item.IsArchived = IsArchived(repository, catalog, submission, state);
+                item.RepositoryState = First(Str(catalog, "RepositoryState"), First(Str(state, "RepositoryState"), Str(state, "Status")));
+                if (item.IsArchived) item.Status = "Archived";
                 completed.Add(item);
             }
 
+            completed.AddRange(ReadFiledRepositoryCatalog());
             completed.AddRange(ReadFiledImports());
             completed.AddRange(ReadHistoricalCompleted());
             return completed
@@ -133,6 +138,80 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 .Select(g => g.First())
                 .OrderByDescending(x => x.FiledAt ?? DateTime.MinValue)
                 .ToList();
+        }
+
+        // Includes filed catalog records that Subsystem 3 displays in its Repository
+        // Catalog even when PublishToExclusive is off. Only staff-approved, filed rows
+        // with an exact approved-file ID and hash match are eligible for these read-only lists.
+        private static List<ClearedSubmission> ReadFiledRepositoryCatalog()
+        {
+            var catalogFilter = Builders<BsonDocument>.Filter.And(
+                Builders<BsonDocument>.Filter.In("subsystem3Catalog.RepositoryState", new[] { "Filed", "Archived" }),
+                Builders<BsonDocument>.Filter.Exists("subsystem3Catalog.FiledAt", true),
+                Builders<BsonDocument>.Filter.Ne("subsystem3Catalog.FiledAt", BsonNull.Value),
+                Builders<BsonDocument>.Filter.Exists("subsystem3Catalog.MetadataApprovedAt", true),
+                Builders<BsonDocument>.Filter.Ne("subsystem3Catalog.MetadataApprovedAt", BsonNull.Value),
+                Builders<BsonDocument>.Filter.Exists("subsystem3Catalog.MetadataApprovedBy", true),
+                Builders<BsonDocument>.Filter.Ne("subsystem3Catalog.MetadataApprovedBy", ""));
+
+            var result = new List<ClearedSubmission>();
+            foreach (BsonDocument record in Db.Database.GetCollection<BsonDocument>("repository_records").Find(catalogFilter).ToList())
+            {
+                BsonDocument historical = Document(record, "subsystem3Historical");
+                string reference = Str(historical, "Reference");
+                const string subsystem2Prefix = "Subsystem 2 final approval ";
+                if (reference.StartsWith(subsystem2Prefix, StringComparison.Ordinal)) continue;
+
+                BsonDocument catalog = Document(record, "subsystem3Catalog");
+                BsonDocument fileInfo = Document(record, "fileInfo");
+                string approvedId = Str(catalog, "ApprovedManuscriptId");
+                string approvedHash = Str(catalog, "ApprovedManuscriptHash");
+                string gridFsId = Str(fileInfo, "gridFsId");
+                string fileHash = Str(fileInfo, "sha256Hash");
+                DateTime? filedAt = Date(catalog, "FiledAt");
+                DateTime? metadataApprovedAt = Date(catalog, "MetadataApprovedAt");
+                if (!filedAt.HasValue || !metadataApprovedAt.HasValue ||
+                    !SameId(approvedId, gridFsId) || !SameHash(approvedHash, fileHash)) continue;
+
+                BsonDocument cloudFile = FindCloudFile(approvedId);
+                if (cloudFile != null && (!SameId(Str(cloudFile, "_id"), approvedId) ||
+                    !SameHash(Str(cloudFile, "sha256"), approvedHash))) continue;
+
+                result.Add(new ClearedSubmission
+                {
+                    Id = Str(record, "_id"),
+                    Title = First(Str(record, "title"), Str(catalog, "Title")),
+                    Authors = String.Join("; ", StringValues(record, "authors", "Authors")),
+                    Abstract = First(Str(record, "abstract"), Str(catalog, "Abstract")),
+                    Keywords = StringValues(record, "keywords", "Keywords").Count > 0
+                        ? StringValues(record, "keywords", "Keywords")
+                        : StringValues(catalog, "Keywords", "keywords"),
+                    Adviser = First(Str(record, "adviserName"), Str(catalog, "Adviser")),
+                    Program = First(Str(record, "program"), Str(catalog, "Program")),
+                    Section = First(Str(record, "section"), Str(catalog, "Section")),
+                    Status = IsArchived(record, catalog) ? "Archived" : "Filed",
+                    RepositoryState = Str(catalog, "RepositoryState"),
+                    IsArchived = IsArchived(record, catalog),
+                    FiledAt = filedAt,
+                    ClearanceGroup = First(Str(catalog, "Name"), reference),
+                    ClearanceReference = reference,
+                    ApprovedManuscriptId = approvedId,
+                    ApprovedManuscriptName = First(Str(cloudFile, "filename"), Str(fileInfo, "fileName")),
+                    ApprovedManuscriptHash = approvedHash,
+                    RepositoryReference = reference,
+                    RepositoryGridFsId = gridFsId,
+                    RepositoryFileHash = fileHash,
+                    CloudFileId = Str(cloudFile, "_id"),
+                    CloudFileHash = Str(cloudFile, "sha256"),
+                    CloudFileLength = Str(cloudFile, "length"),
+                    MetadataApprovedAt = metadataApprovedAt,
+                    StaffReviewer = Str(catalog, "MetadataApprovedBy"),
+                    StaffReviewerId = Str(catalog, "MetadataApprovedBy"),
+                    StaffReviewAt = metadataApprovedAt,
+                    ValidationSummaries = new List<ValidationSummary>()
+                });
+            }
+            return result;
         }
 
         private static List<ClearedSubmission> ReadHistoricalCompleted()
@@ -152,8 +231,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 string approvedHash = Str(catalog, "ApprovedManuscriptHash");
                 DateTime? filedAt = Date(catalog, "FiledAt");
                 DateTime? approvedAt = Date(catalog, "MetadataApprovedAt");
-                if (catalog == null || !Bool(catalog, "PublishToExclusive") ||
-                    !String.Equals(Str(catalog, "RepositoryState"), "Filed", StringComparison.Ordinal) ||
+                if (catalog == null || !IsFiledOrArchived(Str(catalog, "RepositoryState")) ||
                     !filedAt.HasValue || !approvedAt.HasValue ||
                     String.IsNullOrWhiteSpace(Str(catalog, "MetadataApprovedBy")) ||
                     !SameId(approvedId, Str(fileInfo, "gridFsId")) ||
@@ -171,9 +249,10 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     Adviser = First(Str(record, "adviserName"), Str(catalog, "Adviser")),
                     Program = First(Str(record, "program"), Str(catalog, "Program")),
                     Section = First(Str(record, "section"), Str(catalog, "Section")),
-                    Status = "Historical",
+                    Status = IsArchived(record, catalog) ? "Archived" : "Historical",
                     RepositoryState = "Historical",
                     IsHistorical = true,
+                    IsArchived = IsArchived(record, catalog),
                     FiledAt = filedAt,
                     ClearanceGroup = First(Str(catalog, "Name"), reference),
                     ApprovedManuscriptId = approvedId,
@@ -206,7 +285,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 Builders<BsonDocument>.Filter.Regex(
                     "subsystem3Historical.Reference",
                     new BsonRegularExpression("^" + System.Text.RegularExpressions.Regex.Escape(referencePrefix))),
-                Builders<BsonDocument>.Filter.Eq("subsystem3Catalog.RepositoryState", "Filed"),
+                Builders<BsonDocument>.Filter.In("subsystem3Catalog.RepositoryState", new[] { "Filed", "Archived" }),
                 Builders<BsonDocument>.Filter.Exists("subsystem3Catalog.RepositoryRevalidatedAt", true),
                 Builders<BsonDocument>.Filter.Ne("subsystem3Catalog.RepositoryRevalidatedAt", BsonNull.Value),
                 Builders<BsonDocument>.Filter.Exists("subsystem3Catalog.MetadataApprovedAt", true),
@@ -258,7 +337,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             // and the imported repository file hash before the row is admitted.
             BsonDocument source = FindCurrentManuscript(currentId);
             if (source == null ||
-                !string.Equals(Str(catalog, "RepositoryState"), "Filed", StringComparison.Ordinal) ||
+                !IsFiledOrArchived(Str(catalog, "RepositoryState")) ||
                 !SameId(approvedId, repositoryId) ||
                 !SameId(gridFsId, repositoryId) ||
                 !SameHash(adviserHash, approvedHash) ||
@@ -302,7 +381,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 Adviser = First(Str(sourceManuscript, "AdviserName"), Str(approval, "AdviserId")),
                 Program = First(Str(record, "program"), Str(catalog, "Program")),
                 Section = First(Str(record, "section"), Str(catalog, "Section")),
-                Status = "Filed",
+                Status = IsArchived(record, catalog) ? "Archived" : "Filed",
+                IsArchived = IsArchived(record, catalog),
                 FiledAt = filedAt,
                 IsFiledImport = true,
                 ClearanceGroup = First(Str(sourceManuscript, "GroupName"), First(Str(sourceManuscript, "GroupId"), Str(source, "groupId"))),
@@ -523,6 +603,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 Section = First(Str(state, "Section"), Str(clearance, "Section")),
                 Status = Str(state, "Status"),
                 RepositoryState = First(Str(state, "RepositoryState"), Str(state, "Status")),
+                IsArchived = IsArchived(submission, state),
                 DisseminatedAt = Date(state, "DisseminatedAt"),
                 FiledAt = Date(state, "FiledAt"),
                 ClearanceReference = Str(clearance, "Reference"),
@@ -602,6 +683,35 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         {
             BsonValue value = Value(document, key);
             return value != null && value.IsBoolean && value.AsBoolean;
+        }
+
+        private static bool IsFiledOrArchived(string state)
+        {
+            return string.Equals(state, "Filed", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(state, "Archived", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsArchived(params BsonDocument[] documents)
+        {
+            if (documents == null) return false;
+            foreach (BsonDocument document in documents)
+            {
+                if (document == null) continue;
+                if (string.Equals(Str(document, "RepositoryState"), "Archived", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(Str(document, "Status"), "Archived", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(Str(document, "ArchiveStatus"), "Archived", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(Str(document, "ArchiveState"), "Archived", StringComparison.OrdinalIgnoreCase) ||
+                    Bool(document, "IsArchived") || Bool(document, "isArchived") ||
+                    Bool(document, "Archived") || Bool(document, "archived") ||
+                    Date(document, "ArchivedAt").HasValue || Date(document, "ArchiveAt").HasValue)
+                    return true;
+
+                BsonDocument archive = Document(document, "Archive") ?? Document(document, "archive");
+                if (archive != null && (Bool(archive, "IsArchived") || Bool(archive, "Archived") ||
+                    string.Equals(Str(archive, "Status"), "Archived", StringComparison.OrdinalIgnoreCase) ||
+                    Date(archive, "ArchivedAt").HasValue || Date(archive, "At").HasValue)) return true;
+            }
+            return false;
         }
 
         private static DateTime? Date(BsonDocument document, string key)

@@ -90,7 +90,7 @@
                     </td>
                     <td class="author-cell">@s.Author</td>
                     <td class="adviser-cell">@s.Adviser</td>
-                    <td class="type-cell"><span class="defense-type-badge @(s.Type == "Re-defense" ? "redefense" : "first-defense")">@s.Type</span></td>
+                    <td class="type-cell"><span class="defense-type-badge @s.TypeClass">@s.Type</span></td>
                     <td class="date-cell">@s.DateText</td>
                     <td>
                         <span class="status-badge @s.Status">@s.StatusLabel</span>
@@ -118,7 +118,7 @@
     int lastPageLink = Math.Min(Model.SchedulePageCount, Model.SchedulePage + 2);
 }
 <div class="schedule-pagination" aria-label="Manuscript schedule pages">
-    <span class="schedule-pagination-summary">Showing @showingFrom–@showingTo of @Model.ScheduleTotalCount titles</span>
+    <span class="schedule-pagination-summary">Showing @showingFrom-@showingTo of @Model.ScheduleTotalCount titles</span>
     <div class="schedule-pagination-controls">
         @if (Model.SchedulePage > 1)
         {
@@ -126,7 +126,10 @@
         }
         @for (int pageNumber = firstPageLink; pageNumber <= lastPageLink; pageNumber++)
         {
-            <a class="schedule-page-link @(pageNumber == Model.SchedulePage ? "active" : "")" href="@Url.Action("schedulemanagement", "ScheduleManagement", new { page = pageNumber })" aria-current="@(pageNumber == Model.SchedulePage ? "page" : null)">@pageNumber</a>
+            bool isCurrentPage = pageNumber == Model.SchedulePage;
+            string pageClass = isCurrentPage ? "active" : "";
+            string currentPageAttr = isCurrentPage ? "page" : "";
+            <a class="schedule-page-link @pageClass" href="@Url.Action("schedulemanagement", "ScheduleManagement", new { page = pageNumber })" aria-current="@currentPageAttr">@pageNumber</a>
         }
         @if (Model.SchedulePage < Model.SchedulePageCount)
         {

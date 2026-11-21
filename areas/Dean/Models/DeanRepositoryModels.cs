@@ -12,6 +12,7 @@ namespace Subsystem1.Areas.Dean.Models
         public string Filing { get; set; }
         public string Adviser { get; set; }
         public string Sort { get; set; }
+        public bool ShowArchived { get; set; }
         public IList<string> Programs { get; set; }
         public IList<int> Years { get; set; }
         public IList<string> Filings { get; set; }

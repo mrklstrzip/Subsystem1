@@ -5,9 +5,11 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
 {
     public class ConflictResultController : CoordinatorControllerBase
     {
-        public ActionResult conflictresult()
+        public ActionResult conflictresult(int page = 1)
         {
-            return View(CoordinatorData.Load(true));
+            CoordinatorData data = CoordinatorData.Load(true);
+            data.SetConflictPage(page, 8);
+            return View(data);
         }
     }
 }

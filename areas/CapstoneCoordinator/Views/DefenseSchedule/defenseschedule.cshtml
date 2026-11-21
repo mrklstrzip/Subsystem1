@@ -6,7 +6,7 @@
     ViewBag.Title = "Defense Schedule";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=2.4" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=2.5" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -95,6 +95,31 @@
             }
         </tbody>
     </table>
+</div>
+
+@{
+    int defenseShowingFrom = Model.DefenseTotalCount == 0 ? 0 : (Model.DefensePage - 1) * Model.DefensePageSize + 1;
+    int defenseShowingTo = Math.Min(Model.DefensePage * Model.DefensePageSize, Model.DefenseTotalCount);
+    int defenseFirstPage = Math.Max(1, Model.DefensePage - 2);
+    int defenseLastPage = Math.Min(Model.DefensePageCount, Model.DefensePage + 2);
+}
+<div class="defense-pagination" aria-label="Defense schedule pages">
+    <span class="defense-pagination-summary">Showing @defenseShowingFrom-@defenseShowingTo of @Model.DefenseTotalCount defenses</span>
+    <div class="defense-pagination-controls">
+        @if (Model.DefensePage > 1)
+        {
+            <a class="defense-page-link" href="@Url.Action("defenseschedule", "DefenseSchedule", new { area = "CapstoneCoordinator", page = Model.DefensePage - 1 })">Previous</a>
+        }
+        @for (int pageNumber = defenseFirstPage; pageNumber <= defenseLastPage; pageNumber++)
+        {
+            bool isCurrentPage = pageNumber == Model.DefensePage;
+            <a class="defense-page-link @(isCurrentPage ? "active" : "")" href="@Url.Action("defenseschedule", "DefenseSchedule", new { area = "CapstoneCoordinator", page = pageNumber })" aria-current="@(isCurrentPage ? "page" : "")">@pageNumber</a>
+        }
+        @if (Model.DefensePage < Model.DefensePageCount)
+        {
+            <a class="defense-page-link" href="@Url.Action("defenseschedule", "DefenseSchedule", new { area = "CapstoneCoordinator", page = Model.DefensePage + 1 })">Next</a>
+        }
+    </div>
 </div>
 
 <!-- ==========================================================

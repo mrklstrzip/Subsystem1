@@ -351,7 +351,7 @@ namespace Subsystem1.Areas.Dean.Models
         }
 
         // ---------------------------------------------------------------- defense schedule page
-        public static DefenseScheduleViewModel Defenses(string search, string program, string status, string adviser)
+        public static DefenseScheduleViewModel Defenses(string search, string program, string status, string adviser, int page = 1, int pageSize = 8)
         {
             DateTime now = NowManila();
             var all = LoadAll().Where(s => s.Approved && s.Day.HasValue && s.Start.HasValue && s.End.HasValue)
@@ -375,11 +375,19 @@ namespace Subsystem1.Areas.Dean.Models
             if (!string.IsNullOrEmpty(status) && status != "All") q = q.Where(x => x.Status == status);
             if (!string.IsNullOrEmpty(adviser) && adviser != "All") q = q.Where(x => x.Adviser == adviser);
 
+            List<DefenseScheduleItem> filtered = q.ToList();
+            int safePageSize = Math.Max(1, pageSize);
+            int total = filtered.Count;
+            int pageCount = total == 0 ? 1 : (int)Math.Ceiling(total / (double)safePageSize);
+            int currentPage = Math.Max(1, Math.Min(page, pageCount));
+
             return new DefenseScheduleViewModel
             {
-                Items = q.ToList(), Search = search, Program = program ?? "All", Status = status ?? "All", Adviser = adviser ?? "All",
+                Items = filtered.Skip((currentPage - 1) * safePageSize).Take(safePageSize).ToList(),
+                Search = search, Program = program ?? "All", Status = status ?? "All", Adviser = adviser ?? "All",
                 Programs = all.Select(x => x.Program).Where(x => x != "").Distinct().OrderBy(x => x).ToList(),
-                Advisers = all.Select(x => x.Adviser).Where(x => x != "").Distinct().OrderBy(x => x).ToList()
+                Advisers = all.Select(x => x.Adviser).Where(x => x != "").Distinct().OrderBy(x => x).ToList(),
+                Page = currentPage, PageSize = safePageSize, Total = total
             };
         }
     }

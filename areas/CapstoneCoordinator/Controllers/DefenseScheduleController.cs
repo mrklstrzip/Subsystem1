@@ -5,9 +5,11 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
 {
     public class DefenseScheduleController : CoordinatorControllerBase
     {
-        public ActionResult defenseschedule()
+        public ActionResult defenseschedule(int page = 1)
         {
-            return View(CoordinatorData.Load(false));
+            CoordinatorData data = CoordinatorData.Load(false);
+            data.SetDefensePage(page, 8);
+            return View(data);
         }
     }
 }

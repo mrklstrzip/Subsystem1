@@ -1,11 +1,21 @@
 @using Subsystem1.Areas.CapstoneCoordinator.Models
+@using System.Collections.Generic
 @model IList<ClearedSubmission>
 @{
     ViewBag.Title = "Completed Manuscripts";
+    bool showArchived = ViewBag.ShowArchived != null && (bool)ViewBag.ShowArchived;
+    int archivedCount = ViewBag.ArchivedCount == null ? 0 : (int)ViewBag.ArchivedCount;
+    string query = ViewBag.Query as string ?? "";
+    string selectedProgram = ViewBag.Program as string ?? "";
+    string selectedStatus = ViewBag.Status as string ?? "";
+    string selectedAdviser = ViewBag.Adviser as string ?? "";
+    var programs = ViewBag.Programs as IList<string> ?? new List<string>();
+    var statuses = ViewBag.Statuses as IList<string> ?? new List<string>();
+    var advisers = ViewBag.Advisers as IList<string> ?? new List<string>();
 }
 
 <link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=2.4" rel="stylesheet" type="text/css" />
-<link href="@Url.Content("~/Content/css/capstonecoordinator/clearedsubmissions.css")?v=2.1" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/clearedsubmissions.css")?v=2.3" rel="stylesheet" type="text/css" />
 
 <div class="dashboard-header">
     <div class="header-text">
@@ -14,6 +24,28 @@
     </div>
     <div class="header-bg-icon"><i class="fa fa-circle-check"></i></div>
 </div>
+
+<form method="get" class="completed-manuscripts-filter-bar">
+    <input type="search" name="q" value="@query" placeholder="Search by title, author, adviser or keyword" aria-label="Search manuscripts" />
+    <select name="program" aria-label="Program" onchange="this.form.submit()">
+        <option value="">All Programs</option>
+        @foreach (var value in programs) { <option value="@value" @(String.Equals(selectedProgram, value, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@value</option> }
+    </select>
+    <select name="status" aria-label="Status" onchange="this.form.submit()">
+        <option value="">All Statuses</option>
+        @foreach (var value in statuses) { <option value="@value" @(String.Equals(selectedStatus, value, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@value</option> }
+    </select>
+    <select name="adviser" aria-label="Adviser" onchange="this.form.submit()">
+        <option value="">All Advisers</option>
+        @foreach (var value in advisers) { <option value="@value" @(String.Equals(selectedAdviser, value, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@value</option> }
+    </select>
+    <button type="submit" class="completed-filter-search">Search</button>
+    <a class="completed-archive-toggle" href="@Url.Action("Index", "ClearedSubmissions", new { area = "CapstoneCoordinator", q = query, program = selectedProgram, status = showArchived && String.Equals(selectedStatus, "Archived", StringComparison.OrdinalIgnoreCase) ? "" : selectedStatus, adviser = selectedAdviser, showArchived = !showArchived })">
+        <i class="fa fa-box-archive" aria-hidden="true"></i>
+        @(showArchived ? "Hide Archived" : "Show Archived")
+        @if (archivedCount > 0) { <span class="completed-archive-count">@archivedCount</span> }
+    </a>
+</form>
 
 <div class="schedule-management-card completed-manuscripts-card">
     <div class="completed-manuscripts-table-wrap">
@@ -35,7 +67,7 @@
                 {
                     foreach (var item in Model)
                     {
-                        var repositoryStatus = item.IsHistorical ? "Historical" : "Filed";
+                        var repositoryStatus = item.IsArchived ? "Archived" : item.IsHistorical ? "Historical" : "Filed";
                         <tr>
                             <td data-label="Manuscript / group">
                                 <div class="manuscript-title-text">@item.Title</div>
