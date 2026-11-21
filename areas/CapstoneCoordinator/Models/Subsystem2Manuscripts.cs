@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.IO;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
 using Subsystem1.Data;
 using static Subsystem1.Areas.Student.Models.StudentDb;
 
@@ -17,6 +21,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
     /// </summary>
     internal static class Subsystem2Manuscripts
     {
+        private const int MaxManuscriptBytes = 25 * 1024 * 1024;
+
         private sealed class Record
         {
             public BsonDocument Submission;
@@ -87,7 +93,13 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     ? submitted.ToUniversalTime()
                     : DateTime.MinValue;
 
-                BsonValue versionValue = Value(manuscript, "VersionNumber");
+                BsonValue versionValue = Value(submission, "versions");
+                if (versionValue == null || versionValue.IsBsonNull) versionValue = Value(submission, "Revisions");
+                if (versionValue == null || versionValue.IsBsonNull) versionValue = Value(submission, "revisions");
+                if (versionValue == null || versionValue.IsBsonNull) versionValue = Value(manuscript, "versions");
+                if (versionValue == null || versionValue.IsBsonNull) versionValue = Value(manuscript, "Revisions");
+                if (versionValue == null || versionValue.IsBsonNull) versionValue = Value(manuscript, "revisions");
+                if (versionValue == null || versionValue.IsBsonNull) versionValue = Value(manuscript, "VersionNumber");
                 if (versionValue == null || versionValue.IsBsonNull) versionValue = Value(submission, "VersionNumber");
                 if (versionValue == null || versionValue.IsBsonNull) versionValue = Value(submission, "versions");
                 int version;
@@ -118,7 +130,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         private static IEnumerable<Record> SchedulableRecords(bool includeRevisionCase = true)
         {
             return ReadRecords(includeRevisionCase)
-                .GroupBy(VersionGroupKey, StringComparer.OrdinalIgnoreCase)
+                .GroupBy(record => VersionGroupKey(record) + "|revision:" + record.Version.ToString(CultureInfo.InvariantCulture), StringComparer.OrdinalIgnoreCase)
                 .Select(group => group.OrderByDescending(record => record.Version)
                     .ThenByDescending(record => record.SubmittedAt)
                     .First())
@@ -170,7 +182,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
         public static List<BsonDocument> SchedulingTitles()
         {
-            return SchedulableRecords(true).Select(ToCoordinatorTitle).ToList();
+            return SchedulableRecords(false).Select(ToCoordinatorTitle).ToList();
         }
 
         public static HashSet<string> SubmissionIds()
@@ -178,6 +190,37 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return new HashSet<string>(
                 SchedulableRecords(false).Select(r => DocId(r.Submission)),
                 StringComparer.OrdinalIgnoreCase);
+        }
+
+        public static Dictionary<string, int> RevisionNumbers(IEnumerable<string> submissionIds)
+        {
+            var wanted = new HashSet<string>(submissionIds ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+            var revisions = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            if (wanted.Count == 0) return revisions;
+            foreach (Record record in ReadRecords(false))
+            {
+                string id = DocId(record.Submission);
+                if (wanted.Contains(id)) revisions[id] = record.Version;
+            }
+            return revisions;
+        }
+
+        /// <summary>Mirrors coordinator schedule status onto its matching Subsystem 2 submission.</summary>
+        public static void MarkSubmission(string submissionId, string scheduleId, string coStatus, string problem)
+        {
+            ObjectId? oid = ParseId(submissionId);
+            if (!oid.HasValue || String.IsNullOrWhiteSpace(coStatus)) return;
+
+            bool underReview = coStatus == "under-review" || coStatus == "rejected";
+            var u = Builders<BsonDocument>.Update;
+            Collection().UpdateOne(
+                Builders<BsonDocument>.Filter.Eq("_id", oid.Value),
+                u.Combine(
+                    u.Set("coordinatorStatus", coStatus),
+                    u.Set("underReview", underReview),
+                    u.Set("underReviewReason", underReview ? (problem ?? "") : ""),
+                    u.Set("scheduleId", scheduleId ?? ""),
+                    u.Set("coordinatorStatusAt", DateTime.UtcNow)));
         }
 
         public static BsonDocument ForVersion(string subsystem2Id)
@@ -189,12 +232,160 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return record == null ? null : ToCoordinatorTitle(record);
         }
 
-        public static BsonDocument ForScheduleSubmission(string submissionId)
+        /// <summary>Extracts terms from the PDF's labeled keyword section, not from submission metadata.</summary>
+        public static List<string> ExtractPdfKeywords(BsonDocument title)
+        {
+            string url = Str(title, "manuscriptUrl");
+            Uri source;
+            if (!Uri.TryCreate(url, UriKind.Absolute, out source) ||
+                source.Scheme != Uri.UriSchemeHttps ||
+                !(source.Host.Equals("api.cloudinary.com", StringComparison.OrdinalIgnoreCase) ||
+                  source.Host.Equals("res.cloudinary.com", StringComparison.OrdinalIgnoreCase)))
+                return new List<string>();
+
+            try
+            {
+                var request = (HttpWebRequest)WebRequest.Create(source);
+                request.Method = "GET";
+                request.Timeout = 7000;
+                request.ReadWriteTimeout = 7000;
+                request.UserAgent = "Subsystem1-PdfKeywordExtractor";
+
+                byte[] bytes;
+                using (var response = (HttpWebResponse)request.GetResponse())
+                using (Stream input = response.GetResponseStream())
+                using (var output = new MemoryStream())
+                {
+                    if (response.ContentLength > MaxManuscriptBytes) return new List<string>();
+                    byte[] buffer = new byte[81920];
+                    int read;
+                    while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        if (output.Length + read > MaxManuscriptBytes) return new List<string>();
+                        output.Write(buffer, 0, read);
+                    }
+                    bytes = output.ToArray();
+                }
+
+                int header = Array.FindIndex(bytes, 0, Math.Min(bytes.Length, 1024), value => value == 0x25);
+                if (header < 0 || bytes.Length - header < 5 || bytes[header + 1] != 0x50 ||
+                    bytes[header + 2] != 0x44 || bytes[header + 3] != 0x46 || bytes[header + 4] != 0x2d)
+                    return new List<string>();
+
+                using (PdfDocument document = PdfDocument.Open(bytes))
+                {
+                    foreach (var page in document.GetPages().Take(8))
+                    {
+                        List<string> pageKeywords = ExtractPageKeywords(page);
+                        if (pageKeywords.Count > 0) return pageKeywords;
+                    }
+                }
+                return new List<string>();
+            }
+            catch
+            {
+                // Extraction is best-effort. A malformed, image-only, inaccessible, or
+                // encrypted PDF must not prevent the coordinator from generating a schedule.
+                return new List<string>();
+            }
+        }
+
+        private static List<string> ExtractPageKeywords(Page page)
+        {
+            List<Word> words = page.GetWords().ToList();
+            var rows = new List<List<Word>>();
+            foreach (Word word in words.OrderByDescending(w => w.BoundingBox.Top).ThenBy(w => w.BoundingBox.Left))
+            {
+                List<Word> row = rows.FirstOrDefault(r => Math.Abs(r[0].BoundingBox.Top - word.BoundingBox.Top) <= 3.0);
+                if (row == null) { row = new List<Word>(); rows.Add(row); }
+                row.Add(word);
+            }
+            rows = rows.OrderByDescending(r => r.Average(w => w.BoundingBox.Top)).ToList();
+            foreach (List<Word> row in rows) row.Sort((a, b) => a.BoundingBox.Left.CompareTo(b.BoundingBox.Left));
+
+            int labelRow = -1;
+            int labelWord = -1;
+            for (int i = 0; i < rows.Count; i++)
+            {
+                for (int j = 0; j < rows[i].Count; j++)
+                {
+                    string word = Regex.Replace(rows[i][j].Text ?? "", @"[^A-Za-z]", "");
+                    if (word.Equals("keyword", StringComparison.OrdinalIgnoreCase) || word.Equals("keywords", StringComparison.OrdinalIgnoreCase))
+                    { labelRow = i; labelWord = j; break; }
+                }
+                if (labelRow >= 0) break;
+            }
+            if (labelRow < 0) return new List<string>();
+
+            double leftColumnLimit = page.Width * 0.58;
+            var terms = new List<string>();
+            for (int i = labelRow; i < rows.Count && terms.Count < 12; i++)
+            {
+                List<Word> row = rows[i];
+                if (i > labelRow && row.Average(w => w.BoundingBox.Top) > rows[labelRow].Average(w => w.BoundingBox.Top)) continue;
+                string line = String.Join(" ", row
+                    .Where((w, index) => (i != labelRow || index > labelWord) && w.BoundingBox.Left < leftColumnLimit)
+                    .Select(w => w.Text));
+                if (i == labelRow)
+                    line = String.Join(" ", row.Skip(labelWord + 1).Select(w => w.Text));
+
+                line = Regex.Replace(line, @"^[\s:：\-–—]+", "").Trim();
+                if (line == "") continue;
+                if (Regex.IsMatch(line, @"(?i)^\s*(?:abstract|introduction|background|corresponding\s+author|adviser|advisors?|received|submitted|revised|accepted|published)\b")) break;
+
+                string[] parts = Regex.Split(line, @"[,;|•·]+")
+                    .Select(value => Regex.Replace(value, @"^[\s:：\-–—•·]+|[\s.\-–—•·]+$", "").Trim())
+                    .Where(value => value.Length >= 2 && value.Length <= 80)
+                    .Where(value => value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length <= 8)
+                    .ToArray();
+                if (parts.Length == 0) break;
+                terms.AddRange(parts);
+                if (terms.Count >= 12) break;
+            }
+
+            return terms.Distinct(StringComparer.OrdinalIgnoreCase).Take(12).ToList();
+        }
+
+        private static List<string> ParsePdfKeywordSection(string text)
+        {
+            if (String.IsNullOrWhiteSpace(text)) return new List<string>();
+
+            Match label = Regex.Match(text,
+                @"(?im)\b(?:keywords?|key\s+words?|index\s+terms?)(?:\s*(?:&|and)\s*significant\s+terms?)?\s*(?::|[\-–—]\s*|\r?\n)");
+            if (!label.Success) return new List<string>();
+
+            string termText = text.Substring(label.Index + label.Length);
+            Match nextSection = Regex.Match(termText,
+                @"(?im)(?:^|\s)(?:[IVX]{1,5}\.\s*)?(?:INTRODUCTION|BACKGROUND|METHODOLOGY|METHODS|MATERIALS\s+AND\s+METHODS|CHAPTER\s+1|RELATED\s+LITERATURE|REVIEW\s+OF\s+RELATED\s+LITERATURE|OBJECTIVES|PROBLEM\s+STATEMENT)\b");
+            if (nextSection.Success) termText = termText.Substring(0, nextSection.Index);
+            if (termText.Length > 500) termText = termText.Substring(0, 500);
+            termText = Regex.Replace(termText, @"(?im)^\s*(?:ABSTRACT|SIGNIFICANT\s+TERMS?)\s*[:\-–—]?\s*", "");
+
+            string[] pieces = Regex.Split(termText, @"[,;|•·\r\n]+")
+                .Select(value => Regex.Replace(value, @"^[\s\-–—•·]+|[\s.\-–—•·]+$", "").Trim())
+                .Where(value => value.Length >= 2 && value.Length <= 100)
+                .Where(value => !Regex.IsMatch(value, @"(?i)^(?:abstract|introduction|background|keywords?|significant\s+terms?)$"))
+                .ToArray();
+
+            // Some exported thesis PDFs put one keyword on each line; others separate
+            // them with commas on one line. If line breaks did not split the terms,
+            // split the remaining phrase into its non-empty lines as a fallback.
+            if (pieces.Length == 1 && termText.IndexOfAny(new[] { '\r', '\n' }) >= 0)
+                pieces = Regex.Split(termText, @"\r?\n+")
+                    .Select(value => Regex.Replace(value, @"^[\s\-–—•·]+|[\s.\-–—•·]+$", "").Trim())
+                    .Where(value => value.Length >= 2 && value.Length <= 100)
+                    .ToArray();
+
+            return pieces.Distinct(StringComparer.OrdinalIgnoreCase).Take(20).ToList();
+        }
+
+        public static BsonDocument ForScheduleSubmission(string submissionId, bool includeRevisionCase = true)
         {
             if (String.IsNullOrWhiteSpace(submissionId)) return null;
-            Record record = ReadRecords(true).FirstOrDefault(r =>
+            Record record = ReadRecords(false).FirstOrDefault(r =>
                 String.Equals(DocId(r.Submission), submissionId, StringComparison.OrdinalIgnoreCase) ||
                 String.Equals(r.Subsystem2Id, submissionId, StringComparison.OrdinalIgnoreCase));
+            if (record != null && includeRevisionCase) record.RevisionCase = FindRevisionCase(record.Subsystem2Id);
             return record == null ? null : ToCoordinatorTitle(record);
         }
 
@@ -203,7 +394,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             string managerId,
             string title)
         {
-            List<Record> records = ReadRecords(true);
+            List<Record> records = ReadRecords(false);
             Record source = records.FirstOrDefault(r => DocId(r.Submission) == titleId ||
                 String.Equals(r.Subsystem2Id, titleId, StringComparison.OrdinalIgnoreCase));
 
@@ -212,6 +403,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             {
                 // A schedule's titleId points at the exact submission/version. Do not replace
                 // its manuscript with a later version from the same student or group.
+                source.RevisionCase = FindRevisionCase(source.Subsystem2Id);
                 return ToCoordinatorTitle(source);
             }
             else if (!string.IsNullOrWhiteSpace(managerId))
@@ -238,6 +430,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 .ThenByDescending(r => r.SubmittedAt)
                 .FirstOrDefault();
 
+            if (latest != null) latest.RevisionCase = FindRevisionCase(latest.Subsystem2Id);
             return latest == null ? null : ToCoordinatorTitle(latest);
         }
 
@@ -355,6 +548,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 { "fileName", fileName },
                 { "filePath", filePath },
                 { "versionNumber", record.Version },
+                { "revisions", record.Version },
                 { "cloudinaryPublicId", publicId },
                 { "cloudinaryResourceType", resourceType },
                 { "submittedAt", new BsonDateTime(record.SubmittedAt) }

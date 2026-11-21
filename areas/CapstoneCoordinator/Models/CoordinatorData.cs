@@ -17,6 +17,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public string Adviser { get; set; }
         public string Program { get; set; }
         public string Section { get; set; }
+        public string Type { get; set; }
+        public string SchoolYear { get; set; }
         public DateTime? Date { get; set; }
         public string Status { get; set; }
         public bool Declined { get; set; }
@@ -88,6 +90,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public string Title { get; set; }
         public string Program { get; set; }
         public string Section { get; set; }
+        public string SchoolYear { get; set; }
         public string Room { get; set; }
         public string Type { get; set; }
         public string Description { get; set; }
@@ -134,6 +137,11 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public List<ActivityRow> Recent { get; private set; }
         public List<string> FacultyNames { get; private set; }
         public List<string> RoomNames { get; private set; }
+        public Dictionary<string, string> RoomBuildings { get; private set; }
+        public int SchedulePage { get; private set; }
+        public int SchedulePageSize { get; private set; }
+        public int ScheduleTotalCount { get; private set; }
+        public int SchedulePageCount { get { return ScheduleTotalCount == 0 ? 1 : (int)Math.Ceiling(ScheduleTotalCount / (double)SchedulePageSize); } }
 
         public CoordinatorData()
         {
@@ -143,6 +151,19 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             Recent = new List<ActivityRow>();
             FacultyNames = new List<string>();
             RoomNames = new List<string>();
+            RoomBuildings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            SchedulePage = 1;
+            SchedulePageSize = 8;
+            ScheduleTotalCount = 0;
+        }
+
+        public void SetSchedulePage(int requestedPage, int pageSize = 8)
+        {
+            SchedulePageSize = Math.Max(1, pageSize);
+            ScheduleTotalCount = Schedules.Count;
+            int pageCount = SchedulePageCount;
+            SchedulePage = Math.Max(1, Math.Min(requestedPage, pageCount));
+            Schedules = Schedules.Skip((SchedulePage - 1) * SchedulePageSize).Take(SchedulePageSize).ToList();
         }
 
         public int ToSubmit { get { return Schedules.Count(s => s.Status == "to-submit"); } }
@@ -174,6 +195,10 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     .Where(d => subsystem2Ids.Contains(Str(d, "titleId")))
                     .ToList();
             }
+
+            Dictionary<string, int> revisionNumbers = onlySubsystem2
+                ? Subsystem2Manuscripts.RevisionNumbers(docs.Select(d => Str(d, "titleId")))
+                : new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
             // Resolve legacy schedule records that do not contain their own title.
             var titleOids = docs
@@ -224,6 +249,14 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     : (t == null ? "" : Str(t, "adviser"));
 
                 DateTime? day = CoDb.ParseDay(Str(d, "date"));
+                int revision;
+                if (!int.TryParse(AnyStr(d, "revisionNumber"), NumberStyles.Integer, CultureInfo.InvariantCulture, out revision) || revision < 1)
+                {
+                    if (!revisionNumbers.TryGetValue(tid, out revision))
+                    {
+                        if (!int.TryParse(AnyStr(t, "versionNumber"), NumberStyles.Integer, CultureInfo.InvariantCulture, out revision)) revision = 1;
+                    }
+                }
 
                 if (status != null)
                 {
@@ -235,6 +268,10 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                         Adviser = adviser,
                         Program = program,
                         Section = section,
+                        Type = revision == 2 ? "Re-defense" : "1st Defense",
+                        SchoolYear = Str(d, "schoolYear") != "" ? Str(d, "schoolYear")
+                            : Str(d, "academicYear") != "" ? Str(d, "academicYear")
+                            : day.HasValue ? day.Value.Year.ToString(CultureInfo.InvariantCulture) : "",
                         Date = day,
                         Status = status,
                         Declined = CoDb.StatusOf(d) == "declined" ||
@@ -301,6 +338,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     Title = sr.Title,
                     Program = sr.Program,
                     Section = sr.Section,
+                    SchoolYear = sr.SchoolYear,
                     Room = roomOf.ContainsKey(sid) && roomOf[sid] != "" ? roomOf[sid] : "-",
                     Type = Str(c, "type"),
                     Description = Str(c, "description"),
@@ -358,6 +396,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             data.FacultyNames.Sort(StringComparer.OrdinalIgnoreCase);
 
             var ctx = PlanContext.Load();
+            data.RoomBuildings = ctx.Rooms
+                .GroupBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().Building ?? "", StringComparer.OrdinalIgnoreCase);
             data.RoomNames = ctx.Rooms
                 .Select(r => r.Name)
                 .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
@@ -371,6 +412,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         // ------------------------------------------------------------------
         public static object Detail(string id)
         {
+            ScheduleGenerator.RefreshPdfPanelMatching(id);
             ObjectId? oid = ParseId(id);
             BsonDocument d = oid.HasValue
                 ? Schedules().Find(Builders<BsonDocument>.Filter.Eq("_id", oid.Value)).FirstOrDefault()
@@ -458,7 +500,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 adviser = Str(d, "adviser") != "" ? Str(d, "adviser") : (t == null ? "" : Str(t, "adviser")),
                 dateSubmitted = submitted,
                 problem = problem,
-                keywords = string.Join(", ", CoDb.Keywords(t)),
+                keywords = string.Join(", ", CoDb.Keywords(d).Count > 0 ? CoDb.Keywords(d) : CoDb.Keywords(t)),
+                keywordSource = Str(d, "keywordSource") != "" ? Str(d, "keywordSource") : "submission-metadata",
                 manuscriptUrl = t == null ? "" : Str(t, "manuscriptUrl"),
                 manuscriptFileName = t == null ? "" : Str(t, "fileName"),
                 revisionCase = t != null && t.Contains("revisionCase") && t["revisionCase"].IsBsonDocument

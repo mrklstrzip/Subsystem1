@@ -199,15 +199,20 @@ body {
 }
 
 .manuscript-col {
-    width: 30%;
+    width: 27%;
 }
 
 .author-col {
-    width: 20%;
+    width: 17%;
 }
 
 .adviser-col {
-    width: 20%;
+    width: 17%;
+}
+
+.type-col {
+    width: 13%;
+    min-width: 132px;
 }
 
 .date-col {
@@ -215,11 +220,11 @@ body {
 }
 
 .status-col {
-    width: 10%;
+    width: 8%;
 }
 
 .action-col {
-    width: 10%;
+    width: 8%;
     text-align: right;
     padding-right: 20px;
 }
@@ -272,9 +277,33 @@ body {
         border-color: #fecdd3;
     }
 
-.author-cell, .adviser-cell, .date-cell {
+.author-cell, .adviser-cell, .type-cell, .date-cell {
     color: #475569;
     font-weight: 500;
+}
+
+.type-cell { white-space: nowrap; }
+
+.defense-type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 26px;
+    padding: 4px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.defense-type-badge.redefense {
+    border-color: #ddd6fe;
+    background: #f5f3ff;
+    color: #5b21b6;
 }
 
 /* ==========================================================================
@@ -879,6 +908,50 @@ body.modal-open {
     padding: 36px 20px;
     color: #9092AD;
     font-weight: 500;
+}
+
+.schedule-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 14px 0 24px;
+    padding: 12px 16px;
+    color: #596b84;
+    font-size: 12px;
+}
+
+.schedule-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.schedule-page-link {
+    display: inline-flex;
+    min-width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border: 1px solid #d5dceb;
+    border-radius: 8px;
+    background: #fff;
+    color: #223249;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.schedule-page-link:hover,
+.schedule-page-link.active {
+    border-color: #223249;
+    background: #223249;
+    color: #fff;
+}
+
+@media (max-width: 640px) {
+    .schedule-pagination { align-items: flex-start; flex-direction: column; }
+    .schedule-pagination-controls { flex-wrap: wrap; }
 }
 
 

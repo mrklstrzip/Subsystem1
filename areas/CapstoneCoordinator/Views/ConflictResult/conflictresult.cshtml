@@ -5,7 +5,7 @@
     ViewBag.Title = "Under Review";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/conflictresult.css")?v=2.2" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/conflictresult.css")?v=2.4" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -56,7 +56,7 @@
         <tbody>
             @foreach (var c in Model.Conflicts)
             {
-                <tr class="clickable-row" tabindex="0" data-id="@c.ScheduleId"
+                <tr class="clickable-row" tabindex="0" data-id="@c.ScheduleId" data-sy="@c.SchoolYear"
                     data-status="@(c.Resolved ? "resolved" : "in-progress")" data-steps-done="@c.StepsDone"
                     data-type="@c.Type" data-description="@c.Description"
                     data-steps="@(string.Join("\n", c.Steps.Select(s => s.Key + "\t" + s.Value)))">
@@ -64,7 +64,7 @@
                         <div class="manuscript-title-text">@c.Title</div>
                         <span class="program-badge @c.BadgeClass">@c.Badge</span>
                     </td>
-                    <td class="room-cell">@c.Room</td>
+                    <td class="room-cell" data-building="@c.Building">@c.Room</td>
                     <td class="conflict-cell">@c.Type</td>
                     <td class="desc-cell">@c.Description</td>
                     <td class="date-cell">@c.DetectedText</td>
@@ -184,16 +184,27 @@
 
         <!-- Body: Abstract + Panelists -->
         <div class="modal-body-grid">
-            <div class="modal-panel abstract-panel">
-                <h3 class="panel-title">Abstract</h3>
-                <p class="panel-text" id="mAbstract"></p>
-
-                <h3 class="panel-title">Keywords</h3>
-                <p class="panel-text" id="mKeywords"></p>
-
-                <span class="panel-footnote" id="mSubmittedNote"></span>
-            </div>
-
+            <div class="modal-panel abstract-panel">
+                <div class="manuscript-viewer-header">
+                    <h3 class="panel-title">Manuscript</h3>
+                    <a id="mManuscriptOpen" class="manuscript-open-link" target="_blank" rel="noopener" hidden>Open PDF</a>
+                </div>
+                <div class="pdf-viewer" id="mPdfViewer" aria-label="Manuscript PDF viewer">
+                    <div class="pdf-toolbar">
+                        <button type="button" id="pdfPrev" aria-label="Previous page">&lsaquo;</button>
+                        <span><span id="pdfPage">&mdash;</span> / <span id="pdfPages">&mdash;</span></span>
+                        <button type="button" id="pdfNext" aria-label="Next page">&rsaquo;</button>
+                        <button type="button" id="pdfZoomOut" aria-label="Zoom out">&minus;</button>
+                        <button type="button" id="pdfZoomIn" aria-label="Zoom in">+</button>
+                    </div>
+                    <div class="pdf-canvas-wrap" id="pdfCanvasWrap">
+                        <canvas id="pdfCanvas"></canvas>
+                        <p class="pdf-message" id="pdfMessage">No PDF manuscript is available for this submission.</p>
+                    </div>
+                </div>
+                <span class="panel-footnote" id="mSubmittedNote"></span>
+            </div>
+
             <div class="modal-panel panelists-panel">
                 <div class="panel-header-row">
                     <h3 class="panel-title no-margin">Assigned Panelists</h3>
@@ -215,6 +226,7 @@
                     <span>Expertise Match</span>
                 </div>
                 <div id="mPanelists"></div>
+                <p class="panel-footnote" id="mKeywordNote"></p>
 
                 <h3 class="panel-title schedule-title">Proposed Defense Schedule</h3>
                 <dl class="defense-schedule">
@@ -236,6 +248,12 @@
                             <span class="edit-val">
                                 <input type="date" class="edit-input" id="eDate" aria-label="Defense date">
                             </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>BUILDING</dt>
+                        <dd>
+                            <span id="mBuilding"></span>
                         </dd>
                     </div>
                     <div>
@@ -270,12 +288,13 @@
 <datalist id="roomList">
     @foreach (var n in Model.RoomNames)
     {
-        <option value="@n"></option>
+        <option value="@n" data-building="@(Model.RoomBuildings.ContainsKey(n) ? Model.RoomBuildings[n] : "")"></option>
     }
 </datalist>
 
 <script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.0"></script>
-<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.6"></script>
 <script>
     (function () {
         function $(id) { return document.getElementById(id); }
@@ -367,7 +386,7 @@
         resolveBtn.addEventListener("click", function () {
             var id = currentRow.getAttribute("data-id");
             closeReport();
-            CCSchedule.open(id);
+            CCSchedule.open(id, undefined, true);   // opens in edit mode: choose panelists / date / time / room, then Submit
         });
     })();
 </script>
