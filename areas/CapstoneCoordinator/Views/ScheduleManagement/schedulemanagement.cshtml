@@ -5,7 +5,7 @@
     ViewBag.Title = "Manuscript Management";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.9" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=4.4" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -28,11 +28,10 @@
     </div>
 
     <div class="filter-wrapper">
-        <!-- Program Filter Box -->
         <div class="custom-select-box">
-            <span class="filter-legend">Program</span>
+            <span class="filter-legend">Section</span>
             <div class="select-selected">
-                <i class="fa fa-graduation-cap"></i>
+                <i class="fa-solid fa-people-group"></i>
                 <span>All</span>
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
@@ -73,36 +72,55 @@
             <tr>
                 <th class="column-title manuscript-col">MANUSCRIPT</th>
                 <th class="column-title author-col">PROJECT MANAGER</th>
+                <th class="column-title section-col">SECTION</th>
                 <th class="column-title adviser-col">ADVISER</th>
                 <th class="column-title type-col">TYPE</th>
                 <th class="column-title date-col">DATE</th>
-                <th class="column-title status-col">STATUS</th>
+                <th class="column-title manuscript-status-col">MANUSCRIPT STATUS</th>
+                <th class="column-title dean-status-col">DEAN STATUS</th>
                 <th class="column-title action-col">ACTION</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var s in Model.Schedules)
             {
-                <tr data-id="@s.Id" data-sy="@s.SchoolYear">
-                    <td>
-                        <div class="manuscript-title-text">@(s.Status == "not-submitted" ? "\u2014" : s.Title)</div>
-                        <span class="program-badge @s.BadgeClass">@s.Badge</span>
-                    </td>
-                    <td class="author-cell">@s.Author</td>
+                <tr data-id="@s.Id" data-sy="@s.SchoolYear" data-program="@s.Program" data-section="@s.Section" data-manuscript-status="@(!String.IsNullOrWhiteSpace(s.Title) ? "Submitted" : "Not submitted")" data-dean-status="@s.StatusLabel">
+                    <td class="manuscript-title-cell">@s.Title</td>
+                    <td class="author-cell"><div class="manuscript-title-text">@s.Author</div></td>
+                    <td class="section-cell">@s.Section</td>
                     <td class="adviser-cell">@s.Adviser</td>
-                    <td class="type-cell"><span class="defense-type-badge @s.TypeClass">@s.Type</span></td>
-                    <td class="date-cell">@s.DateText</td>
-                    <td>
-                        <span class="status-badge @s.Status">@s.StatusLabel</span>
-                    </td>
-                    <td class="action-cell">
-                        @if (s.Status == "not-submitted")
+                    <td class="type-cell">
+                        @if (String.IsNullOrWhiteSpace(s.Type))
                         {
-                            <span class="no-action">&mdash;</span>
+                            <span class="status-empty">—</span>
                         }
                         else
                         {
-                            <button class="btn-view" data-id="@s.Id">View</button>
+                            <span class="defense-type-badge @s.TypeClass">@s.Type</span>
+                        }
+                    </td>
+                    <td class="date-cell">@s.DateText</td>
+                    <td>
+                        <span class="status-badge @(!String.IsNullOrWhiteSpace(s.Title) ? "submitted" : "not-submitted")">@(!String.IsNullOrWhiteSpace(s.Title) ? "Submitted" : "Not submitted")</span>
+                    </td>
+                    <td>
+                        @if (s.Status == "")
+                        {
+                            <span class="status-empty">—</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge @s.Status">@s.StatusLabel</span>
+                        }
+                    </td>
+                    <td class="action-cell">
+                        @if (!String.IsNullOrWhiteSpace(s.Title))
+                        {
+                            <button class="btn-view" type="button" data-id="@s.Id" data-has-schedule="@(!s.Id.StartsWith("roster-", StringComparison.OrdinalIgnoreCase) ? "true" : "false")" data-manuscript-id="@(s.Id.StartsWith("roster-", StringComparison.OrdinalIgnoreCase) ? s.Id.Substring(7) : "")">View</button>
+                        }
+                        else
+                        {
+                            <span class="no-action">&mdash;</span>
                         }
                     </td>
                 </tr>
@@ -111,37 +129,15 @@
     </table>
 </div>
 
-@{
-    int showingFrom = Model.ScheduleTotalCount == 0 ? 0 : (Model.SchedulePage - 1) * Model.SchedulePageSize + 1;
-    int showingTo = Math.Min(Model.SchedulePage * Model.SchedulePageSize, Model.ScheduleTotalCount);
-    int firstPageLink = Math.Max(1, Model.SchedulePage - 2);
-    int lastPageLink = Math.Min(Model.SchedulePageCount, Model.SchedulePage + 2);
-}
-<div class="schedule-pagination" aria-label="Manuscript schedule pages">
-    <span class="schedule-pagination-summary">Showing @showingFrom-@showingTo of @Model.ScheduleTotalCount titles</span>
-    <div class="schedule-pagination-controls">
-        @if (Model.SchedulePage > 1)
-        {
-            <a class="schedule-page-link" href="@Url.Action("schedulemanagement", "ScheduleManagement", new { page = Model.SchedulePage - 1 })">Previous</a>
-        }
-        @for (int pageNumber = firstPageLink; pageNumber <= lastPageLink; pageNumber++)
-        {
-            bool isCurrentPage = pageNumber == Model.SchedulePage;
-            string pageClass = isCurrentPage ? "active" : "";
-            string currentPageAttr = isCurrentPage ? "page" : "";
-            <a class="schedule-page-link @pageClass" href="@Url.Action("schedulemanagement", "ScheduleManagement", new { page = pageNumber })" aria-current="@currentPageAttr">@pageNumber</a>
-        }
-        @if (Model.SchedulePage < Model.SchedulePageCount)
-        {
-            <a class="schedule-page-link" href="@Url.Action("schedulemanagement", "ScheduleManagement", new { page = Model.SchedulePage + 1 })">Next</a>
-        }
-    </div>
+<div class="schedule-pagination" id="schedulePagination" aria-label="Manuscript schedule pages">
+    <span class="schedule-pagination-summary" id="schedulePaginationSummary" aria-live="polite"></span>
+    <div class="schedule-pagination-controls" id="schedulePaginationControls"></div>
 </div>
 
 
 @Html.Partial("_ScheduleModal", Model)
 
-<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.0"></script>
+<script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.5"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.6"></script>
 <script>
@@ -149,7 +145,15 @@
         // each "View" button opens the pop-up of its schedule (the data comes from the database)
         document.getElementById("scheduleTable").addEventListener("click", function (e) {
             var btn = e.target.closest ? e.target.closest(".btn-view") : null;
-            if (btn) CCSchedule.open(btn.getAttribute("data-id"));
+            if (!btn) return;
+            if (btn.getAttribute("data-has-schedule") === "true") {
+                CCSchedule.open(btn.getAttribute("data-id"));
+                return;
+            }
+            var manuscriptId = btn.getAttribute("data-manuscript-id");
+            if (manuscriptId) {
+                window.open("@Url.Action("manuscript", "CoordinatorApi", new { area = "CapstoneCoordinator" })?id=" + encodeURIComponent(manuscriptId), "_blank", "noopener");
+            }
         });
 
 

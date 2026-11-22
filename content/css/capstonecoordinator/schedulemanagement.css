@@ -174,13 +174,14 @@ body {
     border-radius: 14px;
     border: 1px solid #e2e8f0;
     padding: 0;
-    overflow: hidden;
+    overflow-x: auto;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     margin-bottom: 30px;
 }
 
 .schedule-table {
     width: 100%;
+    min-width: 1280px;
     border-collapse: collapse;
 }
 
@@ -198,33 +199,17 @@ body {
     text-transform: uppercase;
 }
 
-.manuscript-col {
-    width: 27%;
-}
-
-.author-col {
-    width: 17%;
-}
-
-.adviser-col {
-    width: 17%;
-}
-
-.type-col {
-    width: 13%;
-    min-width: 132px;
-}
-
-.date-col {
-    width: 10%;
-}
-
-.status-col {
-    width: 8%;
-}
+.author-col { width: 17%; }
+.section-col { width: 10%; }
+.adviser-col { width: 13%; }
+.manuscript-col { width: 22%; }
+.type-col { width: 9%; min-width: 112px; }
+.date-col { width: 7%; }
+.manuscript-status-col { width: 9%; }
+.dean-status-col { width: 10%; }
 
 .action-col {
-    width: 8%;
+    width: 7%;
     text-align: right;
     padding-right: 20px;
 }
@@ -245,6 +230,28 @@ body {
     font-weight: 600;
     color: #1a202c;
     margin-bottom: 4px;
+}
+
+.student-group-label {
+    display: inline-block;
+    margin-top: 3px;
+    padding: 2px 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 10px;
+}
+
+.manuscript-title-cell {
+    max-width: 340px;
+    overflow-wrap: anywhere;
+}
+
+.status-badge.not-submitted {
+    border: 1px solid #cbd5e1;
+    background: #f1f5f9;
+    color: #475569;
 }
 
 /* Program Badges */
@@ -317,6 +324,11 @@ body {
     font-weight: 600;
     text-align: center;
     white-space: nowrap;
+}
+
+.status-empty {
+    color: #64748b;
+    font-weight: 600;
 }
 
     /* 1. To Submit */
@@ -939,7 +951,15 @@ body.modal-open {
     background: #fff;
     color: #223249;
     font-weight: 600;
+    font-family: inherit;
+    font-size: inherit;
     text-decoration: none;
+    cursor: pointer;
+}
+
+.schedule-page-link:disabled {
+    opacity: .5;
+    cursor: not-allowed;
 }
 
 .schedule-page-link:hover,

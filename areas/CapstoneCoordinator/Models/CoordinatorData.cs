@@ -14,6 +14,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public string Id { get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
+        public string ProjectManagerId { get; set; }
+        public string ManuscriptRecordId { get; set; }
         public string Adviser { get; set; }
         public string Program { get; set; }
         public string Section { get; set; }
@@ -24,6 +26,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public DateTime? Date { get; set; }
         public string Status { get; set; }
         public bool Declined { get; set; }
+        public bool HasSchedule { get; set; }
+        public bool HasManuscript { get; set; }
 
         public string Badge { get { return CoDb.SectionLabel(Section, Program); } }
         public string BadgeClass { get { return CoDb.BadgeClass(Program); } }
@@ -32,8 +36,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             get
             {
                 return Status == "under-review" ? "Under Review"
-                    : Status == "submitted" ? "Submitted"
-                    : "To Submit";
+                    : Status == "submitted" ? "Submitted to Dean"
+                    : Status == "to-submit" ? "Not sent to Dean"
+                    : "—";
             }
         }
         public string DateText
@@ -224,13 +229,22 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             List<BsonDocument> subsystem2Manuscripts = onlySubsystem2
                 ? Subsystem2Manuscripts.SchedulingTitles()
                 : new List<BsonDocument>();
+            List<BsonDocument> rosterManuscripts = onlySubsystem2
+                ? Subsystem2Manuscripts.RosterTitles()
+                : new List<BsonDocument>();
             var subsystem2ById = subsystem2Manuscripts
                 .Where(manuscript => DocId(manuscript) != "")
                 .GroupBy(DocId, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
             if (onlySubsystem2)
             {
-                docs = docs.Where(d => subsystem2ById.ContainsKey(Str(d, "titleId"))).ToList();
+                docs = docs.Where(d => subsystem2ById.ContainsKey(Str(d, "titleId")))
+                    .GroupBy(d => ScheduleManagerId(d, subsystem2ById), StringComparer.OrdinalIgnoreCase)
+                    .Select(group => group
+                        .OrderByDescending(d => ScheduleRevision(d, subsystem2ById))
+                        .ThenByDescending(d => Stamp(d, "updatedAt") ?? Stamp(d, "createdAt") ?? DateTime.MinValue)
+                        .First())
+                    .ToList();
             }
 
             var revisionNumbers = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -287,6 +301,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 string author = Str(d, "manager") != ""
                     ? Str(d, "manager")
                     : (t == null ? "" : Str(t, "projectManager"));
+                string group = FirstText(Str(d, "group"), Str(d, "groupName"), t == null ? "" : Str(t, "group"), t == null ? "" : Str(t, "groupName"));
+                if (group != "") author = author + " (" + group + ")";
 
                 string adviser = Str(d, "adviser") != ""
                     ? Str(d, "adviser")
@@ -312,6 +328,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     data.Schedules.Add(new SchedRow
                     {
                         Id = DocId(d),
+                        ProjectManagerId = Str(d, "projectManagerId") != "" ? Str(d, "projectManagerId") : Str(t, "studentId"),
+                        ManuscriptRecordId = tid,
                         Title = title,
                         Author = author,
                         Adviser = adviser,
@@ -324,6 +342,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                             : day.HasValue ? day.Value.Year.ToString(CultureInfo.InvariantCulture) : "",
                         Date = day,
                         Status = status,
+                        HasSchedule = true,
+                        HasManuscript = true,
                         Declined = CoDb.StatusOf(d) == "declined" ||
                                    CoDb.StatusOf(d) == "rejected"
                     });
@@ -366,6 +386,80 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 .ThenByDescending(s => s.SubmittedAt)
                 .ThenBy(s => s.Title, StringComparer.OrdinalIgnoreCase)
                 .ToList();
+
+            if (onlySubsystem2)
+            {
+                List<BsonDocument> users = Users().Find(new BsonDocument()).ToList();
+                var usersById = users.ToDictionary(DocId, StringComparer.OrdinalIgnoreCase);
+
+                foreach (BsonDocument manager in users.Where(user => IsActive(user) &&
+                    Subsystem1.Areas.Admin.Controllers.AdminApiController.RoleKey(Str(user, "role")) == "project-manager"))
+                {
+                    string managerId = DocId(manager);
+                    string studentNumber = FirstText(
+                        Str(manager, "studentId"),
+                        Str(manager, "studentID"),
+                        Str(manager, "idNumber"));
+                    BsonDocument manuscript = rosterManuscripts
+                        .Where(item => RosterRecordBelongsToStudent(item, managerId, studentNumber))
+                        .OrderByDescending(item => RevisionNumber(item))
+                        .ThenByDescending(item => Stamp(item, "submittedAt") ?? DateTime.MinValue)
+                        .FirstOrDefault();
+
+                    SchedRow scheduledRow = data.Schedules.FirstOrDefault(row =>
+                        String.Equals(row.ProjectManagerId, managerId, StringComparison.OrdinalIgnoreCase) ||
+                        (manuscript != null && String.Equals(row.ManuscriptRecordId, DocId(manuscript), StringComparison.OrdinalIgnoreCase)));
+
+                    string adviser = "";
+                    BsonDocument adviserAccount;
+                    if (usersById.TryGetValue(Str(manager, "adviserId"), out adviserAccount))
+                        adviser = PlainName(adviserAccount);
+
+                    string program = CoDb.ProgramCode(Str(manager, "program"));
+                    string section = Str(manager, "section");
+                    string managerName = PlainName(manager);
+                    if (scheduledRow != null)
+                    {
+                        // Keep the schedule row and attach it to the student account even when
+                        // the source system used a student number instead of the account ID.
+                        scheduledRow.ProjectManagerId = managerId;
+                        if (String.IsNullOrWhiteSpace(scheduledRow.Author)) scheduledRow.Author = managerName;
+                        if (String.IsNullOrWhiteSpace(scheduledRow.Program)) scheduledRow.Program = program;
+                        if (String.IsNullOrWhiteSpace(scheduledRow.Section)) scheduledRow.Section = section;
+                        if (String.IsNullOrWhiteSpace(scheduledRow.Adviser)) scheduledRow.Adviser = adviser;
+                        continue;
+                    }
+
+                    string group = FirstText(AnyStr(manager, "groupName"), AnyStr(manager, "group"), AnyStr(manager, "groupNo"), AnyStr(manager, "groupNumber"));
+
+                    int revision = manuscript == null ? 0 : RevisionNumber(manuscript);
+                    data.Schedules.Add(new SchedRow
+                    {
+                        Id = "roster-" + FirstText(manuscript == null ? "" : Str(manuscript, "subsystem2Id"), managerId),
+                        ProjectManagerId = managerId,
+                        ManuscriptRecordId = manuscript == null ? "" : DocId(manuscript),
+                        Title = manuscript == null ? "" : Str(manuscript, "title"),
+                        Author = managerName + (group == "" ? "" : " (" + group + ")"),
+                        Adviser = adviser,
+                        Program = program,
+                        Section = section,
+                        Type = revision == 2 ? "Re-defense" : manuscript == null ? "" : "1st Defense",
+                        SubmittedAt = manuscript == null ? (DateTime?)null : Stamp(manuscript, "submittedAt"),
+                        SchoolYear = manuscript == null || !Stamp(manuscript, "submittedAt").HasValue
+                            ? ""
+                            : Stamp(manuscript, "submittedAt").Value.Year.ToString(CultureInfo.InvariantCulture),
+                        Status = manuscript == null ? "" : "to-submit",
+                        HasSchedule = false,
+                        HasManuscript = manuscript != null
+                    });
+                }
+
+                data.Schedules = data.Schedules
+                    .OrderByDescending(row => row.SubmittedAt.HasValue)
+                    .ThenByDescending(row => row.SubmittedAt)
+                    .ThenBy(row => row.Author, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
 
             data.Defenses = data.Defenses
                 .OrderBy(d => d.Date)
@@ -463,6 +557,49 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             data.FacultyNames.Sort(StringComparer.OrdinalIgnoreCase);
 
             return data;
+        }
+
+        private static string ScheduleManagerId(BsonDocument schedule, IDictionary<string, BsonDocument> manuscripts)
+        {
+            string managerId = Str(schedule, "projectManagerId");
+            if (managerId != "") return managerId;
+            BsonDocument manuscript;
+            return manuscripts.TryGetValue(Str(schedule, "titleId"), out manuscript)
+                ? Str(manuscript, "studentId")
+                : Str(schedule, "titleId");
+        }
+
+        private static int ScheduleRevision(BsonDocument schedule, IDictionary<string, BsonDocument> manuscripts)
+        {
+            int revision;
+            if (int.TryParse(AnyStr(schedule, "revisionNumber"), NumberStyles.Integer, CultureInfo.InvariantCulture, out revision) && revision > 0)
+                return revision;
+            BsonDocument manuscript;
+            return manuscripts.TryGetValue(Str(schedule, "titleId"), out manuscript) ? RevisionNumber(manuscript) : 1;
+        }
+
+        private static int RevisionNumber(BsonDocument manuscript)
+        {
+            int revision;
+            return int.TryParse(AnyStr(manuscript, "versionNumber"), NumberStyles.Integer, CultureInfo.InvariantCulture, out revision) && revision > 0
+                ? revision
+                : 1;
+        }
+
+        private static string FirstText(params string[] values)
+        {
+            return values.FirstOrDefault(value => !String.IsNullOrWhiteSpace(value)) ?? "";
+        }
+
+        private static bool RosterRecordBelongsToStudent(BsonDocument manuscript, string managerId, string studentNumber)
+        {
+            string recordStudentId = Str(manuscript, "studentId");
+            if (managerId != "" && String.Equals(recordStudentId, managerId, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            string recordStudentNumber = Str(manuscript, "sourceStudentNumber");
+            return studentNumber != "" && recordStudentNumber != "" &&
+                String.Equals(recordStudentNumber.Trim(), studentNumber.Trim(), StringComparison.OrdinalIgnoreCase);
         }
 
         // ------------------------------------------------------------------

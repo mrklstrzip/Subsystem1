@@ -15,7 +15,8 @@
         {
             tableId: 'scheduleTable',
             emptyText: 'No schedules found',
-            filters: { program: true, status: ['Pending Submission', 'To Submit', 'Under Review', 'Submitted'], adviser: true }
+            pageSize: 8,
+            filters: { section: true, status: ['Submitted', 'Not submitted', 'Not sent to Dean', 'Submitted to Dean', 'Under Review'], adviser: true }
         },
         {
             tableId: 'conflictTable',
@@ -49,8 +50,8 @@
     // Row info used by search / filters
     function rowInfo(row) {
         var program = row.querySelector('.program-badge');
-        var status = row.querySelector('.status-badge');
         var adviser = row.querySelector('.adviser-cell');
+        var section = row.querySelector('.program-badge');
 
         var text = [];
         var cells = row.querySelectorAll('td');
@@ -59,8 +60,10 @@
         }
 
         return {
-            program: program ? programCode(program.textContent) : '',
-            status: status ? norm(status.textContent) : '',
+            program: norm(row.getAttribute('data-program')) || (program ? programCode(program.textContent) : ''),
+            section: norm(row.getAttribute('data-section')) || (section ? norm(section.textContent) : ''),
+            manuscriptStatus: norm(row.getAttribute('data-manuscript-status')),
+            deanStatus: norm(row.getAttribute('data-dean-status')),
             adviser: adviser ? norm(adviser.textContent) : '',
             haystack: norm(text.join(' '))
         };
@@ -149,7 +152,10 @@
 
         var tbody = table.tBodies[0];
         var searchInput = $('searchInput');
-        var state = { search: '', program: 'all', status: 'all', adviser: 'all' };
+        var state = { search: '', program: 'all', section: 'all', status: 'all', adviser: 'all', page: 1 };
+        var pagination = cfg.pageSize ? $('schedulePagination') : null;
+        var paginationSummary = $('schedulePaginationSummary');
+        var paginationControls = $('schedulePaginationControls');
 
         // "No results" row (kept in the tbody, toggled with the hidden attribute)
         var cols = table.tHead ? table.tHead.rows[0].cells.length : 1;
@@ -166,26 +172,67 @@
 
         function apply() {
             var tokens = norm(state.search).split(' ').filter(Boolean);
-            var visible = 0;
-
+            var matchingRows = [];
             dataRows().forEach(function (row) {
                 var info = rowInfo(row);
                 var ok =
                     tokens.every(function (t) { return info.haystack.indexOf(t) > -1; }) &&
                     (state.program === 'all' || info.program === state.program) &&
-                    (state.status === 'all' || info.status === state.status) &&
-                    (state.adviser === 'all' || info.adviser === state.adviser);
-                row.hidden = !ok;
-                if (ok) visible++;
+                    (state.status === 'all' || info.manuscriptStatus === state.status || info.deanStatus === state.status) &&
+                    (state.adviser === 'all' || info.adviser === state.adviser) &&
+                    (state.section === 'all' || info.section === state.section);
+                if (ok) matchingRows.push(row);
             });
 
-            emptyRow.hidden = visible > 0;
+            var totalPages = cfg.pageSize ? Math.max(1, Math.ceil(matchingRows.length / cfg.pageSize)) : 1;
+            state.page = Math.max(1, Math.min(state.page, totalPages));
+            var firstIndex = cfg.pageSize ? (state.page - 1) * cfg.pageSize : 0;
+            var lastIndex = cfg.pageSize ? firstIndex + cfg.pageSize : matchingRows.length;
+            var visibleRows = matchingRows.slice(firstIndex, lastIndex);
+            var visibleSet = new Set(visibleRows);
+            dataRows().forEach(function (row) { row.hidden = !visibleSet.has(row); });
+            emptyRow.hidden = matchingRows.length > 0;
+
+            if (pagination && paginationSummary && paginationControls) {
+                var from = matchingRows.length ? firstIndex + 1 : 0;
+                var to = Math.min(lastIndex, matchingRows.length);
+                paginationSummary.textContent = 'Showing ' + from + '-' + to + ' of ' + matchingRows.length + ' titles';
+                renderPagination(totalPages);
+            }
         }
+
+        function renderPagination(totalPages) {
+            if (!paginationControls) return;
+            paginationControls.innerHTML = '';
+            function addButton(label, page, active, disabled) {
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'schedule-page-link' + (active ? ' active' : '');
+                button.textContent = label;
+                button.disabled = !!disabled;
+                if (active) button.setAttribute('aria-current', 'page');
+                button.setAttribute('data-page', page);
+                paginationControls.appendChild(button);
+            }
+            addButton('Previous', Math.max(1, state.page - 1), false, state.page <= 1);
+            var start = Math.max(1, state.page - 2);
+            var end = Math.min(totalPages, state.page + 2);
+            for (var page = start; page <= end; page++) addButton(String(page), page, page === state.page, false);
+            addButton('Next', Math.min(totalPages, state.page + 1), false, state.page >= totalPages);
+        }
+
+        if (paginationControls) paginationControls.addEventListener('click', function (event) {
+            var button = event.target.closest ? event.target.closest('[data-page]') : null;
+            if (!button || button.disabled) return;
+            state.page = parseInt(button.getAttribute('data-page'), 10) || 1;
+            apply();
+        });
 
         // Search bar
         if (searchInput) {
             searchInput.addEventListener('input', function () {
                 state.search = searchInput.value;
+                state.page = 1;
                 apply();
             });
         }
@@ -209,6 +256,9 @@
                     if (key === 'program') {
                         options = unique(rows.map(function (r) { return r.program; })).sort()
                             .map(function (c) { return { value: c, label: c.toUpperCase() }; });
+                    } else if (key === 'section') {
+                        options = unique(rows.map(function (r) { return r.section; })).sort()
+                            .map(function (section) { return { value: section, label: section.toUpperCase() }; });
                     } else {   // adviser: keep the original capitalisation for the label
                         var seen = {};
                         options = [];
@@ -224,6 +274,7 @@
 
                 buildDropdown(box, options, function (value) {
                     state[key] = value;
+                    state.page = 1;
                     apply();
                 });
                 boxes.push(box);
@@ -236,7 +287,7 @@
         pages.push({
             apply: apply,
             clear: function () {
-                state = { search: '', program: 'all', status: 'all', adviser: 'all' };
+                state = { search: '', program: 'all', section: 'all', status: 'all', adviser: 'all', page: 1 };
                 if (searchInput) searchInput.value = '';
                 boxes.forEach(function (b) { b._reset(); });
                 apply();

@@ -238,7 +238,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
     {
         private static readonly object Gate = new object();
         private static bool indexed;
-        private const int PdfKeywordParserVersion = 2;
+        private const int PdfKeywordParserVersion = 3;
 
         private static int KeywordParserVersion(BsonDocument doc)
         {
@@ -246,6 +246,14 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return doc != null && doc.TryGetValue("keywordParserVersion", out value) && value != null && value.IsNumeric
                 ? value.ToInt32()
                 : 0;
+        }
+
+        private static bool IsEligiblePanelist(BsonDocument user, string adviserId)
+        {
+            if (user == null) return false;
+            string id = DocId(user);
+            return id != "" && !String.Equals(id, adviserId ?? "", StringComparison.OrdinalIgnoreCase) &&
+                   AdminApi.RoleKey(Str(user, "role")) == "panelist";
         }
 
         private static void EnsureIndex()
@@ -389,12 +397,14 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
                 BsonDocument title = Subsystem2Manuscripts.ForScheduleSubmission(Str(sched, "titleId"), includeRevisionCase: false) ?? TitleOf(sched);
                 if (title == null || !title.Contains("sourceSubsystem2") || !title["sourceSubsystem2"].IsBoolean || !title["sourceSubsystem2"].AsBoolean) return;
-                if (Str(sched, "keywordSource") == "pdf" && KeywordParserVersion(sched) >= PdfKeywordParserVersion) return;
+                string savedKeywordSource = Str(sched, "keywordSource");
+                if ((savedKeywordSource == "pdf" || savedKeywordSource == "gemini-pdf" || savedKeywordSource == "gemini-generated") && KeywordParserVersion(sched) >= PdfKeywordParserVersion) return;
                 DateTime? lastAttempt = Stamp(sched, "keywordExtractionAttemptedAt");
-                bool parserNeedsUpgrade = Str(sched, "keywordSource") == "pdf" && KeywordParserVersion(sched) < PdfKeywordParserVersion;
+                bool parserNeedsUpgrade = (savedKeywordSource == "pdf" || savedKeywordSource == "gemini-pdf" || savedKeywordSource == "gemini-generated") && KeywordParserVersion(sched) < PdfKeywordParserVersion;
                 if (!parserNeedsUpgrade && lastAttempt.HasValue && DateTime.UtcNow - lastAttempt.Value < TimeSpan.FromHours(1)) return;
 
-                List<string> pdfKeywords = Subsystem2Manuscripts.ExtractPdfKeywords(title);
+                string extractedSource;
+                List<string> pdfKeywords = Subsystem2Manuscripts.ExtractPdfKeywords(title, out extractedSource);
                 DateTime now = DateTime.UtcNow;
                 if (pdfKeywords.Count == 0)
                 {
@@ -408,7 +418,8 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                         {
                             if (!item.IsBsonDocument) continue;
                             BsonDocument user;
-                            if (fallbackContext.Panelists.TryGetValue(Str(item.AsBsonDocument, "userId"), out user)) fallbackPanel.Add(user);
+                            if (fallbackContext.Panelists.TryGetValue(Str(item.AsBsonDocument, "userId"), out user) &&
+                                IsEligiblePanelist(user, Str(sched, "adviserId"))) fallbackPanel.Add(user);
                         }
                     }
                     var fallbackUpdate = Builders<BsonDocument>.Update
@@ -467,7 +478,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
                 var update = Builders<BsonDocument>.Update
                     .Set("keywords", new BsonArray(pdfKeywords))
-                    .Set("keywordSource", "pdf")
+                    .Set("keywordSource", extractedSource)
                     .Set("keywordParserVersion", PdfKeywordParserVersion)
                     .Set("keywordExtractionAttemptedAt", now)
                     .Set("updatedAt", now);
@@ -566,6 +577,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     foreach (EngPick pick in r.Panel)
                     {
                         BsonDocument u = ctx.Panelists[pick.Faculty.Id];
+                        if (!IsEligiblePanelist(u, adviserId)) continue;
                         panel.Add(new BsonDocument
                         {
                             { "userId", pick.Faculty.Id },
@@ -670,7 +682,11 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     res.Error = "\"" + n + "\" is not an active panelist. Pick a name from the list.";
                     return res;
                 }
-                if (id == adviserId) { res.Error = n + " is the group's adviser and cannot also be a panelist."; return res; }
+                if (!IsEligiblePanelist(ctx.Panelists[id], adviserId))
+                {
+                    res.Error = n + " must be an active professor/panelist and cannot be the group's adviser.";
+                    return res;
+                }
                 if (!seen.Add(id)) { res.Error = "A panelist can only be assigned once."; return res; }
                 res.Panel.Add(ctx.Panelists[id]);
             }
@@ -745,6 +761,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             var users = new Dictionary<string, BsonDocument>();
             foreach (BsonDocument u in panel)
             {
+                if (!IsEligiblePanelist(u, adviserId)) continue;
                 var f = new EngFaculty { Id = DocId(u), Name = PlainName(u), Tags = CoDb.Expertise(u) };
                 int pts = ScheduleEngine.Points(f, p);
                 picks.Add(new EngPick { Faculty = f, Points = pts, Percent = ScheduleEngine.Percent(f, p), Match = ScheduleEngine.Level(pts) });
@@ -791,13 +808,14 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 List<string> matchingKeywords = CoDb.Keywords(sched);
                 string keywordSource = Str(sched, "keywordSource");
                 if (title != null && title.Contains("sourceSubsystem2") && title["sourceSubsystem2"].IsBoolean && title["sourceSubsystem2"].AsBoolean &&
-                    (keywordSource != "pdf" || KeywordParserVersion(sched) < PdfKeywordParserVersion))
+                    ((keywordSource != "pdf" && keywordSource != "gemini-pdf" && keywordSource != "gemini-generated") || KeywordParserVersion(sched) < PdfKeywordParserVersion))
                 {
-                    List<string> extracted = Subsystem2Manuscripts.ExtractPdfKeywords(title);
+                    string extractedSource;
+                    List<string> extracted = Subsystem2Manuscripts.ExtractPdfKeywords(title, out extractedSource);
                     if (extracted.Count > 0)
                     {
                         matchingKeywords = extracted;
-                        keywordSource = "pdf";
+                        keywordSource = extractedSource;
                     }
                 }
                 if (matchingKeywords.Count == 0 && title != null) matchingKeywords = CoDb.Keywords(title);
@@ -814,7 +832,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                         u.Set("panelists", PanelDocs(chk.Panel, title ?? new BsonDocument(), Str(sched, "adviserId"), matchingKeywords)),
                         u.Set("keywords", new BsonArray(matchingKeywords)),
                         u.Set("keywordSource", keywordSource != "" ? keywordSource : matchingKeywords.Count > 0 ? "submission-metadata" : "none"),
-                        u.Set("keywordParserVersion", keywordSource == "pdf" ? PdfKeywordParserVersion : 0),
+                        u.Set("keywordParserVersion", (keywordSource == "pdf" || keywordSource == "gemini-pdf" || keywordSource == "gemini-generated") ? PdfKeywordParserVersion : 0),
                         u.Set("keywordExtractionAttemptedAt", DateTime.UtcNow),
                         u.Set("updatedAt", DateTime.UtcNow)));
 
