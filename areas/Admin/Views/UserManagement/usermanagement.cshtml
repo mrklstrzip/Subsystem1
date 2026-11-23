@@ -2,7 +2,7 @@
     ViewBag.Title = "User Management";
 }
 
-<link href="@Url.Content("~/Content/css/admin/usermanagement.css")?v=5.1" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/admin/usermanagement.css")?v=5.3" rel="stylesheet" type="text/css" />
 <link href="@Url.Content("~/Content/css/delete.css")?v=5.0" rel="stylesheet" type="text/css" />
 
 <div class="dashboard-header">
@@ -99,6 +99,7 @@
         </div>
 
         <form action="" method="post" class="modal-form" onsubmit="return false;">
+            <div class="user-form-error" id="userFormError" role="alert" aria-live="polite"></div>
 
             <!-- Name Row (Last Name, First Name, Middle Name, Suffix) -->
             <div class="name-row">
@@ -272,6 +273,26 @@
     </div>
 </div>
 
+<!-- Styled feedback modal for account validation -->
+<div class="modal-overlay" id="userValidationModal">
+    <div class="cd-delete-card user-feedback-card" role="alertdialog" aria-modal="true" aria-labelledby="userValidationTitle" aria-describedby="userValidationMessage">
+        <div class="cd-delete-icon-wrap"><i class="fa-solid fa-circle-exclamation"></i></div>
+        <h3 class="cd-delete-title" id="userValidationTitle">Unable to create account</h3>
+        <p class="cd-delete-text" id="userValidationMessage"></p>
+        <div class="cd-delete-actions"><button type="button" class="btn-cd-delete-cancel" onclick="AD.closeModals()">Got it</button></div>
+    </div>
+</div>
+
+<!-- Account deletion success modal -->
+<div class="modal-overlay" id="userDeletedModal">
+    <div class="cd-delete-card user-deleted-card" role="dialog" aria-modal="true" aria-labelledby="userDeletedTitle" aria-describedby="userDeletedMessage">
+        <div class="cd-delete-icon-wrap user-deleted-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h3 class="cd-delete-title" id="userDeletedTitle">Account deleted</h3>
+        <p class="cd-delete-text" id="userDeletedMessage">The account was deleted successfully.</p>
+        <div class="cd-delete-actions"><button type="button" class="btn-cd-delete-cancel" onclick="AD.closeModals()">Done</button></div>
+    </div>
+</div>
+
 <!-- Delete User Pop up -->
 <div class="modal-overlay" id="delUserModal">
     <div class="cd-delete-card">
@@ -304,4 +325,4 @@
     </div>
 </div>
 
-<script src="@Url.Content("~/Scripts/admin-app.js")?v=8.3"></script>
+<script src="@Url.Content("~/Scripts/admin-app.js")?v=8.5"></script>

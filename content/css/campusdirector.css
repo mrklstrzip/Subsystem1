@@ -2072,7 +2072,7 @@ table.cdp2-info {
 /* stat cards */
 .dsh-stat {
     position: relative;
-    min-height: 118px;
+    min-height: 108px;
     box-sizing: border-box;
     border: 1px solid #e2e8f0;
     display: flex;

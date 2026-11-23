@@ -87,6 +87,9 @@
                     data-program="@m.Program"
                     data-status="@m.Status"
                     data-adviser="@m.Adviser"
+                    data-search-title="@m.Title.ToLower()"
+                    data-search-manager="@m.ProjectManager.ToLower()"
+                    data-search-adviser="@m.Adviser.ToLower()"
                     data-search="@((m.Title + " " + m.ProjectManager + " " + m.Adviser).ToLower())">
                     <td class="sa-title">
                         <strong>@m.Title</strong>
@@ -103,10 +106,10 @@
             }
         </tbody>
     </table>
-    <div class="sa-empty" id="saEmpty" style="display:@(items.Any() ? "none" : "block");">@(items.Any() ? "No results found." : "No submitted schedules yet.")</div>
+    <div class="sa-empty" id="saEmpty" role="status" aria-live="polite" style="display:@(items.Any() ? "none" : "block");">@(items.Any() ? "No Matching Schedules Found" : "No submitted schedules yet.")</div>
 </div>
 
 
 @Html.Partial("_ScheduleApprovalModal")
-<script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.4"></script>
+<script src="@Url.Content("~/Scripts/DeanSchedApproval.js")?v=1.6"></script>
 <script src="@Url.Content("~/Scripts/dean-select.js")?v=1.0"></script>

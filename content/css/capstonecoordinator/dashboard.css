@@ -276,7 +276,7 @@ body {
     position: relative;
     overflow: hidden;
     margin-bottom: 20px;
-    min-height: 130px;
+    min-height: 120px;
     transition: background-color .22s ease, border-color .22s ease, box-shadow .22s ease;
 }
 

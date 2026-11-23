@@ -215,6 +215,7 @@
     <Content Include="Content\css\fonts.css" />
     <Content Include="Content\css\loading.css" />
     <Content Include="Content\css\logout-confirm.css" />
+    <Content Include="Content\css\modal-system.css" />
     <Content Include="Content\css\notice.css" />
     <Content Include="Content\css\school-year-filter.css" />
     <Content Include="Content\css\profile.css" />
@@ -264,9 +265,11 @@
     <Content Include="Scripts\dean-profile.js" />
     <Content Include="Scripts\dean-select.js" />
     <Content Include="Scripts\loading.js" />
+    <Content Include="Scripts\modal-system.js" />
     <Content Include="Scripts\notice.js" />
     <Content Include="Scripts\recent-pager.js" />
     <Content Include="Scripts\school-year-filter.js" />
+    <Content Include="Scripts\search-experience.js" />
     <Content Include="Scripts\xlsx.full.min.js" />
     <Content Include="Scripts\campusdirector-modal.js" />
     <Content Include="Scripts\campusdirector-profile.js" />

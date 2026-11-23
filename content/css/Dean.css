@@ -268,7 +268,7 @@
     position: relative;
     display: block;
     padding: 22px 20px;
-    min-height: 132px;
+    min-height: 122px;
     box-sizing: border-box;
     transition: background-color .22s ease, border-color .22s ease, box-shadow .22s ease;
 }

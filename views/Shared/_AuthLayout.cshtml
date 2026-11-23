@@ -10,33 +10,38 @@
     <link href="@Url.Content("~/Content/css/loading.css")?v=1.0" rel="stylesheet" type="text/css" />
     <link href="@Url.Content("~/Content/css/notice.css")?v=1.0" rel="stylesheet" type="text/css" />
 
+    <script src="@Url.Content("~/Scripts/modal-system.js")?v=1.1"></script>
 </head>
-<div><body class="auth-body">
-    <div class="auth-art" aria-hidden="true">
-        <div class="auth-sheets">
-            <span class="auth-sheet auth-sheet--plane"></span>
-            <span class="auth-sheet auth-sheet--back"></span>
-            <span class="auth-sheet auth-sheet--front"></span>
-            <span class="auth-sheet auth-sheet--corner"></span>
-        </div>
-    </div>
-    <main class="auth-center">
-        <div class="auth-brand">
-            <div class="auth-brand__logos">
-                <img src="@Url.Content("~/Content/images/qcu.jpeg")" alt="Quezon City University seal" />
-                <img src="@Url.Content("~/Content/images/ccs-logo.png")" alt="College of Computer Studies seal" />
-            </div>
-            <div>
-                <div class="auth-brand__name">Quezon City University</div>
-                <div class="auth-brand__sub">College of Computer Studies</div>
+<div>
+    <body class="auth-body">
+        <div class="auth-art" aria-hidden="true">
+            <div class="auth-sheets">
+                <span class="auth-sheet auth-sheet--plane"></span>
+                <span class="auth-sheet auth-sheet--back"></span>
+                <span class="auth-sheet auth-sheet--front"></span>
+                <span class="auth-sheet auth-sheet--corner"></span>
             </div>
         </div>
-        <div class="auth-card @ViewBag.CardClass">
-            @RenderBody()
-        </div>
-    </main>
-    <script src="@Url.Content("~/Scripts/auth.js")?v=2.0"></script>
-    <script src="@Url.Content("~/Scripts/loading.js")?v=1.1"></script>
-    <script src="@Url.Content("~/Scripts/notice.js")?v=1.0"></script>
-</body></div>
+        <main class="auth-center">
+            <div class="auth-brand">
+                <div class="auth-brand__logos">
+                    <img src="@Url.Content("~/Content/images/qcu.jpeg")" alt="Quezon City University seal" />
+                    <img src="@Url.Content("~/Content/images/ccs-logo.png")" alt="College of Computer Studies seal" />
+                </div>
+                <div>
+                    <div class="auth-brand__name">Quezon City University</div>
+                    <div class="auth-brand__sub">College of Computer Studies</div>
+                </div>
+            </div>
+            <div class="auth-card @ViewBag.CardClass">
+                @RenderBody()
+            </div>
+        </main>
+        <script src="@Url.Content("~/Scripts/auth.js")?v=2.0"></script>
+        <script src="@Url.Content("~/Scripts/loading.js")?v=1.1"></script>
+        <script src="@Url.Content("~/Scripts/notice.js")?v=1.0"></script>
+        <script src="@Url.Content("~/Scripts/search-experience.js")?v=1.0"></script>
+        <link href="@Url.Content("~/Content/css/modal-system.css")?v=1.2" rel="stylesheet" type="text/css" />
+    </body>
+</div>
 </html>

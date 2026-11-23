@@ -117,7 +117,9 @@
         api(action, body).then(function (res) {
             busy = false;
             if (!res || !res.success) {
-                alert((res && res.message) || 'Something went wrong. Please try again.');
+                var message = (res && res.message) || 'Something went wrong. Please try again.';
+                if (action === 'saveUser') showUserNotice('Unable to save account', message);
+                else alert(message);
                 return;
             }
             // Saved. Reload the lists from the database, then redraw.
@@ -217,6 +219,57 @@
     function closeModals() {
         var all = document.querySelectorAll('.modal-overlay');
         for (var i = 0; i < all.length; i++) all[i].style.display = 'none';
+    }
+
+    function clearUserFieldErrors() {
+        var modal = $('userModal');
+        if (!modal) return;
+        modal.querySelectorAll('.input-fieldset.field-invalid').forEach(function (fieldset) {
+            fieldset.classList.remove('field-invalid');
+            fieldset.querySelectorAll('[aria-invalid="true"]').forEach(function (input) { input.removeAttribute('aria-invalid'); });
+        });
+        var error = $('userFormError');
+        if (error) { error.textContent = ''; error.classList.remove('is-visible'); }
+    }
+
+    function markUserFieldsRequired(ids, message) {
+        clearUserFieldErrors();
+        var firstInput = null;
+        ids.forEach(function (id) {
+            var input = $(id);
+            var fieldset = input && input.closest('.input-fieldset');
+            if (!fieldset) return;
+            fieldset.classList.remove('field-invalid');
+            void fieldset.offsetWidth;
+            fieldset.classList.add('field-invalid');
+            input.setAttribute('aria-invalid', 'true');
+            if (!firstInput) firstInput = input;
+        });
+        var error = $('userFormError');
+        if (error) {
+            error.textContent = message || 'Complete the highlighted required fields to continue.';
+            error.classList.add('is-visible');
+        }
+        if (firstInput) firstInput.focus();
+    }
+
+    function clearUserFieldError(input) {
+        var fieldset = input && input.closest('.input-fieldset');
+        if (!fieldset) return;
+        fieldset.classList.remove('field-invalid');
+        fieldset.querySelectorAll('[aria-invalid="true"]').forEach(function (field) { field.removeAttribute('aria-invalid'); });
+        var modal = $('userModal');
+        var error = $('userFormError');
+        if (modal && error && !modal.querySelector('.input-fieldset.field-invalid')) {
+            error.textContent = '';
+            error.classList.remove('is-visible');
+        }
+    }
+
+    function showUserNotice(title, message) {
+        if ($('userValidationTitle')) $('userValidationTitle').textContent = title || 'Unable to create account';
+        if ($('userValidationMessage')) $('userValidationMessage').textContent = message || 'Please review the account details and try again.';
+        openModal('userValidationModal');
     }
 
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModals(); });
@@ -1121,6 +1174,7 @@
     });
 
     function openCreateUser() {
+        clearUserFieldErrors();
         isEditMode = false;
         editUserId = null;
         requestId = '';
@@ -1226,22 +1280,29 @@
         var email = $('emailInput') ? $('emailInput').value.trim() : '';
         var role = $('modalRoleSelect') ? $('modalRoleSelect').value : 'project-manager';
 
-        if (!lastName || !firstName || !email) { alert('Please fill in all required fields (Name, Email).'); return; }
+        if (!lastName || !firstName || !email) {
+            var missing = [];
+            if (!lastName) missing.push('lastNameInput');
+            if (!firstName) missing.push('firstNameInput');
+            if (!email) missing.push('emailInput');
+            markUserFieldsRequired(missing, 'Complete the highlighted required fields to continue.');
+            return;
+        }
 
         var emailTaken = state.users.some(function (o) { return o.id !== editUserId && norm(o.email) === norm(email); });
-        if (emailTaken) { alert('That email is already used by another account.'); return; }
+        if (emailTaken) { showUserNotice('Email already in use', 'That email is already used by another account.'); return; }
 
         var isCoord = role === 'capstone-coordinator';
         var coordProgram = isCoord && $('coordProgramSelect') ? $('coordProgramSelect').value || '' : '';
         if (isCoord) {
-            if (!coordProgram) { alert('Please select the Capstone Coordinator\'s program (BSIT, BSCS or BSIS).'); return; }
+            if (!coordProgram) { markUserFieldsRequired(['coordProgramSelect'], 'Select a program for the Capstone Coordinator account.'); return; }
             var progTaken = state.users.some(function (o) { return o.id !== editUserId && o.role === role && o.program === coordProgram; });
-            if (progTaken) { alert('There is already a Capstone Coordinator for ' + coordProgram + '. Only one per program is allowed.'); return; }
+            if (progTaken) { showUserNotice('Coordinator already exists', 'There is already a Capstone Coordinator for ' + coordProgram + '. Only one per program is allowed.'); return; }
         }
 
         if (SINGLE_ROLES.indexOf(role) > -1 && !isCoord) {
             var roleTaken = state.users.some(function (o) { return o.id !== editUserId && o.role === role; });
-            if (roleTaken) { alert('There is already a ' + roleLabel(role) + ' account. Only one is allowed, so edit or delete the existing one first.'); return; }
+            if (roleTaken) { showUserNotice('Account already exists', 'There is already a ' + roleLabel(role) + ' account. Only one is allowed, so edit or delete the existing one first.'); return; }
         }
 
         var idValue = $('modalIdInput') ? $('modalIdInput').value.trim() : '';
@@ -1251,7 +1312,10 @@
         var program = isPM && $('programSelect') ? $('programSelect').value || '' : '';
         var section = isPM && $('sectionInput') ? $('sectionInput').value.trim() : '';
         if (isPM && (!program || !section)) {
-            alert('Please select the student\'s program and enter the section.');
+            var missingStudentFields = [];
+            if (!program) missingStudentFields.push('programSelect');
+            if (!section) missingStudentFields.push('sectionInput');
+            markUserFieldsRequired(missingStudentFields, 'Select the student program and enter the section.');
             return;
         }
 
@@ -1326,11 +1390,15 @@
 
     function confirmDelUser() {
         if (!delUserId) { closeModal('delUserModal'); return; }
+        var user = userById(delUserId);
+        var deletedName = user ? plainName(user) : 'User account';
 
         send('deleteUser', { id: delUserId }, function () {
             delUserId = null;
             closeModal('delUserModal');
             renderUsers();
+            if ($('userDeletedMessage')) $('userDeletedMessage').textContent = deletedName + ' was deleted successfully.';
+            openModal('userDeletedModal');
         });
     }
 
@@ -1343,7 +1411,12 @@
 
         if ($('openModalBtn')) $('openModalBtn').addEventListener('click', openCreateUser);
         if ($('confirmBtn')) $('confirmBtn').addEventListener('click', saveUser);
-        if ($('cancelBtn')) $('cancelBtn').addEventListener('click', function () { closeModal('userModal'); });
+        if ($('cancelBtn')) $('cancelBtn').addEventListener('click', function () { closeModal('userModal'); clearUserFieldErrors(); });
+        var userForm = $('userModal') && $('userModal').querySelector('.modal-form');
+        if (userForm) {
+            userForm.addEventListener('input', function (event) { clearUserFieldError(event.target); });
+            userForm.addEventListener('change', function (event) { clearUserFieldError(event.target); });
+        }
 
         if ($('modalRoleSelect')) {
             $('modalRoleSelect').addEventListener('change', function (e) {

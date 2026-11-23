@@ -1,0 +1,204 @@
+﻿/* Shared dialog visual system used across every role and authentication screen. */
+.modal-overlay,
+.sa-overlay,
+.inv-overlay,
+.nt-overlay,
+.logout-overlay,
+.pm-modal:not([hidden]) {
+    z-index: 30000 !important;
+    box-sizing: border-box;
+    padding: 20px !important;
+    background: rgba(0, 0, 0, .22) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+    .modal-card,
+    .schedule-modal,
+    .sa-modal,
+    .inv-modal,
+    .cd-delete-card,
+    .pm-modal:not([hidden]) > .pm-modal-card[role="dialog"],
+    dialog.pm-dialog > .pm-modal-card {
+        box-sizing: border-box;
+        border: 1px solid #dbe3ed !important;
+        border-radius: 16px !important;
+        background: #fff !important;
+        box-shadow: 0 20px 56px rgba(15, 23, 42, .22) !important;
+        max-height: calc(100vh - 40px) !important;
+        overflow: auto;
+        animation: system-modal-enter .18s ease-out;
+    }
+
+.modal-card,
+.schedule-modal,
+.sa-modal,
+.inv-modal,
+dialog.pm-dialog > .pm-modal-card {
+    width: min(760px, calc(100vw - 40px)) !important;
+    max-width: 760px !important;
+    padding: 24px !important;
+}
+
+.cd-delete-card {
+    width: min(480px, calc(100vw - 40px)) !important;
+    max-width: 480px !important;
+    padding: 26px 24px !important;
+}
+
+.pm-modal:not([hidden]) > .pm-modal-card[role="dialog"] {
+    width: min(560px, calc(100vw - 40px)) !important;
+    max-width: 560px !important;
+    padding: 24px !important;
+}
+
+dialog.pm-dialog {
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible;
+    animation: none;
+}
+
+    dialog.pm-dialog::backdrop {
+        background: rgba(0, 0, 0, .22) !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+
+.system-alert-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, .22) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+.system-alert-modal {
+    width: min(480px, calc(100vw - 40px));
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 26px 24px 22px;
+    border: 1px solid #dbe3ed;
+    border-radius: 16px;
+    background: #fff;
+    color: #172a43;
+    box-shadow: 0 20px 56px rgba(15, 23, 42, .22);
+    animation: system-modal-enter .18s ease-out;
+}
+
+    .system-alert-modal h2 {
+        margin: 0 0 10px;
+        color: #172a43;
+        font: 700 20px/1.25 'Inter', sans-serif;
+    }
+
+    .system-alert-modal p {
+        margin: 0;
+        color: #536273;
+        font: 400 14px/1.55 'Inter', sans-serif;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+    }
+
+.system-alert-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 22px;
+}
+
+    .system-alert-actions button {
+        min-width: 88px;
+        padding: 9px 20px;
+        border: 1px solid #172a43;
+        border-radius: 9px;
+        background: #172a43;
+        color: #fff;
+        font: 600 13px 'Inter', sans-serif;
+        cursor: pointer;
+        transition: background .16s ease, box-shadow .16s ease, transform .16s ease;
+    }
+
+        .system-alert-actions button:hover {
+            background: #2c3f56;
+            box-shadow: 0 4px 12px rgba(23, 42, 67, .2);
+        }
+
+        .system-alert-actions button:focus-visible {
+            outline: 3px solid rgba(67, 108, 242, .42);
+            outline-offset: 2px;
+        }
+
+@keyframes system-modal-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 600px) {
+    .modal-overlay,
+    .sa-overlay,
+    .inv-overlay,
+    .nt-overlay,
+    .logout-overlay,
+    .pm-modal:not([hidden]) {
+        padding: 12px !important;
+    }
+
+        .modal-card, .schedule-modal, .sa-modal, .inv-modal,
+        dialog.pm-dialog > .pm-modal-card, .cd-delete-card,
+        .pm-modal:not([hidden]) > .pm-modal-card[role="dialog"] {
+            width: calc(100vw - 24px) !important;
+            max-width: calc(100vw - 24px) !important;
+            max-height: calc(100vh - 24px) !important;
+            padding: 20px !important;
+        }
+}
+/* Shared active and keyboard-focus treatment for filter dropdowns. */
+.system-filter-control {
+    transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
+}
+
+    .system-filter-control.filter-active,
+    .system-filter-control.filter-open {
+        border-color: #657d9d !important;
+        background-color: #f5f8fc !important;
+        box-shadow: 0 0 0 2px rgba(82, 111, 150, .13) !important;
+    }
+
+    .system-filter-control:focus-within,
+    .system-filter-control:focus-visible,
+    .system-filter-control.filter-focused {
+        border-color: #526f96 !important;
+        background-color: #f7f9fc !important;
+        box-shadow: 0 0 0 3px rgba(82, 111, 150, .18) !important;
+    }
+
+select.system-filter-control:focus-visible {
+    outline: 2px solid rgba(82, 111, 150, .28);
+    outline-offset: 2px;
+}
+
+.system-filter-control .select-selected:focus-visible,
+.system-filter-control .cdc-selected:focus-visible {
+    outline: 2px solid rgba(82, 111, 150, .28);
+    outline-offset: 2px;
+    border-radius: 6px;
+}

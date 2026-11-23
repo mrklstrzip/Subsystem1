@@ -743,3 +743,56 @@ tr:last-child td {
 #passwordInput {
     letter-spacing: 1px;
 }
+
+/* Required fields and inline validation in the Create User Account modal. */
+.user-form-error {
+    display: none;
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border: 1px solid #f2b8b5;
+    border-radius: 8px;
+    background: #fff4f2;
+    color: #a3261f;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+    .user-form-error.is-visible {
+        display: block;
+    }
+
+.input-fieldset.field-invalid {
+    border-color: #b3261e !important;
+    box-shadow: 0 0 0 1px rgba(179, 38, 30, .16);
+    animation: required-field-shake .28s ease-in-out;
+}
+
+    .input-fieldset.field-invalid legend, .input-fieldset.field-invalid .input-icon {
+        color: #b3261e;
+    }
+
+.user-feedback-card {
+    max-width: calc(100% - 32px);
+}
+
+@keyframes required-field-shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    50% {
+        transform: translateX(4px);
+    }
+
+    75% {
+        transform: translateX(-2px);
+    }
+}
+
+.user-deleted-icon i {
+    color: #1e7a3c;
+}

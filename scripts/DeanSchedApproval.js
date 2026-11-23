@@ -42,20 +42,37 @@
         var applyFilters = function () {
             var q = $('saSearch').value.trim().toLowerCase();
             var p = $('fProgram').value, s = $('fStatus').value, a = $('fAdviser').value;
+            var sy = $('fSY') ? $('fSY').value : 'all';
+            var rows = document.querySelectorAll('#saTable tbody tr[data-id]');
             var shown = 0;
-            document.querySelectorAll('#saTable tbody tr').forEach(function (tr) {
-                var ok = (!q || tr.dataset.search.indexOf(q) > -1) &&
+            rows.forEach(function (tr) {
+                var field = tr.dataset.search;
+                var yearMatches = !sy || sy === 'all' || !tr.dataset.sy || tr.dataset.sy === sy;
+                var ok = (!q || (field || '').indexOf(q) > -1) &&
                     (!p || tr.dataset.program === p) &&
                     (!s || tr.dataset.status === s) &&
-                    (!a || tr.dataset.adviser === a);
+                    (!a || tr.dataset.adviser === a) && yearMatches;
                 tr.style.display = ok ? '' : 'none';
                 if (ok) shown++;
             });
-            $('saEmpty').style.display = shown ? 'none' : 'block';
+
+            var empty = $('saEmpty');
+            if (shown) {
+                empty.style.display = 'none';
+            } else {
+                empty.textContent = rows.length === 0 ? 'No submitted schedules yet.' :
+                    q ? 'No Matching Schedules Found' : 'No schedules match the selected filters.';
+                empty.style.display = 'block';
+            }
+            document.querySelectorAll('#saTable .sy-empty-row').forEach(function (row) {
+                row.style.display = 'none';
+            });
         };
-        ['saSearch', 'fProgram', 'fStatus', 'fAdviser'].forEach(function (id) {
-            $(id).addEventListener(id === 'saSearch' ? 'input' : 'change', applyFilters);
+        $('saSearch').addEventListener('input', applyFilters);
+        ['fSY', 'fProgram', 'fStatus', 'fAdviser'].forEach(function (id) {
+            if ($(id)) $(id).addEventListener('change', applyFilters);
         });
+        applyFilters();
     }
 
     /* ---------- Modal ---------- */
