@@ -46,7 +46,7 @@ namespace Subsystem1.Areas.Student.Models
         public static string Str(BsonDocument d, string name)
         {
             BsonValue v;
-            if (d.TryGetValue(name, out v) && v != null && v.IsString) return v.AsString;
+            if (d != null && d.TryGetValue(name, out v) && v != null && v.IsString) return v.AsString;
             return "";
         }
 
@@ -67,7 +67,7 @@ namespace Subsystem1.Areas.Student.Models
         public static int? Minutes(BsonDocument d, string name)
         {
             BsonValue v;
-            if (!d.TryGetValue(name, out v) || v == null) return null;
+            if (d == null || !d.TryGetValue(name, out v) || v == null || v.IsBsonNull) return null;
             if (v.IsInt32) return v.AsInt32;
             if (v.IsInt64) return (int)v.AsInt64;
             if (v.IsDouble) return (int)v.AsDouble;

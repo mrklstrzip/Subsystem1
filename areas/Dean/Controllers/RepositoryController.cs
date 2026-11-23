@@ -10,7 +10,7 @@ namespace Subsystem1.Areas.Dean.Controllers
     // Schedule approvals remain in the existing Subsystem 1 controllers.
     public sealed class RepositoryController : DeanControllerBase
     {
-        public ActionResult Index(string q, string program, int? year, string filing, string adviser, string sort)
+        public ActionResult Index(string q, string program, int? year, string filing, string adviser, string sort, bool showArchived = false)
         {
             // The Dean's exclusive archive contains the published/filed repository
             // catalog (including historical records) as well as cleared disseminations.
@@ -22,6 +22,8 @@ namespace Subsystem1.Areas.Dean.Controllers
                 .Select(group => group.First())
                 .ToList();
             var all = rows.ToList();
+            showArchived = showArchived || String.Equals(filing, "Archived", StringComparison.OrdinalIgnoreCase);
+            if (!showArchived) rows = rows.Where(x => !x.IsArchived).ToList();
             if (!String.IsNullOrWhiteSpace(q))
             {
                 string term = q.Trim();
@@ -41,10 +43,10 @@ namespace Subsystem1.Areas.Dean.Controllers
             return View(new DeanRepositoryVm
             {
                 Query = q ?? "", Items = rows, Program = program ?? "", Adviser = adviser ?? "", Year = year, Filing = filing ?? "",
-                Sort = sort ?? "recent",
+                Sort = sort ?? "recent", ShowArchived = showArchived,
                 Programs = all.Select(x => x.Program).Where(x => !String.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList(),
                 Years = all.Select(x => (x.FiledAt ?? x.DisseminatedAt)?.Year).Where(x => x.HasValue).Select(x => x.Value).Distinct().OrderByDescending(x => x).ToList(),
-                Filings = new[] { "Filed", "Disseminated", "Historical" },
+                Filings = new[] { "Filed", "Disseminated", "Historical", "Archived" },
                 Advisers = all.Select(x => x.Adviser).Where(x => !String.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList()
             });
         }
@@ -104,6 +106,7 @@ namespace Subsystem1.Areas.Dean.Controllers
 
         private static string FilingStatus(ClearedSubmission item)
         {
+            if (item.IsArchived) return "Archived";
             if (item.IsHistorical || String.Equals(item.Status, "Historical", StringComparison.OrdinalIgnoreCase)) return "Historical";
             return item.IsFiledImport || String.Equals(item.Status, "Filed", StringComparison.OrdinalIgnoreCase) ? "Filed" : "Disseminated";
         }

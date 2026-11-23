@@ -3,7 +3,7 @@
     Layout = "~/Areas/Dean/Views/Shared/_DeanLayout.cshtml";
     var item = Model.Item;
     var recordDate = item.FiledAt ?? item.DisseminatedAt;
-    var filingStatus = item.IsFiledImport || String.Equals(item.Status, "Filed", StringComparison.OrdinalIgnoreCase) ? "Filed" : "Disseminated";
+    var filingStatus = item.IsArchived ? "Archived" : item.IsHistorical ? "Historical" : item.IsFiledImport || String.Equals(item.Status, "Filed", StringComparison.OrdinalIgnoreCase) ? "Filed" : "Disseminated";
 }
 <section class="dean-paper-page">
     <a class="dean-paper-back" href="@Url.Action("Index", "Repository", new { area = "Dean" })"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back to Results</a>

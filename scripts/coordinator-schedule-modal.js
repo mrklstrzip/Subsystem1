@@ -300,6 +300,10 @@
         badge.textContent = STATUS_LABELS[d.status] || d.status;
 
         $('mSubmittedNote').textContent = d.dateSubmitted && d.dateSubmitted !== '-' ? 'Submitted ' + d.dateSubmitted : '';
+        var keywordSource = d.keywordSource === 'pdf' ? 'PDF' : d.keywordSource === 'submission-metadata' ? 'submission metadata' : '';
+        $('mKeywordNote').textContent = d.keywords
+            ? 'Panel matching terms' + (keywordSource ? ' (' + keywordSource + ')' : '') + ': ' + d.keywords + (d.keywordSource === 'pdf-unavailable' ? ' · PDF keywords could not be extracted; using submission metadata.' : '')
+            : (d.keywordSource === 'pdf-unavailable' ? 'PDF keywords could not be extracted; panel matching uses the title and abstract.' : 'No manuscript keywords were found; panel matching used the title and abstract.');
         loadManuscript('/CapstoneCoordinator/CoordinatorApi/manuscript?id=' + encodeURIComponent(d.subsystem2Id || d.id || ''));
 
         submitBtn.style.display = d.editable ? '' : 'none';

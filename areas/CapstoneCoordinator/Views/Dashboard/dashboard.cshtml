@@ -6,7 +6,7 @@
 }
 
 <link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.8" rel="stylesheet" type="text/css" />
-<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=3.4" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=2.3" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -53,11 +53,10 @@
                                 <div class="manuscript-title-text">@s.Title</div>
                                 <span class="program-badge @s.BadgeClass">@s.Badge</span>
                             </td>
-                            <td>@s.Author</td>
-                            <td>@s.Adviser</td>
-                            <td>-</td>
                             <td class="date-cell">@(s.Date.HasValue ? s.Date.Value.ToString("MM-dd-yy", System.Globalization.CultureInfo.InvariantCulture) : "-")</td>
-                            <td class="time-cell">-</td>
+                            <td class="action-cell">
+                                <button type="button" class="btn-view" data-id="@s.Id">View</button>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -98,6 +97,9 @@
                             <td><strong>@(String.IsNullOrWhiteSpace(d.Room) ? "-" : d.Room)</strong></td>
                             <td class="date-cell">@d.ShortDate</td>
                             <td class="time-cell">@d.ShortTime</td>
+                            <td class="action-cell">
+                                <button type="button" class="btn-view" data-id="@d.Id" data-status="@d.Status">View</button>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -137,8 +139,8 @@
                     @foreach (var a in Model.Recent)
                     {
                         <tr>
-                            <td class="recent-date-cell"><span class="recent-date-main">@a.At.ToString("MM-dd-yyyy", System.Globalization.CultureInfo.InvariantCulture)</span><span class="recent-date-time">@a.At.ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture)</span></td>
-                            <td class="recent-activity-text">@a.Text</td>
+                            <td class="time-col">@a.At.ToString("MM-dd-yy | h:mm tt", System.Globalization.CultureInfo.InvariantCulture)</td>
+                            <td class="activity-col">@a.Text</td>
                         </tr>
                     }
                     @for (int k = Model.Recent.Count; k < 3; k++)
@@ -156,24 +158,12 @@
 @Html.Partial("_ScheduleModal", Model)
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.5"></script>
+<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.6"></script>
 <script>
     (function () {
         document.addEventListener("click", function (e) {
-            var row = e.target.closest ? e.target.closest(".dashboard-clickable-row") : null;
-            if (row && window.CCSchedule) {
-                CCSchedule.open(row.getAttribute("data-schedule-id"), row.getAttribute("data-schedule-status") || "");
-                return;
-            }
             var btn = e.target.closest ? e.target.closest(".btn-view") : null;
             if (btn && window.CCSchedule) CCSchedule.open(btn.getAttribute("data-id"), btn.getAttribute("data-status") || "");
-        });
-        document.addEventListener("keydown", function (e) {
-            var row = e.target.closest ? e.target.closest(".dashboard-clickable-row") : null;
-            if (row && (e.key === "Enter" || e.key === " ")) {
-                e.preventDefault();
-                row.click();
-            }
         });
     })();
 </script>

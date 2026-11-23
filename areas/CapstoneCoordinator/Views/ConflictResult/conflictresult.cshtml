@@ -1,11 +1,11 @@
-﻿@using System.Linq
+@using System.Linq
 @using Subsystem1.Areas.CapstoneCoordinator.Models
 @model CoordinatorData
 @{
     ViewBag.Title = "Under Review";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/conflictresult.css")?v=2.4" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/conflictresult.css")?v=2.5" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -76,6 +76,31 @@
             }
         </tbody>
     </table>
+</div>
+
+@{
+    int conflictShowingFrom = Model.ConflictTotalCount == 0 ? 0 : (Model.ConflictPage - 1) * Model.ConflictPageSize + 1;
+    int conflictShowingTo = Math.Min(Model.ConflictPage * Model.ConflictPageSize, Model.ConflictTotalCount);
+    int conflictFirstPage = Math.Max(1, Model.ConflictPage - 2);
+    int conflictLastPage = Math.Min(Model.ConflictPageCount, Model.ConflictPage + 2);
+}
+<div class="conflict-pagination" aria-label="Under review pages">
+    <span class="conflict-pagination-summary">Showing @conflictShowingFrom-@conflictShowingTo of @Model.ConflictTotalCount cases</span>
+    <div class="conflict-pagination-controls">
+        @if (Model.ConflictPage > 1)
+        {
+            <a class="conflict-page-link" href="@Url.Action("conflictresult", "ConflictResult", new { area = "CapstoneCoordinator", page = Model.ConflictPage - 1 })">Previous</a>
+        }
+        @for (int pageNumber = conflictFirstPage; pageNumber <= conflictLastPage; pageNumber++)
+        {
+            bool isCurrentPage = pageNumber == Model.ConflictPage;
+            <a class="conflict-page-link @(isCurrentPage ? "active" : "")" href="@Url.Action("conflictresult", "ConflictResult", new { area = "CapstoneCoordinator", page = pageNumber })" aria-current="@(isCurrentPage ? "page" : "")">@pageNumber</a>
+        }
+        @if (Model.ConflictPage < Model.ConflictPageCount)
+        {
+            <a class="conflict-page-link" href="@Url.Action("conflictresult", "ConflictResult", new { area = "CapstoneCoordinator", page = Model.ConflictPage + 1 })">Next</a>
+        }
+    </div>
 </div>
 
 <!-- ==========================================================
@@ -184,26 +209,28 @@
 
         <!-- Body: Abstract + Panelists -->
         <div class="modal-body-grid">
-            <div class="modal-panel abstract-panel">
-                <div class="manuscript-viewer-header">
-                    <h3 class="panel-title">Manuscript</h3>
-                    <a id="mManuscriptOpen" class="manuscript-open-link" target="_blank" rel="noopener" hidden>Open PDF</a>
-                </div>
-                <div class="pdf-viewer" id="mPdfViewer" aria-label="Manuscript PDF viewer">
-                    <div class="pdf-toolbar">
-                        <button type="button" id="pdfPrev" aria-label="Previous page">&lsaquo;</button>
-                        <span><span id="pdfPage">&mdash;</span> / <span id="pdfPages">&mdash;</span></span>
-                        <button type="button" id="pdfNext" aria-label="Next page">&rsaquo;</button>
-                        <button type="button" id="pdfZoomOut" aria-label="Zoom out">&minus;</button>
-                        <button type="button" id="pdfZoomIn" aria-label="Zoom in">+</button>
-                    </div>
-                    <div class="pdf-canvas-wrap" id="pdfCanvasWrap">
-                        <canvas id="pdfCanvas"></canvas>
-                        <p class="pdf-message" id="pdfMessage">No PDF manuscript is available for this submission.</p>
-                    </div>
-                </div>
-                <span class="panel-footnote" id="mSubmittedNote"></span>
-            </div>
+            <div class="modal-panel abstract-panel">
+                <div class="manuscript-viewer-header">
+                    <h3 class="panel-title">Manuscript</h3>
+                    <a id="mManuscriptOpen" class="manuscript-open-link" target="_blank" rel="noopener" hidden>Open PDF</a>
+                </div>
+                <div class="pdf-viewer" id="mPdfViewer" aria-label="Manuscript PDF viewer">
+                    <div class="pdf-toolbar">
+                        <button type="button" id="pdfPrev" aria-label="Previous page">&lsaquo;</button>
+                        <span><span id="pdfPage">&mdash;</span> / <span id="pdfPages">&mdash;</span></span>
+                        <button type="button" id="pdfNext" aria-label="Next page">&rsaquo;</button>
+                        <button type="button" id="pdfZoomOut" aria-label="Zoom out">&minus;</button>
+                        <button type="button" id="pdfZoomIn" aria-label="Zoom in">+</button>
+                    </div>
+                    <div class="pdf-canvas-wrap" id="pdfCanvasWrap">
+                        <canvas id="pdfCanvas"></canvas>
+                        <p class="pdf-message" id="pdfMessage">No PDF manuscript is available for this submission.</p>
+                    </div>
+                </div>
+                <span class="panel-footnote" id="mSubmittedNote"></span>
+
+            </div>
+
 
             <div class="modal-panel panelists-panel">
                 <div class="panel-header-row">
@@ -226,6 +253,7 @@
                     <span>Expertise Match</span>
                 </div>
                 <div id="mPanelists"></div>
+                <p class="panel-footnote" id="mKeywordNote"></p>
 
                 <h3 class="panel-title schedule-title">Proposed Defense Schedule</h3>
                 <dl class="defense-schedule">
@@ -292,8 +320,8 @@
 </datalist>
 
 <script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.0"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.5"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.6"></script>
 <script>
     (function () {
         function $(id) { return document.getElementById(id); }

@@ -44,5 +44,9 @@ namespace Subsystem1.Areas.Dean.Models
         public List<string> Programs { get; set; } = new List<string>();
         public List<string> Statuses { get; set; } = new List<string> { "Completed", "Ongoing", "Upcoming" };
         public List<string> Advisers { get; set; } = new List<string>();
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 8;
+        public int Total { get; set; }
+        public int PageCount { get { return Total == 0 ? 1 : (int)Math.Ceiling(Total / (double)PageSize); } }
     }
 }

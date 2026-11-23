@@ -31,7 +31,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
     {
         public string Id;
         public string Name;
-        public string Building;   // building name, shown next to the room
+        public string Building = "";
     }
 
     public class EngPick
@@ -54,6 +54,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public string Title = "";
         public string Abstract = "";
         public List<string> Keywords = new List<string>();
+        public string Section = "";
         public string AdviserId;                       // null when unknown
 
         public List<EngFaculty> Faculty = new List<EngFaculty>();
@@ -68,6 +69,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public int MaxTotal = 12;
 
         public Func<string, DateTime, int, int, bool> PersonBusy = (id, day, s, e) => false;
+        public Func<string, DateTime, int, int, bool> SectionBusy = (section, day, s, e) => false;
         public Func<string, DateTime, int, int, bool> RoomBusy = (id, day, s, e) => false;
         public Func<string, DateTime, int> DayLoad = (id, day) => 0;
         public Func<string, int> TotalLoad = id => 0;
@@ -189,16 +191,16 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
             if (p.Rooms.Count == 0)
             {
-                return Fail(r, p, "Room Unavailability", "There are no active rooms to hold the defense.", 0, 0, 0, 0, 0, 0);
+                return Fail(r, p, "Room Unavailability", "There are no active rooms to hold the defense.", 0, 0, 0, 0, 0, 0, 0);
             }
             if (cands.Count < p.PanelSize)
             {
                 return Fail(r, p, "Insufficient Panelists",
-                    "Only " + Pl(cands.Count, "panelist") + " available in the system; " + p.PanelSize + " are needed.", 0, 0, 0, 0, 0, 0);
+                    "Only " + Pl(cands.Count, "panelist") + " available in the system; " + p.PanelSize + " are needed.", 0, 0, 0, 0, 0, 0, 0);
             }
 
             // ---- steps 2-3: CSP with backtracking over the slots ----
-            int slotsTried = 0, noRoom = 0, adviserBusy = 0, shortPanel = 0, noStrong = 0, rejectedCombos = 0;
+            int slotsTried = 0, noRoom = 0, adviserBusy = 0, sectionBusy = 0, shortPanel = 0, noStrong = 0, rejectedCombos = 0;
 
             foreach (DateTime day in p.Days)
             {
@@ -214,6 +216,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
                     // constraint: the adviser attends too
                     if (p.AdviserId != null && p.PersonBusy(p.AdviserId, day, start, end)) { adviserBusy++; continue; }
+
+                    // Keep the defense outside the target section's scheduled class periods.
+                    if (!String.IsNullOrWhiteSpace(p.Section) && p.SectionBusy(p.Section, day, start, end)) { sectionBusy++; continue; }
 
                     // variable: panelists (domain = free, not overloaded)
                     List<EngPick> avail = cands.Where(c =>
@@ -239,10 +244,15 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             }
 
             string type, desc;
-            if (noRoom >= adviserBusy && noRoom >= shortPanel && noRoom >= noStrong)
+            if (noRoom >= adviserBusy && noRoom >= sectionBusy && noRoom >= shortPanel && noRoom >= noStrong)
             {
                 type = "Room Unavailability";
                 desc = "No free room in " + noRoom + " of " + slotsTried + " time slots.";
+            }
+            else if (sectionBusy > adviserBusy && sectionBusy >= shortPanel && sectionBusy >= noStrong)
+            {
+                type = "Section Schedule Unavailability";
+                desc = "The " + p.Section + " section has class in " + sectionBusy + " of " + slotsTried + " time slots.";
             }
             else if (adviserBusy >= shortPanel && adviserBusy >= noStrong)
             {
@@ -254,7 +264,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 type = "Panelist Unavailability";
                 desc = "Fewer than " + p.PanelSize + " free panelists in " + (shortPanel + noStrong) + " of " + slotsTried + " time slots.";
             }
-            return Fail(r, p, type, desc, slotsTried, noRoom, adviserBusy, shortPanel, noStrong, rejectedCombos);
+            return Fail(r, p, type, desc, slotsTried, noRoom, adviserBusy, sectionBusy, shortPanel, noStrong, rejectedCombos);
         }
 
         // depth-first search with backtracking: pick a panelist, go deeper, undo when the panel is rejected
@@ -282,7 +292,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         }
 
         private static EngResult Fail(EngResult r, EngProblem p, string type, string desc,
-            int slots, int noRoom, int adviserBusy, int shortPanel, int noStrong, int rejected)
+            int slots, int noRoom, int adviserBusy, int sectionBusy, int shortPanel, int noStrong, int rejected)
         {
             r.Success = false;
             r.ConflictType = type;
@@ -294,7 +304,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             {
                 Title = "Check availability",
                 Text = "Checked " + Pl(p.Days.Count, "day") + " (" + window + ") with " + Pl(p.SlotStarts.Length, "time slot") + " each and "
-                    + Pl(p.Rooms.Count, "room") + ": " + Pl(slots, "slot") + " in total. Considered class schedules, other defenses, "
+                    + Pl(p.Rooms.Count, "room") + ": " + Pl(slots, "slot") + " in total. Considered adviser and section class schedules, other defenses, "
                     + "room bookings and each panelist's workload."
             });
             r.Steps.Add(new EngStep
@@ -303,7 +313,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 Text = slots == 0
                     ? "No slot could be tried: " + desc
                     : "Tried each slot in date order and backed out of it when a constraint failed: " + Pl(noRoom, "slot") + " had no free room, "
-                        + Pl(adviserBusy, "slot") + " had a busy adviser, " + Pl(shortPanel, "slot") + " had fewer than " + p.PanelSize
+                        + Pl(adviserBusy, "slot") + " had a busy adviser, " + Pl(sectionBusy, "slot") + " overlapped a section class, " + Pl(shortPanel, "slot") + " had fewer than " + p.PanelSize
                         + " free panelists, and " + Pl(noStrong, "slot") + " had no panel with an expertise match. "
                         + Pl(rejected, "panel combination") + " were tried and rejected."
             });

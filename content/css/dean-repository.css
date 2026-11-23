@@ -9,6 +9,15 @@
 .dean-repo-search { display:flex; gap:10px; margin: 0 0 12px; }
 .dean-repo-search input { flex:1; min-width:0; border:1px solid #cbd1df; border-radius:8px; padding:11px 14px; background:#fff; color:#26364e; }
 .dean-repo-search select { width:180px; border:1px solid #cbd1df; border-radius:8px; padding:10px; background:#fff; color:#26364e; }
+.dean-archive-toggle { white-space:nowrap; }
+.dean-repository-filters { margin:0 0 16px; }
+.dean-repository-filter-bar { align-items:center; flex-wrap:wrap; gap:10px; padding:14px; border:1px solid #e2e8f0; border-radius:14px; background:#fff; box-shadow:0 4px 16px rgba(0,0,0,.06); }
+.dean-repository-filter-bar input[type=search] { box-sizing:border-box; flex:1 1 260px; height:44px; }
+.dean-repository-filter-bar select { box-sizing:border-box; flex:0 1 150px; width:150px; height:44px; }
+.dean-repository-filter-bar select[name=year] { flex-basis:130px; width:130px; }
+.dean-repository-filter-bar select[name=sort] { flex-basis:155px; width:155px; }
+.dean-repository-filter-bar button { min-height:44px; }
+.dean-repository-filter-bar .dean-archive-toggle { min-height:44px; box-sizing:border-box; }
 .dean-page-btn { display:inline-flex; align-items:center; justify-content:center; border:1px solid #22364f; border-radius:7px; padding:9px 15px; background:#22364f; color:#fff; text-decoration:none; font-weight:600; cursor:pointer; }
 .dean-page-btn:hover { color:#fff; background:#30445e; }
 .dean-page-btn.light { background:#fff; color:#203551; }
@@ -69,7 +78,7 @@
 .dean-facts dt { color:#64748b; font-size:13px; }
 .dean-facts dd { margin:0; color:#21364f; overflow-wrap:anywhere; }
 @media(max-width:1000px){.dean-repo-grid{grid-template-columns:1fr}.dean-filter-head{display:none}.dean-record-tools{grid-template-columns:1fr 1fr}.dean-report-stats{grid-template-columns:1fr 1fr}}
-@media(max-width:650px){.dean-page-banner{padding:20px}.dean-page-banner h1{font-size:24px}.dean-repo-search{flex-wrap:wrap}.dean-repo-search input{flex-basis:100%}.dean-result-card{grid-template-columns:76px 1fr;padding:12px;gap:12px}.dean-book-cover{width:72px;height:110px}.dean-result-main h2{font-size:16px}.dean-record-tools{grid-template-columns:1fr}.dean-report-stats{grid-template-columns:1fr 1fr}.dean-facts{grid-template-columns:1fr}.dean-facts dd{margin-bottom:8px}}
+@media(max-width:650px){.dean-page-banner{padding:20px}.dean-page-banner h1{font-size:24px}.dean-repo-search{flex-wrap:wrap}.dean-repo-search input{flex-basis:100%}.dean-repo-search select{flex:1;width:auto}.dean-repository-filter-bar input[type=search]{flex-basis:100%}.dean-repository-filter-bar select{flex:1 1 calc(50% - 10px);width:auto}.dean-repository-filter-bar select[name=year],.dean-repository-filter-bar select[name=sort]{flex-basis:calc(50% - 10px);width:auto}.dean-archive-toggle{flex:1}.dean-result-card{grid-template-columns:76px 1fr;padding:12px;gap:12px}.dean-book-cover{width:72px;height:110px}.dean-result-main h2{font-size:16px}.dean-record-tools{grid-template-columns:1fr}.dean-report-stats{grid-template-columns:1fr 1fr}.dean-facts{grid-template-columns:1fr}.dean-facts dd{margin-bottom:8px}}
 @media print { .layout-header,.layout-sidebar,.dean-page-banner,.dean-page-tabs,.dean-report-filters,.dean-report-actions,.notif-panel { display:none !important; } .layout-content { margin:0 !important; padding:0 !important; background:#fff !important; } .dean-page-panel { box-shadow:none; } }
 
 /* Dean pages use the same navy and slate palette as Dashboard and Schedule Approval. */
@@ -293,6 +302,10 @@
 .dean-submission-pages .disabled { color: #a3aab5; }
 .dean-submission-pagination > label { display: flex; justify-content: end; align-items: center; gap: 8px; white-space: nowrap; }
 .dean-submission-pagination select { height: 34px; padding: 0 8px; border: 1px solid #cbd3df; border-radius: 7px; background: #fff; color: #26364e; }
+.dean-defense-pagination { display:flex; align-items:center; justify-content:space-between; gap:14px; margin:14px 0 24px; padding:12px 16px; color:#63758d; font-size:12px; }
+.dean-defense-pages { display:flex; align-items:center; gap:6px; }
+.dean-defense-pages a { display:inline-flex; min-width:34px; height:34px; align-items:center; justify-content:center; padding:0 10px; border:1px solid #d8deea; border-radius:8px; background:#fff; color:#405875; font-weight:600; text-decoration:none; }
+.dean-defense-pages a:hover, .dean-defense-pages a.active { border-color:#223249; background:#223249; color:#fff; }
 .dean-submission-record-detail { padding: 24px; }
 .dean-submission-record-detail dl { display: grid; grid-template-columns: 150px minmax(0,1fr); gap: 12px; margin: 0; }
 .dean-submission-record-detail dt { color: #71809a; font-size: 11px; font-weight: 700; }
@@ -319,6 +332,8 @@
     .dean-submission-results { padding: 0 12px; }
     .dean-submission-pagination { grid-template-columns: 1fr auto; }
     .dean-submission-pagination > label { grid-column: 1 / -1; justify-content: start; }
+    .dean-defense-pagination { align-items:flex-start; flex-direction:column; }
+    .dean-defense-pages { flex-wrap:wrap; }
 }
 @media(max-width:520px) {
     .dean-submission-filter-card { padding: 14px; }
@@ -331,6 +346,7 @@
     .dean-submission-results-heading h2 { font-size: 16px; }
     .dean-submission-pagination { grid-template-columns: 1fr; justify-items: start; }
     .dean-submission-pagination > label { grid-column: 1; }
+    .dean-defense-pagination { align-items:flex-start; }
 }
 
 @media(max-width:700px) {

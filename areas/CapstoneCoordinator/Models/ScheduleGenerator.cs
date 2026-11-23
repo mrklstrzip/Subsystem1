@@ -165,6 +165,45 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return null;
         }
 
+        public bool SectionClassClash(string section, DateTime day, int s, int e)
+        {
+            string wanted = SectionKey(section);
+            if (wanted == "") return false;
+            string dayName = day.DayOfWeek.ToString();
+            foreach (BsonDocument c in Classes)
+            {
+                if (!String.Equals(Str(c, "day"), dayName, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!ClassSections(c).Any(value => SectionKey(value) == wanted)) continue;
+                int cs = Minutes(c, "start") ?? 0, ce = Minutes(c, "end") ?? 0;
+                if (Overlap(s, e, cs, ce)) return true;
+            }
+            return false;
+        }
+
+        private static IEnumerable<string> ClassSections(BsonDocument schedule)
+        {
+            foreach (string field in new[] { "section", "sectionName", "sectionCode" })
+            {
+                BsonValue value;
+                if (!schedule.TryGetValue(field, out value) || value == null || value.IsBsonNull) continue;
+                if (value.IsString) yield return value.AsString;
+                else if (value.IsBsonArray)
+                    foreach (BsonValue item in value.AsBsonArray) if (item.IsString) yield return item.AsString;
+            }
+            BsonValue sections;
+            if (schedule.TryGetValue("sections", out sections) && sections != null && sections.IsBsonArray)
+                foreach (BsonValue item in sections.AsBsonArray) if (item.IsString) yield return item.AsString;
+        }
+
+        private static string SectionKey(string section)
+        {
+            string key = Regex.Replace((section ?? "").Trim().ToUpperInvariant(), @"[^A-Z0-9]", "");
+            if (key.StartsWith("SBIT", StringComparison.Ordinal)) key = "BSIT" + key.Substring(4);
+            else if (key.StartsWith("SBCS", StringComparison.Ordinal)) key = "BSCS" + key.Substring(4);
+            else if (key.StartsWith("SBIS", StringComparison.Ordinal)) key = "BSIS" + key.Substring(4);
+            return key;
+        }
+
         public int DayLoad(string id, DateTime day) { return Bookings.Count(b => b.Day == day && b.Panel.Contains(id)); }
         public int TotalLoad(string id) { return Bookings.Count(b => b.Day >= Today && b.Panel.Contains(id)); }
 
@@ -199,6 +238,23 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
     {
         private static readonly object Gate = new object();
         private static bool indexed;
+        private const int PdfKeywordParserVersion = 3;
+
+        private static int KeywordParserVersion(BsonDocument doc)
+        {
+            BsonValue value;
+            return doc != null && doc.TryGetValue("keywordParserVersion", out value) && value != null && value.IsNumeric
+                ? value.ToInt32()
+                : 0;
+        }
+
+        private static bool IsEligiblePanelist(BsonDocument user, string adviserId)
+        {
+            if (user == null) return false;
+            string id = DocId(user);
+            return id != "" && !String.Equals(id, adviserId ?? "", StringComparison.OrdinalIgnoreCase) &&
+                   AdminApi.RoleKey(Str(user, "role")) == "panelist";
+        }
 
         private static void EnsureIndex()
         {
@@ -234,19 +290,26 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             {
                 var have = new HashSet<string>();
                 var haveManagers = new HashSet<string>();
-                foreach (BsonDocument s in Schedules().Find(new BsonDocument()).ToList())
+                List<BsonDocument> existingSchedules = Schedules().Find(new BsonDocument()).ToList();
+                foreach (BsonDocument s in existingSchedules)
                 {
                     if (Str(s, "titleId") != "") have.Add(Str(s, "titleId"));
                     if (Str(s, "projectManagerId") != "") haveManagers.Add(Str(s, "projectManagerId"));
                 }
 
-                List<BsonDocument> subsystem2Todo = Subsystem2Manuscripts.SchedulingTitles()
+                List<BsonDocument> allSubsystem2Titles = Subsystem2Manuscripts.SchedulingTitles();
+                var subsystem2TitleById = allSubsystem2Titles
+                    .Where(t => DocId(t) != "")
+                    .GroupBy(DocId, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+                var subsystem2Managers = new HashSet<string>(
+                    allSubsystem2Titles.Select(t => Str(t, "studentId")).Where(id => id != ""),
+                    StringComparer.OrdinalIgnoreCase);
+                List<BsonDocument> subsystem2Todo = allSubsystem2Titles
+                    .Where(t => IsFirstDefenseRevision(t) || IsRedefenseRevision(t) && HasCompletedFirstDefense(Str(t, "studentId"), existingSchedules, subsystem2TitleById))
                     .Where(t => !have.Contains(DocId(t)))
                     .OrderBy(t => Stamp(t, "submittedAt") ?? DateTime.MinValue)
                     .ToList();
-                var subsystem2Managers = new HashSet<string>(
-                    subsystem2Todo.Select(t => Str(t, "studentId")).Where(id => id != ""),
-                    StringComparer.OrdinalIgnoreCase);
 
                 List<BsonDocument> legacyTodo = Titles().Find(new BsonDocument()).ToList()
                     .Where(t => !have.Contains(DocId(t)) && !haveManagers.Contains(Str(t, "studentId")))
@@ -267,6 +330,44 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             }
         }
 
+        private static int RevisionOf(BsonDocument title)
+        {
+            int revision;
+            string value = AnyStr(title, "versionNumber");
+            if (String.IsNullOrWhiteSpace(value)) value = AnyStr(title, "revisions");
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out revision)
+                ? revision
+                : 1;
+        }
+
+        private static bool IsFirstDefenseRevision(BsonDocument title) { return RevisionOf(title) == 1; }
+        private static bool IsRedefenseRevision(BsonDocument title) { return RevisionOf(title) == 2; }
+
+        private static bool HasCompletedFirstDefense(string managerId, List<BsonDocument> schedules, Dictionary<string, BsonDocument> titlesById)
+        {
+            if (String.IsNullOrWhiteSpace(managerId)) return false;
+            DateTime now = NowManila();
+            foreach (BsonDocument schedule in schedules.Where(s => Str(s, "projectManagerId") == managerId))
+            {
+                int revision = 0;
+                int.TryParse(AnyStr(schedule, "revisionNumber"), NumberStyles.Integer, CultureInfo.InvariantCulture, out revision);
+                if (revision == 0)
+                {
+                    BsonDocument source;
+                    if (titlesById.TryGetValue(Str(schedule, "titleId"), out source)) revision = RevisionOf(source);
+                }
+                if (revision != 1) continue;
+
+                string status = CoDb.StatusOf(schedule);
+                if (status == "completed" || status == "complete") return true;
+                if (status != "approved") continue;
+                DateTime? day = CoDb.ParseDay(Str(schedule, "date"));
+                int? end = Minutes(schedule, "end");
+                if (day.HasValue && end.HasValue && day.Value.AddMinutes(end.Value) <= now) return true;
+            }
+            return false;
+        }
+
         /// <summary>Called right after a student submits a title.</summary>
         public static bool GenerateForTitle(string titleId)
         {
@@ -283,13 +384,118 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             }
         }
 
-        private static EngProblem ProblemFor(BsonDocument title, string adviserId, PlanContext ctx)
+        /// <summary>Refreshes an editable generated schedule from its latest Subsystem 2 PDF.</summary>
+        public static void RefreshPdfPanelMatching(string scheduleId)
+        {
+            lock (Gate)
+            {
+                ObjectId? oid = ParseId(scheduleId);
+                if (!oid.HasValue) return;
+                var filter = Builders<BsonDocument>.Filter.Eq("_id", oid.Value);
+                BsonDocument sched = Schedules().Find(filter).FirstOrDefault();
+                if (sched == null || !CoDb.IsEditable(sched)) return;
+
+                BsonDocument title = Subsystem2Manuscripts.ForScheduleSubmission(Str(sched, "titleId"), includeRevisionCase: false) ?? TitleOf(sched);
+                if (title == null || !title.Contains("sourceSubsystem2") || !title["sourceSubsystem2"].IsBoolean || !title["sourceSubsystem2"].AsBoolean) return;
+                string savedKeywordSource = Str(sched, "keywordSource");
+                if ((savedKeywordSource == "pdf" || savedKeywordSource == "gemini-pdf" || savedKeywordSource == "gemini-generated") && KeywordParserVersion(sched) >= PdfKeywordParserVersion) return;
+                DateTime? lastAttempt = Stamp(sched, "keywordExtractionAttemptedAt");
+                bool parserNeedsUpgrade = (savedKeywordSource == "pdf" || savedKeywordSource == "gemini-pdf" || savedKeywordSource == "gemini-generated") && KeywordParserVersion(sched) < PdfKeywordParserVersion;
+                if (!parserNeedsUpgrade && lastAttempt.HasValue && DateTime.UtcNow - lastAttempt.Value < TimeSpan.FromHours(1)) return;
+
+                string extractedSource;
+                List<string> pdfKeywords = Subsystem2Manuscripts.ExtractPdfKeywords(title, out extractedSource);
+                DateTime now = DateTime.UtcNow;
+                if (pdfKeywords.Count == 0)
+                {
+                    List<string> fallbackKeywords = CoDb.Keywords(title);
+                    PlanContext fallbackContext = PlanContext.Load();
+                    var fallbackPanel = new List<BsonDocument>();
+                    BsonValue previousPanel;
+                    if (sched.TryGetValue("panelists", out previousPanel) && previousPanel != null && previousPanel.IsBsonArray)
+                    {
+                        foreach (BsonValue item in previousPanel.AsBsonArray)
+                        {
+                            if (!item.IsBsonDocument) continue;
+                            BsonDocument user;
+                            if (fallbackContext.Panelists.TryGetValue(Str(item.AsBsonDocument, "userId"), out user) &&
+                                IsEligiblePanelist(user, Str(sched, "adviserId"))) fallbackPanel.Add(user);
+                        }
+                    }
+                    var fallbackUpdate = Builders<BsonDocument>.Update
+                        .Set("keywords", new BsonArray(fallbackKeywords))
+                        .Set("keywordExtractionAttemptedAt", now)
+                        .Set("keywordSource", fallbackKeywords.Count > 0 ? "submission-metadata" : "pdf-unavailable")
+                        .Set("updatedAt", now);
+                    if (fallbackPanel.Count == CoDb.PanelSize)
+                        fallbackUpdate = fallbackUpdate.Set("panelists", PanelDocs(fallbackPanel, title, Str(sched, "adviserId"), fallbackKeywords));
+                    Schedules().UpdateOne(filter, fallbackUpdate);
+                    return;
+                }
+
+                PlanContext ctx = PlanContext.Load();
+                string adviserId = Str(sched, "adviserId");
+                string section = Str(sched, "section");
+                EngProblem p = ProblemFor(title, adviserId, section, ctx);
+                p.Keywords = pdfKeywords;
+
+                DateTime? day = CoDb.ParseDay(Str(sched, "date"));
+                int? start = Minutes(sched, "start"), end = Minutes(sched, "end");
+                string roomId = Str(sched, "roomId");
+                EngRoom room = ctx.Rooms.FirstOrDefault(r => r.Id == roomId);
+                List<BsonDocument> panel = new List<BsonDocument>();
+                if (day.HasValue && start.HasValue && end.HasValue && end.Value > start.Value && room != null)
+                {
+                    p.Days = new List<DateTime> { day.Value };
+                    p.SlotStarts = new[] { start.Value };
+                    p.Duration = end.Value - start.Value;
+                    p.Rooms = new List<EngRoom> { room };
+                    p.PersonBusy = (id, d, s, e) => ctx.PersonBooking(id, d, s, e, scheduleId) != null || ctx.ClassClash(id, d, s, e) != null;
+                    p.SectionBusy = (targetSection, d, s, e) => ctx.SectionClassClash(targetSection, d, s, e);
+                    p.RoomBusy = (id, d, s, e) => ctx.RoomBusy(id, d, s, e, scheduleId);
+                    p.DayLoad = (id, d) => ctx.Bookings.Count(b => b.ScheduleId != scheduleId && b.Day == d && b.Panel.Contains(id));
+                    p.TotalLoad = id => ctx.Bookings.Count(b => b.ScheduleId != scheduleId && b.Day >= ctx.Today && b.Panel.Contains(id));
+
+                    EngResult result = ScheduleEngine.Solve(p);
+                    if (result.Success)
+                        panel = result.Panel.Select(pick => ctx.Panelists[pick.Faculty.Id]).ToList();
+                }
+
+                if (panel.Count == 0)
+                {
+                    BsonValue savedPanel;
+                    if (sched.TryGetValue("panelists", out savedPanel) && savedPanel != null && savedPanel.IsBsonArray)
+                    {
+                        foreach (BsonValue item in savedPanel.AsBsonArray)
+                        {
+                            if (!item.IsBsonDocument) continue;
+                            string id = Str(item.AsBsonDocument, "userId");
+                            BsonDocument user;
+                            if (ctx.Panelists.TryGetValue(id, out user)) panel.Add(user);
+                        }
+                    }
+                }
+
+                var update = Builders<BsonDocument>.Update
+                    .Set("keywords", new BsonArray(pdfKeywords))
+                    .Set("keywordSource", extractedSource)
+                    .Set("keywordParserVersion", PdfKeywordParserVersion)
+                    .Set("keywordExtractionAttemptedAt", now)
+                    .Set("updatedAt", now);
+                if (panel.Count == CoDb.PanelSize)
+                    update = update.Set("panelists", PanelDocs(panel, title, adviserId, pdfKeywords));
+                Schedules().UpdateOne(filter, update);
+            }
+        }
+
+        private static EngProblem ProblemFor(BsonDocument title, string adviserId, string section, PlanContext ctx)
         {
             var p = new EngProblem
             {
                 Title = Str(title, "title"),
                 Abstract = Str(title, "abstract"),
                 Keywords = CoDb.Keywords(title),
+                Section = section ?? "",
                 AdviserId = adviserId == "" ? null : adviserId,
                 PanelSize = CoDb.PanelSize
             };
@@ -317,8 +523,12 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 BsonDocument pm = ManagerOf(title);
                 string adviserId = Str(title, "adviserId");
                 if (adviserId == "" && pm != null) adviserId = Str(pm, "adviserId");
+                string section = Str(title, "section") != "" ? Str(title, "section") : (pm == null ? "" : Str(pm, "section"));
 
-                EngProblem p = ProblemFor(title, adviserId, ctx);
+                EngProblem p = ProblemFor(title, adviserId, section, ctx);
+                // Keep the list page responsive: Cloudinary PDF extraction is done when
+                // the coordinator opens the schedule, not while bulk schedules are generated.
+                string keywordSource = p.Keywords.Count > 0 ? "submission-metadata" : "none";
                 p.Rooms = ctx.Rooms;
 
                 DateTime day = ctx.Today.AddDays(1);
@@ -329,6 +539,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 }
 
                 p.PersonBusy = (id, d, s, e) => ctx.PersonBooking(id, d, s, e, null) != null || ctx.ClassClash(id, d, s, e) != null;
+                p.SectionBusy = (targetSection, d, s, e) => ctx.SectionClassClash(targetSection, d, s, e);
                 p.RoomBusy = (id, d, s, e) => ctx.RoomBusy(id, d, s, e, null);
                 p.DayLoad = (id, d) => ctx.DayLoad(id, d);
                 p.TotalLoad = id => ctx.TotalLoad(id);
@@ -336,7 +547,6 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 EngResult r = ScheduleEngine.Solve(p);
 
                 string program = CoDb.ProgramCode(pm != null && Str(pm, "program") != "" ? Str(pm, "program") : Str(title, "program"));
-                string section = Str(title, "section") != "" ? Str(title, "section") : (pm == null ? "" : Str(pm, "section"));
                 string group = pm == null ? "" : FirstNonEmpty(AnyStr(pm, "group"), AnyStr(pm, "groupNo"), AnyStr(pm, "groupNumber"));
                 DateTime now = DateTime.UtcNow;
 
@@ -344,6 +554,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 {
                     { "projectManagerId", Str(title, "studentId") },
                     { "titleId", titleId },
+                    { "revisionNumber", RevisionOf(title) },
                     { "title", Str(title, "title") },
                     { "authors", new BsonArray(SplitAuthors(Str(title, "authors"))) },
                     { "manager", pm == null ? Str(title, "projectManager") : PlainName(pm) },
@@ -352,6 +563,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     { "group", group },
                     { "adviserId", adviserId },
                     { "adviser", Str(title, "adviser") },
+                    { "keywords", new BsonArray(p.Keywords) },
+                    { "keywordSource", keywordSource },
+                    { "keywordParserVersion", 0 },
                     { "createdAt", now },
                     { "updatedAt", now }
                 };
@@ -363,6 +577,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     foreach (EngPick pick in r.Panel)
                     {
                         BsonDocument u = ctx.Panelists[pick.Faculty.Id];
+                        if (!IsEligiblePanelist(u, adviserId)) continue;
                         panel.Add(new BsonDocument
                         {
                             { "userId", pick.Faculty.Id },
@@ -435,6 +650,13 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             catch { /* the schedule is already saved; CoordinatorData.Load repeats this on the next visit */ }
         }
 
+        // Shows the schedule's status (To Submit / Under Review / Submitted) on the capstone_submissions document.
+        private static void SyncSubmission(BsonDocument sched)
+        {
+            try { Subsystem2Manuscripts.MarkSubmission(Str(sched, "titleId"), DocId(sched), CoDb.CoStatus(sched), Str(sched, "problem")); }
+            catch { /* the schedule is already saved; CoordinatorData.Load repeats this on the next visit */ }
+        }
+
         private static string FirstNonEmpty(params string[] values)
         {
             return values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v)) ?? "";
@@ -467,7 +689,11 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                     res.Error = "\"" + n + "\" is not an active panelist. Pick a name from the list.";
                     return res;
                 }
-                if (id == adviserId) { res.Error = n + " is the group's adviser and cannot also be a panelist."; return res; }
+                if (!IsEligiblePanelist(ctx.Panelists[id], adviserId))
+                {
+                    res.Error = n + " must be an active professor/panelist and cannot be the group's adviser.";
+                    return res;
+                }
                 if (!seen.Add(id)) { res.Error = "A panelist can only be assigned once."; return res; }
                 res.Panel.Add(ctx.Panelists[id]);
             }
@@ -488,6 +714,13 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             res.Day = day.Value;
             res.Start = start.Value;
             res.End = end.Value;
+
+            string section = Str(sched, "section");
+            if (section != "" && ctx.SectionClassClash(section, res.Day, res.Start, res.End))
+            {
+                res.Error = "The " + section + " section has a scheduled class during that defense time. Choose a free section period.";
+                return res;
+            }
 
             // room
             string roomName = (input.Room ?? "").Trim();
@@ -525,9 +758,9 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             return res;
         }
 
-        private static BsonArray PanelDocs(List<BsonDocument> panel, BsonDocument title, string adviserId)
+        private static BsonArray PanelDocs(List<BsonDocument> panel, BsonDocument title, string adviserId, List<string> keywords)
         {
-            var p = new EngProblem { Title = Str(title, "title"), Abstract = Str(title, "abstract"), Keywords = CoDb.Keywords(title) };
+            var p = new EngProblem { Title = Str(title, "title"), Abstract = Str(title, "abstract"), Keywords = keywords ?? CoDb.Keywords(title) };
             var arr = new BsonArray();
 
             // same rule as the generator: highest percentage = Chairman, the rest = Members
@@ -535,6 +768,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             var users = new Dictionary<string, BsonDocument>();
             foreach (BsonDocument u in panel)
             {
+                if (!IsEligiblePanelist(u, adviserId)) continue;
                 var f = new EngFaculty { Id = DocId(u), Name = PlainName(u), Tags = CoDb.Expertise(u) };
                 int pts = ScheduleEngine.Points(f, p);
                 picks.Add(new EngPick { Faculty = f, Points = pts, Percent = ScheduleEngine.Percent(f, p), Match = ScheduleEngine.Level(pts) });
@@ -577,7 +811,21 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                 if (chk.Error != null) return chk.Error;
                 if (chk.Soft.Count > 0 && !force) { soft.AddRange(chk.Soft); return null; }
 
-                BsonDocument title = TitleOf(sched);
+                BsonDocument title = Subsystem2Manuscripts.ForScheduleSubmission(Str(sched, "titleId"), includeRevisionCase: false) ?? TitleOf(sched);
+                List<string> matchingKeywords = CoDb.Keywords(sched);
+                string keywordSource = Str(sched, "keywordSource");
+                if (title != null && title.Contains("sourceSubsystem2") && title["sourceSubsystem2"].IsBoolean && title["sourceSubsystem2"].AsBoolean &&
+                    ((keywordSource != "pdf" && keywordSource != "gemini-pdf" && keywordSource != "gemini-generated") || KeywordParserVersion(sched) < PdfKeywordParserVersion))
+                {
+                    string extractedSource;
+                    List<string> extracted = Subsystem2Manuscripts.ExtractPdfKeywords(title, out extractedSource);
+                    if (extracted.Count > 0)
+                    {
+                        matchingKeywords = extracted;
+                        keywordSource = extractedSource;
+                    }
+                }
+                if (matchingKeywords.Count == 0 && title != null) matchingKeywords = CoDb.Keywords(title);
                 var u = Builders<BsonDocument>.Update;
                 Schedules().UpdateOne(
                     Builders<BsonDocument>.Filter.Eq("_id", oid.Value),
@@ -588,7 +836,11 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
                         u.Set("roomId", chk.Room.Id),
                         u.Set("roomName", chk.Room.Name),
                         u.Set("buildingName", chk.Room.Building ?? ""),
-                        u.Set("panelists", PanelDocs(chk.Panel, title ?? new BsonDocument(), Str(sched, "adviserId"))),
+                        u.Set("panelists", PanelDocs(chk.Panel, title ?? new BsonDocument(), Str(sched, "adviserId"), matchingKeywords)),
+                        u.Set("keywords", new BsonArray(matchingKeywords)),
+                        u.Set("keywordSource", keywordSource != "" ? keywordSource : matchingKeywords.Count > 0 ? "submission-metadata" : "none"),
+                        u.Set("keywordParserVersion", (keywordSource == "pdf" || keywordSource == "gemini-pdf" || keywordSource == "gemini-generated") ? PdfKeywordParserVersion : 0),
+                        u.Set("keywordExtractionAttemptedAt", DateTime.UtcNow),
                         u.Set("updatedAt", DateTime.UtcNow)));
 
                 CoDb.Log("Schedule edited for \"" + Str(sched, "title") + "\"");

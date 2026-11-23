@@ -56,6 +56,14 @@
 .manuscript-unavailable { padding: 9px 10px; border-radius: 7px; background: #fff6e9; color: #87521d; }
 
 .completed-manuscripts-card { border-radius: 14px; }
+.completed-manuscripts-filter-bar { box-sizing:border-box; display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:0 0 14px; padding:14px; border:1px solid #e2e8f0; border-radius:14px; background:#fff; box-shadow:0 4px 16px rgba(0,0,0,.06); }
+.completed-manuscripts-filter-bar input[type=search] { box-sizing:border-box; flex:1 1 260px; min-width:180px; height:44px; padding:0 14px; border:1px solid #cbd3df; border-radius:9px; background:#fff; color:#223249; font:13px 'Inter',sans-serif; }
+.completed-manuscripts-filter-bar select { box-sizing:border-box; flex:0 1 155px; min-width:135px; height:44px; padding:0 12px; border:1px solid #cbd3df; border-radius:9px; background:#fff; color:#223249; font:13px 'Inter',sans-serif; }
+.completed-filter-search { min-height:44px; padding:0 18px; border:1px solid #223249; border-radius:9px; background:#223249; color:#fff; font:600 13px 'Inter',sans-serif; cursor:pointer; }
+.completed-filter-search:hover { background:#374a60; }
+.completed-archive-toggle { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; box-sizing:border-box; padding:0 14px; border:1px solid #ccd5e1; border-radius:8px; background:#fff; color:#344c69; font-size:12px; font-weight:700; text-decoration:none; box-shadow:0 2px 7px rgba(25,42,65,.05); transition:background .15s ease,border-color .15s ease; white-space:nowrap; }
+.completed-archive-toggle:hover { border-color:#9aadc4; background:#f5f8fb; color:#223249; }
+.completed-archive-count { display:inline-grid; min-width:19px; height:19px; place-items:center; padding:0 5px; border-radius:999px; background:#edf1f6; color:#52647d; font-size:10px; }
 .completed-manuscripts-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; border-bottom: 1px solid #e7ebf0; }
 .completed-manuscripts-card-heading h2 { margin: 0; color: #223249; font: 700 20px 'Newsreader', Georgia, serif; }
 .completed-manuscripts-card-heading > span { color: #71809a; font-size: 12px; font-weight: 600; }
@@ -115,6 +123,10 @@
     .cleared-detail-body { min-width: 0; max-width: 100%; grid-column: 1 / -1; }
     .cleared-details { min-width: 0; }
     .completed-manuscripts-table-wrap { padding: 0 12px 12px; }
+    .completed-manuscripts-filter-bar { gap:8px; padding:12px; }
+    .completed-manuscripts-filter-bar input[type=search] { flex-basis:100%; }
+    .completed-manuscripts-filter-bar select { flex:1 1 calc(50% - 8px); min-width:0; }
+    .completed-filter-search, .completed-archive-toggle { flex:1 1 calc(50% - 8px); }
 }
 
 @media (max-width: 520px) {

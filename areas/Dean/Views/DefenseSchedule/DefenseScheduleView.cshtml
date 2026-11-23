@@ -106,6 +106,31 @@
     </table>
 </div>
 
+@{
+    int defenseFirstRow = Model.Total == 0 ? 0 : (Model.Page - 1) * Model.PageSize + 1;
+    int defenseLastRow = Math.Min(Model.Page * Model.PageSize, Model.Total);
+    int defenseFirstPage = Math.Max(1, Model.Page - 2);
+    int defenseLastPage = Math.Min(Model.PageCount, Model.Page + 2);
+}
+<footer class="dean-defense-pagination">
+    <span>Showing @defenseFirstRow-@defenseLastRow of @Model.Total defenses</span>
+    <div class="dean-defense-pages">
+        @if (Model.Page > 1)
+        {
+            <a href="@Url.Action("DefenseScheduleView", "DefenseSchedule", new { area = "Dean", search = Model.Search, program = Model.Program, status = Model.Status, adviser = Model.Adviser, page = Model.Page - 1 })">‹ Previous</a>
+        }
+        @for (int pageNumber = defenseFirstPage; pageNumber <= defenseLastPage; pageNumber++)
+        {
+            bool isCurrentPage = pageNumber == Model.Page;
+            <a class="@(isCurrentPage ? "active" : "")" href="@Url.Action("DefenseScheduleView", "DefenseSchedule", new { area = "Dean", search = Model.Search, program = Model.Program, status = Model.Status, adviser = Model.Adviser, page = pageNumber })" aria-current="@(isCurrentPage ? "page" : "")">@pageNumber</a>
+        }
+        @if (Model.Page < Model.PageCount)
+        {
+            <a href="@Url.Action("DefenseScheduleView", "DefenseSchedule", new { area = "Dean", search = Model.Search, program = Model.Program, status = Model.Status, adviser = Model.Adviser, page = Model.Page + 1 })">Next ›</a>
+        }
+    </div>
+</footer>
+
 @Html.Partial("_ScheduleApprovalModal")
 
 @section scripts {

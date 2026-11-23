@@ -5,7 +5,7 @@
 @{
     ViewBag.Title = Model.Title;
     var recordDate = Model.FiledAt ?? Model.DisseminatedAt;
-    var repositoryStatus = Model.IsHistorical ? "Historical" : "Filed";
+    var repositoryStatus = Model.IsArchived ? "Archived" : Model.IsHistorical ? "Historical" : "Filed";
 }
 <link href="@Url.Content("~/Content/css/capstonecoordinator/clearedsubmissions.css")?v=2.2" rel="stylesheet" type="text/css" />
 

@@ -7,10 +7,10 @@ namespace Subsystem1.Areas.Dean.Controllers
     {
         // GET: Dean/DefenseSchedule
         public ActionResult DefenseScheduleView(string search, string program = "All",
-                                                string status = "All", string adviser = "All")
+                                                string status = "All", string adviser = "All", int page = 1)
         {
             ViewBag.Title = "Defense Schedule";
-            return View(DeanData.Defenses(search, program, status, adviser));
+            return View(DeanData.Defenses(search, program, status, adviser, page, 8));
         }
 
         public ActionResult Index()
