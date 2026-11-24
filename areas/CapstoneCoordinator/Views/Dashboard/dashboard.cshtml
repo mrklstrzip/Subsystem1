@@ -5,7 +5,7 @@
     ViewBag.Title = "Dashboard";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.8" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=4.6" rel="stylesheet" type="text/css" />
 <link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=2.3" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
@@ -30,25 +30,22 @@
                 <h3 class="section-title">To Submit</h3>
                 <a href="@Url.Action("schedulemanagement", "ScheduleManagement")" class="view-all-link">View All</a>
             </div>
-            <table class="dashboard-table to-submit-table">
+            <table class="dashboard-table">
                 <thead>
                     <tr>
                         <th class="column-title manuscript-col">MANUSCRIPT</th>
-                        <th class="column-title">PROJECT MANAGER</th>
-                        <th class="column-title">ADVISER</th>
-                        <th class="column-title">ROOM</th>
                         <th class="column-title date-col">DATE</th>
-                        <th class="column-title time-col">TIME</th>
+                        <th class="column-title action-col">ACTION</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (!Model.Schedules.Any(s => s.Status == "to-submit"))
                     {
-                        <tr class="empty-row"><td colspan="6">Nothing to submit right now.</td></tr>
+                        <tr class="empty-row"><td colspan="3">Nothing to submit right now.</td></tr>
                     }
                     @foreach (var s in Model.Schedules.Where(x => x.Status == "to-submit").Take(3))
                     {
-                        <tr class="dashboard-clickable-row" data-schedule-id="@s.Id" tabindex="0" role="button" aria-label="Open schedule for @s.Title">
+                        <tr>
                             <td>
                                 <div class="manuscript-title-text">@s.Title</div>
                                 <span class="program-badge @s.BadgeClass">@s.Badge</span>
@@ -69,32 +66,27 @@
                 <h3 class="section-title">Upcoming Defenses</h3>
                 <a href="@Url.Action("defenseschedule", "DefenseSchedule")" class="view-all-link">View All</a>
             </div>
-            <table class="dashboard-table upcoming-defenses-table">
+            <table class="dashboard-table">
                 <thead>
                     <tr>
                         <th class="column-title manuscript-col">MANUSCRIPT</th>
-                        <th class="column-title">PROJECT MANAGER</th>
-                        <th class="column-title">ADVISER</th>
-                        <th class="column-title">ROOM</th>
                         <th class="column-title date-col">DATE</th>
                         <th class="column-title time-col">TIME</th>
+                        <th class="column-title action-col">ACTION</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (!Model.Upcoming.Any())
                     {
-                        <tr class="empty-row"><td colspan="6">No upcoming defenses yet.</td></tr>
+                        <tr class="empty-row"><td colspan="4">No upcoming defenses yet.</td></tr>
                     }
                     @foreach (var d in Model.Upcoming.Take(3))
                     {
-                        <tr class="dashboard-clickable-row" data-schedule-id="@d.Id" data-schedule-status="@d.Status" tabindex="0" role="button" aria-label="Open defense schedule for @d.Title">
+                        <tr>
                             <td>
                                 <div class="manuscript-title-text">@d.Title</div>
                                 <span class="program-badge @d.BadgeClass">@d.Badge</span>
                             </td>
-                            <td>@d.Author</td>
-                            <td>@d.Adviser</td>
-                            <td><strong>@(String.IsNullOrWhiteSpace(d.Room) ? "-" : d.Room)</strong></td>
                             <td class="date-cell">@d.ShortDate</td>
                             <td class="time-cell">@d.ShortTime</td>
                             <td class="action-cell">
@@ -113,27 +105,29 @@
 
         <!-- Metric Cards Row -->
         <div class="metrics-row">
-            <a class="metric-card total-defense-card dashboard-metric-link" href="@Url.Action("defenseschedule", "DefenseSchedule")" aria-label="View defense schedules">
+            <div class="metric-card total-defense-card">
                 <div class="metric-title">TOTAL DEFENSES</div>
                 <div class="metric-value">@Model.TotalDefenses</div>
                 <div class="metric-subtitle">Across all buildings</div>
                 <div class="metric-icon"><i class="fa-solid fa-door-open"></i></div>
-            </a>
-            <a class="metric-card under-review-card dashboard-metric-link" href="@Url.Action("conflictresult", "ConflictResult")" aria-label="View schedules under review">
+            </div>
+            <div class="metric-card under-review-card">
                 <div class="metric-title">UNDER REVIEW</div>
                 <div class="metric-value">@Model.UnderReview</div>
                 <div class="metric-subtitle">Across all buildings</div>
                 <div class="metric-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            </a>
+            </div>
         </div>
 
         <!-- Recent Activities Section -->
         <div class="dashboard-card recent-activities-card">
             <h3 class="section-title">RECENT ACTIVITIES</h3>
-            <table class="dashboard-table dashboard-recent-activity">
-                <colgroup><col class="recent-date-column" style="width:120px" /><col /></colgroup>
+            <table class="dashboard-table">
                 <thead>
-                    <tr><th class="column-title">DATE</th><th class="column-title">ACTIVITY</th></tr>
+                    <tr>
+                        <th class="column-title time-col">TIME</th>
+                        <th class="column-title activity-col">ACTIVITY</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach (var a in Model.Recent)
@@ -158,12 +152,12 @@
 @Html.Partial("_ScheduleModal", Model)
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.6"></script>
+<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.7"></script>
 <script>
     (function () {
         document.addEventListener("click", function (e) {
             var btn = e.target.closest ? e.target.closest(".btn-view") : null;
             if (btn && window.CCSchedule) CCSchedule.open(btn.getAttribute("data-id"), btn.getAttribute("data-status") || "");
         });
-    })();
+    })();   
 </script>

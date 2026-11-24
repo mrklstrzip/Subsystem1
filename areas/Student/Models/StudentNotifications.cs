@@ -84,34 +84,6 @@ namespace Subsystem1.Areas.Student.Models
             }
         }
 
-        /// <summary>
-        /// Adds a notification for one student (used by the Capstone Coordinator). Does nothing when the same key
-        /// already exists for that student. Returns true when a new notification was created.
-        /// </summary>
-        public static bool Push(string studentId, string key, string type, string title, string text)
-        {
-            EnsureIndex();
-            var f = Builders<BsonDocument>.Filter;
-            var u = Builders<BsonDocument>.Update;
-            try
-            {
-                UpdateResult r = Notifications().UpdateOne(
-                    f.And(f.Eq("studentId", studentId), f.Eq("key", key)),
-                    u.Combine(
-                        u.SetOnInsert("type", type),
-                        u.SetOnInsert("title", title),
-                        u.SetOnInsert("text", text),
-                        u.SetOnInsert("read", false),
-                        u.SetOnInsert("createdAt", DateTime.UtcNow)),
-                    new UpdateOptions { IsUpsert = true });
-                return r.UpsertedId != null;
-            }
-            catch (MongoWriteException)
-            {
-                return false;
-            }
-        }
-
         /// <summary>Creates any reminder that is due, then returns the newest notifications.</summary>
         public static List<NotificationItem> Load(BsonDocument me, SubmissionStore s)
         {

@@ -122,15 +122,11 @@
         const confirmPass = document.getElementById('fpConfirmPass').value;
 
         if (newPass.length < MIN_PASSWORD_LENGTH) {
-            var lengthMessage = 'New password must be at least ' + MIN_PASSWORD_LENGTH + ' characters long.';
-            showError('resetError', lengthMessage);
-            if (window.Notice) Notice.error('Password not changed', lengthMessage);
+            showError('resetError', 'New password must be at least ' + MIN_PASSWORD_LENGTH + ' characters long.');
             return;
         }
         if (newPass !== confirmPass) {
-            var mismatchMessage = 'New password and confirmation do not match.';
-            showError('resetError', mismatchMessage);
-            if (window.Notice) Notice.error('Password not changed', mismatchMessage);
+            showError('resetError', 'New password and confirmation do not match.');
             return;
         }
         showError('resetError', '');
@@ -139,14 +135,21 @@
         post('resetPassword', { email: currentEmail, code: verifiedCode, newPassword: newPass }).then(function (res) {
             setBusy(stepReset, false);
             if (!res.success) {
-                var errorMessage = res.message || 'Could not reset the password.';
-                showError('resetError', errorMessage);
-                if (window.Notice) Notice.error('Password not changed', errorMessage);
+                showError('resetError', res.message || 'Could not reset the password.');
                 return;
             }
-            if (window.Notice) Notice.success('Password changed', 'Your password has been reset successfully.', function () { window.location.href = LOGIN_URL; });
-            else { alert('Password successfully reset. You can now log in with your new password.'); window.location.href = LOGIN_URL; }
+            alert('Password successfully reset. You can now log in with your new password.');
+            window.location.href = LOGIN_URL;
         });
     });
 
+    document.querySelectorAll('.toggle-password').forEach(function (icon) {
+        icon.addEventListener('click', function () {
+            const input = icon.parentElement.querySelector('input');
+            const hidden = input.type === 'password';
+            input.type = hidden ? 'text' : 'password';
+            icon.classList.toggle('fa-eye', !hidden);
+            icon.classList.toggle('fa-eye-slash', hidden);
+        });
+    });
 })();

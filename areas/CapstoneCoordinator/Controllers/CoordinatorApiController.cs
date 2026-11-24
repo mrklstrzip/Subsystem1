@@ -168,6 +168,57 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
             }
         }
 
+        // A submitted manuscript can appear in the PM roster before a schedule document exists.
+        // Generate/find that version's schedule on demand so View opens the schedule modal.
+        [HttpGet]
+        public ActionResult ensureSchedule(string versionId)
+        {
+            try
+            {
+                Guid parsedVersion;
+                if (!Guid.TryParse(versionId, out parsedVersion))
+                    return Json(new { success = false, message = "The manuscript version is invalid." }, JsonRequestBehavior.AllowGet);
+
+                BsonDocument manuscript = Subsystem2Manuscripts.ForVersion(parsedVersion.ToString("D"));
+                if (manuscript == null)
+                    return Json(new { success = false, message = "The submitted manuscript could not be found." }, JsonRequestBehavior.AllowGet);
+
+                string titleId = DocId(manuscript);
+                BsonDocument schedule = Schedules()
+                    .Find(Builders<BsonDocument>.Filter.Eq("titleId", titleId))
+                    .Sort(Builders<BsonDocument>.Sort.Combine(
+                        Builders<BsonDocument>.Sort.Descending("revisionNumber"),
+                        Builders<BsonDocument>.Sort.Descending("createdAt")))
+                    .FirstOrDefault();
+
+                if (schedule == null)
+                {
+                    ScheduleGenerator.EnsureGeneratedForSubsystem2Version(parsedVersion.ToString("D"));
+                    schedule = Schedules()
+                        .Find(Builders<BsonDocument>.Filter.Eq("titleId", titleId))
+                        .Sort(Builders<BsonDocument>.Sort.Combine(
+                            Builders<BsonDocument>.Sort.Descending("revisionNumber"),
+                            Builders<BsonDocument>.Sort.Descending("createdAt")))
+                        .FirstOrDefault();
+                }
+
+                if (schedule == null)
+                    return Json(new { success = false, message = "A defense schedule is not available for this manuscript yet. Check that its defense version is eligible for scheduling." }, JsonRequestBehavior.AllowGet);
+
+                return Json(new
+                {
+                    success = true,
+                    scheduleId = DocId(schedule),
+                    date = Str(schedule, "date"),
+                    revisionNumber = AnyStr(schedule, "revisionNumber")
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ErrorText(ex) }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         // Stream authenticated Cloudinary PDFs through this same-origin endpoint so PDF.js
         // does not depend on Cloudinary CORS configuration.
         [HttpGet]
@@ -267,71 +318,6 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
                 string error = ScheduleGenerator.Submit(dto.Id, PlainName(Me));
                 if (error != null) return Json(new { success = false, message = error });
                 return Json(new { success = true, message = "Schedule submitted to the Dean." });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ErrorText(ex) });
-            }
-        }
-
-        // Manuscript Management > Notify PM: reminds every Project Manager who has not submitted a manuscript yet.
-        // Each one gets a notification in their drawer (once per day) and, when e-mail is set up, an e-mail too.
-        [HttpPost]
-        public ActionResult notifyPms()
-        {
-            try
-            {
-                List<CoordinatorData.PmWaiting> waiting = CoordinatorData.PmsNotYetSubmitted();
-                if (waiting.Count == 0)
-                    return Json(new { success = true, total = 0, notified = 0, already = 0, emailed = 0,
-                        message = "Every project manager has already submitted a manuscript." });
-
-                string day = NowManila().ToString("yyyy-MM-dd");
-                string coordinator = PlainName(Me);
-                const string text = "Reminder from the Capstone Coordinator: you have not submitted your manuscript yet. Please submit it as soon as you can.";
-
-                int notified = 0, already = 0;
-                foreach (CoordinatorData.PmWaiting pm in waiting)
-                {
-                    if (Subsystem1.Areas.Student.Models.StudentNotifications.Push(
-                            pm.Id, "submit-reminder:" + day, "reminder", "Manuscript Not Yet Submitted", text)) notified++;
-                    else already++;
-                }
-
-                // E-mail is a bonus: if it is not set up, the in-app notification above is still delivered.
-                int emailed = 0;
-                if (Subsystem1.Services.Mailer.Problem() == null)
-                {
-                    try
-                    {
-                        using (var client = Subsystem1.Services.Mailer.Connect())
-                        {
-                            foreach (CoordinatorData.PmWaiting pm in waiting)
-                            {
-                                if (pm.Email.Trim() == "") continue;
-                                string html = "<p>Hello " + Subsystem1.Services.Mailer.Html(pm.Name) + ",</p><p>" +
-                                    Subsystem1.Services.Mailer.Html(text) + "</p><p>- " + Subsystem1.Services.Mailer.Html(coordinator) + ", Capstone Coordinator</p>";
-                                string plain = "Hello " + pm.Name + ",\n\n" + text + "\n\n- " + coordinator + ", Capstone Coordinator";
-                                try
-                                {
-                                    using (var msg = Subsystem1.Services.Mailer.Compose(pm.Email.Trim(), "Reminder: submit your capstone manuscript", html, plain))
-                                    {
-                                        if (Subsystem1.Services.Mailer.TrySend(client, msg) == null) emailed++;
-                                    }
-                                }
-                                catch (FormatException) { }
-                            }
-                        }
-                    }
-                    catch { }
-                }
-
-                CoDb.Log("Reminded " + waiting.Count + " project manager" + (waiting.Count == 1 ? "" : "s") + " to submit their manuscript.");
-
-                return Json(new { success = true, total = waiting.Count, notified = notified, already = already, emailed = emailed,
-                    message = notified > 0
-                        ? "Reminder sent to " + notified + " project manager" + (notified == 1 ? "" : "s") + " who haven't submitted their manuscript."
-                        : "All " + waiting.Count + " project manager" + (waiting.Count == 1 ? " was" : "s were") + " already reminded today." });
             }
             catch (Exception ex)
             {
@@ -466,21 +452,6 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
                     failed = failed,
                     results = results
                 });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ErrorText(ex) });
-            }
-        }
-
-        // Tells the pop-up which addresses already have an account, so they cannot be invited.
-        [HttpPost]
-        public ActionResult checkEmails(CoInviteDto dto)
-        {
-            try
-            {
-                if (dto == null || dto.Emails == null) return Json(new { success = true, taken = new string[0] });
-                return Json(new { success = true, taken = PmInvites.ExistingAccounts(dto.Emails) });
             }
             catch (Exception ex)
             {

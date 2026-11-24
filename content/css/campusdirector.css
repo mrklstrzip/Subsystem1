@@ -2029,12 +2029,11 @@ table.cdp2-info {
 }
 
 .dsh-row-1 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr 1fr 1fr 1.5fr;
 }
 
 .dsh-row-2 {
     grid-template-columns: 2fr 3fr;
-    align-items: stretch;
 }
 
 .dsh-card {
@@ -2049,16 +2048,11 @@ table.cdp2-info {
     padding: 16px 22px;
 }
 
-.dsh-chart-stack {
-    display: grid;
-    align-content: start;
-    gap: 18px;
-    min-width: 0;
-}
-
-.dsh-building-card {
-    align-self: start;
-}
+    /* Room per Building card: the list fills whatever height the stat cards give it */
+    .dsh-row-1 .dsh-card:last-child {
+        position: relative;
+        min-height: 140px;
+    }
 
 .dsh-card-title {
     font-size: 13px;
@@ -2073,99 +2067,71 @@ table.cdp2-info {
 .dsh-stat {
     position: relative;
     min-height: 118px;
-    box-sizing: border-box;
-    border: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    transition: background .22s ease, border-color .22s ease, color .22s ease, box-shadow .22s ease;
 }
 
-.dashboard-room-stat-link {
-    color: inherit;
-    text-decoration: none;
-}
-
-    .dashboard-room-stat-link:focus-visible {
-        outline: 3px solid #246a86;
-        outline-offset: 3px;
+    .dsh-stat .dsh-label {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #59607a;
+        padding-right: 84px;
     }
 
-.dsh-stat .dsh-label {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    color: #59607a;
-    padding-right: 84px;
-}
+    .dsh-stat .dsh-value {
+        font-size: 46px;
+        font-weight: 800;
+        color: #17263c;
+        margin: 6px 0 2px;
+        line-height: 1;
+    }
 
-.dsh-stat .dsh-value {
-    font-size: 46px;
-    font-weight: 800;
-    color: #17263c;
-    margin: 6px 0 2px;
-    line-height: 1;
-}
+    .dsh-stat .dsh-desc {
+        font-size: 12px;
+        font-weight: 500;
+        color: #6b7280;
+        line-height: 1.3;
+        padding-right: 84px;
+    }
 
-.dsh-stat .dsh-desc {
-    font-size: 12px;
-    font-weight: 500;
-    color: #6b7280;
-    line-height: 1.3;
-    padding-right: 84px;
-}
-
-/* big icon badge, vertically centered on the right side of the card */
-.dsh-stat .dsh-icon {
-    position: absolute;
-    top: auto;
-    right: 16px;
-    bottom: 14px;
-    transform: none;
-    width: auto;
-    height: auto;
-    border-radius: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 34px;
-    background: transparent;
-    color: #f0f1f3;
-}
+    /* big icon badge, vertically centered on the right side of the card */
+    .dsh-stat .dsh-icon {
+        position: absolute;
+        top: 50%;
+        right: 22px;
+        transform: translateY(-50%);
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        background: #eef0f6;
+        color: #2C3F56;
+    }
 
 /* same colors as the Room Status pie chart: Active #246a86, Disabled #6b97d6 */
 .dsh-row-1 .dsh-stat:nth-child(2) .dsh-icon {
-    background: transparent;
-    color: #f0f1f3;
+    background: #dbeaf0;
+    color: #246a86;
 }
 
 .dsh-row-1 .dsh-stat:nth-child(3) .dsh-icon {
-    background: transparent;
-    color: #f0f1f3;
-}
-
-.dsh-stat:hover {
-    background: linear-gradient(to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100%);
-    border-color: #17263c;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, .16);
-}
-
-    .dsh-stat:hover .dsh-label,
-    .dsh-stat:hover .dsh-value,
-    .dsh-stat:hover .dsh-desc {
-        color: #fff;
-    }
-
-.dsh-row-1 .dsh-stat:hover .dsh-icon {
-    background: transparent;
-    color: #fff;
+    background: #e4edf9;
+    color: #6b97d6;
 }
 
 /* room per building (fills the card height, scrolls when there are many buildings) */
 .dsh-bars {
-    position: static;
-    max-height: 260px;
+    position: absolute;
+    top: 46px;
+    left: 22px;
+    right: 14px;
+    bottom: 14px;
     overflow-y: auto;
     padding-right: 8px;
     scrollbar-width: thin;
@@ -2195,7 +2161,7 @@ table.cdp2-info {
     }
 
 .dsh-track {
-    height: 12px;
+    height: 8px;
     border-radius: 8px;
     background: #e3e7f0;
     overflow: hidden;
@@ -2204,7 +2170,7 @@ table.cdp2-info {
 .dsh-fill {
     height: 100%;
     border-radius: 8px;
-    background: #172A43;
+    background: #17263c;
     transition: width .4s ease;
 }
 
@@ -2217,87 +2183,10 @@ table.cdp2-info {
     padding-top: 4px;
 }
 
-.dsh-donut-chart {
-    position: relative;
-    width: 200px;
-    height: 200px;
-}
-
 .dsh-donut {
     width: 200px;
     height: 200px;
-    overflow: visible;
 }
-
-.dsh-donut-center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #1B293B;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-}
-
-    .dsh-donut-center strong {
-        font-size: 28px;
-        line-height: 1.1;
-    }
-
-    .dsh-donut-center span {
-        color: #65758b;
-        font-size: 12px;
-    }
-
-.dsh-donut-segment {
-    cursor: default;
-    stroke: #fff;
-    stroke-width: 3px;
-    stroke-linejoin: round;
-    transform-box: view-box;
-    transform-origin: center;
-    transition: transform .18s ease, filter .18s ease;
-}
-
-    .dsh-donut-segment:hover, .dsh-donut-segment.is-hovered {
-        transform: scale(1.055);
-        filter: drop-shadow(0 3px 4px rgba(27, 41, 59, .24));
-    }
-
-.dsh-donut-tooltip {
-    position: absolute;
-    z-index: 2;
-    top: 0;
-    left: 50%;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 118px;
-    padding: 7px 10px;
-    border-radius: 6px;
-    background: #fff;
-    box-shadow: 0 3px 12px rgba(27,41,59,.16);
-    color: #1B293B;
-    font-size: 11px;
-    text-align: center;
-    pointer-events: none;
-    transform: translate(-50%, calc(-100% - 9px));
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity .12s ease;
-}
-
-    .dsh-donut-tooltip[aria-hidden="false"] {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .dsh-donut-tooltip strong {
-        font-size: 12px;
-    }
 
 .dsh-legend {
     display: flex;
@@ -2306,39 +2195,6 @@ table.cdp2-info {
     font-weight: 600;
     color: #1B293B;
 }
-
-    .dsh-legend button {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 4px 6px;
-        border: 0;
-        border-radius: 5px;
-        background: transparent;
-        color: #1B293B;
-        font: inherit;
-        font-size: 12px;
-        cursor: pointer;
-        transition: opacity .18s ease, background .18s ease;
-    }
-
-        .dsh-legend button:hover {
-            background: #f3f6fa;
-        }
-
-        .dsh-legend button[aria-pressed="false"] {
-            opacity: .45;
-            text-decoration: line-through;
-        }
-
-        .dsh-legend button:focus-visible {
-            outline: 2px solid #246a86;
-            outline-offset: 2px;
-        }
-
-        .dsh-legend button strong {
-            font-size: 12px;
-        }
 
     .dsh-legend span {
         display: inline-flex;
@@ -2355,9 +2211,7 @@ table.cdp2-info {
 
 /* recent activity */
 .dsh-activity {
-    display: flex;
-    flex: 1;
-    min-height: 0;
+    max-height: 270px;
     overflow-y: auto;
     scrollbar-width: thin;
 }
@@ -2368,112 +2222,34 @@ table.dsh-table {
     font-size: .88rem;
 }
 
-.dsh-card .dashboard-recent-activity {
-    table-layout: fixed;
-}
-
-.dsh-row-2 > .dsh-card:last-child {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-.dsh-card .dashboard-recent-activity .recent-date-column {
-    width: 180px !important;
-}
-
-.dsh-card .dashboard-recent-activity th {
-    padding: 0 0 12px;
-    border-bottom: 1px solid #EDEDED;
-    color: #2C3F56;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .5px;
-    text-align: left;
-    vertical-align: bottom;
-}
-
-    .dsh-card .dashboard-recent-activity th:first-child {
-        width: 180px;
-        padding-left: 0;
-    }
-
-    .dsh-card .dashboard-recent-activity th:nth-child(2) {
-        padding-left: 10px;
-    }
-
-.dsh-card .dashboard-recent-activity td {
-    padding: 10px 0;
-    border-bottom: 1px solid #F4F5F7;
-    color: #2D3748;
-    font-size: 13px;
-    font-weight: 400;
-    vertical-align: middle;
-}
-
-    .dsh-card .dashboard-recent-activity td:first-child {
-        width: 180px;
-        padding-left: 0;
-        white-space: nowrap;
-    }
-
-    .dsh-card .dashboard-recent-activity td:nth-child(2) {
-        padding-left: 10px;
+    table.dsh-table th {
         text-align: left;
-    }
-
-.dsh-card .dashboard-recent-activity tr:last-child td {
-    border-bottom: 0;
-}
-
-.dsh-card .recent-date-main {
-    display: block;
-    color: #2D3748;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.35;
-}
-
-.dsh-card .recent-date-time {
-    display: block;
-    color: #8C98A6;
-    font-size: 10px;
-    line-height: 1.35;
-}
-
-.dsh-card .recent-activity-text {
-    color: #2D3748;
-    font-size: 13px;
-}
-
-table.dsh-table th {
-    text-align: left;
-    font-size: .7rem;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    color: #59607a;
-    background: #FFFFFF;
-    border: 0;
-    padding: 10px 16px 10px 0;
-    position: sticky;
-    top: 0;
-}
-
-table.dsh-table td {
-    border: 0;
-    padding: 10px 16px 10px 0;
-    font-size: .85rem;
-    font-weight: 600;
-    color: #1B293B;
-}
-
-    table.dsh-table td:first-child {
-        font-weight: 500;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
         color: #59607a;
-        width: 200px;
-        white-space: nowrap;
+        background: #FFFFFF;
+        border: 0;
+        padding: 10px 16px 10px 0;
+        position: sticky;
+        top: 0;
     }
+
+    table.dsh-table td {
+        border: 0;
+        padding: 10px 16px 10px 0;
+        font-size: .85rem;
+        font-weight: 600;
+        color: #1B293B;
+    }
+
+        table.dsh-table td:first-child {
+            font-weight: 500;
+            color: #59607a;
+            width: 200px;
+            white-space: nowrap;
+        }
 
 .dsh-empty {
     color: #8a8aa8;
@@ -2493,21 +2269,22 @@ table.dsh-table td {
     }
 
     .dsh-stat .dsh-icon {
-        right: 14px;
-        bottom: 12px;
-        top: auto;
-        transform: none;
-        width: auto;
-        height: auto;
-        border-radius: 0;
-        font-size: 30px;
+        right: 16px;
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        font-size: 24px;
     }
 }
 
 @media (max-width: 1200px) {
     .dsh-row-1 {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: 1fr 1fr;
     }
+
+        .dsh-row-1 .dsh-card:last-child {
+            grid-column: 1 / -1;
+        }
 
     .dsh-row-2 {
         grid-template-columns: 1fr;

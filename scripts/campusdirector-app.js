@@ -210,129 +210,33 @@
         // Room per building (bars are relative to the biggest building)
         var counts = state.buildings.map(function (b) { return { b: b, n: roomsOf(b.id).length }; });
         var max = Math.max.apply(null, counts.map(function (c) { return c.n; }).concat([1]));
-        var buildingShades = ['#17324F', '#2B4E70', '#416B91', '#5D86AA', '#7DA2C1', '#A2BCD1', '#C5D5E2'];
-        $('dash-buildings').innerHTML = counts.map(function (c, index) {
+        $('dash-buildings').innerHTML = counts.map(function (c) {
             var pct = Math.round(c.n / (max * 1.25) * 100);
-            var shade = buildingShades[index % buildingShades.length];
             return '<div class="dsh-bar-row">' +
                 '<div class="dsh-bar-head"><span>' + esc(c.b.name) + ' | ' + esc(c.b.code) + '</span>' +
                 '<b>' + c.n + (c.n === 1 ? ' room' : ' rooms') + '</b></div>' +
-                '<div class="dsh-track"><div class="dsh-fill" style="width:' + pct + '%;background:' + shade + '"></div></div></div>';
+                '<div class="dsh-track"><div class="dsh-fill" style="width:' + pct + '%"></div></div></div>';
         }).join('') || '<div class="dsh-empty">No buildings yet</div>';
 
-        // Interactive Room Status donut. Legend buttons control visibility; SVG slices only show hover details.
-        var donut = $('dash-donut');
-        var donutWrap = donut && donut.closest('.dsh-donut-chart');
-        var roomLegend = $('dash-donut-legend');
-        if (donut && donutWrap && roomLegend) {
-            var hidden = donut._hiddenRoomStatuses || {};
-            var center = donutWrap.querySelector('.dsh-donut-center');
-            var tooltip = donutWrap.querySelector('.dsh-donut-tooltip');
-            var segments = [
-                { key: 'active', label: 'Active Rooms', color: '#246a86', value: active },
-                { key: 'disabled', label: 'Disabled Rooms', color: '#6b97d6', value: disabled }
-            ];
-            var point = function (radius, angle) {
-                var radians = (angle - 90) * Math.PI / 180;
-                return { x: 100 + radius * Math.cos(radians), y: 100 + radius * Math.sin(radians) };
-            };
-            var ringPath = function (start, end) {
-                var outerStart = point(92, start), outerEnd = point(92, end);
-                var innerEnd = point(58, end), innerStart = point(58, start);
-                var large = end - start > 180 ? 1 : 0;
-                if (end - start >= 359.99) {
-                    var mid = start + 180, outerMid = point(92, mid), innerMid = point(58, mid);
-                    return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 1 1 ' + outerMid.x + ' ' + outerMid.y + ' A 92 92 0 1 1 ' + outerStart.x + ' ' + outerStart.y + ' L ' + innerStart.x + ' ' + innerStart.y + ' A 58 58 0 1 0 ' + innerMid.x + ' ' + innerMid.y + ' A 58 58 0 1 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
-                }
-                return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 ' + large + ' 1 ' + outerEnd.x + ' ' + outerEnd.y + ' L ' + innerEnd.x + ' ' + innerEnd.y + ' A 58 58 0 ' + large + ' 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
-            };
-            var drawRoomDonut = function (values) {
-                var shownTotal = values[0] + values[1], angle = 0;
-                var markup = segments.map(function (segment, index) {
-                    var value = values[index];
-                    if (!value || !shownTotal) return '';
-                    var sweep = value / shownTotal * 360;
-                    var start = angle, end = angle + sweep;
-                    angle = end;
-                    var percent = Math.round(value / shownTotal * 100);
-                    return '<path class="dsh-donut-segment" data-status="' + segment.key + '" data-label="' + segment.label + '" data-value="' + Math.round(value) + '" data-percent="' + percent + '" d="' + ringPath(start, end) + '" fill="' + segment.color + '" aria-hidden="true" />';
-                }).join('');
-                donut.innerHTML = markup || '<circle cx="100" cy="100" r="75" fill="none" stroke="#e2e8f0" stroke-width="34" />';
-                center.innerHTML = '<strong>' + Math.round(shownTotal) + '</strong><span>rooms</span>';
-                donut.setAttribute('aria-label', 'Room status chart, ' + Math.round(shownTotal) + ' rooms shown.');
-                donut._roomValues = values.slice();
-                roomLegend.querySelectorAll('[data-room-status]').forEach(function (button, index) {
-                    button.setAttribute('aria-pressed', String(!hidden[button.getAttribute('data-room-status')]));
-                    button.querySelector('strong').textContent = Math.round(segments[index].value);
-                });
-            };
-            if (donut._animFrame) window.cancelAnimationFrame(donut._animFrame);
-            donut._hiddenRoomStatuses = hidden;
-            drawRoomDonut([hidden.active ? 0 : active, hidden.disabled ? 0 : disabled]);
-            var hideRoomTooltip = function () { tooltip.setAttribute('aria-hidden', 'true'); tooltip.innerHTML = ''; };
-            var showRoomTooltip = function (segment, event) {
-                if (!segment) return hideRoomTooltip();
-                tooltip.innerHTML = '<strong>' + segment.getAttribute('data-label') + '</strong><span>' + segment.getAttribute('data-value') + ' rooms (' + segment.getAttribute('data-percent') + '%)</span>';
-                if (event) {
-                    var bounds = donutWrap.getBoundingClientRect();
-                    tooltip.style.left = (event.clientX - bounds.left) + 'px';
-                    tooltip.style.top = (event.clientY - bounds.top) + 'px';
-                }
-                tooltip.setAttribute('aria-hidden', 'false');
-            };
-            if (!donut._eventsBound) {
-                donut._eventsBound = true;
-                donut.addEventListener('pointerover', function (event) {
-                    var segment = event.target.closest('.dsh-donut-segment');
-                    if (segment) { segment.classList.add('is-hovered'); showRoomTooltip(segment, event); }
-                });
-                donut.addEventListener('pointerout', function (event) {
-                    var segment = event.target.closest('.dsh-donut-segment');
-                    if (segment && !segment.contains(event.relatedTarget)) { segment.classList.remove('is-hovered'); hideRoomTooltip(); }
-                });
-            }
-            if (!roomLegend._eventsBound) {
-                roomLegend._eventsBound = true;
-                roomLegend.addEventListener('click', function (event) {
-                    var button = event.target.closest('[data-room-status]');
-                    if (!button) return;
-                    var key = button.getAttribute('data-room-status');
-                    hidden[key] = !hidden[key];
-                    button.setAttribute('aria-pressed', String(!hidden[key]));
-                    var from = donut._roomValues.slice();
-                    var to = [hidden.active ? 0 : active, hidden.disabled ? 0 : disabled];
-                    if (donut._animFrame) window.cancelAnimationFrame(donut._animFrame);
-                    var started = null, duration = 220;
-                    function animate(timestamp) {
-                        if (started === null) started = timestamp;
-                        var progress = Math.min(1, (timestamp - started) / duration);
-                        var eased = 1 - Math.pow(1 - progress, 3);
-                        drawRoomDonut(from.map(function (value, index) { return value + (to[index] - value) * eased; }));
-                        if (progress < 1) donut._animFrame = window.requestAnimationFrame(animate);
-                        else donut._animFrame = 0;
-                    }
-                    donut._animFrame = window.requestAnimationFrame(animate);
-                });
-                roomLegend.addEventListener('mouseover', function (event) {
-                    var button = event.target.closest('[data-room-status]');
-                    if (!button) return;
-                    var segment = donut.querySelector('[data-status="' + button.getAttribute('data-room-status') + '"]');
-                    if (segment) segment.classList.add('is-hovered');
-                });
-                roomLegend.addEventListener('mouseout', function (event) {
-                    if (!event.relatedTarget || !event.relatedTarget.closest('[data-room-status]')) donut.querySelectorAll('.is-hovered').forEach(function (segment) { segment.classList.remove('is-hovered'); });
-                });
+        // Room status donut (Active vs Disabled)
+        var R = 72, SW = 44, C = 2 * Math.PI * R;
+        var svg = '<g transform="rotate(-90 100 100)" fill="none" stroke-width="' + SW + '">';
+        if (!total) {
+            svg += '<circle cx="100" cy="100" r="' + R + '" stroke="#e2e8f0"><title>No rooms yet</title></circle>';
+        } else {
+            var aLen = C * active / total;
+            svg += '<circle cx="100" cy="100" r="' + R + '" stroke="#6b97d6"><title>Disabled Rooms: ' + disabled +
+                ' (' + Math.round(disabled / total * 100) + '%)</title></circle>';
+            if (active > 0) {
+                svg += '<circle cx="100" cy="100" r="' + R + '" stroke="#246a86" stroke-dasharray="' + aLen.toFixed(2) + ' ' + C.toFixed(2) +
+                    '"><title>Active Rooms: ' + active + ' (' + Math.round(active / total * 100) + '%)</title></circle>';
             }
         }
+        $('dash-donut').innerHTML = svg + '</g>';
 
         // Recent activity
         $('dash-activity').innerHTML = state.activity.slice(0, 6).map(function (a) {
-            var stamp = fmtStamp(a.at), splitAt = stamp.indexOf(' ');
-            var date = splitAt > -1 ? stamp.slice(0, splitAt) : stamp;
-            var time = splitAt > -1 ? stamp.slice(splitAt + 1) : '';
-            return '<tr><td class="recent-date-cell"><span class="recent-date-main">' + esc(date) + '</span>' +
-                (time ? '<span class="recent-date-time">' + esc(time) + '</span>' : '') +
-                '</td><td class="recent-activity-text">' + esc(a.text) + '</td></tr>';
+            return '<tr><td>' + esc(fmtStamp(a.at)) + '</td><td>' + esc(a.text) + '</td></tr>';
         }).join('') || '<tr><td colspan="2" class="dsh-empty">No recent activity</td></tr>';
     }
 
@@ -379,7 +283,7 @@
         var list = [];
         scheduleItems.forEach(function (s) {
             if (s.roomId !== roomId) return;
-            var label = s.section || s.title || 'Defense';
+            var label = [s.section, s.group ? 'Group ' + s.group : ''].filter(Boolean).join(' \u00b7 ') || s.title || 'Defense';
             list.push({
                 id: s.id, label: label, start: s.start, end: s.end, ref: s,
                 status: statusOf(date, s.start, s.end, s.cancelled)
@@ -475,6 +379,7 @@
         var rows = detailRow('Title of the Manuscript', esc(s.title || '\u2014')) +
             detailRow('Authors', (s.authors || []).map(esc).join('<br>') || '\u2014') +
             detailRow('Section', esc(s.section || '\u2014')) +
+            detailRow('Group Number', s.group ? 'Group ' + esc(s.group) : '\u2014') +
             detailRow('Program', esc(s.program || '\u2014')) +
             detailRow('Day, Date', esc(fmtFull(d.date))) +
             detailRow('Time', esc(fmtTime(d.start) + ' \u2013 ' + fmtTime(d.end))) +

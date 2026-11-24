@@ -47,59 +47,33 @@ body {
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 400px;
+    grid-template-columns: 1fr 1fr;
     gap: 24px;
     align-items: start;
 }
 
-.to-submit-table,
-.upcoming-defenses-table {
+.dashboard-left-column .dashboard-card:first-child table {
     table-layout: fixed;
     width: 100%;
 }
 
-    .to-submit-table .manuscript-col,
-    .upcoming-defenses-table .manuscript-col {
-        width: 36%;
-    }
-
-    .to-submit-table th:nth-child(2), .to-submit-table th:nth-child(3),
-    .upcoming-defenses-table th:nth-child(2), .upcoming-defenses-table th:nth-child(3) {
-        width: 17%;
-    }
-
-    .to-submit-table th:nth-child(4),
-    .upcoming-defenses-table th:nth-child(4) {
-        width: 10%;
-    }
-
-    .to-submit-table .date-col, .to-submit-table .time-col,
-    .upcoming-defenses-table .date-col, .upcoming-defenses-table .time-col {
-        width: 10%;
-    }
-
-    .to-submit-table .date-cell,
-    .to-submit-table .time-cell,
-    .upcoming-defenses-table .date-cell,
-    .upcoming-defenses-table .time-cell {
-        text-align: left;
-        padding-right: 0;
-        white-space: nowrap;
-        font-size: 12px;
-    }
-
-.dashboard-clickable-row {
-    cursor: pointer;
+.dashboard-left-column .dashboard-card:first-child .manuscript-col {
+    width: 75%;
 }
 
-    .dashboard-clickable-row:hover {
-        background-color: #f4f6f8;
-    }
+.dashboard-left-column .dashboard-card:first-child .date-col,
+.dashboard-left-column .dashboard-card:first-child .date-cell {
+    width: 15%;
+    text-align: left;
+    padding-right: 0;
+}
 
-    .dashboard-clickable-row:focus-visible {
-        outline: 2px solid #374A60;
-        outline-offset: -2px;
-    }
+.dashboard-left-column .dashboard-card:first-child .action-col,
+.dashboard-left-column .dashboard-card:first-child .action-cell {
+    width: 10%;
+    text-align: right;
+    white-space: nowrap;
+}
 
 .dashboard-card {
     background-color: #ffffff;
@@ -142,36 +116,20 @@ body {
     border-collapse: collapse;
 }
 
-.upcoming-defenses-table td {
-    overflow-wrap: anywhere;
-}
-
-.upcoming-defenses-table .manuscript-title-text {
-    font-size: 12px;
-}
-
-.to-submit-table td {
-    overflow-wrap: anywhere;
-}
-
-.to-submit-table .manuscript-title-text {
-    font-size: 12px;
-}
-
 .column-title {
     color: #9092AD;
     font-weight: 700;
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.8px;
-    padding: 0 4px 12px;
+    padding-bottom: 12px;
     text-align: left;
     border-bottom: 1px solid #EDEDED;
     text-transform: uppercase;
 }
 
 .dashboard-table td {
-    padding: 14px 4px;
-    font-size: 12px;
+    padding: 14px 0;
+    font-size: 13px;
     color: #1a202c;
     border-bottom: 1px solid #F4F5F7;
     vertical-align: middle;
@@ -276,20 +234,7 @@ body {
     position: relative;
     overflow: hidden;
     margin-bottom: 20px;
-    min-height: 130px;
-    transition: background-color .22s ease, border-color .22s ease, box-shadow .22s ease;
 }
-
-.dashboard-metric-link {
-    display: block;
-    color: inherit;
-    text-decoration: none;
-}
-
-    .dashboard-metric-link:focus-visible {
-        outline: 3px solid #436cf2;
-        outline-offset: 3px;
-    }
 
 .metric-title {
     font-size: 11px;
@@ -315,12 +260,10 @@ body {
 
 .metric-icon {
     position: absolute;
-    right: 14px;
-    bottom: 12px;
-    font-size: 48px;
-    line-height: 1;
-    color: #f0f1f3;
-    transition: color .22s ease, transform .22s ease;
+    right: 16px;
+    bottom: 16px;
+    font-size: 36px;
+    color: #cbd5e1;
 }
 
 .recent-activities-card .time-col {
@@ -328,126 +271,10 @@ body {
     white-space: nowrap;
 }
 
-/* Recent activity table follows the Admin dashboard's two-column layout (without icons). */
-.recent-activities-card .dashboard-recent-activity {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-}
-
-    .recent-activities-card .dashboard-recent-activity .recent-date-column {
-        width: 120px !important;
-    }
-
-    .recent-activities-card .dashboard-recent-activity th {
-        padding: 0 0 12px;
-        border-bottom: 1px solid #EDEDED;
-        color: #2C3F56;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: .5px;
-        text-align: left;
-        vertical-align: bottom;
-    }
-
-        .recent-activities-card .dashboard-recent-activity th:first-child {
-            width: 120px;
-            padding-left: 0;
-        }
-
-        .recent-activities-card .dashboard-recent-activity th:nth-child(2) {
-            padding-left: 10px;
-        }
-
-    .recent-activities-card .dashboard-recent-activity td {
-        padding: 10px 0;
-        border-bottom: 1px solid #F4F5F7;
-        color: #2D3748;
-        font-size: 13px;
-        vertical-align: middle;
-    }
-
-        .recent-activities-card .dashboard-recent-activity td:first-child {
-            width: 120px;
-            padding-left: 0;
-            white-space: nowrap;
-        }
-
-        .recent-activities-card .dashboard-recent-activity td:nth-child(2) {
-            padding-left: 10px;
-            text-align: left;
-        }
-
-    .recent-activities-card .dashboard-recent-activity tr:last-child td {
-        border-bottom: 0;
-    }
-
-.recent-date-main {
-    display: block;
-    color: #2D3748;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.35;
-}
-
-.recent-date-time {
-    display: block;
-    color: #8C98A6;
-    font-size: 10px;
-    line-height: 1.35;
-}
-
-.recent-activity-text {
-    color: #2D3748;
-    font-size: 13px;
-}
-
 .under-review-card .metric-icon {
-    color: #f0f1f3;
+    color: #991b1b;
 }
 
 .total-defense-card .metric-icon {
-    color: #f0f1f3;
-}
-
-.metric-card:hover {
-    background: linear-gradient(to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100%);
-    border-color: #17263c;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, .16);
-}
-
-    .metric-card:hover .metric-title,
-    .metric-card:hover .metric-value,
-    .metric-card:hover .metric-subtitle,
-    .metric-card:hover .metric-icon {
-        color: #fff;
-    }
-
-    .metric-card:hover .metric-icon {
-        transform: scale(1.04);
-    }
-
-/* Status badges inside the schedule pop-up (Upcoming Defenses show Upcoming / Ongoing / Completed) */
-.status-badge.completed {
-    background-color: #dcfce7;
-    color: #15803d;
-    border: 1px solid #bbf7d0;
-}
-
-.status-badge.ongoing {
-    background-color: #dbeafe;
-    color: #1d4ed8;
-    border: 1px solid #bfdbfe;
-}
-
-.status-badge.upcoming {
-    background-color: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #fecaca;
-}
-
-@media (max-width: 1000px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
+    color: #3B82F6;
 }

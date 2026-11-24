@@ -125,23 +125,6 @@ namespace Subsystem1.Areas.Dean.Controllers
             }
         }
 
-        // The Dean sends the schedule back to the Capstone Coordinator with a reason
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Reject(string id, string reason)
-        {
-            try
-            {
-                string error = DeanData.Reject(id, reason, Me);
-                if (error != null) return Json(new { success = false, message = error });
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ErrorText(ex) });
-            }
-        }
-
         private static string ErrorText(Exception ex)
         {
             bool debug = System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.IsDebuggingEnabled;

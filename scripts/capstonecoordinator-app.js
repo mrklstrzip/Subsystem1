@@ -13,11 +13,6 @@
      * ------------------------------------------------------------------ */
     var PAGES = [
         {
-            tableId: 'assessmentCasesTable',
-            emptyText: 'No assessment cases found',
-            filters: { status: ['Pending', 'In Progress', 'Completed', 'Resolved', 'Approved', 'Rejected'] }
-        },
-        {
             tableId: 'scheduleTable',
             emptyText: 'No schedules found',
             pageSize: 8,

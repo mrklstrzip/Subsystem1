@@ -14,7 +14,7 @@
     var advisers = ViewBag.Advisers as IList<string> ?? new List<string>();
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=2.4" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=2.7" rel="stylesheet" type="text/css" />
 <link href="@Url.Content("~/Content/css/capstonecoordinator/clearedsubmissions.css")?v=2.3" rel="stylesheet" type="text/css" />
 
 <div class="dashboard-header">
@@ -76,7 +76,7 @@
                             <td data-label="Program" class="author-cell">@item.Program @item.Section</td>
                             <td data-label="Repository status"><span class="status-badge completed-repository-status">@repositoryStatus</span></td>
                             <td data-label="Action" class="completed-manuscript-action">
-                                <a class="completed-view-button" href="@Url.Action("ViewManuscript", "ClearedSubmissions", new { area = "CapstoneCoordinator", id = item.Id })">View manuscript</a>
+                                <a class="completed-view-button" href="@Url.Action("ViewManuscript", "ClearedSubmissions", new { area = "CapstoneCoordinator", id = item.Id })">View manuscript <span aria-hidden="true">→</span></a>
                             </td>
                         </tr>
                     }

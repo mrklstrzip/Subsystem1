@@ -58,36 +58,3 @@
     .cases-table tbody tr:has(td.cases-empty):hover {
         background: transparent;
     }
-
-/* Long notes / details wrap inside their cell instead of running past the table */
-.cases-table {
-    table-layout: fixed;
-    width: 100%;
-}
-
-    .cases-table td {
-        white-space: normal;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-        vertical-align: top;
-    }
-
-    .cases-table th:nth-child(1) {
-        width: 14%;
-    }
-
-    .cases-table th:nth-child(2) {
-        width: 24%;
-    }
-
-    .cases-table th:nth-child(3) {
-        width: 12%;
-    }
-
-    .cases-table th:nth-child(4) {
-        width: 36%;
-    }
-
-    .cases-table th:nth-child(5) {
-        width: 14%;
-    }

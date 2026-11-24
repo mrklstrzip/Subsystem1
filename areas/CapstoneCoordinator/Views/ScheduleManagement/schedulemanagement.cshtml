@@ -5,7 +5,7 @@
     ViewBag.Title = "Manuscript Management";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=4.4" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=4.6" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -139,7 +139,7 @@
 
 <script src="@Url.Content("~/Scripts/capstonecoordinator-app.js")?v=2.5"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.6"></script>
+<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.7"></script>
 <script>
     (function () {
         // each "View" button opens the pop-up of its schedule (the data comes from the database)
@@ -151,9 +151,54 @@
                 return;
             }
             var manuscriptId = btn.getAttribute("data-manuscript-id");
-            if (manuscriptId) {
-                window.open("@Url.Action("manuscript", "CoordinatorApi", new { area = "CapstoneCoordinator" })?id=" + encodeURIComponent(manuscriptId), "_blank", "noopener");
-            }
+            if (!manuscriptId) return;
+
+            var originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = "Preparing...";
+            fetch("@Url.Action("ensureSchedule", "CoordinatorApi", new { area = "CapstoneCoordinator" })?versionId=" + encodeURIComponent(manuscriptId), {
+                method: "GET",
+                credentials: "same-origin",
+                cache: "no-store",
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            }).then(function (response) {
+                return response.text().then(function (text) {
+                    var result;
+                    try { result = JSON.parse(text); }
+                    catch (parseError) {
+                        throw new Error("Schedule service returned HTTP " + response.status + " instead of JSON. Rebuild and restart the web app, then try again.");
+                    }
+                    if (!response.ok) throw new Error((result && result.message) || ("Schedule service returned HTTP " + response.status + "."));
+                    return result;
+                });
+            })
+                .then(function (result) {
+                    if (result && result.unauthorized) { window.location.href = "/Auth/Login/login"; return; }
+                    if (!result || !result.success || !result.scheduleId) {
+                        if (window.Notice) Notice.error("Schedule unavailable", (result && result.message) || "Could not prepare the generated schedule.");
+                        else window.alert((result && result.message) || "Could not prepare the generated schedule.");
+                        return;
+                    }
+                    btn.setAttribute("data-id", result.scheduleId);
+                    btn.setAttribute("data-has-schedule", "true");
+                    btn.removeAttribute("data-manuscript-id");
+                    var row = btn.closest("tr");
+                    if (row) {
+                        row.setAttribute("data-id", result.scheduleId);
+                        var dateCell = row.querySelector(".date-cell");
+                        var dateParts = String(result.date || "").split("-");
+                        if (dateCell && dateParts.length === 3)
+                            dateCell.textContent = dateParts[1] + "-" + dateParts[2].slice(0, 2) + "-" + dateParts[0].slice(-2);
+                    }
+                    CCSchedule.open(result.scheduleId);
+                }).catch(function (error) {
+                    var message = error && error.message ? error.message : "Could not reach the server. Please try again.";
+                    if (window.Notice) Notice.error("Schedule unavailable", message);
+                    else window.alert(message);
+                }).then(function () {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                });
         });
 
 

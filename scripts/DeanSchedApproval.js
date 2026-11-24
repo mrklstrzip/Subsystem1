@@ -8,7 +8,6 @@
 
     var detailsUrl = config.dataset.detailsUrl;
     var approveUrl = config.dataset.approveUrl;
-    var rejectUrl = config.dataset.rejectUrl;
     var manuscriptUrl = config.dataset.manuscriptUrl;
     var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
     var token = tokenInput ? tokenInput.value : '';
@@ -61,7 +60,7 @@
     /* ---------- Modal ---------- */
     function setStatusBadge(el, status) {
         el.textContent = status;
-        el.className = 'sa-status ' + (status === 'Approved' ? 'st-approved' : status === 'Rejected' ? 'st-rejected' : 'st-toapprove');
+        el.className = 'sa-status ' + (status === 'Approved' ? 'st-approved' : 'st-toapprove');
     }
 
     function clearManuscript() {
@@ -159,15 +158,7 @@
                 $('mAdviser').textContent = d.Adviser;
                 $('mTime').textContent = d.Time;
                 $('mDate').textContent = d.DefenseDate;
-                if ($('mBuilding')) $('mBuilding').textContent = d.Building || '-';
                 $('mRoom').textContent = d.Room;
-
-                // the Dean's reason, when this schedule was sent back to the Capstone Coordinator
-                var note = $('mRejectNote');
-                if (note) {
-                    note.hidden = !(d.Status === 'Rejected' && d.RejectReason);
-                    $('mRejectReason').textContent = d.RejectReason || '';
-                }
 
                 $('mPanelists').innerHTML = d.Panelists.map(function (p) {
                     var pct = (p.Percent === null || p.Percent === undefined) ? '\u2014' : Number(p.Percent).toFixed(1) + '%';
@@ -220,75 +211,11 @@
     $('saClose').addEventListener('click', closeModal);
     $('saPdfPrev').addEventListener('click', function () { if (pdfPageNumber > 1) { pdfPageNumber--; renderManuscriptPage(); } });
     $('saPdfNext').addEventListener('click', function () { if (pdfDocument && pdfPageNumber < pdfDocument.numPages) { pdfPageNumber++; renderManuscriptPage(); } });
-    $('saPdfZoomOut').addEventListener('click', function () { pdfZoom = Math.max(.6, pdfZoom - .15); renderManuscriptPage(); });
-    $('saPdfZoomIn').addEventListener('click', function () { pdfZoom = Math.min(2, pdfZoom + .15); renderManuscriptPage(); });
+    $('saPdfZoomOut').addEventListener('click', function () { pdfZoom = Math.max(.5, pdfZoom / 1.2); renderManuscriptPage(); });
+    $('saPdfZoomIn').addEventListener('click', function () { pdfZoom = Math.min(3, pdfZoom * 1.2); renderManuscriptPage(); });
     window.addEventListener('resize', function () { if (pdfDocument && overlay.classList.contains('open')) renderManuscriptPage(); });
     overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
-
-    /* ---------- Reject (the schedule goes back to the Capstone Coordinator, under Review) ---------- */
-    var rejectConfirm = $('saRejectConfirm');
-    if (rejectConfirm && rejectUrl) {
-        rejectConfirm.addEventListener('click', function () {
-            var reasonBox = $('saRejectReason');
-            var reasonError = $('saRejectError');
-            var reason = reasonBox.value.trim();
-            if (!currentId) return;
-            if (!reason) { reasonError.hidden = false; return; }
-            reasonError.hidden = true;
-            if (rejectConfirm.disabled) return;
-            rejectConfirm.disabled = true;
-
-            var body = new URLSearchParams();
-            body.append('id', currentId);
-            body.append('reason', reason);
-            body.append('__RequestVerificationToken', token);
-
-            fetch(rejectUrl, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: body.toString()
-            })
-                .then(function (r) { return r.json(); })
-                .then(function (res) {
-                    if (res && res.unauthorized) { expired(); return; }
-                    if (!res.success) {
-                        reasonError.textContent = res.message || 'Rejecting the schedule failed.';
-                        reasonError.hidden = false;
-                        return;
-                    }
-
-                    var row = document.querySelector('tr[data-id="' + currentId + '"]');
-                    if (row) {
-                        var badge = row.querySelector('.sa-status');
-                        if (badge) {
-                            // Schedule Approval page: the row now reads Rejected
-                            row.dataset.status = 'Rejected';
-                            setStatusBadge(badge, 'Rejected');
-                        } else {
-                            // Dashboard "To Approve" table: it is no longer pending
-                            row.remove();
-                        }
-                    }
-
-                    var rejectedTitle = $('mTitle').textContent;
-                    var rejectOverlay = $('saRejectOverlay');
-                    rejectOverlay.classList.remove('open');
-                    rejectOverlay.setAttribute('aria-hidden', 'true');
-                    closeModal();
-                    if (window.Notice) Notice.success('Schedule rejected', '"' + rejectedTitle + '" was sent back to the Capstone Coordinator.');
-                })
-                .catch(function () {
-                    reasonError.textContent = 'Something went wrong. Please try again.';
-                    reasonError.hidden = false;
-                })
-                .then(function () { rejectConfirm.disabled = false; });
-        });
-    }
 
     /* ---------- Approve ---------- */
     approveBtn.addEventListener('click', function () {

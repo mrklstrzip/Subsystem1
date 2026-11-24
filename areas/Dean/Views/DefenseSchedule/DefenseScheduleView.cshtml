@@ -2,7 +2,7 @@
 @{
     ViewBag.Title = "DefenseScheduleView";
 }
-<link href="@Url.Content("~/Content/css/Dean.css")?v=1.1" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/Dean.css")?v=1.5" rel="stylesheet" type="text/css" />
 <div class="dashboard-header">
     <div class="header-text">
         <h1 class="page-title">Defense Schedule</h1>
@@ -18,13 +18,6 @@
     <div class="sa-search">
         <i class="fa fa-magnifying-glass"></i>
         <input type="text" name="search" value="@Model.Search" placeholder="Search" autocomplete="off" />
-    </div>
-
-    <div class="sa-filter">
-        <label>School Year</label>
-        <i class="fa-solid fa-calendar-days"></i>
-        <select id="fSY" data-sy-filter></select>
-        <i class="fa-solid fa-chevron-down sa-chev"></i>
     </div>
 
     <div class="sa-filter">
@@ -88,7 +81,7 @@
             }
             @foreach (var i in Model.Items)
             {
-                <tr class="sa-row-click" data-sa-open data-id="@i.Id" data-sy="@Subsystem1.Data.SchoolYear.Of(i.Date)">
+                <tr class="sa-row-click" data-sa-open data-id="@i.Id">
                     <td class="sa-title">
                         <strong>@i.Manuscript</strong>
                         <span class="sa-chip chip-@i.ProgramClass">@i.Section</span>

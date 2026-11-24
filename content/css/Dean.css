@@ -123,97 +123,6 @@
         text-align: left;
     }
 
-    .dash-table tbody tr.dashboard-clickable-row {
-        cursor: pointer;
-    }
-
-        .dash-table tbody tr.dashboard-clickable-row:hover {
-            background: #f4f6f8;
-        }
-
-        .dash-table tbody tr.dashboard-clickable-row:focus-visible {
-            outline: 2px solid #374A60;
-            outline-offset: -2px;
-        }
-
-.to-approve-table {
-    table-layout: fixed;
-}
-
-    .to-approve-table th,
-    .upcoming-defenses-table th {
-        color: #9092AD;
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: .8px;
-        padding: 0 4px 12px;
-        text-align: left;
-        border-bottom: 1px solid #EDEDED;
-        text-transform: uppercase;
-    }
-
-    .to-approve-table td,
-    .upcoming-defenses-table td {
-        color: #1a202c;
-        font-size: 12px;
-        padding: 14px 4px;
-        text-align: left;
-        vertical-align: middle;
-        border-top: 0;
-        border-bottom: 1px solid #F4F5F7;
-    }
-
-    .to-approve-table tr:last-child td,
-    .upcoming-defenses-table tr:last-child td {
-        border-bottom: 0;
-    }
-
-    .to-approve-table .ms-title,
-    .upcoming-defenses-table .ms-title {
-        font-size: 12px;
-    }
-
-    .to-approve-table td:nth-child(5),
-    .to-approve-table td:nth-child(6),
-    .upcoming-defenses-table td:nth-child(5),
-    .upcoming-defenses-table td:nth-child(6) {
-        white-space: nowrap;
-    }
-
-    .to-approve-table th:first-child {
-        width: 36%;
-    }
-
-    .to-approve-table th:nth-child(2),
-    .to-approve-table th:nth-child(3) {
-        width: 17%;
-    }
-
-    .to-approve-table th:nth-child(4),
-    .to-approve-table th:nth-child(5),
-    .to-approve-table th:nth-child(6) {
-        width: 10%;
-    }
-
-.upcoming-defenses-table {
-    table-layout: fixed;
-}
-
-    .upcoming-defenses-table th:first-child {
-        width: 36%;
-    }
-
-    .upcoming-defenses-table th:nth-child(2),
-    .upcoming-defenses-table th:nth-child(3) {
-        width: 17%;
-    }
-
-    .upcoming-defenses-table th:nth-child(4),
-    .upcoming-defenses-table th:nth-child(5),
-    .upcoming-defenses-table th:nth-child(6) {
-        width: 10%;
-    }
-
 .ms-title {
     font-weight: 600;
     font-size: 13px;
@@ -230,21 +139,18 @@
 }
 
 .tag-gray {
-    background: #f1f5f9;
-    color: #334155;
-    border: 1px solid #cbd5e1;
+    background: #d0d0d0;
+    color: #333;
 }
 
-.tag-teal {
-    background: #CCFBF1;
-    color: #0F766E;
-    border: 1px solid #99F6E4;
+.tag-red {
+    background: #f5b5b5;
+    color: #7a1f1f;
 }
 
 .tag-purple {
-    background: #f5f3ff;
-    color: #5b21b6;
-    border: 1px solid #ddd6fe;
+    background: #d9c5f2;
+    color: #4b2a7a;
 }
 
 /* ---------- View button ---------- */
@@ -265,28 +171,10 @@
 
 /* ---------- Total Defenses card ---------- */
 .stat-card {
-    position: relative;
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 22px 20px;
-    min-height: 132px;
-    box-sizing: border-box;
-    transition: background-color .22s ease, border-color .22s ease, box-shadow .22s ease;
-}
-
-.dashboard-stat-link {
-    color: inherit;
-    text-decoration: none;
-}
-
-    .dashboard-stat-link:focus-visible {
-        outline: 3px solid #436cf2;
-        outline-offset: 3px;
-    }
-
-.stat-card > div {
-    position: relative;
-    z-index: 1;
-    padding-right: 58px;
 }
 
 .stat-label {
@@ -309,31 +197,9 @@
 }
 
 .stat-icon {
-    position: absolute;
-    right: 18px;
-    bottom: 15px;
-    font-size: 52px;
-    line-height: 1;
-    color: #f0f1f3;
-    transition: color .22s ease, transform .22s ease;
+    font-size: 36px;
+    color: #8b8fb5;
 }
-
-.stat-card:hover {
-    background: linear-gradient(to left, #223249 0%, #17263c 25%, #0d192c 60%, #060c18 100%);
-    border-color: #17263c;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, .16);
-}
-
-    .stat-card:hover .stat-label,
-    .stat-card:hover .stat-number,
-    .stat-card:hover .stat-sub,
-    .stat-card:hover .stat-icon {
-        color: #fff;
-    }
-
-    .stat-card:hover .stat-icon {
-        transform: scale(1.04);
-    }
 
 /* ---------- Recent Activities ---------- */
 .activity-table th:first-child,
@@ -341,129 +207,6 @@
     width: 30%;
     white-space: nowrap;
 }
-
-/* Dashboard activity table: Admin's date/activity spacing and typography, with no icon column. */
-.recent-activities-card .dashboard-recent-activity {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-}
-
-    .recent-activities-card .dashboard-recent-activity .recent-date-column {
-        width: 120px !important;
-    }
-
-    .recent-activities-card .dashboard-recent-activity th {
-        padding: 0 0 12px;
-        border-bottom: 1px solid #EDEDED;
-        color: #2C3F56;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: .5px;
-        text-align: left;
-        vertical-align: bottom;
-    }
-
-        .recent-activities-card .dashboard-recent-activity th:first-child {
-            width: 120px;
-            padding-left: 0;
-        }
-
-        .recent-activities-card .dashboard-recent-activity th:nth-child(2) {
-            padding-left: 10px;
-        }
-
-    .recent-activities-card .dashboard-recent-activity td {
-        padding: 10px 0;
-        border-bottom: 1px solid #F4F5F7;
-        color: #2D3748;
-        font-size: 13px;
-        vertical-align: middle;
-    }
-
-        .recent-activities-card .dashboard-recent-activity td:first-child {
-            width: 120px;
-            padding-left: 0;
-            white-space: nowrap;
-        }
-
-        .recent-activities-card .dashboard-recent-activity td:nth-child(2) {
-            padding-left: 10px;
-            text-align: left;
-        }
-
-    .recent-activities-card .dashboard-recent-activity tr:last-child td {
-        border-bottom: 0;
-    }
-
-.recent-activities-card .recent-date-main {
-    display: block;
-    color: #2D3748;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.35;
-}
-
-.recent-activities-card .recent-date-time {
-    display: block;
-    color: #8C98A6;
-    font-size: 10px;
-    line-height: 1.35;
-}
-
-.recent-activities-card .recent-activity-text {
-    color: #2D3748;
-    font-size: 13px;
-}
-
-/* Override the Dean dashboard's general centered table rule for Recent Activities only. */
-#deanRecentActivitiesTable {
-    width: 100% !important;
-    table-layout: fixed !important;
-    text-align: left !important;
-}
-
-    #deanRecentActivitiesTable .recent-date-column {
-        width: 120px !important;
-    }
-
-    #deanRecentActivitiesTable th,
-    #deanRecentActivitiesTable td {
-        text-align: left !important;
-    }
-
-        #deanRecentActivitiesTable th:first-child,
-        #deanRecentActivitiesTable td:first-child {
-            width: 120px !important;
-            padding-left: 0 !important;
-        }
-
-        #deanRecentActivitiesTable th:nth-child(2),
-        #deanRecentActivitiesTable td:nth-child(2) {
-            padding-left: 10px !important;
-        }
-
-    #deanRecentActivitiesTable .recent-date-cell {
-        white-space: normal !important;
-    }
-
-    #deanRecentActivitiesTable .recent-date-main,
-    #deanRecentActivitiesTable .recent-date-time {
-        display: block !important;
-    }
-
-    #deanRecentActivitiesTable .recent-date-main {
-        color: #2D3748;
-        font-size: 12px;
-        font-weight: 600;
-        line-height: 1.35;
-    }
-
-    #deanRecentActivitiesTable .recent-date-time {
-        color: #8C98A6;
-        font-size: 10px;
-        line-height: 1.35;
-    }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1000px) {
@@ -779,9 +522,9 @@
 }
 
 .chip-bscs {
-    background: #CCFBF1;
-    color: #0F766E;
-    border-color: #99F6E4;
+    background: #fff1f2;
+    color: #be123c;
+    border-color: #fecdd3;
 }
 
 .chip-bsis {
@@ -813,28 +556,6 @@
     color: #2D333C;
     border-color: #B0B6C0;
 }
-
-.st-rejected {
-    background: #F89B9E;
-    color: #8C1C1E;
-    border-color: #F37B80;
-}
-
-/* the Dean's reason, shown in the pop-up of a rejected schedule */
-.sa-reject-note {
-    grid-column: 1 / -1;
-}
-
-    .sa-reject-note[hidden] {
-        display: none;
-    }
-
-    .sa-reject-note strong {
-        display: block;
-        white-space: normal;
-        overflow-wrap: anywhere;
-        color: #8C1C1E;
-    }
 
 /* Oversight statuses */
 .os-st-submitted {
@@ -913,6 +634,7 @@
     width: 100%;
     max-width: 800px;
     max-height: 94vh;
+    overflow-x: hidden;
     overflow-y: auto;
     padding: 28px 32px;
     box-sizing: border-box;
@@ -1016,12 +738,13 @@
 
 .sa-body {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
     gap: 16px;
     margin-bottom: 20px;
 }
 
 .sa-panel {
+    min-width: 0;
     border: 1px solid #E5E7EB;
     border-radius: 14px;
     padding: 18px;
@@ -1067,129 +790,25 @@
     margin-bottom: 12px;
 }
 
-.sa-manuscript-panel {
-    display: flex;
-    flex-direction: column;
-}
-
-.sa-manuscript-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-    .sa-manuscript-head h3 {
-        margin: 0;
-    }
-
-.sa-manuscript-open {
-    color: #526f96;
-    font-size: 11px;
-    font-weight: 600;
-    text-decoration: underline;
-}
-
-.sa-pdf-viewer {
-    overflow: hidden;
-    border: 1px solid #dce2eb;
-    border-radius: 9px;
-    background: #f3f5f8;
-}
-
-.sa-pdf-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 34px;
-    border-bottom: 1px solid #dce2eb;
-    background: #f8fafc;
-    color: #526071;
-    font-size: 10px;
-}
-
-    .sa-pdf-toolbar button {
-        min-width: 25px;
-        height: 24px;
-        border: 1px solid #d5dce7;
-        border-radius: 5px;
-        background: #fff;
-        color: #344156;
-        cursor: pointer;
-        font-size: 14px;
-        line-height: 1;
-    }
-
-        .sa-pdf-toolbar button:disabled {
-            cursor: default;
-            opacity: .45;
-        }
-
-.sa-pdf-canvas-wrap {
-    box-sizing: border-box;
-    height: 230px;
-    overflow: auto;
-    padding: 12px;
-    text-align: center;
-}
-
-    .sa-pdf-canvas-wrap canvas {
-        display: block;
-        max-width: 100%;
-        height: auto;
-        margin: 0 auto;
-        box-shadow: 0 2px 8px rgba(20,35,55,.18);
-    }
-
-.sa-pdf-message {
-    margin: 70px auto;
-    color: #758196;
-    font-size: 11px;
-    line-height: 1.5;
-}
-
-.sa-manuscript-panel > .sa-muted {
-    margin-top: 6px;
-}
+.sa-manuscript-panel { display: flex; flex-direction: column; }
+.sa-manuscript-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.sa-manuscript-head h3 { margin: 0; }
+.sa-manuscript-open { color: #526f96; font-size: 11px; font-weight: 600; text-decoration: underline; }
+.sa-pdf-viewer { flex: 0 0 auto; width: 100%; min-width: 0; max-width: 100%; overflow: hidden; border: 1px solid #dce2eb; border-radius: 9px; background: #f3f5f8; }
+.sa-pdf-toolbar { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 34px; border-bottom: 1px solid #dce2eb; background: #f8fafc; color: #526071; font-size: 10px; }
+.sa-pdf-toolbar button { min-width: 25px; height: 24px; border: 1px solid #d5dce7; border-radius: 5px; background: #fff; color: #344156; cursor: pointer; font-size: 14px; line-height: 1; }
+.sa-pdf-toolbar button:disabled { cursor: default; opacity: .45; }
+.sa-pdf-canvas-wrap { display: block; flex: 0 0 230px; box-sizing: border-box; width: 100%; min-width: 0; height: 230px; min-height: 230px; overflow: auto; padding: 12px; }
+.sa-pdf-canvas-wrap canvas { display: block; flex: 0 0 auto; max-width: none; max-height: none; margin: 0 auto; box-shadow: 0 2px 8px rgba(20,35,55,.18); }
+.sa-pdf-message { margin: 70px auto; color: #758196; font-size: 11px; line-height: 1.5; }
+.sa-manuscript-panel > .sa-muted { margin-top: 6px; }
 
 /* Privacy shield for the schedule approval / defense schedule detail modal. */
-.sa-modal, .sa-modal * {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-}
-
-    .sa-modal > * {
-        transition: filter .12s ease;
-    }
-
-    .sa-modal.sa-shield > *:not(.sa-modal-head):not(.sa-modal-foot) {
-        filter: blur(14px);
-        pointer-events: none;
-    }
-
-    .sa-modal.sa-shield::after {
-        content: "Details hidden for protection";
-        position: absolute;
-        top: 45%;
-        right: 0;
-        left: 0;
-        z-index: 2;
-        color: #1b293b;
-        font-weight: 700;
-        text-align: center;
-        pointer-events: none;
-    }
-
-@media print {
-    .sa-overlay {
-        display: none !important;
-    }
-}
+.sa-modal, .sa-modal * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.sa-modal > * { transition: filter .12s ease; }
+.sa-modal.sa-shield > *:not(.sa-modal-head):not(.sa-modal-foot) { filter: blur(14px); pointer-events: none; }
+.sa-modal.sa-shield::after { content: "Details hidden for protection"; position: absolute; top: 45%; right: 0; left: 0; z-index: 2; color: #1b293b; font-weight: 700; text-align: center; pointer-events: none; }
+@media print { .sa-overlay { display: none !important; } }
 
 /* percentage on the left of the High / Medium / Low tag */
 .sa-match-wrap {

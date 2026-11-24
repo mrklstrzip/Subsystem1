@@ -112,17 +112,15 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
 
         public static string StatusOf(BsonDocument d) { return Str(d, "status").Trim().ToLowerInvariant(); }
 
-        // Coordinator-side status: to-submit | under-review | rejected | submitted, or null when it is not on the list.
-        // "rejected" = the Dean sent a submitted schedule back (the reason is in "problem"); it also shows in Under Review.
+        // Coordinator-side status: to-submit | under-review | submitted, or null when it is not on the list
         public static string CoStatus(BsonDocument d)
         {
             switch (StatusOf(d))
             {
                 case "generated":
                 case "declined":
-                    return "to-submit";
                 case "rejected":
-                    return "rejected";
+                    return "to-submit";
                 case "under-review":
                     return "under-review";
                 case "submitted":
@@ -146,7 +144,7 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
         public static bool IsEditable(BsonDocument d)
         {
             string s = CoStatus(d);
-            return s == "to-submit" || s == "under-review" || s == "rejected";
+            return s == "to-submit" || s == "under-review";
         }
 
         public static void Log(string text)

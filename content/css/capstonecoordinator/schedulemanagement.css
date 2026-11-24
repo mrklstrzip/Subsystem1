@@ -408,6 +408,10 @@ body.modal-open {
     position: relative;
     width: 100%;
     max-width: 800px;
+    min-width: 0;
+    max-height: 94vh;
+    overflow-x: hidden;
+    overflow-y: auto;
     background: #FFFFFF;
     border-radius: 24px;
     padding: 28px 32px 28px 32px;
@@ -523,12 +527,14 @@ body.modal-open {
 /* ---- Body: abstract + panelists ---- */
 .modal-body-grid {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
     gap: 16px;
     margin-bottom: 20px;
 }
 
 .modal-panel {
+    min-width: 0;
+    min-height: 0;
     border: 1px solid #E5E7EB;
     border-radius: 14px;
     padding: 18px 18px;
@@ -567,13 +573,13 @@ body.modal-open {
 .manuscript-viewer-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
 .manuscript-viewer-header .panel-title { margin:0; }
 .manuscript-open-link { color:#405875; font-size:11px; font-weight:700; }
-.pdf-viewer { border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; background:#f3f4f6; }
+.pdf-viewer { flex:0 0 auto; width:100%; min-width:0; max-width:100%; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; background:#f3f4f6; }
 .pdf-toolbar { display:flex; align-items:center; justify-content:center; gap:8px; padding:5px 8px; background:#f8fafc; border-bottom:1px solid #e5e7eb; color:#4b5563; font-size:11px; }
 .pdf-toolbar button { width:25px; height:24px; border:1px solid #d1d5db; border-radius:4px; background:#fff; color:#374151; cursor:pointer; font-size:16px; line-height:1; }
 .pdf-toolbar button:disabled { opacity:.45; cursor:default; }
-.pdf-canvas-wrap { height:230px; padding:10px; overflow:auto; display:flex; align-items:flex-start; justify-content:center; }
-.pdf-canvas-wrap canvas { background:#fff; box-shadow:0 1px 5px #0002; }
-.pdf-message { align-self:center; margin:0; color:#6b7280; font-size:11px; text-align:center; }
+.pdf-canvas-wrap { display:block; flex:0 0 230px; width:100%; min-width:0; height:230px; min-height:230px; box-sizing:border-box; padding:10px; overflow:auto; }
+.pdf-canvas-wrap canvas { display:block; max-width:none; max-height:none; margin:0 auto; background:#fff; box-shadow:0 1px 5px #0002; }
+.pdf-message { margin:70px auto; color:#6b7280; font-size:11px; text-align:center; }
 .manuscript-abstract { margin-top:10px; color:#374151; font-size:11px; }
 .manuscript-abstract summary { cursor:pointer; font-weight:700; }
 .manuscript-abstract .panel-text { margin:8px 0 0; white-space:pre-wrap; }
@@ -989,23 +995,3 @@ body.modal-open {
     .panelist-role.chairman {
         color: #A33F53;
     }
-
-/* ---- Project managers who have not submitted a manuscript yet ---- */
-.status-badge.not-submitted {
-    background-color: #F3F4F6;
-    color: #4B5563;
-    border: 1px solid #D1D5DB;
-}
-
-.schedule-table .no-action {
-    color: #9092AD;
-    font-weight: 600;
-    padding-right: 14px;
-}
-
-/* Rejected by the Dean (shown here and in Under Review) */
-.status-badge.rejected {
-    background-color: #F89B9E;
-    color: #8C1C1E;
-    border: 1px solid #F37B80;
-}

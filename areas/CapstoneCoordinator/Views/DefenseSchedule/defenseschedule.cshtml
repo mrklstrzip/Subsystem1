@@ -6,7 +6,7 @@
     ViewBag.Title = "Defense Schedule";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=2.5" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/defenseschedule.css")?v=2.7" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
 <div class="dashboard-header">
@@ -78,7 +78,7 @@
         <tbody>
             @foreach (var d in Model.Defenses)
             {
-                <tr class="clickable-row" tabindex="0" data-id="@d.Id" data-status="@d.Status" data-sy="@d.SchoolYear">
+                <tr class="clickable-row" tabindex="0" data-id="@d.Id" data-status="@d.Status">
                     <td>
                         <div class="manuscript-title-text">@d.Title</div>
                         <span class="program-badge @d.BadgeClass">@d.Badge</span>
@@ -232,6 +232,7 @@
     (function () {
         var API = "/CapstoneCoordinator/CoordinatorApi/";
         var STATUS_LABELS = { "upcoming": "Upcoming", "ongoing": "Ongoing", "completed": "Completed" };
+        var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         var DEFAULT_PERCENT = { high: 90, medium: 70, low: 40 };
 
         var overlay = document.getElementById("defenseModal");
@@ -253,7 +254,7 @@
         function fmtDate(iso) {
             if (!iso) return "\u2014";
             var p = iso.split("-");
-            return p[1] + "-" + p[2] + "-" + p[0].slice(-2);   // numeric: MM-DD-YY
+            return MONTHS[parseInt(p[1], 10) - 1] + " " + parseInt(p[2], 10) + ", " + p[0];
         }
 
         function fmtTime(t) {
@@ -444,8 +445,8 @@
         $("modalCloseBtn").addEventListener("click", closeModal);
         $("pdfPrev").addEventListener("click", function () { if (pdfPageNumber > 1) { pdfPageNumber--; renderPdfPage(); } });
         $("pdfNext").addEventListener("click", function () { if (pdfDocument && pdfPageNumber < pdfDocument.numPages) { pdfPageNumber++; renderPdfPage(); } });
-        $("pdfZoomOut").addEventListener("click", function () { pdfZoom = Math.max(.6, pdfZoom - .15); renderPdfPage(); });
-        $("pdfZoomIn").addEventListener("click", function () { pdfZoom = Math.min(2, pdfZoom + .15); renderPdfPage(); });
+        $("pdfZoomOut").addEventListener("click", function () { pdfZoom = Math.max(.5, pdfZoom / 1.2); renderPdfPage(); });
+        $("pdfZoomIn").addEventListener("click", function () { pdfZoom = Math.min(3, pdfZoom * 1.2); renderPdfPage(); });
         window.addEventListener("resize", function () { if (pdfDocument && overlay.classList.contains("open")) renderPdfPage(); });
 
         overlay.addEventListener("click", function (e) {

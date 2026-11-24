@@ -31,7 +31,7 @@
     var SINGLE_ROLES = ['admin', 'campus-director', 'capstone-coordinator', 'dean'];
 
     // Data loaded from the database (replaced on every refresh)
-    var state = { users: [], tags: [], activity: [], dashboard: null };
+    var state = { users: [], tags: [], activity: [] };
 
     /* ---------------------------------------------------------------
        Server calls
@@ -80,14 +80,8 @@
             state = {
                 users: res.users || [],
                 tags: res.tags || [],
-                activity: res.activity || [],
-                dashboard: res.dashboard || null
+                activity: res.activity || []
             };
-            if (!$('dash-total')) return;
-            return api('dashboardState').then(function (dashboardRes) {
-                if (!dashboardRes || !dashboardRes.success) throw new Error((dashboardRes && dashboardRes.message) || 'Could not load dashboard data.');
-                state.dashboard = dashboardRes.dashboard || {};
-            });
         });
     }
 
@@ -192,8 +186,6 @@
 
     function getActivityIcon(a) {
         if (a.category === 'tag') return '<i class="fa fa-tag"></i>';
-        if (a.category === 'building') return '<i class="fa fa-building"></i>';
-        if (a.category === 'room') return '<i class="fa fa-door-open"></i>';
         if (a.type === 'delete') return '<i class="fa fa-ban"></i>';
         var t = (a.text || '').toLowerCase();
         if (t.indexOf('student') > -1) return '<i class="fa fa-graduation-cap"></i>';
@@ -266,25 +258,10 @@
                     document.querySelectorAll('.custom-select-dropdown').forEach(function (m) {
                         if (m !== menu) m.classList.remove('open');
                     });
-                    document.querySelectorAll('.custom-select-box .select-selected[aria-expanded="true"]').forEach(function (item) {
-                        if (item !== toggle) item.setAttribute('aria-expanded', 'false');
-                    });
 
                     menu.classList.toggle('open');
-                    if (toggle.hasAttribute('aria-expanded')) toggle.setAttribute('aria-expanded', String(menu.classList.contains('open')));
                     e.stopPropagation();
                 });
-                if (toggle.hasAttribute('aria-expanded')) {
-                    toggle.addEventListener('keydown', function (e) {
-                        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-                            e.preventDefault();
-                            if (!menu.classList.contains('open')) toggle.click();
-                        } else if (e.key === 'Escape') {
-                            menu.classList.remove('open');
-                            toggle.setAttribute('aria-expanded', 'false');
-                        }
-                    });
-                }
             }
 
             if (menu && hiddenSelect) {
@@ -322,7 +299,6 @@
 
                         // Close dropdown
                         menu.classList.remove('open');
-                        if (toggle && toggle.hasAttribute('aria-expanded')) toggle.setAttribute('aria-expanded', 'false');
 
                         // Trigger filter
                         hiddenSelect.dispatchEvent(new Event('change', {
@@ -336,9 +312,6 @@
         document.addEventListener('click', function () {
             document.querySelectorAll('.custom-select-dropdown').forEach(function (m) {
                 m.classList.remove('open');
-            });
-            document.querySelectorAll('.custom-select-box .select-selected[aria-expanded="true"]').forEach(function (item) {
-                item.setAttribute('aria-expanded', 'false');
             });
         });
     }
@@ -375,11 +348,7 @@
                 /^building .+ added$/.test(action) ||
                 /^building .+ details updated$/.test(action) ||
                 /^building .+ status changed to /.test(action) ||
-                /^building .+ deleted$/.test(action) ||
-                /^room .+ added to /.test(action) ||
-                /^room .+ details updated$/.test(action) ||
-                /^room .+ status changed to /.test(action) ||
-                /^room .+ deleted$/.test(action)
+                /^room .+ added to /.test(action)
             );
         }
 
@@ -405,19 +374,13 @@
     function renderDashboard() {
         if (!$('dash-total')) return;
 
-        var chartEl = document.querySelector('.donut-chart');
-        var statusFilterEl = $('role-status-filter');
-        var chartStatus = chartEl && chartEl._statusFilter || (statusFilterEl ? statusFilterEl.value : 'all');
         var known = DIST.map(function (d) { return d.role; });
         var people = state.users.filter(function (u) { return known.indexOf(u.role) > -1; });
         function count(role, status) {
-            return people.filter(function (u) {
-                return u.role === role && (!status || (status === 'inactive' ? u.status !== 'active' : u.status === status));
-            }).length;
+            return people.filter(function (u) { return u.role === role && (!status || u.status === status); }).length;
         }
-        function chartCount(role) { return count(role, chartStatus === 'all' ? null : chartStatus); }
 
-        var totalPeople = state.dashboard && typeof state.dashboard.totalUsers === 'number' ? state.dashboard.totalUsers : state.users.length;
+        var totalPeople = people.length;
 
         $('dash-total').textContent = totalPeople;
         if ($('dash-students')) $('dash-students').textContent = count('project-manager');
@@ -432,297 +395,58 @@
             .slice(0, 6)
             .map(function (a) {
 
-                return '<tr>' +
-                    '<td class="actdate">' +
-                    '<div class="activity-date-wrapper">' +
-                    '<span class="activity-badge ' + getActivityBadgeClass(a.type) + '">' + getActivityIcon(a) + '</span>' +
-                    '<div>' +
-                    '<span class="date-main">' + esc(fmtDate(a.at)) + '</span>' +
-                    '<span class="time-sub">' + esc(fmtTime(a.at)) + '</span>' +
-                    '</div>' +
-                    '</div>' +
-                    '</td>' +
-                    '<td class="actname bold">' + esc(a.text) + '</td>' +
-                    '</tr>';
-            }).join('') || '<tr><td colspan="2" class="actdate">No recent activity</td></tr>';
+            return '<tr>' +
+                '<td class="actdate">' +
+                '<div class="activity-date-wrapper">' +
+                '<span class="activity-badge ' + getActivityBadgeClass(a.type) + '">' + getActivityIcon(a) + '</span>' +
+                '<div>' +
+                '<span class="date-main">' + esc(fmtDate(a.at)) + '</span>' +
+                '<span class="time-sub">' + esc(fmtTime(a.at)) + '</span>' +
+                '</div>' +
+                '</div>' +
+                '</td>' +
+                '<td class="actname bold">' + esc(a.text) + '</td>' +
+                '</tr>';
+        }).join('') || '<tr><td colspan="2" class="actdate">No recent activity</td></tr>';
 
-        var dashboard = state.dashboard || {};
-        $('dash-total-rooms').textContent = dashboard.roomSummary ? dashboard.roomSummary.totalRooms : 0;
-        $('dash-total-defenses').textContent = dashboard.totalDefenses || 0;
-        $('dash-under-review').textContent = dashboard.underReview || 0;
-        renderRoomStatusChart(dashboard.roomSummary || {});
-        function renderScheduleRows(targetId, rows) {
-            var target = $(targetId);
-            if (!target) return;
-            target.innerHTML = (rows || []).map(function (row) {
-                return '<tr' + (row.id ? ' data-sa-open data-id="' + esc(row.id) + '" tabindex="0" role="button" aria-label="View schedule for ' + esc(row.title || 'manuscript') + '"' : '') + '><td class="dashboard-manuscript"><strong>' + esc(row.title || 'Untitled') + '</strong>' +
-                    (row.section ? '<small>' + esc(row.section) + '</small>' : '') + '</td>' +
-                    '<td>' + esc(row.projectManager || '-') + '</td><td>' + esc(row.adviser || '-') + '</td>' +
-                    '<td>' + esc(row.room || '-') + '</td><td>' + esc(row.date || '-') + '</td><td>' + esc(row.time || '-') + '</td></tr>';
-            }).join('') || '<tr><td colspan="6" class="dashboard-empty">No records to show.</td></tr>';
-        }
-        renderScheduleRows('dash-to-submit', dashboard.toSubmit);
-        renderScheduleRows('dash-to-approve', dashboard.toApprove);
-        renderScheduleRows('dash-upcoming', dashboard.upcoming);
-        var buildingTarget = $('dash-buildings');
-        if (buildingTarget) {
-            var buildings = dashboard.roomSummary && dashboard.roomSummary.buildings || [];
-            var maxRooms = Math.max.apply(null, buildings.map(function (b) { return Number(b.roomCount) || 0; }).concat([1]));
-            var buildingShades = ['#17324F', '#2B4E70', '#416B91', '#5D86AA', '#7DA2C1', '#A2BCD1', '#C5D5E2'];
-            buildingTarget.innerHTML = buildings.map(function (b, index) {
-                var count = Number(b.roomCount) || 0;
-                var label = (b.name || '') + (b.code ? ' | ' + b.code : '');
-                var width = Math.round(count / (maxRooms * 1.25) * 100);
-                var shade = buildingShades[index % buildingShades.length];
-                return '<div class="admin-building-row"><span class="admin-building-name" title="' + esc(label) + '">' + esc(label) + '</span><div class="admin-building-track" role="img" aria-label="' + esc(label) + ': ' + count + (count === 1 ? ' room' : ' rooms') + '"><i style="width:' + width + '%;background:' + shade + '"></i></div><strong>' + count + (count === 1 ? ' room' : ' rooms') + '</strong></div>';
-            }).join('') || '<div class="dashboard-empty">No building data available.</div>';
-        }
-
-        var chartWrap = chartEl && chartEl.closest('.donut-chart-container');
-        var hiddenRoles = chartEl && chartEl._hiddenRoles || {};
-        if (chartEl) chartEl._statusFilter = chartStatus;
-        if (statusFilterEl && !statusFilterEl._bound) {
-            statusFilterEl._bound = true;
-            statusFilterEl.addEventListener('change', function () {
-                if (chartEl) chartEl._statusFilter = statusFilterEl.value;
-                renderDashboard();
-            });
-        }
         $('dash-roles').innerHTML = DIST.map(function (d) {
-            return '<button type="button" class="donut-legend-toggle" data-role="' + esc(d.role) + '" aria-pressed="' + String(!hiddenRoles[d.role]) + '" title="' + esc(d.label) + ': ' + chartCount(d.role) + ' users. Click to toggle this segment.">' +
-                '<span class="legend-dot ' + d.dotCls + '"></span><span class="legend-label">' + esc(d.label) + '</span><strong>' + chartCount(d.role) + '</strong></button>';
+            return '<tr>' +
+                '<td class="role-name bold"><span class="legend-dot ' + d.dotCls + '"></span>' + esc(d.label) + '</td>' +
+                '<td class="total-num bold">' + count(d.role) + '</td>' +
+                '<td class="active-num bold">' + count(d.role, 'active') + '</td>' +
+                '<td class="inactive-num bold">' + count(d.role, 'inactive') + '</td>' +
+                '</tr>';
         }).join('');
 
         // Donut chart based on the role distribution
+        var chartEl = document.querySelector('.donut-chart');
         if (chartEl) {
-            var cssVarMap = {
-                'project-manager': '--projectmanager', 'panelist': '--panelist', 'adviser': '--adviser',
-                'campus-director': '--campusdirector', 'capstone-coordinator': '--capstonecoordinator', 'dean': '--dean'
-            };
-            function point(radius, angle) {
-                var radians = (angle - 90) * Math.PI / 180;
-                return { x: 100 + radius * Math.cos(radians), y: 100 + radius * Math.sin(radians) };
-            }
-            function ringPath(start, end) {
-                var outerStart = point(92, start), outerEnd = point(92, end);
-                var innerEnd = point(58, end), innerStart = point(58, start);
-                var large = end - start > 180 ? 1 : 0;
-                if (end - start >= 359.99) {
-                    var mid = start + 180, outerMid = point(92, mid), innerMid = point(58, mid);
-                    return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 1 1 ' + outerMid.x + ' ' + outerMid.y + ' A 92 92 0 1 1 ' + outerStart.x + ' ' + outerStart.y + ' L ' + innerStart.x + ' ' + innerStart.y + ' A 58 58 0 1 0 ' + innerMid.x + ' ' + innerMid.y + ' A 58 58 0 1 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
-                }
-                return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 ' + large + ' 1 ' + outerEnd.x + ' ' + outerEnd.y + ' L ' + innerEnd.x + ' ' + innerEnd.y + ' A 58 58 0 ' + large + ' 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
-            }
-            var center = chartWrap.querySelector('.donut-center-total');
-            function drawDonut(values) {
-                var total = values.reduce(function (sum, value) { return sum + value; }, 0);
-                var angle = 0;
-                var svgMarkup = DIST.map(function (d, index) {
-                    var value = values[index];
-                    if (!value || !total) return '';
-                    var sweep = value / total * 360;
-                    var start = angle, end = angle + sweep;
-                    angle = end;
-                    var color = getComputedStyle(document.documentElement).getPropertyValue(cssVarMap[d.role]).trim() || '#ccc';
-                    var visibleValue = Math.round(value), percent = Math.round(value / total * 100);
-                    return '<path class="donut-segment" data-role="' + esc(d.role) + '" data-label="' + esc(d.label) + '" data-value="' + visibleValue + '" data-percent="' + percent + '" d="' + ringPath(start, end) + '" fill="' + esc(color) + '" aria-hidden="true" />';
-                }).join('');
-                chartEl.innerHTML = svgMarkup || '<circle cx="100" cy="100" r="75" fill="none" stroke="#E2E8F0" stroke-width="34" />';
-                center.innerHTML = '<strong>' + Math.round(total) + '</strong><small>users</small>';
-                chartEl.setAttribute('aria-label', 'Role distribution, ' + Math.round(total) + ' users shown.');
-                chartEl._donutValues = values.slice();
-            }
-            if (chartEl._animFrame) window.cancelAnimationFrame(chartEl._animFrame);
-            drawDonut(DIST.map(function (d) { return hiddenRoles[d.role] ? 0 : chartCount(d.role); }));
-            chartEl._hiddenRoles = hiddenRoles;
-            var tooltip = chartWrap.querySelector('.donut-tooltip');
-            function hideTooltip() { tooltip.setAttribute('aria-hidden', 'true'); tooltip.innerHTML = ''; }
-            function showTooltip(segment, event) {
-                if (!segment) return hideTooltip();
-                tooltip.innerHTML = '<strong>' + esc(segment.getAttribute('data-label')) + '</strong><span>' + segment.getAttribute('data-value') + ' users (' + segment.getAttribute('data-percent') + '%)</span>';
-                if (event && typeof event.clientX === 'number') {
-                    var bounds = chartWrap.getBoundingClientRect();
-                    tooltip.style.left = (event.clientX - bounds.left) + 'px';
-                    tooltip.style.top = (event.clientY - bounds.top) + 'px';
-                }
-                tooltip.setAttribute('aria-hidden', 'false');
-            }
-            function toggleRole(role) {
-                hiddenRoles[role] = !hiddenRoles[role];
-                var from = chartEl._donutValues.slice();
-                var to = DIST.map(function (d) { return hiddenRoles[d.role] ? 0 : chartCount(d.role); });
-                var started = null, duration = 220;
-                if (chartEl._animFrame) window.cancelAnimationFrame(chartEl._animFrame);
-                function frame(timestamp) {
-                    if (started === null) started = timestamp;
-                    var progress = Math.min(1, (timestamp - started) / duration);
-                    var eased = 1 - Math.pow(1 - progress, 3);
-                    drawDonut(from.map(function (value, index) { return value + (to[index] - value) * eased; }));
-                    if (progress < 1) chartEl._animFrame = window.requestAnimationFrame(frame);
-                    else chartEl._animFrame = 0;
-                }
-                chartEl._animFrame = window.requestAnimationFrame(frame);
-            }
-            if (!chartEl._eventsBound) {
-                chartEl._eventsBound = true;
-                chartEl.addEventListener('pointerover', function (event) {
-                    var segment = event.target.closest('.donut-segment');
-                    if (!segment) return;
-                    segment.classList.add('is-hovered'); showTooltip(segment, event);
+            if (totalPeople === 0) {
+                chartEl.style.background = '#E2E8F0'; // fallback if there are no users yet
+            } else {
+                var accumulated = 0;
+                var cssVarMap = {
+                    'project-manager': 'var(--projectmanager)',
+                    'panelist': 'var(--panelist)',
+                    'adviser': 'var(--adviser)',
+                    'campus-director': 'var(--campusdirector)',
+                    'capstone-coordinator': 'var(--capstonecoordinator)',
+                    'dean': 'var(--dean)'
+                };
+                var gradientStops = DIST.map(function (d) {
+                    var percentage = (count(d.role) / totalPeople) * 100;
+                    var start = accumulated;
+                    accumulated += percentage;
+                    return (cssVarMap[d.role] || '#ccc') + ' ' + start + '% ' + accumulated + '%';
                 });
-                chartEl.addEventListener('pointerout', function (event) {
-                    var segment = event.target.closest('.donut-segment');
-                    if (!segment || segment.contains(event.relatedTarget)) return;
-                    segment.classList.remove('is-hovered'); hideTooltip();
-                });
-            }
-            var legend = document.getElementById('dash-roles');
-            if (!chartEl._legendBound && legend) {
-                chartEl._legendBound = true;
-                legend.addEventListener('click', function (event) {
-                    var button = event.target.closest('.donut-legend-toggle');
-                    if (!button) return;
-                    var role = button.getAttribute('data-role');
-                    toggleRole(role);
-                    button.setAttribute('aria-pressed', String(!hiddenRoles[role]));
-                });
-                legend.addEventListener('mouseover', function (event) {
-                    var button = event.target.closest('.donut-legend-toggle');
-                    if (button) {
-                        chartEl.querySelectorAll('.is-hovered').forEach(function (item) { item.classList.remove('is-hovered'); });
-                        var hovered = chartEl.querySelector('[data-role="' + button.getAttribute('data-role') + '"]');
-                        if (hovered) { hovered.classList.add('is-hovered'); showTooltip(hovered, event); }
-                    }
-                });
-                legend.addEventListener('mouseout', function (event) {
-                    if (!event.relatedTarget || !event.relatedTarget.closest('.donut-legend-toggle')) { chartEl.querySelectorAll('.is-hovered').forEach(function (item) { item.classList.remove('is-hovered'); }); hideTooltip(); }
-                });
-            }
-        }
-    }
 
-    function renderRoomStatusChart(summary) {
-        var svg = $('dash-room-status-chart');
-        var legend = $('dash-room-status-legend');
-        var wrap = svg && svg.parentElement;
-        if (!svg || !legend || !wrap) return;
-
-        var values = { active: Number(summary.activeRooms) || 0, disabled: Number(summary.disabledRooms) || 0 };
-        var colors = { active: '#246a86', disabled: '#6b97d6' };
-        var hidden = svg._hiddenStatuses || {};
-        $('dash-room-active').textContent = values.active;
-        $('dash-room-disabled').textContent = values.disabled;
-
-        function point(radius, angle) {
-            var radians = (angle - 90) * Math.PI / 180;
-            return { x: 100 + radius * Math.cos(radians), y: 100 + radius * Math.sin(radians) };
-        }
-        function ringPath(start, end) {
-            var outerStart = point(92, start), outerEnd = point(92, end);
-            var innerEnd = point(58, end), innerStart = point(58, start);
-            var large = end - start > 180 ? 1 : 0;
-            if (end - start >= 359.99) {
-                var mid = start + 180, outerMid = point(92, mid), innerMid = point(58, mid);
-                return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 1 1 ' + outerMid.x + ' ' + outerMid.y + ' A 92 92 0 1 1 ' + outerStart.x + ' ' + outerStart.y + ' L ' + innerStart.x + ' ' + innerStart.y + ' A 58 58 0 1 0 ' + innerMid.x + ' ' + innerMid.y + ' A 58 58 0 1 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
+                chartEl.style.background = 'conic-gradient(' + gradientStops.join(', ') + ')';
             }
-            return 'M ' + outerStart.x + ' ' + outerStart.y + ' A 92 92 0 ' + large + ' 1 ' + outerEnd.x + ' ' + outerEnd.y + ' L ' + innerEnd.x + ' ' + innerEnd.y + ' A 58 58 0 ' + large + ' 0 ' + innerStart.x + ' ' + innerStart.y + ' Z';
         }
-        function draw(renderValues) {
-            var total = renderValues.active + renderValues.disabled;
-            var angle = 0;
-            var segments = [
-                { key: 'active', label: 'Active Rooms', color: colors.active, value: renderValues.active },
-                { key: 'disabled', label: 'Disabled Rooms', color: colors.disabled, value: renderValues.disabled }
-            ];
-            var markup = segments.map(function (segment) {
-                if (!segment.value || !total) return '';
-                var sweep = segment.value / total * 360;
-                var start = angle, end = angle + sweep;
-                angle = end;
-                var percent = Math.round(segment.value / total * 100);
-                return '<path class="room-status-segment" data-status="' + segment.key + '" data-label="' + segment.label + '" data-value="' + Math.round(segment.value) + '" data-percent="' + percent + '" d="' + ringPath(start, end) + '" fill="' + segment.color + '" aria-hidden="true" />';
-            }).join('');
-            svg.innerHTML = markup || '<circle cx="100" cy="100" r="75" fill="none" stroke="#e2e8f0" stroke-width="34" />';
-            $('dash-room-status-total').textContent = String(parseInt(Math.round(total), 10));
-            svg.setAttribute('aria-label', 'Room status, ' + total + ' rooms shown.');
-        }
-
-        var initialValues = { active: hidden.active ? 0 : values.active, disabled: hidden.disabled ? 0 : values.disabled };
-        draw(initialValues);
-        svg._currentStatusValues = initialValues;
-        svg._hiddenStatuses = hidden;
-        function hideTooltip() {
-            var tooltip = $('dash-room-status-tooltip');
-            tooltip.setAttribute('aria-hidden', 'true');
-            tooltip.textContent = '';
-        }
-        function showTooltip(segment, event) {
-            if (!segment) return hideTooltip();
-            var tooltip = $('dash-room-status-tooltip');
-            tooltip.innerHTML = '<strong>' + segment.getAttribute('data-label') + '</strong><span>' + segment.getAttribute('data-value') + ' rooms (' + segment.getAttribute('data-percent') + '%)</span>';
-            var bounds = wrap.getBoundingClientRect();
-            tooltip.style.left = (event.clientX - bounds.left) + 'px';
-            tooltip.style.top = (event.clientY - bounds.top) + 'px';
-            tooltip.setAttribute('aria-hidden', 'false');
-        }
-        if (!svg._eventsBound) {
-            svg._eventsBound = true;
-            svg.addEventListener('pointerover', function (event) {
-                var segment = event.target.closest('.room-status-segment');
-                if (segment) { segment.classList.add('is-hovered'); showTooltip(segment, event); }
-            });
-            svg.addEventListener('pointerout', function (event) {
-                var segment = event.target.closest('.room-status-segment');
-                if (segment) { segment.classList.remove('is-hovered'); hideTooltip(); }
-            });
-            legend.addEventListener('click', function (event) {
-                var button = event.target.closest('[data-room-status]');
-                if (!button) return;
-                var key = button.getAttribute('data-room-status');
-                hidden[key] = !hidden[key];
-                button.setAttribute('aria-pressed', String(!hidden[key]));
-                var from = svg._currentStatusValues || initialValues;
-                var to = { active: hidden.active ? 0 : values.active, disabled: hidden.disabled ? 0 : values.disabled };
-                var started = null;
-                if (svg._statusAnimFrame) window.cancelAnimationFrame(svg._statusAnimFrame);
-                function frame(timestamp) {
-                    if (started === null) started = timestamp;
-                    var progress = Math.min(1, (timestamp - started) / 220);
-                    var eased = 1 - Math.pow(1 - progress, 3);
-                    var current = {
-                        active: from.active + (to.active - from.active) * eased,
-                        disabled: from.disabled + (to.disabled - from.disabled) * eased
-                    };
-                    draw(current);
-                    svg._currentStatusValues = current;
-                    if (progress < 1) svg._statusAnimFrame = window.requestAnimationFrame(frame);
-                    else svg._statusAnimFrame = 0;
-                }
-                svg._statusAnimFrame = window.requestAnimationFrame(frame);
-            });
-            legend.addEventListener('pointerover', function (event) {
-                var button = event.target.closest('[data-room-status]');
-                if (!button) return;
-                var segment = svg.querySelector('[data-status="' + button.getAttribute('data-room-status') + '"]');
-                if (segment) segment.classList.add('is-hovered');
-            });
-            legend.addEventListener('pointerout', function (event) {
-                if (!event.relatedTarget || !event.relatedTarget.closest('[data-room-status]')) {
-                    svg.querySelectorAll('.is-hovered').forEach(function (segment) { segment.classList.remove('is-hovered'); });
-                    hideTooltip();
-                }
-            });
-        }
-        legend.querySelectorAll('[data-room-status]').forEach(function (button) {
-            var key = button.getAttribute('data-room-status');
-            button.setAttribute('aria-pressed', String(!hidden[key]));
-        });
     }
 
     function initDashboard() {
         if (!$('dash-total')) return;
-
-        bindCustomDropdowns();
 
         var welcome = $('dash-welcome');
         if (welcome) {
@@ -975,14 +699,10 @@
                 '<td class="email bold">' + esc(u.email) + '</td>' +
                 '<td class="role bold"><span class="' + r.cls + '" data-role="' + esc(u.role) + '">' + roleIcon + ' ' + esc(r.label) + '</span></td>' +
                 '<td class="status bold">' + statusBadge(u.status) + '</td>' +
-                // Admin accounts have no actions (they cannot be edited or deleted).
-                (u.role === 'admin'
-                    ? '<td class="action bold"></td>'
-                    : '<td class="action bold">' +
-                    '<i class="fa fa-edit" onclick="AD.editUser(\'' + esc(u.id) + '\')"></i>' +
-                    '<i class="fa fa-trash" onclick="AD.deleteUser(\'' + esc(u.id) + '\')"></i>' +
-                    '</td>') +
-                '</tr>';
+                '<td class="action bold">' +
+                '<i class="fa fa-edit" onclick="AD.editUser(\'' + esc(u.id) + '\')"></i>' +
+                '<i class="fa fa-trash" onclick="AD.deleteUser(\'' + esc(u.id) + '\')"></i>' +
+                '</td></tr>';
         }).join('') || '<tr><td colspan="5" style="text-align:center; color:#9092AD;">No users found</td></tr>';
     }
 
@@ -1204,7 +924,7 @@
         if ($('statusActive')) $('statusActive').checked = (u.status === 'active');
         if ($('statusInactive')) $('statusInactive').checked = (u.status !== 'active');
 
-
+       
         setRoleOptions();
         if ($('modalRoleSelect')) $('modalRoleSelect').value = u.role;
         updateIdPrefix(u.role, u.idNumber);

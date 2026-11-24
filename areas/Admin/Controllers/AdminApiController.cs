@@ -561,22 +561,11 @@ namespace Subsystem1.Areas.Admin.Controllers
                      t.EndsWith(" details updated", c) ||
                      t.IndexOf(" status changed to ", c) >= 0);
 
-                bool buildingDeleted =
-                    t.StartsWith("Building ", c) &&
-                    t.EndsWith(" deleted", c);
-
                 bool roomAdded =
                     t.StartsWith("Room ", c) &&
                     t.IndexOf(" added to ", c) >= 0;
 
-                // Room edits ("details updated" / "status changed to ...") and deletes
-                bool roomEditedOrDeleted =
-                    t.StartsWith("Room ", c) &&
-                    (t.EndsWith(" details updated", c) ||
-                     t.IndexOf(" status changed to ", c) >= 0 ||
-                     t.EndsWith(" deleted", c));
-
-                return buildingAction || buildingDeleted || roomAdded || roomEditedOrDeleted;
+                return buildingAction || roomAdded;
             }
 
             // CAPSTONE COORDINATOR
@@ -662,7 +651,7 @@ namespace Subsystem1.Areas.Admin.Controllers
                     .Concat(campusLogs)
                     .Concat(coordinatorLogs)
                     .Where(a => a.at != DateTime.MinValue &&
-                                !string.IsNullOrWhiteSpace(a.text) &&
+                                !string.IsNullOrWhiteSpace(a.text) && 
                                 IsTrackedSystemActivity(a.text))
                     .OrderByDescending(a => a.at)
                     .Take(50)
@@ -684,254 +673,7 @@ namespace Subsystem1.Areas.Admin.Controllers
             }
         }
 
-        [HttpGet]
-        public ActionResult dashboardState()
-        {
-            try
-            {
-                Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
-                var coordinator = Subsystem1.Areas.CapstoneCoordinator.Models.CoordinatorData.Load(false, false, false, false);
-                var dean = Subsystem1.Areas.Dean.Models.DeanData.Dashboard();
-                var dashboard = new
-                {
-                    totalUsers = RealUsers().Count,
-                    totalDefenses = dean.TotalDefenses,
-                    underReview = coordinator.UnderReview,
-                    toSubmit = coordinator.Schedules.Where(s => s.Status == "to-submit").Take(3).Select(s => new
-                    {
-                        id = s.Id,
-                        title = s.Title,
-                        section = s.Badge,
-                        projectManager = s.Author,
-                        adviser = s.Adviser,
-                        room = "-",
-                        date = s.DateText,
-                        time = "-"
-                    }).ToList(),
-                    toApprove = dean.ToApprove.Select(s => new
-                    {
-                        id = s.Id,
-                        title = s.Title,
-                        section = s.Section,
-                        projectManager = s.Author,
-                        adviser = s.Adviser,
-                        room = s.Room,
-                        date = s.Date,
-                        time = s.Time
-                    }).ToList(),
-                    upcoming = coordinator.Upcoming.Select(s => new
-                    {
-                        id = s.Id,
-                        title = s.Title,
-                        section = s.Badge,
-                        projectManager = s.Author,
-                        adviser = s.Adviser,
-                        room = s.Room,
-                        date = s.ShortDate,
-                        time = s.ShortTime
-                    }).Concat(dean.Upcoming.Select(s => new
-                    {
-                        id = s.Id,
-                        title = s.Title,
-                        section = s.Section,
-                        projectManager = s.Author,
-                        adviser = s.Adviser,
-                        room = s.Room,
-                        date = s.Date,
-                        time = s.Time
-                    })).GroupBy(s => s.id).Select(g => g.First()).Take(3).ToList(),
-                    roomSummary = Subsystem1.Areas.CampusDirector.Controllers.CampusDirectorApiController.DashboardSummaryData()
-                };
-                return Json(new { success = true, dashboard = dashboard }, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ErrorText(ex) }, JsonRequestBehavior.AllowGet);
-            }
-        }
-
         // ========================== USERS ===========================
-
-        // ===================== VIEW-ONLY PAGES =====================
-        // Read-only data for the Admin's Defense Schedule, Schedule Approval and Room Schedule pages.
-        // Nothing here changes any data. (Same data as the Coordinator, Dean and Campus Director pages.)
-
-        [HttpGet]
-        public ActionResult defenseSchedule(string id)
-        {
-            try
-            {
-                Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
-                object detail = Subsystem1.Areas.CapstoneCoordinator.Models.CoordinatorData.Detail(id);
-                if (detail == null) return Json(new { success = false, message = "Schedule not found." }, JsonRequestBehavior.AllowGet);
-                return Json(new { success = true, schedule = detail }, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ErrorText(ex) }, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        // Manuscript PDF of a defense schedule (id = subsystem2 version id, or a schedule id).
-        [HttpGet]
-        public ActionResult defenseManuscript(string id)
-        {
-            try
-            {
-                Guid versionId;
-                BsonDocument title;
-                if (Guid.TryParse(id, out versionId))
-                {
-                    title = Subsystem1.Areas.CapstoneCoordinator.Models.Subsystem2Manuscripts.ForVersion(versionId.ToString("D"));
-                }
-                else
-                {
-                    ObjectId scheduleId;
-                    if (!ObjectId.TryParse(id, out scheduleId)) return new HttpStatusCodeResult(404);
-                    BsonDocument scheduleDoc = Subsystem1.Areas.Student.Models.StudentDb.Schedules()
-                        .Find(Builders<BsonDocument>.Filter.Eq("_id", scheduleId)).FirstOrDefault();
-                    if (scheduleDoc == null) return new HttpStatusCodeResult(404);
-                    title = Subsystem1.Areas.CapstoneCoordinator.Models.Subsystem2Manuscripts.LatestForSchedule(
-                        Str(scheduleDoc, "titleId"), Str(scheduleDoc, "projectManagerId"), Str(scheduleDoc, "title"));
-                }
-
-                string url = title == null ? "" : Str(title, "manuscriptUrl");
-                string fileName = title == null ? "" : Str(title, "fileName");
-                if (!fileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
-                    return new HttpStatusCodeResult(415, "This submission does not contain a PDF manuscript.");
-
-                return StreamCloudinaryPdf(url);
-            }
-            catch (Exception ex)
-            {
-                return new HttpStatusCodeResult(502, ErrorText(ex));
-            }
-        }
-
-        [HttpGet]
-        public ActionResult scheduleDetails(string id)
-        {
-            try
-            {
-                Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
-                var vm = Subsystem1.Areas.Dean.Models.DeanData.Detail(id);
-                if (vm == null) return Json(new { success = false, message = "Schedule not found." }, JsonRequestBehavior.AllowGet);
-                return Json(vm, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ErrorText(ex) }, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        [HttpGet]
-        public ActionResult scheduleManuscript(string id)
-        {
-            try
-            {
-                var manuscript = Subsystem1.Areas.Dean.Models.DeanData.ManuscriptFile(id);
-                if (manuscript == null) return new HttpStatusCodeResult(404, "No PDF manuscript is available for this schedule.");
-                return StreamCloudinaryPdf(manuscript.Url);
-            }
-            catch (Exception ex)
-            {
-                return new HttpStatusCodeResult(502, ErrorText(ex));
-            }
-        }
-
-        // Rooms and buildings for the Room Schedule grid.
-        [HttpGet]
-        public ActionResult roomState()
-        {
-            try
-            {
-                Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
-                return Json(Subsystem1.Areas.CampusDirector.Controllers.CampusDirectorApiController.StateData(null),
-                    JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ErrorText(ex) }, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        // Defense schedules that hold a room on one day.
-        [HttpGet]
-        public ActionResult roomSchedule(string date)
-        {
-            try
-            {
-                Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
-                return Json(Subsystem1.Areas.CampusDirector.Controllers.CampusDirectorApiController.ScheduleData(date),
-                    JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ErrorText(ex) }, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        // Streams a Cloudinary PDF through this same-origin endpoint (the Cloudinary link is never sent to the browser).
-        private ActionResult StreamCloudinaryPdf(string sourceUrl)
-        {
-            Uri current;
-            if (!Uri.TryCreate(sourceUrl, UriKind.Absolute, out current) || !IsCloudinary(current))
-                return new HttpStatusCodeResult(404);
-
-            for (int redirect = 0; redirect <= 3; redirect++)
-            {
-                var request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(current);
-                request.Method = "GET";
-                request.Timeout = 30000;
-                request.ReadWriteTimeout = 30000;
-                request.AllowAutoRedirect = false;
-                request.UserAgent = "Subsystem1-Admin-Manuscript-Viewer";
-
-                System.Net.HttpWebResponse upstream;
-                try { upstream = (System.Net.HttpWebResponse)request.GetResponse(); }
-                catch (System.Net.WebException ex)
-                {
-                    var failed = ex.Response as System.Net.HttpWebResponse;
-                    if (failed != null) failed.Dispose();
-                    return new HttpStatusCodeResult(502, "Cloudinary could not provide this manuscript.");
-                }
-
-                using (upstream)
-                {
-                    int status = (int)upstream.StatusCode;
-                    if (status >= 300 && status < 400)
-                    {
-                        Uri next;
-                        string location = upstream.Headers[System.Net.HttpResponseHeader.Location];
-                        if (redirect == 3 || string.IsNullOrWhiteSpace(location)
-                            || !Uri.TryCreate(current, location, out next) || !IsCloudinary(next))
-                            return new HttpStatusCodeResult(502, "Cloudinary returned an invalid manuscript redirect.");
-                        current = next;
-                        continue;
-                    }
-                    if (upstream.StatusCode != System.Net.HttpStatusCode.OK)
-                        return new HttpStatusCodeResult(502, "Cloudinary returned an unexpected manuscript response.");
-
-                    Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
-                    Response.Cache.SetNoStore();
-                    Response.BufferOutput = false;
-                    Response.ContentType = "application/pdf";
-                    Response.AddHeader("Content-Disposition", "inline; filename=\"manuscript.pdf\"");
-                    Response.AddHeader("X-Content-Type-Options", "nosniff");
-                    if (upstream.ContentLength >= 0) Response.AddHeader("Content-Length", upstream.ContentLength.ToString());
-                    using (System.IO.Stream input = upstream.GetResponseStream()) input.CopyTo(Response.OutputStream);
-                    return new EmptyResult();
-                }
-            }
-            return new HttpStatusCodeResult(502);
-        }
-
-        private static bool IsCloudinary(Uri uri)
-        {
-            return uri != null && uri.Scheme == Uri.UriSchemeHttps
-                && (uri.Host.Equals("api.cloudinary.com", StringComparison.OrdinalIgnoreCase)
-                    || uri.Host.Equals("res.cloudinary.com", StringComparison.OrdinalIgnoreCase));
-        }
 
         // ========================== MY PROFILE ===========================
 
@@ -1074,7 +816,7 @@ namespace Subsystem1.Areas.Admin.Controllers
                 bool isCoordinator = roleKey == "capstone-coordinator";
 
                 bool isEdit = Clean(dto.Id) != "";
-
+                
                 if (!isEdit &&
     roleKey != "campus-director" &&
     roleKey != "capstone-coordinator" &&

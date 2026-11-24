@@ -4,7 +4,6 @@
 
     // Dropdowns: submit right away
     form.querySelectorAll('select').forEach(function (el) {
-        if (el.hasAttribute('data-sy-filter')) return;   // the School Year filter works on the page, no reload
         el.addEventListener('change', function () { form.submit(); });
     });
 

@@ -4,7 +4,7 @@
     var events = ViewBag.Events as System.Collections.Generic.List<MongoDB.Bson.BsonDocument>;
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/audit.css")?v=3.6" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/audit.css")?v=3.5" rel="stylesheet" type="text/css" />
 
 
 <div class="os-header">
@@ -29,8 +29,8 @@
             {
                 foreach (var e in events)
                 {
-                    <tr data-sy="@(e.Contains("at") && e["at"].IsBsonDateTime ? Subsystem1.Data.SchoolYear.Of(e["at"].ToUniversalTime().ToLocalTime()) : "")">
-                        <td>@(e.Contains("at") && e["at"].IsBsonDateTime ? e["at"].ToUniversalTime().ToLocalTime().ToString("MM-dd-yy | h:mm tt") : "—")</td>
+                    <tr>
+                        <td>@(e.Contains("at") && e["at"].IsBsonDateTime ? e["at"].ToUniversalTime().ToLocalTime().ToString("MMM d, yyyy h:mm tt") : "—")</td>
                         <td>@(e.Contains("actor") ? e["actor"].ToString() : "")</td>
                         <td>@(e.Contains("action") ? e["action"].ToString() : "")</td>
                         <td>@(e.Contains("target") ? e["target"].ToString() : "")</td>

@@ -19,17 +19,6 @@ namespace Subsystem1.Data
         // All stored times are Philippine clock time, so "now" is Philippine time too.
         public static DateTime Now() { return DateTime.UtcNow.AddHours(8); }
 
-        // Numeric version used by the Capstone Coordinator: "11-11-26 | 7:05 AM"
-        public static string StampNumeric(DateTime d) { return d.ToString("MM-dd-yy | h:mm tt", System.Globalization.CultureInfo.InvariantCulture); }
-
-        public static string TimeAgoNumeric(DateTime d)
-        {
-            var now = Now();
-            var diff = now - d;
-            if (diff.TotalMinutes >= 0 && diff.TotalHours < 24) return TimeAgo(d);
-            return StampNumeric(d);
-        }
-
         public static string TimeAgo(DateTime d)
         {
             var now = Now();
