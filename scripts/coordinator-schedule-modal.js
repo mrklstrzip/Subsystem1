@@ -377,8 +377,8 @@
     submitBtn.addEventListener('click', submit);
     $('pdfPrev').addEventListener('click', function () { if (pdfPageNumber > 1) { pdfPageNumber--; renderPdfPage(); } });
     $('pdfNext').addEventListener('click', function () { if (pdfDocument && pdfPageNumber < pdfDocument.numPages) { pdfPageNumber++; renderPdfPage(); } });
-    $('pdfZoomOut').addEventListener('click', function () { pdfZoom = Math.max(.6, pdfZoom - .15); renderPdfPage(); });
-    $('pdfZoomIn').addEventListener('click', function () { pdfZoom = Math.min(2, pdfZoom + .15); renderPdfPage(); });
+    $('pdfZoomOut').addEventListener('click', function () { pdfZoom = Math.max(.5, pdfZoom / 1.2); renderPdfPage(); });
+    $('pdfZoomIn').addEventListener('click', function () { pdfZoom = Math.min(3, pdfZoom * 1.2); renderPdfPage(); });
     window.addEventListener('resize', function () { if (pdfDocument && overlay.classList.contains('open')) renderPdfPage(); });
 
     window.CCSchedule = { open: open, close: close };

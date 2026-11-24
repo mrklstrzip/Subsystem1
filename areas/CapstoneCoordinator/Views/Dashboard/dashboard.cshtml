@@ -5,7 +5,7 @@
     ViewBag.Title = "Dashboard";
 }
 
-<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=3.8" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/capstonecoordinator/schedulemanagement.css")?v=4.6" rel="stylesheet" type="text/css" />
 <link href="@Url.Content("~/Content/css/capstonecoordinator/dashboard.css")?v=2.3" rel="stylesheet" type="text/css" />
 
 <!-- Header Banner -->
@@ -152,12 +152,12 @@
 @Html.Partial("_ScheduleModal", Model)
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.6"></script>
+<script src="@Url.Content("~/Scripts/coordinator-schedule-modal.js")?v=1.7"></script>
 <script>
     (function () {
         document.addEventListener("click", function (e) {
             var btn = e.target.closest ? e.target.closest(".btn-view") : null;
             if (btn && window.CCSchedule) CCSchedule.open(btn.getAttribute("data-id"), btn.getAttribute("data-status") || "");
         });
-    })();
+    })();   
 </script>

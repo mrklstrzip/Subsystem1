@@ -211,8 +211,8 @@
     $('saClose').addEventListener('click', closeModal);
     $('saPdfPrev').addEventListener('click', function () { if (pdfPageNumber > 1) { pdfPageNumber--; renderManuscriptPage(); } });
     $('saPdfNext').addEventListener('click', function () { if (pdfDocument && pdfPageNumber < pdfDocument.numPages) { pdfPageNumber++; renderManuscriptPage(); } });
-    $('saPdfZoomOut').addEventListener('click', function () { pdfZoom = Math.max(.6, pdfZoom - .15); renderManuscriptPage(); });
-    $('saPdfZoomIn').addEventListener('click', function () { pdfZoom = Math.min(2, pdfZoom + .15); renderManuscriptPage(); });
+    $('saPdfZoomOut').addEventListener('click', function () { pdfZoom = Math.max(.5, pdfZoom / 1.2); renderManuscriptPage(); });
+    $('saPdfZoomIn').addEventListener('click', function () { pdfZoom = Math.min(3, pdfZoom * 1.2); renderManuscriptPage(); });
     window.addEventListener('resize', function () { if (pdfDocument && overlay.classList.contains('open')) renderManuscriptPage(); });
     overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });

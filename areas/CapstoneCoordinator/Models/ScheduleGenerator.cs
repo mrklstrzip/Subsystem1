@@ -330,6 +330,40 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Models
             }
         }
 
+        /// <summary>Ensures the schedule for one exact Subsystem 2 manuscript version exists.</summary>
+        public static bool EnsureGeneratedForSubsystem2Version(string subsystem2Id)
+        {
+            Guid requestedVersion;
+            if (!Guid.TryParse(subsystem2Id, out requestedVersion)) return false;
+            string normalizedVersion = requestedVersion.ToString("D");
+
+            lock (Gate)
+            {
+                List<BsonDocument> titles = Subsystem2Manuscripts.SchedulingTitles();
+                BsonDocument title = titles.FirstOrDefault(item =>
+                    String.Equals(Str(item, "subsystem2Id"), normalizedVersion, StringComparison.OrdinalIgnoreCase));
+                if (title == null) return false;
+                if (!IsFirstDefenseRevision(title) && !IsRedefenseRevision(title)) return false;
+
+                string titleId = DocId(title);
+                var titleFilter = Builders<BsonDocument>.Filter.Eq("titleId", titleId);
+                if (Schedules().Find(titleFilter).FirstOrDefault() != null) return true;
+
+                var titlesById = titles
+                    .Where(item => DocId(item) != "")
+                    .GroupBy(DocId, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+                List<BsonDocument> existingSchedules = Schedules().Find(new BsonDocument()).ToList();
+                if (IsRedefenseRevision(title) &&
+                    !HasCompletedFirstDefense(Str(title, "studentId"), existingSchedules, titlesById))
+                    return false;
+
+                EnsureIndex();
+                GenerateOne(PlanContext.Load(), title);
+                return Schedules().Find(titleFilter).FirstOrDefault() != null;
+            }
+        }
+
         private static int RevisionOf(BsonDocument title)
         {
             int revision;

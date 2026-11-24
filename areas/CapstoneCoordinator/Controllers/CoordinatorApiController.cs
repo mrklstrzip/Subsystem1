@@ -168,6 +168,57 @@ namespace Subsystem1.Areas.CapstoneCoordinator.Controllers
             }
         }
 
+        // A submitted manuscript can appear in the PM roster before a schedule document exists.
+        // Generate/find that version's schedule on demand so View opens the schedule modal.
+        [HttpGet]
+        public ActionResult ensureSchedule(string versionId)
+        {
+            try
+            {
+                Guid parsedVersion;
+                if (!Guid.TryParse(versionId, out parsedVersion))
+                    return Json(new { success = false, message = "The manuscript version is invalid." }, JsonRequestBehavior.AllowGet);
+
+                BsonDocument manuscript = Subsystem2Manuscripts.ForVersion(parsedVersion.ToString("D"));
+                if (manuscript == null)
+                    return Json(new { success = false, message = "The submitted manuscript could not be found." }, JsonRequestBehavior.AllowGet);
+
+                string titleId = DocId(manuscript);
+                BsonDocument schedule = Schedules()
+                    .Find(Builders<BsonDocument>.Filter.Eq("titleId", titleId))
+                    .Sort(Builders<BsonDocument>.Sort.Combine(
+                        Builders<BsonDocument>.Sort.Descending("revisionNumber"),
+                        Builders<BsonDocument>.Sort.Descending("createdAt")))
+                    .FirstOrDefault();
+
+                if (schedule == null)
+                {
+                    ScheduleGenerator.EnsureGeneratedForSubsystem2Version(parsedVersion.ToString("D"));
+                    schedule = Schedules()
+                        .Find(Builders<BsonDocument>.Filter.Eq("titleId", titleId))
+                        .Sort(Builders<BsonDocument>.Sort.Combine(
+                            Builders<BsonDocument>.Sort.Descending("revisionNumber"),
+                            Builders<BsonDocument>.Sort.Descending("createdAt")))
+                        .FirstOrDefault();
+                }
+
+                if (schedule == null)
+                    return Json(new { success = false, message = "A defense schedule is not available for this manuscript yet. Check that its defense version is eligible for scheduling." }, JsonRequestBehavior.AllowGet);
+
+                return Json(new
+                {
+                    success = true,
+                    scheduleId = DocId(schedule),
+                    date = Str(schedule, "date"),
+                    revisionNumber = AnyStr(schedule, "revisionNumber")
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ErrorText(ex) }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         // Stream authenticated Cloudinary PDFs through this same-origin endpoint so PDF.js
         // does not depend on Cloudinary CORS configuration.
         [HttpGet]
